@@ -16,12 +16,9 @@
 # under the License.
 
 import time
-
-from typing import List
-
+import os
+import unittest
 from ai_flow.api.configuration import project_description
-from ai_flow.udf.function_context import FunctionContext
-from python_ai_flow.user_define_funcs import Executor
 from notification_service.client import NotificationClient
 from ai_flow.executor.executor import CmdExecutor
 
@@ -34,8 +31,13 @@ from tests.python_codes.base_ete_test import BaseETETest, workflow_config_file
 import ai_flow as af
 
 
-class TestRunAIFlowJobs(BaseETETest):
+class TestRunRemoteAIFlowJobs(BaseETETest):
 
+    @unittest.skipUnless((os.environ.get('blob_server.endpoint') is not None
+                         and os.environ.get('blob_server.access_key_id') is not None
+                         and os.environ.get('blob_server.access_key_secret') is not None
+                         and os.environ.get('blob_server.bucket') is not None
+                         and os.environ.get('blob_server.repo_name') is not None), 'need set oss')
     def test_run_cmd_job(self):
         def build_and_submit_ai_flow():
             with af.global_config_file(workflow_config_file()):
@@ -59,11 +61,11 @@ class TestRunAIFlowJobs(BaseETETest):
         config = {
             'blob_server.type': 'oss',
             'local_repository': '/tmp',
-            'blob_server.access_key_id': 'LTAI5tKazG6QiC8wykDmhaLn',
-            'blob_server.access_key_secret': 'HzIoU5eHIY4qANjGVolCBzjfjyMn5z',
-            'blob_server.endpoint': 'oss-cn-beijing.aliyuncs.com',
-            'blob_server.bucket': 'vvp-alink-test-data',
-            'blob_server.repo_name': 'repo'
+            'blob_server.access_key_id': os.environ.get('blob_server.access_key_id'),
+            'blob_server.access_key_secret': os.environ.get('blob_server.access_key_secret'),
+            'blob_server.endpoint': os.environ.get('blob_server.endpoint'),
+            'blob_server.bucket': os.environ.get('blob_server.bucket'),
+            'blob_server.repo_name': os.environ.get('blob_server.repo_name')
         }
         project_desc.project_config['blob'] = config
         self.run_ai_flow(build_and_submit_ai_flow, run_task_function)
@@ -71,34 +73,3 @@ class TestRunAIFlowJobs(BaseETETest):
             tes = session.query(TaskExecution).filter(TaskExecution.dag_id == 'test_project.test_workflow',
                                                       TaskExecution.task_id == 'task_1').all()
             self.assertEqual(1, len(tes))
-
-    def test_run_python_job(self):
-
-        def build_and_submit_ai_flow():
-            with af.global_config_file(workflow_config_file()):
-                with af.config('task_2'):
-                    executor = af.user_define_operation(af.PythonObjectExecutor(SimpleExecutor()))
-                workflow_info = af.workflow_operation.submit_workflow('test_workflow')
-            return workflow_info.workflow_name
-
-        def run_task_function(client: NotificationClient):
-            af.workflow_operation.start_new_workflow_execution('test_workflow')
-            while True:
-                with create_session() as session:
-                    dag_run = session.query(DagRun).filter(DagRun.dag_id == 'test_project.test_workflow').first()
-                    if dag_run is not None and dag_run.state in State.finished:
-                        break
-                    else:
-                        time.sleep(1)
-
-        self.run_ai_flow(build_and_submit_ai_flow, run_task_function)
-        with create_session() as session:
-            tes = session.query(TaskExecution).filter(TaskExecution.dag_id == 'test_project.test_workflow',
-                                                      TaskExecution.task_id == 'task_2').all()
-            self.assertEqual(1, len(tes))
-
-
-class SimpleExecutor(Executor):
-    def execute(self, function_context: FunctionContext, input_list: List) -> List:
-        print("hello world!")
-        return []
