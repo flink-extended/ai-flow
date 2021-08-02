@@ -25,15 +25,3 @@ build:
   apt_packages:
     - default-libmysqlclient-dev
     - build-essential
-
-python:
-  # For available versions, see:
-  # https://docs.readthedocs.io/en/stable/config-file/v2.html#build-image
-  version: 3.7  # Flink AI Flow currently only support py3.7
-  install:
-    - method: pip
-      path: flink-ai-flow/
-    - method: pip
-      path: flink-ai-flow/lib/notification_service
-    - method: pip
-      path: flink-ai-flow/lib/airflow
