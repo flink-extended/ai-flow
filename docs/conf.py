@@ -53,32 +53,32 @@ templates_path = ['_templates']
 
 # Following modules will be excluded as they are not public API
 exclude_rst = [
-    '**ai_flow.metadata_store.test.rst', 
-    '**ai_flow.runtime.rst', 
-    '**ai_flow.metric.service.rst', 
-    '**ai_flow.exception.rst', 
-    '**ai_flow.model_center.entity.rst', 
-    '**ai_flow.metadata_store.test.sbin.rst', 
-    '**ai_flow.translator.rst', 
-    '**ai_flow.model_center.rst', 
-    '**ai_flow.model_center.service.rst', 
-    '**ai_flow.scheduler.rst', 
-    '**ai_flow.endpoint.client.rst', 
+    '**ai_flow.metadata_store.test.rst',
+    '**ai_flow.runtime.rst',
+    '**ai_flow.metric.service.rst',
+    '**ai_flow.exception.rst',
+    '**ai_flow.model_center.entity.rst',
+    '**ai_flow.metadata_store.test.sbin.rst',
+    '**ai_flow.translator.rst',
+    '**ai_flow.model_center.rst',
+    '**ai_flow.model_center.service.rst',
+    '**ai_flow.scheduler.rst',
+    '**ai_flow.endpoint.client.rst',
     '**ai_flow.util.rst',
-    '**ai_flow.metadata_store.rst',  
-    '**ai_flow.store.rst', 
-    '**ai_flow.log.rst', 
-    '**ai_flow.protobuf.rst', 
-    '**ai_flow.metadata_store.utils.rst', 
-    '**ai_flow.util.model_util.rst', 
-    '**ai_flow.metric.rst', 
-    '**ai_flow.metadata_store.service.rst',  
-    '**ai_flow.util.file_util.rst', 
+    '**ai_flow.metadata_store.rst',
+    '**ai_flow.store.rst',
+    '**ai_flow.log.rst',
+    '**ai_flow.protobuf.rst',
+    '**ai_flow.metadata_store.utils.rst',
+    '**ai_flow.util.model_util.rst',
+    '**ai_flow.metric.rst',
+    '**ai_flow.metadata_store.service.rst',
+    '**ai_flow.util.file_util.rst',
 
-    '**ai_flow_plugins.scheduler_plugins.airflow.rst', 
-    '**ai_flow_plugins.job_plugins.utils.rst', 
+    '**ai_flow_plugins.scheduler_plugins.airflow.rst',
+    '**ai_flow_plugins.job_plugins.utils.rst',
 
-    '**modules.rst', 
+    '**modules.rst',
 ]
 
 # List of patterns, relative to source directory, that match files and
@@ -115,13 +115,16 @@ html_use_index = False
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'flinkaiflowdoc'
 
+
 def autodoc_skip_member(app, what, name, obj, skip, options):
     exclusions = ('__doc__', '__module__', '__dict__')
     exclude = name in exclusions
     # return True if (skip or exclude) else None  # Can interfere with subsequent skip functions.
     return True if exclude else None
- 
+
+
 def setup(app):
     app.connect('autodoc-skip-member', autodoc_skip_member)
-    dir=os.path.dirname(os.path.abspath(__file__))
-    subprocess.call(['bash', dir+'/docgen.sh'])
+    workdir = os.path.dirname(os.path.abspath(__file__))
+    subprocess.call(['pip', 'install', 'ai-flow'])
+    subprocess.call(['bash', workdir + '/docgen.sh'])
