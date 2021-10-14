@@ -38,7 +38,6 @@ jobs:
 
       - name: Build Image
         run: |
-          cd ./flink-ai-flow
           echo building image with repo: ${{ env.IMAGE_REPO }} tag: ${{ env.IMAGE_TAG }}
           bash build_docker_image.sh ${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}
 
