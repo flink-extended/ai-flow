@@ -16,13 +16,19 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import os
+import logging
 import tempfile
+import fcntl
+import time
 from typing import Text, Dict, Any
 from pathlib import Path
 import oss2
 from ai_flow.plugin_interface.blob_manager_interface import BlobManager
 from ai_flow.util.file_util.zip_file_util import make_dir_zipfile
 from ai_flow_plugins.blob_manager_plugins.blob_manager_utils import extract_project_zip_file
+
+logger = logging.getLogger(__name__)
 
 
 class OssBlobManager(BlobManager):
@@ -34,14 +40,14 @@ class OssBlobManager(BlobManager):
     3. bucket: The oss bucket name.
     4. local_repository: It represents the root path of the downloaded project package.
     """
+
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
-        ack_id = config.get('access_key_id', None)
-        ack_secret = config.get('access_key_secret', None)
-        endpoint = config.get('endpoint', None)
-        bucket_name = config.get('bucket', None)
-        auth = oss2.Auth(ack_id, ack_secret)
-        self.bucket = oss2.Bucket(auth, endpoint, bucket_name)
+        self.ack_id = config.get('access_key_id', None)
+        self.ack_secret = config.get('access_key_secret', None)
+        self.endpoint = config.get('endpoint', None)
+        self.bucket_name = config.get('bucket', None)
+        self._bucket = None
         self.repo_name = config.get('repo_name', '')
         self._local_repo = config.get('local_repository', None)
 
@@ -81,8 +87,50 @@ class OssBlobManager(BlobManager):
             repo_path = Path(tempfile.gettempdir())
         local_zip_file_path = str(repo_path / local_zip_file_name) + '.zip'
         extract_path = str(repo_path / local_zip_file_name)
-        self.bucket.get_object_to_file(oss_object_key, filename=local_zip_file_path)
+
+        if not os.path.exists(local_zip_file_path):
+            logger.debug("{} not exist".format(local_zip_file_path))
+            lock_file_path = os.path.join(repo_path, "{}.lock".format(local_zip_file_name))
+            lock_file = open(lock_file_path, 'w')
+            logger.debug("Locking file {}".format(lock_file_path))
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            logger.debug("Locked file {}".format(lock_file_path))
+            try:
+                if not os.path.exists(local_zip_file_path):
+                    logger.info("Downloading oss object: {}".format(oss_object_key))
+                    self._get_oss_object(local_zip_file_path, oss_object_key)
+            except Exception as e:
+                logger.error("Failed to download oss file: {}".format(oss_object_key), exc_info=e)
+            finally:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+                logger.debug('Unlocked file {}'.format(lock_file_path))
+                lock_file.close()
+                if os.path.exists(lock_file_path):
+                    os.remove(lock_file_path)
+        else:
+            logger.info("Oss file: {} already exist at {}".format(oss_object_key, local_zip_file_path))
+
         return extract_project_zip_file(workflow_snapshot_id=workflow_snapshot_id,
                                         local_root_path=repo_path,
                                         zip_file_path=local_zip_file_path,
                                         extract_project_path=extract_path)
+
+    @property
+    def bucket(self):
+        if self._bucket:
+            return self._bucket
+        auth = oss2.Auth(self.ack_id, self.ack_secret)
+        self._bucket = oss2.Bucket(auth, self.endpoint, self.bucket_name)
+        return self._bucket
+
+    def _get_oss_object(self, dest, oss_object_key, retry_sleep_sec=5):
+        for i in range(3):
+            try:
+                self.bucket.get_object_to_file(oss_object_key, filename=dest)
+                return
+            except Exception as e:
+                logger.error("Downloading object {} failed, retrying {}/3 in {} second".format(oss_object_key, i+1,
+                                                                                               retry_sleep_sec),
+                             exc_info=e)
+                time.sleep(retry_sleep_sec)
+        raise RuntimeError("Failed to download oss file: {}".format(oss_object_key))
