@@ -106,7 +106,10 @@ class OssBlobManager(BlobManager):
                 logger.debug('Unlocked file {}'.format(lock_file_path))
                 lock_file.close()
                 if os.path.exists(lock_file_path):
-                    os.remove(lock_file_path)
+                    try:
+                        os.remove(lock_file_path)
+                    except OSError as e:
+                        logger.warning("Failed to remove lock file: {}".format(lock_file_path), exc_info=e)
         else:
             logger.info("Oss file: {} already exist at {}".format(oss_object_key, local_zip_file_path))
 
