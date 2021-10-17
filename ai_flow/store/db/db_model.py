@@ -348,6 +348,27 @@ class SqlMetricSummary(base, Base):
                                                                         self.model_version, self.job_execution_id)
 
 
+class SqlWorkflowSnapshot(base, Base):
+    """
+    SQL table of workflow snapshot in metadata backend storage.
+    """
+    __tablename__ = 'workflow_snapshot'
+
+    workflow_id = Column(BigInteger, ForeignKey('workflow.uuid', onupdate='cascade'))
+    uri = Column(String(1000))
+    signature = Column(String(1000))
+    create_time = Column(BigInteger)
+
+    workflow = relationship("SqlWorkflow", backref=backref('workflow_snapshot', cascade='all'))
+
+    def __repr__(self):
+        return '<SqlWorkflowSnapshot ({}, {}, {}, {}, {})>'.format(self.uuid,
+                                                                   self.workflow_id,
+                                                                   self.uri,
+                                                                   self.signature,
+                                                                   self.create_time)
+
+
 class SqlMember(base):
     """
     SQL model of cluster member.
@@ -702,6 +723,26 @@ class MongoMetricSummary(Document):
         return '<Document MetricSummary ({}, {}, {})>'.format(self.uuid, self.metric_name, self.metric_key,
                                                               self.metric_value, self.metric_timestamp,
                                                               self.model_version, self.job_execution_id)
+
+
+class MongoWorkflowSnapshot(Document):
+    """
+    Document of workflow snapshot.
+    """
+    uuid = SequenceField(db_alias=MONGO_DB_ALIAS_META_SERVICE)
+    workflow_id = IntField()
+    uri = StringField(max_length=1000)
+    signature = StringField(max_length=1000)
+    create_time = LongField()
+
+    meta = {'db_alias': MONGO_DB_ALIAS_META_SERVICE}
+
+    def __repr__(self):
+        return '<Document WorkflowSnapshot ({}, {}, {}, {}, {})>'.format(self.uuid,
+                                                                         self.workflow_id,
+                                                                         self.uri,
+                                                                         self.signature,
+                                                                         self.create_time)
 
 
 class MongoMember(Document):

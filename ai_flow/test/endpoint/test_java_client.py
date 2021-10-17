@@ -206,3 +206,12 @@ class JavaAIFlowClientTest(unittest.TestCase):
 
     def test_metric_summary(self):
         self._run_test_with_java_client('testMetricSummary')
+
+    def test_workflow_snapshot_operation(self):
+        self._run_test_with_java_client('testWorkflowSnapshotOperation')
+
+    def test_delete_non_existent_workflow_snapshot(self):
+        self._run_test_with_java_client('testDeleteNonExistentWorkflowSnapshot')
+
+    def test_get_non_existent_workflow_snapshot(self):
+        self._run_test_with_java_client('testGetNonExistentWorkflowSnapshot')

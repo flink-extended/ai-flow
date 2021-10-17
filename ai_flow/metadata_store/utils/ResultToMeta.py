@@ -18,6 +18,7 @@
 #
 import ast
 
+from ai_flow.meta.workflow_snapshot_meta import WorkflowSnapshotMeta
 from ai_flow.store.db.db_model import SqlWorkflow
 
 from ai_flow.meta.artifact_meta import ArtifactMeta
@@ -106,3 +107,11 @@ class ResultToMeta:
                             scheduling_rules=scheduling_rules,
                             graph=workflow_result.graph,
                             last_event_version=workflow_result.last_event_version)
+
+    @staticmethod
+    def result_to_workflow_snapshot_meta(workflow_snapshot_result) -> WorkflowSnapshotMeta:
+        return WorkflowSnapshotMeta(workflow_id=workflow_snapshot_result.workflow_id,
+                                    uri=workflow_snapshot_result.uri,
+                                    signature=workflow_snapshot_result.signature,
+                                    create_time=workflow_snapshot_result.create_time,
+                                    uuid=workflow_snapshot_result.uuid)

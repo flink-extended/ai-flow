@@ -33,6 +33,7 @@ from ai_flow.meta.metric_meta import MetricMeta, MetricType, MetricSummary
 from ai_flow.meta.model_relation_meta import ModelRelationMeta, ModelVersionRelationMeta
 from ai_flow.meta.project_meta import ProjectMeta
 from ai_flow.meta.workflow_meta import WorkflowMeta
+from ai_flow.meta.workflow_snapshot_meta import WorkflowSnapshotMeta
 from ai_flow.metadata_store.utils.MetaToTable import MetaToTable
 from ai_flow.metadata_store.utils.ResultToMeta import ResultToMeta
 from ai_flow.metric.utils import table_to_metric_meta, table_to_metric_summary, metric_meta_to_table, \
@@ -47,7 +48,8 @@ from ai_flow.store.abstract_store import AbstractStore, BROADCAST_ALL_CONTEXT_EX
     BaseOrder
 from ai_flow.store.db.base_model import base
 from ai_flow.store.db.db_model import SqlDataset, SqlModelRelation, SqlModelVersionRelation, SqlProject, \
-    SqlWorkflow, SqlEvent, SqlArtifact, SqlMember, SqlProjectSnapshot, SqlWorkflowContextEventHandlerState
+    SqlWorkflow, SqlEvent, SqlArtifact, SqlMember, SqlProjectSnapshot, SqlWorkflowContextEventHandlerState, \
+    SqlWorkflowSnapshot
 from ai_flow.store.db.db_model import SqlMetricMeta, SqlMetricSummary
 from ai_flow.store.db.db_model import SqlRegisteredModel, SqlModelVersion
 from ai_flow.store.db.db_util import extract_db_engine_from_uri, create_sqlalchemy_engine, _get_managed_session_maker
@@ -819,6 +821,106 @@ class SqlAlchemyStore(AbstractStore):
             except sqlalchemy.exc.IntegrityError as e:
                 raise AIFlowException(str(e))
 
+    """workflow snapshot api"""
+
+    def register_workflow_snapshot(self,
+                                   workflow_id: int,
+                                   uri: Text,
+                                   signature: Text):
+        """
+        register a workflow snapshot in metadata store.
+
+        :param workflow_id: the id of workflow
+        :param uri: the uri of workflow snapshot
+        :param signature: the MD5 hash of the workflow directory
+        """
+        create_time = int(time.time() * 1000)
+        with self.ManagedSessionMaker() as session:
+            try:
+                workflow_snapshot = MetaToTable.workflow_snapshot_to_table(workflow_id=workflow_id,
+                                                                           uri=uri,
+                                                                           signature=signature,
+                                                                           create_time=create_time)
+                session.add(workflow_snapshot)
+                session.flush()
+
+                return WorkflowSnapshotMeta(uuid=workflow_snapshot.uuid,
+                                            workflow_id=workflow_id,
+                                            uri=uri,
+                                            signature=signature,
+                                            create_time=create_time)
+            except sqlalchemy.exc.IntegrityError as e:
+                raise AIFlowException('Error: {}'.format(str(e)))
+
+    def get_workflow_snapshot(self,
+                              workflow_snapshot_id: int) -> Optional[WorkflowSnapshotMeta]:
+        """
+        Get a specific workflow snapshot in metadata store by snapshot id.
+
+        :param workflow_snapshot_id: the workflow snapshot id
+        :return: A single :py:class:`ai_flow.meta.workflow_snapshot_meta.WorkflowSnapshotMeta` object
+                 if exists, Otherwise, returns None if the workflow snapshot does not exist.
+        """
+        with self.ManagedSessionMaker() as session:
+            workflow_snapshot = session.query(SqlWorkflowSnapshot)\
+                .filter(SqlWorkflowSnapshot.uuid == workflow_snapshot_id)\
+                .scalar()
+            return None if workflow_snapshot is None \
+                else ResultToMeta.result_to_workflow_snapshot_meta(workflow_snapshot)
+
+    def list_workflow_snapshots(self,
+                                workflow_id: int = None,
+                                page_size: int = None,
+                                offset: int = None,
+                                filters: Filters = None) -> Optional[List[WorkflowSnapshotMeta]]:
+        """
+        List workflow snapshots of the specific workflow.
+
+        :param workflow_id: the workflow id.
+        :param page_size: the limitation of the listed workflow snapshots.
+        :param offset: the offset of listed workflow snapshots.
+        :param filters: A Filter class that contains all filters to apply.
+        """
+        with self.ManagedSessionMaker() as session:
+            query = session.query(SqlWorkflowSnapshot)
+            if workflow_id:
+                query = query.filter(SqlWorkflowSnapshot.workflow_id == workflow_id)
+            if filters:
+                query = filters.apply_all(SqlWorkflowSnapshot, query)
+            if page_size:
+                query = query.limit(page_size)
+            if offset:
+                query = query.offset(offset)
+            result = query.all()
+            if len(result) == 0:
+                return None
+            workflow_snapshot_list = []
+            for i in result:
+                workflow_snapshot_list.append(ResultToMeta.result_to_workflow_snapshot_meta(i))
+            return workflow_snapshot_list
+
+    def delete_workflow_snapshot(self,
+                                 workflow_snapshot_id: int) -> Status:
+        """
+        Delete the workflow snapshot by specific id
+
+        :param workflow_snapshot_id: the uuid of workflow snapshot
+        :return: Status.OK if the workflow snapshot is successfully deleted,
+                 Status.ERROR if the workflow snapshot does not exist otherwise.
+        """
+        with self.ManagedSessionMaker() as session:
+            try:
+                workflow_snapshot = session.query(SqlWorkflowSnapshot).filter(
+                    SqlWorkflowSnapshot.uuid == workflow_snapshot_id).scalar()
+
+                if workflow_snapshot is None:
+                    return Status.ERROR
+                else:
+                    session.delete(workflow_snapshot)
+                    return Status.OK
+            except sqlalchemy.exc.IntegrityError as e:
+                raise AIFlowException(str(e))
+
     '''workflow api'''
 
     def register_workflow(self, name, project_id, context_extractor_in_bytes: bytes = BROADCAST_ALL_CONTEXT_EXTRACTOR,
@@ -850,7 +952,7 @@ class SqlAlchemyStore(AbstractStore):
                                     context_extractor_in_bytes=context_extractor_in_bytes,
                                     graph=graph)
             except sqlalchemy.exc.IntegrityError as e:
-                raise AIFlowException('Error: {}'.format(workflow.name, workflow.project_id, str(e)))
+                raise AIFlowException('Error: {}'.format(str(e)))
 
     def get_workflow_by_name(self, project_name, workflow_name) -> Optional[WorkflowMeta]:
         """

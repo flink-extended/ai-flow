@@ -28,6 +28,7 @@ import org.aiflow.client.entity.ModelVersionMeta;
 import org.aiflow.client.entity.ModelVersionRelationMeta;
 import org.aiflow.client.entity.ProjectMeta;
 import org.aiflow.client.entity.WorkflowMeta;
+import org.aiflow.client.entity.WorkflowSnapshotMeta;
 import org.aiflow.client.proto.Message.ArtifactProto;
 import org.aiflow.client.proto.Message.DatasetProto;
 import org.aiflow.client.proto.Message.ModelProto;
@@ -39,12 +40,15 @@ import org.aiflow.client.proto.Message.ProjectProto;
 import org.aiflow.client.proto.Message.Response;
 import org.aiflow.client.proto.Message.SchemaProto;
 import org.aiflow.client.proto.Message.WorkflowMetaProto;
+import org.aiflow.client.proto.Message.WorkflowSnapshotProto;
 import org.aiflow.client.proto.MetadataServiceGrpc;
+import org.aiflow.client.proto.MetadataServiceOuterClass;
 import org.aiflow.client.proto.MetadataServiceOuterClass.ArtifactListProto;
 import org.aiflow.client.proto.MetadataServiceOuterClass.DatasetListProto;
 import org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.ListModelVersionRelationRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.ListRequest;
+import org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowsRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.ModelRelationListProto;
 import org.aiflow.client.proto.MetadataServiceOuterClass.ModelVersionNameRequest;
@@ -60,6 +64,7 @@ import org.aiflow.client.proto.MetadataServiceOuterClass.RegisterModelVersionRel
 import org.aiflow.client.proto.MetadataServiceOuterClass.RegisterModelVersionRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.RegisterProjectRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowRequest;
+import org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.UpdateArtifactRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.UpdateDatasetRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.UpdateProjectRequest;
@@ -93,6 +98,8 @@ import static org.aiflow.client.entity.ProjectMeta.buildProjectMeta;
 import static org.aiflow.client.entity.ProjectMeta.buildProjectMetas;
 import static org.aiflow.client.entity.WorkflowMeta.buildWorkflowMeta;
 import static org.aiflow.client.entity.WorkflowMeta.buildWorkflowMetas;
+import static org.aiflow.client.entity.WorkflowSnapshotMeta.buildWorkflowSnapshotMeta;
+import static org.aiflow.client.entity.WorkflowSnapshotMeta.buildWorkflowSnapshotMetas;
 import static org.aiflow.client.util.Transform.dataTypeList;
 import static org.aiflow.client.util.Transform.int64Value;
 import static org.aiflow.client.util.Transform.metadataDeleteResponse;
@@ -1092,5 +1099,99 @@ public class MetadataClient {
         return StringUtils.isEmpty(metadataDetailResponse(response, this.parser, builder))
                 ? null
                 : buildWorkflowMeta(builder.build());
+    }
+
+    /**
+     * Register a workflow snapshot
+     *
+     * @param projectName the name of project which contains the workflow snapshot
+     * @param workflowName the name of workflow
+     * @param uri the uri of workflow snapshot
+     * @param signature the MD5 hash of the workflow directory
+     * @return {@link WorkflowSnapshotMeta} object registered in Metadata Store
+     */
+    public WorkflowSnapshotMeta registerWorkflowSnapshot(
+            String projectName, String workflowName, String uri, String signature)
+            throws Exception {
+        WorkflowMeta workflow = getWorkflowByName(projectName, workflowName);
+        if (workflow == null) {
+            throw new Exception(
+                    String.format("Workflow doesn't exist, %s.%s", projectName, workflowName));
+        }
+        WorkflowSnapshotProto workflowSnapshotProto =
+                WorkflowSnapshotProto.newBuilder()
+                        .setWorkflowId(int64Value(workflow.getUuid()))
+                        .setUri(stringValue(uri))
+                        .setSignature(stringValue(signature))
+                        .build();
+        RegisterWorkflowSnapshotRequest request =
+                RegisterWorkflowSnapshotRequest.newBuilder()
+                        .setWorkflowSnapshot(workflowSnapshotProto)
+                        .build();
+        Response response = metadataServiceStub.registerWorkflowSnapshot(request);
+        WorkflowSnapshotProto.Builder builder = WorkflowSnapshotProto.newBuilder();
+        return StringUtils.isEmpty(metadataDetailResponse(response, this.parser, builder))
+                ? null
+                : buildWorkflowSnapshotMeta(builder.build());
+    }
+
+    /**
+     * Get a specific workflow snapshot in metadata store by snapshot id.
+     *
+     * @param workflowSnapshotId the workflow snapshot id
+     * @return: {@link WorkflowSnapshotMeta} if exists, otherwise returns null .
+     */
+    public WorkflowSnapshotMeta getWorkflowSnapshot(Long workflowSnapshotId) throws Exception {
+        IdRequest request = IdRequest.newBuilder().setId(workflowSnapshotId).build();
+        Response response = metadataServiceStub.getWorkflowSnapshot(request);
+        WorkflowSnapshotProto.Builder builder = WorkflowSnapshotProto.newBuilder();
+        return StringUtils.isEmpty(metadataDetailResponse(response, this.parser, builder))
+                ? null
+                : buildWorkflowSnapshotMeta(builder.build());
+    }
+
+    /**
+     * List workflow snapshots of the specific workflow.
+     *
+     * @param projectName the name of project which contains the workflow snapshot
+     * @param workflowName the name of workflow
+     * @param pageSize the limitation of the listed workflow snapshots
+     * @param offset the offset of listed workflow snapshots
+     * @return List of {@link WorkflowSnapshotMeta} if exists,
+     * @throws Exception
+     */
+    public List<WorkflowSnapshotMeta> listWorkflowSnapshots(
+            String projectName, String workflowName, Long pageSize, Long offset) throws Exception {
+        WorkflowMeta workflow = getWorkflowByName(projectName, workflowName);
+        if (workflow == null) {
+            throw new Exception(
+                    String.format("Workflow doesn't exist, %s.%s", projectName, workflowName));
+        }
+        ListWorkflowSnapshotsRequest request =
+                ListWorkflowSnapshotsRequest.newBuilder()
+                        .setWorkflowId(workflow.getUuid())
+                        .setPageSize(pageSize)
+                        .setOffset(offset)
+                        .build();
+        Response response = metadataServiceStub.listWorkflowSnapshots(request);
+        MetadataServiceOuterClass.WorkflowSnapshotListProto.Builder builder =
+                MetadataServiceOuterClass.WorkflowSnapshotListProto.newBuilder();
+        return StringUtils.isEmpty(metadataDetailResponse(response, this.parser, builder))
+                ? null
+                : buildWorkflowSnapshotMetas(builder.build());
+    }
+
+    /**
+     * Delete the workflow snapshot by specific id
+     *
+     * @param workflowSnapshotId the uuid of workflow snapshot
+     * @return {@link Status OK} if the workflow snapshot is successfully deleted, {@link Status
+     *     ERROR} if the workflow snapshot does not exist otherwise.
+     * @throws Exception
+     */
+    public Status deleteWorkflowSnapshot(Long workflowSnapshotId) throws Exception {
+        IdRequest request = IdRequest.newBuilder().setId(workflowSnapshotId).build();
+        Response response = metadataServiceStub.deleteWorkflowSnapshot(request);
+        return metadataDeleteResponse(response);
     }
 }

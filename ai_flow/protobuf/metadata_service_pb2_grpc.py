@@ -289,6 +289,26 @@ class MetadataServiceStub(object):
                 request_serializer=metadata__service__pb2.ListWorkflowsRequest.SerializeToString,
                 response_deserializer=message__pb2.Response.FromString,
                 )
+        self.registerWorkflowSnapshot = channel.unary_unary(
+                '/ai_flow.MetadataService/registerWorkflowSnapshot',
+                request_serializer=metadata__service__pb2.RegisterWorkflowSnapshotRequest.SerializeToString,
+                response_deserializer=message__pb2.Response.FromString,
+                )
+        self.getWorkflowSnapshot = channel.unary_unary(
+                '/ai_flow.MetadataService/getWorkflowSnapshot',
+                request_serializer=metadata__service__pb2.IdRequest.SerializeToString,
+                response_deserializer=message__pb2.Response.FromString,
+                )
+        self.listWorkflowSnapshots = channel.unary_unary(
+                '/ai_flow.MetadataService/listWorkflowSnapshots',
+                request_serializer=metadata__service__pb2.ListWorkflowSnapshotsRequest.SerializeToString,
+                response_deserializer=message__pb2.Response.FromString,
+                )
+        self.deleteWorkflowSnapshot = channel.unary_unary(
+                '/ai_flow.MetadataService/deleteWorkflowSnapshot',
+                request_serializer=metadata__service__pb2.IdRequest.SerializeToString,
+                response_deserializer=message__pb2.Response.FromString,
+                )
 
 
 class MetadataServiceServicer(object):
@@ -566,7 +586,8 @@ class MetadataServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def registerWorkflow(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """workflow api
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -602,6 +623,31 @@ class MetadataServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def listWorkflows(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def registerWorkflowSnapshot(self, request, context):
+        """workflow snapshot api
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def getWorkflowSnapshot(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def listWorkflowSnapshots(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def deleteWorkflowSnapshot(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -863,6 +909,26 @@ def add_MetadataServiceServicer_to_server(servicer, server):
             'listWorkflows': grpc.unary_unary_rpc_method_handler(
                     servicer.listWorkflows,
                     request_deserializer=metadata__service__pb2.ListWorkflowsRequest.FromString,
+                    response_serializer=message__pb2.Response.SerializeToString,
+            ),
+            'registerWorkflowSnapshot': grpc.unary_unary_rpc_method_handler(
+                    servicer.registerWorkflowSnapshot,
+                    request_deserializer=metadata__service__pb2.RegisterWorkflowSnapshotRequest.FromString,
+                    response_serializer=message__pb2.Response.SerializeToString,
+            ),
+            'getWorkflowSnapshot': grpc.unary_unary_rpc_method_handler(
+                    servicer.getWorkflowSnapshot,
+                    request_deserializer=metadata__service__pb2.IdRequest.FromString,
+                    response_serializer=message__pb2.Response.SerializeToString,
+            ),
+            'listWorkflowSnapshots': grpc.unary_unary_rpc_method_handler(
+                    servicer.listWorkflowSnapshots,
+                    request_deserializer=metadata__service__pb2.ListWorkflowSnapshotsRequest.FromString,
+                    response_serializer=message__pb2.Response.SerializeToString,
+            ),
+            'deleteWorkflowSnapshot': grpc.unary_unary_rpc_method_handler(
+                    servicer.deleteWorkflowSnapshot,
+                    request_deserializer=metadata__service__pb2.IdRequest.FromString,
                     response_serializer=message__pb2.Response.SerializeToString,
             ),
     }
@@ -1738,6 +1804,74 @@ class MetadataService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/listWorkflows',
             metadata__service__pb2.ListWorkflowsRequest.SerializeToString,
+            message__pb2.Response.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def registerWorkflowSnapshot(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/registerWorkflowSnapshot',
+            metadata__service__pb2.RegisterWorkflowSnapshotRequest.SerializeToString,
+            message__pb2.Response.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def getWorkflowSnapshot(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/getWorkflowSnapshot',
+            metadata__service__pb2.IdRequest.SerializeToString,
+            message__pb2.Response.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def listWorkflowSnapshots(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/listWorkflowSnapshots',
+            metadata__service__pb2.ListWorkflowSnapshotsRequest.SerializeToString,
+            message__pb2.Response.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def deleteWorkflowSnapshot(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/deleteWorkflowSnapshot',
+            metadata__service__pb2.IdRequest.SerializeToString,
             message__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

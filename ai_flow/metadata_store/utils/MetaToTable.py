@@ -21,7 +21,7 @@ from typing import List, Text
 from ai_flow.meta.dataset_meta import DatasetMeta
 from ai_flow.endpoint.server.exception import AIFlowException
 from ai_flow.store.db.db_model import SqlDataset, SqlProject, SqlModelRelation, \
-    SqlModelVersionRelation, SqlArtifact, SqlWorkflow, MongoWorkflow
+    SqlModelVersionRelation, SqlArtifact, SqlWorkflow, MongoWorkflow, MongoWorkflowSnapshot, SqlWorkflowSnapshot
 from ai_flow.store.db.db_model import (MongoProject, MongoDataset,
                                        MongoArtifact,
                                        MongoModelRelation, MongoModelVersionRelation)
@@ -148,3 +148,18 @@ class MetaToTable:
                       update_time=update_time,
                       context_extractor_in_bytes=context_extractor_in_bytes,
                       graph=graph)
+
+    @staticmethod
+    def workflow_snapshot_to_table(workflow_id: int,
+                                   uri: Text,
+                                   signature: Text,
+                                   create_time: int,
+                                   store_type='SqlAlchemyStore'):
+        if store_type == 'MongoStore':
+            _class = MongoWorkflowSnapshot
+        else:
+            _class = SqlWorkflowSnapshot
+        return _class(workflow_id=workflow_id,
+                      uri=uri,
+                      signature=signature,
+                      create_time=create_time)

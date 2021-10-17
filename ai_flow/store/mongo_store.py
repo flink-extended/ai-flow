@@ -32,6 +32,7 @@ from ai_flow.meta.metric_meta import MetricMeta, MetricType, MetricSummary
 from ai_flow.meta.model_relation_meta import ModelRelationMeta, ModelVersionRelationMeta
 from ai_flow.meta.project_meta import ProjectMeta
 from ai_flow.meta.workflow_meta import WorkflowMeta
+from ai_flow.meta.workflow_snapshot_meta import WorkflowSnapshotMeta
 from ai_flow.metadata_store.utils.MetaToTable import MetaToTable
 from ai_flow.metadata_store.utils.ResultToMeta import ResultToMeta
 from ai_flow.metric.utils import table_to_metric_meta, table_to_metric_summary, metric_meta_to_table, \
@@ -49,7 +50,7 @@ from ai_flow.store.db.db_model import (MongoProject, MongoDataset, MongoModelVer
                                        MongoArtifact, MongoRegisteredModel, MongoModelRelation,
                                        MongoMetricSummary, MongoMetricMeta,
                                        MongoModelVersionRelation, MongoMember, MongoProjectSnapshot, MongoWorkflow,
-                                       MongoWorkflowContextEventHandlerState)
+                                       MongoWorkflowContextEventHandlerState, MongoWorkflowSnapshot)
 from ai_flow.store.db.db_util import parse_mongo_uri
 from ai_flow.util import json_utils
 from ai_flow.workflow.control_edge import WorkflowSchedulingRule
@@ -549,6 +550,98 @@ class MongoStore(AbstractStore):
             self._save_all(
                 [project] + project.model_relation + model_version_list)
             return Status.OK
+        except mongoengine.OperationError as e:
+            raise AIFlowException(str(e))
+
+    """workflow snapshot api"""
+
+    def register_workflow_snapshot(self,
+                                   workflow_id: int,
+                                   uri: Text,
+                                   signature: Text):
+        """
+        register a workflow snapshot in metadata store.
+
+        :param workflow_id: the id of workflow
+        :param uri: the uri of workflow snapshot
+        :param signature: the MD5 hash of the workflow directory
+        """
+        create_time = int(time.time() * 1000)
+        try:
+            workflow_snapshot = MetaToTable.workflow_snapshot_to_table(workflow_id=workflow_id,
+                                                                       uri=uri,
+                                                                       signature=signature,
+                                                                       create_time=create_time,
+                                                                       store_type=type(self).__name__)
+            workflow_snapshot.save()
+            return WorkflowSnapshotMeta(uuid=workflow_snapshot.uuid,
+                                        workflow_id=workflow_snapshot.workflow_id,
+                                        uri=workflow_snapshot.uri,
+                                        signature=workflow_snapshot.signature,
+                                        create_time=workflow_snapshot.create_time)
+        except mongoengine.OperationError as e:
+            raise AIFlowException('Error: {}'.format(str(e)))
+
+    def get_workflow_snapshot(self,
+                              workflow_snapshot_id: int) -> Optional[WorkflowSnapshotMeta]:
+        """
+        Get a specific workflow snapshot in metadata store by snapshot id.
+
+        :param workflow_snapshot_id: the workflow snapshot id
+        :return: A single :py:class:`ai_flow.meta.workflow_snapshot_meta.WorkflowSnapshotMeta` object
+                 if exists, Otherwise, returns None if the workflow snapshot does not exist.
+        """
+        workflow_snapshot_result = MongoWorkflowSnapshot.objects(uuid=workflow_snapshot_id)
+        if len(workflow_snapshot_result) == 0:
+            return None
+        return ResultToMeta.result_to_workflow_snapshot_meta(workflow_snapshot_result[0])
+
+    def list_workflow_snapshots(self,
+                                workflow_id: int = None,
+                                page_size: int = None,
+                                offset: int = None,
+                                filters: Filters = None) -> Optional[List[WorkflowSnapshotMeta]]:
+        """
+        List workflow snapshots of the specific workflow.
+
+        :param workflow_id: the workflow id.
+        :param page_size: the limitation of the listed workflow snapshots.
+        :param offset: the offset of listed workflow snapshots.
+        :param filters: A Filter class that contains all filters to apply.
+        """
+        query = {}
+        if workflow_id:
+            query.update({'workflow_id': workflow_id})
+        if filters:
+            query = filters.apply_all(MongoWorkflowSnapshot, query)
+        workflow_snapshot_result = MongoWorkflowSnapshot.objects(**query)
+        if offset:
+            workflow_snapshot_result.skip(offset)
+        if page_size:
+            workflow_snapshot_result.limit(page_size)
+        if len(workflow_snapshot_result) == 0:
+            return None
+        workflow_snapshot_list = []
+        for snapshot in workflow_snapshot_result:
+            workflow_snapshot_list.append(ResultToMeta.result_to_workflow_snapshot_meta(snapshot))
+        return workflow_snapshot_list
+
+    def delete_workflow_snapshot(self,
+                                 workflow_snapshot_id: int):
+        """
+        Delete the workflow snapshot by specific id
+
+        :param workflow_snapshot_id: the uuid of workflow snapshot
+        :return: Status.OK if the workflow snapshot is successfully deleted,
+                 Status.ERROR if the workflow snapshot does not exist otherwise.
+        """
+        try:
+            workflow_snapshot = MongoWorkflowSnapshot.objects(uuid=workflow_snapshot_id).first()
+            if workflow_snapshot is None:
+                return Status.ERROR
+            else:
+                workflow_snapshot.delete()
+                return Status.OK
         except mongoengine.OperationError as e:
             raise AIFlowException(str(e))
 

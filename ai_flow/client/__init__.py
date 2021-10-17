@@ -31,6 +31,7 @@ from ai_flow.meta.metric_meta import MetricType, MetricMeta, MetricSummary
 from ai_flow.meta.model_meta import ModelMeta, ModelVersionMeta
 from ai_flow.meta.model_relation_meta import ModelRelationMeta, ModelVersionRelationMeta
 from ai_flow.meta.project_meta import ProjectMeta
+from ai_flow.meta.workflow_snapshot_meta import WorkflowSnapshotMeta
 from ai_flow.model_center.entity.model_version_detail import ModelVersionDetail
 from ai_flow.model_center.entity.model_version_stage import ModelVersionStage
 from ai_flow.model_center.entity.registered_model_detail import RegisteredModelDetail
@@ -250,6 +251,29 @@ def update_workflow(workflow_name: Text, project_name: Text, context_extractor: 
                                                 context_extractor=context_extractor,
                                                 properties=properties,
                                                 graph=graph)
+
+
+def register_workflow_snapshot(project_name: Text, workflow_name: Text, uri: Text,
+                               signature: Text) -> Optional[WorkflowSnapshotMeta]:
+    return get_ai_flow_client().register_workflow_snapshot(project_name=project_name,
+                                                           workflow_name=workflow_name,
+                                                           uri=uri,
+                                                           signature=signature)
+
+
+def get_workflow_snapshot(workflow_snapshot_id: int):
+    return get_ai_flow_client().get_workflow_snapshot(workflow_snapshot_id=workflow_snapshot_id)
+
+
+def list_workflow_snapshots(project_name: Text, workflow_name: Text, page_size: int, offset: int):
+    return get_ai_flow_client().list_workflow_snapshots(project_name=project_name,
+                                                        workflow_name=workflow_name,
+                                                        page_size=page_size,
+                                                        offset=offset)
+
+
+def delete_workflow_snapshot(workflow_snapshot_id: int):
+    return get_ai_flow_client().delete_workflow_snapshot(workflow_snapshot_id=workflow_snapshot_id)
 
 
 def get_artifact_by_id(artifact_id) -> Optional[ArtifactMeta]:

@@ -23,10 +23,11 @@ from ai_flow.meta.artifact_meta import ArtifactMeta
 from ai_flow.meta.dataset_meta import DatasetMeta
 from ai_flow.meta.model_relation_meta import ModelRelationMeta, ModelVersionRelationMeta
 from ai_flow.meta.project_meta import ProjectMeta
+from ai_flow.meta.workflow_snapshot_meta import WorkflowSnapshotMeta
 from ai_flow.protobuf.message_pb2 import DatasetProto, DataTypeProto, \
     SchemaProto, ProjectProto, \
     ModelRelationProto, ModelVersionRelationProto, ModelProto, ModelVersionProto, ArtifactProto, \
-    ModelVersionStage, WorkflowMetaProto
+    ModelVersionStage, WorkflowMetaProto, WorkflowSnapshotProto
 from ai_flow.endpoint.server import stringValue, int64Value
 
 
@@ -111,6 +112,24 @@ class MetaToProto:
         for workflow in workflows:
             workflow_proto_list.append(MetaToProto.workflow_meta_to_proto(workflow))
         return workflow_proto_list
+
+    @staticmethod
+    def workflow_snapshot_meta_to_proto(workflow_snapshot_meta: WorkflowSnapshotMeta) -> WorkflowSnapshotProto:
+        if workflow_snapshot_meta is None:
+            return None
+        else:
+            return WorkflowSnapshotProto(workflow_id=int64Value(workflow_snapshot_meta.workflow_id),
+                                         uri=stringValue(workflow_snapshot_meta.uri),
+                                         signature=stringValue(workflow_snapshot_meta.signature),
+                                         create_time=int64Value(workflow_snapshot_meta.create_time),
+                                         uuid=workflow_snapshot_meta.uuid)
+
+    @staticmethod
+    def workflow_snapshot_meta_list_to_proto(snapshots: List[WorkflowSnapshotMeta]) -> List[WorkflowSnapshotProto]:
+        workflow_snapshot_list = []
+        for workflow_snapshot in snapshots:
+            workflow_snapshot_list.append(MetaToProto.workflow_snapshot_meta_to_proto(workflow_snapshot))
+        return workflow_snapshot_list
 
     @staticmethod
     def artifact_meta_to_proto(artifact_meta: ArtifactMeta) -> ArtifactProto:

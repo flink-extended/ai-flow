@@ -23,9 +23,10 @@ from ai_flow.meta.model_meta import ModelMeta, ModelVersionMeta
 from ai_flow.meta.model_relation_meta import ModelRelationMeta, ModelVersionRelationMeta
 from ai_flow.meta.project_meta import ProjectMeta
 from ai_flow.meta.workflow_meta import WorkflowMeta
+from ai_flow.meta.workflow_snapshot_meta import WorkflowSnapshotMeta
 from ai_flow.protobuf.message_pb2 import DatasetProto, ProjectProto, \
     StateProto, ModelRelationProto, ModelVersionRelationProto, ModelProto, ModelVersionProto, \
-    ArtifactProto, ModelVersionStage, DataTypeProto, WorkflowMetaProto
+    ArtifactProto, ModelVersionStage, DataTypeProto, WorkflowMetaProto, WorkflowSnapshotProto
 
 
 class ProtoToMeta:
@@ -121,6 +122,23 @@ class ProtoToMeta:
         for workflow in workflows:
             workflow_meta_list.append(ProtoToMeta.proto_to_workflow_meta(workflow))
         return workflow_meta_list
+
+    @staticmethod
+    def proto_to_workflow_snapshot_meta(proto: WorkflowSnapshotProto) -> WorkflowSnapshotMeta:
+        return WorkflowSnapshotMeta(uuid=proto.uuid,
+                                    workflow_id=proto.workflow_id.value if proto.HasField('workflow_id') else None,
+                                    uri=proto.uri.value if proto.HasField('uri') else None,
+                                    signature=proto.signature.value if proto.HasField('signature') else None,
+                                    create_time=proto.create_time.value if proto.HasField('create_time') else None
+                                    )
+
+    @staticmethod
+    def proto_to_workflow_snapshot_meta_list(workflow_snapshots: List[WorkflowSnapshotProto])\
+            -> List[WorkflowSnapshotMeta]:
+        workflow_snapshot_list = []
+        for snapshots in workflow_snapshots:
+            workflow_snapshot_list.append(ProtoToMeta.proto_to_workflow_snapshot_meta(snapshots))
+        return workflow_snapshot_list
 
     @staticmethod
     def proto_to_artifact_meta(artifact_proto: ArtifactProto) -> ArtifactMeta:
