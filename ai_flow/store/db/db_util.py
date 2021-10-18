@@ -29,6 +29,7 @@ from ai_flow.endpoint.server.server_config import DBType
 from ai_flow.protobuf.message_pb2 import INTERNAL_ERROR
 from ai_flow.store import AIFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW, AIFLOW_SQLALCHEMYSTORE_POOL_SIZE
 from ai_flow.store.db.db_engine import DATABASE_ENGINES
+from ai_flow.util import sqlalchemy_db
 
 _logger = logging.getLogger(__name__)
 
@@ -131,5 +132,7 @@ def create_db_store(db_uri):
                            db=db)
     else:
         from ai_flow.store.sqlalchemy_store import SqlAlchemyStore
+        if not sqlalchemy_db.tables_exists(db_uri):
+            sqlalchemy_db.init_db(db_uri)
         store = SqlAlchemyStore(db_uri)
     return store

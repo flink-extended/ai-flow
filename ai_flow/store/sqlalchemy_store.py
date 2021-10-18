@@ -54,6 +54,7 @@ from ai_flow.store.db.db_model import SqlMetricMeta, SqlMetricSummary
 from ai_flow.store.db.db_model import SqlRegisteredModel, SqlModelVersion
 from ai_flow.store.db.db_util import extract_db_engine_from_uri, create_sqlalchemy_engine, _get_managed_session_maker
 from ai_flow.util import json_utils
+from ai_flow.util import sqlalchemy_db
 from ai_flow.workflow.control_edge import WorkflowSchedulingRule
 
 if not hasattr(time, 'time_ns'):
@@ -108,7 +109,6 @@ class SqlAlchemyStore(AbstractStore):
         self.db_uri = db_uri
         self.db_type = extract_db_engine_from_uri(db_uri)
         self.db_engine = create_sqlalchemy_engine(db_uri)
-        base.metadata.create_all(self.db_engine)
         # Verify that database sql model tables exist.
         SqlAlchemyStore._verify_registry_tables_exist(self.db_engine)
         base.metadata.bind = self.db_engine

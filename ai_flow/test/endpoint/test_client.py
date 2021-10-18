@@ -40,6 +40,7 @@ from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.store.db.base_model import base
 from ai_flow.test.store.test_sqlalchemy_store import _get_store
 from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server, _NS_URI
+from ai_flow.util import sqlalchemy_db
 
 _SQLITE_DB_FILE = 'aiflow.db'
 _SQLITE_DB_URI = '%s%s' % ('sqlite:///', _SQLITE_DB_FILE)
@@ -1145,8 +1146,7 @@ class TestAIFlowClientSqlite(AIFlowClientTestCases, unittest.TestCase):
         _get_store(_SQLITE_DB_URI)
 
     def tearDown(self) -> None:
-        store = _get_store(_SQLITE_DB_URI)
-        base.metadata.drop_all(store.db_engine)
+        sqlalchemy_db.clear_db(_SQLITE_DB_URI, base.metadata)
 
 
 @unittest.skip("Skip until HA is re-implemented.")
@@ -1191,8 +1191,7 @@ class TestAIFlowClientSqliteWithSingleHighAvailableServer(
         _get_store(_SQLITE_DB_URI)
 
     def tearDown(self) -> None:
-        store = _get_store(_SQLITE_DB_URI)
-        base.metadata.drop_all(store.db_engine)
+        sqlalchemy_db.clear_db(_SQLITE_DB_URI, base.metadata)
 
 
 if __name__ == '__main__':
