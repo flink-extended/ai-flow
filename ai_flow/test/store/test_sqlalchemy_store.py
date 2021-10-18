@@ -27,12 +27,14 @@ from ai_flow.store.db.base_model import base
 from ai_flow.store.sqlalchemy_store import SqlAlchemyStore
 from ai_flow.test.test_util import get_mysql_server_url
 from ai_flow.test.store.common import AbstractTestStore
+from ai_flow.util import sqlalchemy_db
 
 _SQLITE_DB_FILE = 'ai_flow.db'
 _SQLITE_DB_URI = '%s%s' % ('sqlite:///', _SQLITE_DB_FILE)
 
 
 def _get_store(db_uri=''):
+    sqlalchemy_db.init_db(db_uri)
     return SqlAlchemyStore(db_uri)
 
 
@@ -51,7 +53,7 @@ class TestSqlAlchemyStoreSqlite(AbstractTestStore, unittest.TestCase):
         self.store = _get_store(_SQLITE_DB_URI)
 
     def tearDown(self):
-        base.metadata.drop_all(self.store.db_engine)
+        sqlalchemy_db.clear_db(_SQLITE_DB_URI, base.metadata)
 
 
 @unittest.skip("To run this test you need to configure the mysql info in 'ai_flow/test/test_util.py'")
@@ -80,8 +82,7 @@ class TestSqlAlchemyStoreMySQL(AbstractTestStore, unittest.TestCase):
         self.store = _get_store(self.store_uri)
 
     def tearDown(self) -> None:
-        store = _get_store(self.store_uri)
-        base.metadata.drop_all(store.db_engine)
+        sqlalchemy_db.clear_db(_SQLITE_DB_URI, base.metadata)
 
 
 if __name__ == '__main__':

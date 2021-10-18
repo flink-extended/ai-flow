@@ -28,6 +28,7 @@ from ai_flow.client.ai_flow_client import AIFlowClient
 from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.store.db.base_model import base
 from ai_flow.store.sqlalchemy_store import SqlAlchemyStore
+from ai_flow.util import sqlalchemy_db
 
 _SQLITE_DB_FILE = 'aiflow.db'
 _SQLITE_DB_URI = '%s%s' % ('sqlite:///', _SQLITE_DB_FILE)
@@ -81,8 +82,7 @@ class TestHighAvailableAIFlowServer(unittest.TestCase):
             self.server3.stop()
         if self.notification is not None:
             self.notification.stop()
-        store = SqlAlchemyStore(_SQLITE_DB_URI)
-        base.metadata.drop_all(store.db_engine)
+        sqlalchemy_db.clear_db(_SQLITE_DB_URI, base.metadata)
 
     def test_server_change(self) -> None:
         self.client.register_project("test_project")

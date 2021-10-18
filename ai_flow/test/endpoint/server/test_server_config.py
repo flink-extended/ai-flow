@@ -18,7 +18,7 @@
 #
 import unittest
 import os
-from ai_flow.endpoint.server.server_config import AIFlowServerConfig, DBType
+from ai_flow.endpoint.server.server_config import AIFlowServerConfig, DBType, get_configuration
 
 
 class TestConfiguration(unittest.TestCase):
@@ -30,10 +30,17 @@ class TestConfiguration(unittest.TestCase):
 
     def test_load_master_configuration(self):
         config = AIFlowServerConfig()
-        config.load_from_file(os.path.dirname(__file__) + '/master_config.yaml')
+        config.load_from_file(os.path.dirname(__file__) + '/aiflow_server.yaml')
         self.assertEqual('sql_lite', config.get_db_type())
         self.assertEqual('/tmp/repo', config.get_scheduler_service_config()['repository'])
         self.assertEqual(True, config.start_scheduler_service())
+
+    def test_get_configuration(self):
+        os.environ['AIFLOW_HOME'] = os.path.dirname(__file__)
+        config = get_configuration()
+        self.assertEqual('sqlite:///aiflow.db', config.get_db_uri())
+        self.assertEqual(50051, config.get_server_port())
+        self.assertEqual('localhost:50052', config.get_notification_server_uri())
 
 
 if __name__ == '__main__':
