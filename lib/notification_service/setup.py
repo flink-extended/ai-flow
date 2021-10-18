@@ -50,8 +50,9 @@ setup(
     url='https://github.com/alibaba/flink-ai-extended',
     packages=find_packages(exclude=['tests*']),
     scripts=get_script(),
+    package_data={'notification_service': ['alembic.ini']},
     include_package_data=True,
-    install_requires=["protobuf==3.15.6", "grpcio==1.34.0", "sqlalchemy>=1.3.18, <2", "pyyaml>=5.1, <5.4"],
+    install_requires=["protobuf==3.15.6", "grpcio==1.34.0", "sqlalchemy>=1.3.18, <2", "pyyaml>=5.1, <5.4", "alembic>=1.2, <2.0"],
     entry_points={
         'console_scripts': [
             'notification = notification_service.__main__:main'

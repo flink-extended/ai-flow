@@ -106,6 +106,19 @@ class GroupCommand(NamedTuple):
     epilog: Optional[str] = None
 
 
+ARG_YES = Arg(
+    ("-y", "--yes"), help="Do not prompt to confirm reset. Use with care!", action="store_true", default=False
+)
+
+ARG_DB_VERSION = Arg(
+    ("-v", "--version"),
+    help=(
+        'The version corresponding to the database.'
+    ),
+    default='heads',
+)
+
+
 CLICommand = Union[ActionCommand, GroupCommand]
 
 VERSION_COMMAND = ActionCommand("version",
@@ -113,9 +126,40 @@ VERSION_COMMAND = ActionCommand("version",
                                 lazy_load_command("notification_service.cli.commands.version_command.version"),
                                 [],
                                 "Shows the version of Notification.")
+DB_COMMANDS = (
+    ActionCommand(
+        name='init',
+        help="Initialize the metadata database",
+        func=lazy_load_command('notification_service.cli.commands.db_command.init'),
+        args=(),
+    ),
+    ActionCommand(
+        name='reset',
+        help="Burn down and rebuild the metadata database",
+        func=lazy_load_command('notification_service.cli.commands.db_command.reset'),
+        args=(ARG_YES,),
+    ),
+    ActionCommand(
+        name='upgrade',
+        help="Upgrade the metadata database to the version",
+        func=lazy_load_command('notification_service.cli.commands.db_command.upgrade'),
+        args=(ARG_DB_VERSION,),
+    ),
+    ActionCommand(
+        name='downgrade',
+        help="Downgrade the metadata database to the version",
+        func=lazy_load_command('notification_service.cli.commands.db_command.downgrade'),
+        args=(ARG_DB_VERSION,),
+    )
+)
 
 notification_commands: List[CLICommand] = [
-    VERSION_COMMAND
+    VERSION_COMMAND,
+    GroupCommand(
+        name='db',
+        help="Database operations",
+        subcommands=DB_COMMANDS,
+    ),
 ]
 ALL_COMMANDS_DICT: Dict[str, CLICommand] = {sp.name: sp for sp in notification_commands}
 

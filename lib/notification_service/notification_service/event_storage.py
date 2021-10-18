@@ -264,5 +264,4 @@ class DbEventStorage(BaseEventStorage):
         return EventModel.get_event_by_uuid(uuid)
 
     def clean_up(self):
-        EventModel.cleanup()
-        ClientModel.cleanup()
+        db.reset_db(db.SQL_ALCHEMY_CONN)

@@ -92,8 +92,7 @@ class HaServerTest(unittest.TestCase):
             self.master2.stop()
         if self.master3 is not None:
             self.master3.stop()
-        db_engine = sqlalchemy.create_engine(_SQLITE_DB_URI, pool_pre_ping=True)
-        declarative_base().metadata.drop_all(db_engine)
+        db.clear_engine_and_session()
 
     def wait_for_new_members_detected(self, new_member_uri):
         for i in range(100):

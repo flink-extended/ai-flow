@@ -14,3 +14,16 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import os
+from notification_service.server_config import NotificationServerConfig
+
+
+def get_configuration():
+    if 'NOTIFICATION_HOME' in os.environ:
+        home = os.getenv('NOTIFICATION_HOME')
+    else:
+        home = os.getenv('HOME') + '/notification_service'
+    config_file = home + '/notification_server.yaml'
+    if not os.path.exists(config_file):
+        raise FileNotFoundError('Do not find config file {}'.format(config_file))
+    return NotificationServerConfig(config_file=config_file)

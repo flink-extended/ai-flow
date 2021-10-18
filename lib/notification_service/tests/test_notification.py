@@ -406,6 +406,7 @@ class DbStorageTest(unittest.TestCase, NotificationTest):
     def tearDown(self):
         self.client.stop_listen_events()
         self.client.stop_listen_event()
+        db.clear_engine_and_session()
 
     @classmethod
     def wait_for_master_started(cls, server_uri="localhost:50051"):
@@ -485,6 +486,7 @@ class HaDbStorageTest(unittest.TestCase, NotificationTest):
         self.client.stop_listen_events()
         self.client.stop_listen_event()
         self.client.disable_high_availability()
+        db.clear_engine_and_session()
 
 
 class HaClientWithNonHaServerTest(unittest.TestCase, NotificationTest):
@@ -524,3 +526,4 @@ class HaClientWithNonHaServerTest(unittest.TestCase, NotificationTest):
     def tearDown(self):
         self.client.stop_listen_events()
         self.client.stop_listen_event()
+        db.clear_engine_and_session()
