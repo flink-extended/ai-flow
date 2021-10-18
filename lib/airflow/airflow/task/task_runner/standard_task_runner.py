@@ -83,7 +83,8 @@ class StandardTaskRunner(BaseTaskRunner):
             try:
                 args.func(args, dag=self.dag)
                 return_code = 0
-            except Exception:  # pylint: disable=broad-except
+            except Exception as e:  # pylint: disable=broad-except
+                self.log.error("Task runner failed", exc_info=e)
                 return_code = 1
             finally:
                 # Explicitly flush any pending exception to Sentry if enabled
