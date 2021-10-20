@@ -2047,9 +2047,9 @@ class Airflow(AirflowBaseView):  # noqa: D101  pylint: disable=too-many-public-m
                             upstream_tasks[from_task_id] = {downstream_task}
 
         for key, value in event_tasks.items():
-            event_metas = self.notification_client.list_events(namespace=key[0], key=key[1], event_type=key[2])
-            for event_meta in event_metas:
-                sender = event_meta.sender
+            sender_event_counts = self.notification_client.count_events(namespace=key[0], key=key[1], event_type=key[2])
+            for sender_event_count in sender_event_counts[1]:
+                sender = sender_event_count.sender
                 if sender in dag.task_ids:
                     downstream_tasks = downstream_tasks.union(value)
                     if sender in upstream_tasks:
@@ -2225,7 +2225,7 @@ class Airflow(AirflowBaseView):  # noqa: D101  pylint: disable=too-many-public-m
 
         dag_run = session.query(DagRun).filter(DagRun.dag_id == dag.dag_id, DagRun.execution_date == dttm).first()
 
-        task_instances:  Dict[str, Dict] = {}
+        task_instances: Dict[str, Dict] = {}
         task_logs: Dict[str, List[str]] = {}
         for ti in dag.get_task_instances(dttm, dttm):
             ti_dict = alchemy_to_dict(ti)
@@ -2262,13 +2262,14 @@ class Airflow(AirflowBaseView):  # noqa: D101  pylint: disable=too-many-public-m
         send_events = {}
         event_senders = {}
         for key, value in events.items():
-            event_metas = self.notification_client.list_events(namespace=value[0], key=value[1], event_type=value[2])
-            event_senders[key] = event_metas
+            sender_event_counts = self.notification_client.count_events(namespace=value[0], key=value[1],
+                                                                        event_type=value[2])
+            event_senders[key] = sender_event_counts[1]
             sender_count = 0
-            for event_meta in event_metas:
-                if event_meta.sender in dag.task_ids:
-                    sender_count += 1
-            send_events[key] = (value[0], value[1], value[2], sender_count, len(event_metas) - sender_count)
+            for sender_event_count in sender_event_counts[1]:
+                if sender_event_count.sender in dag.task_ids:
+                    sender_count += sender_event_count.event_count
+            send_events[key] = (value[0], value[1], value[2], sender_count, sender_event_counts[0] - sender_count)
 
         node_edges = set()
         for e in edges:
@@ -2869,14 +2870,14 @@ class Airflow(AirflowBaseView):  # noqa: D101  pylint: disable=too-many-public-m
         send_events = {}
         node_edges = set()
         for key, value in events.items():
-            event_metas = self.notification_client.list_events(namespace=value[0], key=value[1],
-                                                               event_type=value[2])
+            sender_event_counts = self.notification_client.count_events(namespace=value[0], key=value[1],
+                                                                        event_type=value[2])
             sender_count = 0
-            for event_meta in event_metas:
-                if event_meta.sender in dag.task_ids:
-                    sender_count += 1
-                    node_edges.add((event_meta.sender, key))
-            send_events[key] = (value[0], value[1], value[2], sender_count, len(event_metas) - sender_count)
+            for sender_event_count in sender_event_counts[1]:
+                if sender_event_count.sender in dag.task_ids:
+                    sender_count += sender_event_count.event_count
+                    node_edges.add((sender_event_count.sender, key))
+            send_events[key] = (value[0], value[1], value[2], sender_count, sender_event_counts[0] - sender_count)
 
         return json.dumps({'task_instances': task_instances, 'events': send_events,
                            'edges': [{'source_id': source_id, 'target_id': target_id} for source_id, target_id in
@@ -2897,17 +2898,13 @@ class Airflow(AirflowBaseView):  # noqa: D101  pylint: disable=too-many-public-m
         event_namespace = request.args.get('event_namespace')
         event_key = request.args.get('event_key')
         event_type = request.args.get('event_type')
-        events = self.notification_client.list_events(namespace=event_namespace, key=event_key, event_type=event_type)
-        logging.info('List events: {}'.format(str(events)))
+        sender_event_counts = self.notification_client.count_events(namespace=event_namespace, key=event_key,
+                                                                    event_type=event_type)
+        logging.info('Count events: {}'.format(str(sender_event_counts[1])))
         event_senders = {}
-        for event in events:
-            sender = event.sender
-            if sender in event_senders:
-                event_senders[sender] = event_senders[sender] + 1
-            else:
-                event_senders[sender] = 1
+        for sender_event_count in sender_event_counts[1]:
+            event_senders.update({sender_event_count.sender: sender_event_count.event_count})
         logging.info('List event senders: {}'.format(str(event_senders)))
-
         return json.dumps({'event_senders': event_senders},
                           cls=utils_json.AirflowJsonEncoder)
 

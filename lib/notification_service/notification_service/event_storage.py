@@ -21,7 +21,7 @@ from abc import ABC, abstractmethod
 from collections import Iterable
 from typing import Union, Tuple
 
-from notification_service.base_notification import BaseEvent, ANY_CONDITION
+from notification_service.base_notification import BaseEvent, ANY_CONDITION, SenderEventCount
 from notification_service.util import db
 from notification_service.util.db import EventModel, ClientModel
 
@@ -40,6 +40,16 @@ class BaseEventStorage(ABC):
                     start_time: int = None,
                     namespace: str = None,
                     sender: str = None):
+        pass
+
+    @abstractmethod
+    def count_events(self,
+                     key: Union[str, Tuple[str]],
+                     version: int = None,
+                     event_type: str = None,
+                     start_time: int = None,
+                     namespace: str = None,
+                     sender: str = None):
         pass
 
     @abstractmethod
@@ -104,7 +114,7 @@ class MemoryEventStorage(BaseEventStorage):
         namespace = None if namespace == "" else namespace
         sender = None if sender == "" else sender
         if isinstance(key, str):
-            key = (key, )
+            key = (key,)
         elif isinstance(key, Iterable):
             key = tuple(key)
         for event in self.store:
@@ -121,6 +131,45 @@ class MemoryEventStorage(BaseEventStorage):
             if sender is not None and sender != ANY_CONDITION and event.sender != sender:
                 continue
             res.append(event)
+        return res
+
+    def count_events(self,
+                     key: Union[str, Tuple[str]],
+                     version: int = None,
+                     event_type: str = None,
+                     start_time: int = None,
+                     namespace: str = None,
+                     sender: str = None):
+        key = None if key == "" else key
+        version = None if version == 0 else version
+        event_type = None if event_type == "" else event_type
+        namespace = None if namespace == "" else namespace
+        sender = None if sender == "" else sender
+        if isinstance(key, str):
+            key = (key,)
+        elif isinstance(key, Iterable):
+            key = tuple(key)
+        event_counts = {}
+        for event in self.store:
+            if key is not None and event.key not in key and ANY_CONDITION not in key:
+                continue
+            if version is not None and event.version <= version:
+                continue
+            if event_type is not None and event.event_type != event_type and event_type != ANY_CONDITION:
+                continue
+            if start_time is not None and event.create_time < start_time:
+                continue
+            if namespace is not None and namespace != ANY_CONDITION and event.namespace != namespace:
+                continue
+            if sender is not None and sender != ANY_CONDITION and event.sender != sender:
+                continue
+            if event.sender in event_counts:
+                event_counts.update({event.sender: event_counts.get(event.sender) + 1})
+            else:
+                event_counts.update({event.sender: 1})
+        res = []
+        for sender, event_count in event_counts.items():
+            res.append(SenderEventCount(sender=sender, event_count=event_count))
         return res
 
     def list_all_events(self, start_time: int):
@@ -185,6 +234,15 @@ class DbEventStorage(BaseEventStorage):
                     namespace: str = None,
                     sender: str = None):
         return EventModel.list_events(key, version, event_type, start_time, namespace, sender)
+
+    def count_events(self,
+                     key: Union[str, Tuple[str]],
+                     version: int = None,
+                     event_type: str = None,
+                     start_time: int = None,
+                     namespace: str = None,
+                     sender: str = None):
+        return EventModel.count_events(key, version, event_type, start_time, namespace, sender)
 
     def list_all_events(self, start_time: int):
         return EventModel.list_all_events(start_time)
