@@ -18,16 +18,20 @@ import os
 from ai_flow.endpoint.server.server_runner import AIFlowServerRunner
 from ai_flow_plugins.tests import airflow_db_utils
 from ai_flow_plugins.tests import airflow_scheduler_utils
+from ai_flow.test.util.notification_service_utils import start_notification_server
 
 
 class ExampleServer(object):
     def __init__(self):
         self.master = None
+        self.ns_server = None
 
     def run(self):
         airflow_db_utils.clear_all()
+
         config_file = os.path.dirname(__file__) + '/master.yaml'
         aiflow_db_file = os.path.dirname(__file__) + '/aiflow.db'
+        self.ns_server = start_notification_server()
         if os.path.exists(aiflow_db_file):
             os.remove(aiflow_db_file)
         self.master = AIFlowServerRunner(config_file=config_file)

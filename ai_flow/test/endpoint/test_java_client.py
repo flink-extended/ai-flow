@@ -25,6 +25,7 @@ from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.store.db.base_model import base
 from ai_flow.test.store.test_sqlalchemy_store import _get_store
 from notification_service.event_storage import DbEventStorage
+from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
 
 _SQLITE_DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'aiflow.db')
 _SQLITE_DB_URI = '%s%s' % ('sqlite:///', _SQLITE_DB_FILE)
@@ -35,6 +36,7 @@ class JavaAIFlowClientTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        cls.ns_server = start_notification_server()
         port = cls._get_properties(_CONFIG_FILE_PATH, 'port')
         if os.path.exists(_SQLITE_DB_FILE):
             os.remove(_SQLITE_DB_FILE)
@@ -45,6 +47,7 @@ class JavaAIFlowClientTest(unittest.TestCase):
     def tearDownClass(cls) -> None:
         cls.server.stop()
         os.remove(_SQLITE_DB_FILE)
+        stop_notification_server(cls.ns_server)
 
     def setUp(self) -> None:
         _get_store(_SQLITE_DB_URI)
@@ -52,8 +55,7 @@ class JavaAIFlowClientTest(unittest.TestCase):
     def tearDown(self) -> None:
         store = _get_store(_SQLITE_DB_URI)
         base.metadata.drop_all(store.db_engine)
-        storage = DbEventStorage(db_conn=_SQLITE_DB_URI, create_table_if_not_exists=False)
-        storage.clean_up()
+        self.ns_server.storage.clean_up()
 
     @staticmethod
     def _get_properties(file_path: str, key: str):

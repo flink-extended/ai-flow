@@ -50,7 +50,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import static org.aiflow.client.common.Constant.DEFAULT_NAMESPACE;
-import static org.aiflow.client.common.Constant.SERVER_URI;
 import static org.aiflow.notification.conf.Configuration.CLIENT_ENABLE_IDEMPOTENCE_CONFIG_KEY;
 
 /** Client of AIFlow Rest Endpoint that provides Metadata/Model/Notification function service. */
@@ -68,36 +67,37 @@ public class AIFlowClient {
             Boolean enableHa,
             Integer listMemberIntervalMs,
             Integer retryIntervalMs,
-            Integer retryTimeoutMs)
+            Integer retryTimeoutMs,
+            String notificationServiceTarget)
             throws Exception {
         this(
                 ManagedChannelBuilder.forTarget(target).usePlaintext().build(),
-                StringUtils.isEmpty(target) ? SERVER_URI : target,
                 StringUtils.isEmpty(defaultNamespace) ? DEFAULT_NAMESPACE : defaultNamespace,
                 sender,
                 enableHa,
                 listMemberIntervalMs,
                 retryIntervalMs,
-                retryTimeoutMs);
+                retryTimeoutMs,
+                notificationServiceTarget);
     }
 
     public AIFlowClient(
             Channel channel,
-            String target,
             String defaultNamespace,
             String sender,
             Boolean enableHa,
             Integer listMemberIntervalMs,
             Integer retryIntervalMs,
-            Integer retryTimeoutMs)
+            Integer retryTimeoutMs,
+            String notificationServiceTarget)
             throws Exception {
         this.metadataClient = new MetadataClient(channel);
         this.modelCenterClient = new ModelCenterClient(channel);
         Properties properties = new Properties();
-        properties.put(CLIENT_ENABLE_IDEMPOTENCE_CONFIG_KEY, "true");
+        properties.put(CLIENT_ENABLE_IDEMPOTENCE_CONFIG_KEY, "false");
         this.notificationClient =
                 new NotificationClient(
-                        target,
+                        notificationServiceTarget,
                         defaultNamespace,
                         sender,
                         enableHa,

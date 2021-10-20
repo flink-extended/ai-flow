@@ -34,6 +34,7 @@ from ai_flow_plugins.tests.airflow_scheduler_utils import run_ai_flow_workflow, 
     set_workflow_execution_info
 from ai_flow_plugins.tests import airflow_db_utils
 import ai_flow as af
+from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
 
 project_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
@@ -80,6 +81,7 @@ class Sink(flink.FlinkPythonProcessor):
 class TestFlink(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        cls.ns_server = start_notification_server()
         config_file = project_path + '/master.yaml'
         cls.master = AIFlowServerRunner(config_file=config_file)
         cls.master.start()
@@ -87,6 +89,7 @@ class TestFlink(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         cls.master.stop()
+        stop_notification_server(cls.ns_server)
 
     def setUp(self):
         airflow_db_utils.clear_all()

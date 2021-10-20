@@ -23,6 +23,7 @@ from ai_flow.api.ai_flow_context import init_ai_flow_context
 from ai_flow.context.workflow_config_loader import current_workflow_config
 from ai_flow.api import workflow_operation
 from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
+from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
 
 _SQLITE_DB_FILE = 'aiflow.db'
 _SQLITE_DB_URI = '%s%s' % ('sqlite:///', _SQLITE_DB_FILE)
@@ -35,7 +36,7 @@ SCHEDULER_CLASS = 'ai_flow.test.api.mock_plugins.MockScheduler'
 class TestWorkflowOperation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-
+        cls.ns_server = start_notification_server()
         if os.path.exists(_SQLITE_DB_FILE):
             os.remove(_SQLITE_DB_FILE)
         raw_config = {
@@ -45,7 +46,6 @@ class TestWorkflowOperation(unittest.TestCase):
         }
         config = SchedulerServiceConfig(raw_config)
         cls.server = AIFlowServer(store_uri=_SQLITE_DB_URI, port=_PORT,
-                                  start_default_notification=True,
                                   start_meta_service=True,
                                   start_metric_service=False,
                                   start_model_center_service=False,
@@ -58,6 +58,7 @@ class TestWorkflowOperation(unittest.TestCase):
         cls.server.stop()
         if os.path.exists(_SQLITE_DB_FILE):
             os.remove(_SQLITE_DB_FILE)
+        stop_notification_server(cls.ns_server)
 
     def setUp(self):
         init_ai_flow_context()

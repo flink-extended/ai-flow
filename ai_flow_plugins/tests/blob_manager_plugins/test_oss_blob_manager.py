@@ -57,6 +57,9 @@ class TestOSSBlobManager(unittest.TestCase):
         self.assertEqual('/tmp/workflow_1_project/project', downloaded_path)
 
     def test_download_oss_file_concurrently(self):
+        project_zip = '/tmp/workflow_1_project.zip'
+        if os.path.exists(project_zip):
+            os.remove(project_zip)
         config = {}
         oss_blob_manager = OssBlobManager(config)
 
