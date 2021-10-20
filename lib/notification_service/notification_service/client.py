@@ -286,7 +286,7 @@ class NotificationClient(BaseNotification):
         """
         Count specific events in Notification Service.
 
-        :param key: Key of the event for listening.
+        :param key: The key or the list of keys of the events for listening.
         :param namespace: (Optional) Namespace of the event for listening.
         :param version: (Optional) Version of the events must greater than this version.
         :param event_type: (Optional) Type of the events.
