@@ -292,7 +292,7 @@ class NotificationClient(BaseNotification):
         :param event_type: (Optional) Type of the events.
         :param start_time: (Optional) Start time of the events.
         :param sender: The event sender.
-        :return: The event count.
+        :return: The total event count and the list of event counts of each sender.
         """
         if isinstance(key, str):
             key = (key,)
