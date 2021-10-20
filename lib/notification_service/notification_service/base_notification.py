@@ -65,9 +65,7 @@ class BaseEvent(object):
 
 
 class SenderEventCount(object):
-    def __init__(self,
-                 sender: str = None,
-                 event_count: int = None):
+    def __init__(self, sender: str, event_count: int):
         self.sender = sender
         self.event_count = event_count
 
