@@ -29,7 +29,12 @@ from grpc import _common, _server
 from grpc._cython.cygrpc import StatusCode
 from grpc._server import _serialize_response, _status, _abort, _Context, _unary_request, \
     _select_thread_pool_for_behavior, _unary_response_in_pool
+
+from notification_service.event_storage import DbEventStorage
+from notification_service.high_availability import DbHighAvailabilityStorage, SimpleNotificationServerHaManager
 from notification_service.proto import notification_service_pb2_grpc
+from notification_service.service import NotificationService, HighAvailableNotificationService
+from notification_service.util.utils import get_ip_addr
 
 # sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../../..")))
 
@@ -77,6 +82,42 @@ class NotificationMaster(object):
         self.server.stop(0)
         self.service.stop()
         print('Notification master stopped.')
+
+
+class NotificationServer(object):
+    def __init__(self,
+                 port=_PORT,
+                 db_conn: str = None,
+                 enable_ha: bool = False,
+                 advertised_uri: str = None,
+                 create_table_if_not_exists: bool = True
+                 ):
+        if db_conn:
+            self.storage = DbEventStorage(db_conn, create_table_if_not_exists)
+        else:
+            raise Exception('Failed to start notification service without database connection info.')
+
+        if enable_ha:
+            server_uri = advertised_uri if advertised_uri is not None else get_ip_addr() + ':' + str(port)
+            ha_storage = DbHighAvailabilityStorage(db_conn=db_conn)
+            ha_manager = SimpleNotificationServerHaManager()
+            service = HighAvailableNotificationService(
+                self.storage,
+                ha_manager,
+                server_uri,
+                ha_storage,
+                5000)
+            self.master = NotificationMaster(service=service,
+                                             port=int(port))
+        else:
+            self.master = NotificationMaster(service=NotificationService(self.storage),
+                                             port=port)
+
+    def start(self, is_block=False):
+        self.master.run(is_block)
+
+    def stop(self):
+        self.master.stop()
 
 
 def _loop(loop: asyncio.AbstractEventLoop):

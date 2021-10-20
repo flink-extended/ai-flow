@@ -19,27 +19,27 @@
 ##
 set -e
 
-BIN=`dirname "${BASH_SOURCE-$0}"`
-BIN=`cd "$BIN"; pwd`
-. ${BIN}/aiflow-config.sh
+BIN=$(dirname "${BASH_SOURCE-$0}")
+BIN=$(cd "$BIN"; pwd)
+. "${BIN}"/init-notification-env.sh
 
 usage="Usage: start-notification_service.sh [database-conn]"
 
 if [ $# -ne 1 ]; then
-  echo $usage
+  echo "$usage"
   exit 1
 fi
 
-if [ -e ${AIFLOW_PID_DIR}/notification_service.pid ]; then
+if [ -e "${NOTIFICATION_PID_DIR}"/notification_service.pid ]; then
   echo "Notification service is running, stopping first"
-  ${BIN}/stop-notification.sh
+  "${BIN}"/stop-notification.sh
 fi
 
 echo "Starting notification service"
 LOG_FILE_NAME=notification_service-$(date "+%Y%m%d-%H%M%S").log
-start_notification_service.py --database-conn=$1 > ${AIFLOW_LOG_DIR}/${LOG_FILE_NAME} 2>&1 &
-echo $! > ${AIFLOW_PID_DIR}/notification_service.pid
+start_notification_service.py --database-conn="$1" > "${NOTIFICATION_LOG_DIR}"/"${LOG_FILE_NAME}" 2>&1 &
+echo $! > "${NOTIFICATION_PID_DIR}"/notification_service.pid
 
 echo "notification service started"
-echo "Notification service log: ${AIFLOW_LOG_DIR}/${LOG_FILE_NAME}"
-echo "Notification service pid: $(cat ${AIFLOW_PID_DIR}/notification_service.pid)"
+echo "Notification service log: ${NOTIFICATION_LOG_DIR}/${LOG_FILE_NAME}"
+echo "Notification service pid: $(cat "${NOTIFICATION_PID_DIR}"/notification_service.pid)"
