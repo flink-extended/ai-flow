@@ -19,11 +19,11 @@
 ##
 set -e
 
-BIN=`dirname "${BASH_SOURCE-$0}"`
-BIN=`cd "$BIN"; pwd`
-. ${BIN}/init-aiflow-env.sh
+BIN=$(dirname "${BASH_SOURCE-$0}")
+BIN=$(cd "$BIN"; pwd)
+. "${BIN}"/init-aiflow-env.sh
 
-if [ ! -e ${AIFLOW_PID_DIR}/aiflow_server.pid ]; then
+if [ ! -e "${AIFLOW_PID_DIR}"/aiflow_server.pid ]; then
   echo "No aiflow server running"
 fi
 
@@ -31,17 +31,17 @@ set +e
 echo "Killing AIFlow Server"
 for ((i=1;i<=3;i++))
 do
-  kill $(cat ${AIFLOW_PID_DIR}/aiflow_server.pid) >/dev/null 2>&1 && sleep 1
+  kill $(cat "${AIFLOW_PID_DIR}"/aiflow_server.pid) >/dev/null 2>&1 && sleep 1
 done
 
-rm ${AIFLOW_PID_DIR}/aiflow_server.pid
+rm "${AIFLOW_PID_DIR}"/aiflow_server.pid
 echo "AIFlow Server killed"
 
 echo "Killing AIFlow Web"
 for ((i=1;i<=3;i++))
 do
-  kill $(cat ${AIFLOW_PID_DIR}/aiflow_web_server.pid) >/dev/null 2>&1 && sleep 1
+  kill $(cat "${AIFLOW_PID_DIR}"/aiflow_web_server.pid) >/dev/null 2>&1 && sleep 1
 done
 
-rm ${AIFLOW_PID_DIR}/aiflow_web_server.pid
+rm "${AIFLOW_PID_DIR}"/aiflow_web_server.pid
 echo "AIFlow Web killed"

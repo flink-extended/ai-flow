@@ -59,7 +59,7 @@ start-cluster.sh
 ```
 - Start AIFlow Server
 ```shell
-start-all-aiflow-services.sh mysql://admin:admin@127.0.0.1/airflow
+start-all-aiflow-services.sh start-all-aiflow-services.sh mysql://aiflow:aiflow@127.0.0.1/notification_service mysql://aiflow:aiflow@127.0.0.1/airflow mysql://aiflow:aiflow@127.0.0.1/aiflow
 ```
 Note, the user should refer to QuickStart for starting AIFlow correctly.
 

@@ -19,15 +19,15 @@
 ##
 set -e
 
-BIN=`dirname "${BASH_SOURCE-$0}"`
-BIN=`cd "$BIN"; pwd`
-. ${BIN}/init-aiflow-env.sh
+BIN=$(dirname "${BASH_SOURCE-$0}")
+BIN=$(cd "$BIN"; pwd)
+source "${BIN}"/init-airflow-env.sh
 
-if [ ! -e ${AIFLOW_PID_DIR}/scheduler.pid ]; then
+if [ ! -e "${AIRFLOW_PID_DIR}"/scheduler.pid ]; then
   echo "No airflow scheduler running"
 fi
 
-if [ ! -e ${AIFLOW_PID_DIR}/web.pid ]; then
+if [ ! -e "${AIRFLOW_PID_DIR}"/web.pid ]; then
   echo "No airflow web server running"
 fi
 
@@ -35,10 +35,10 @@ set +e
 echo "Killing Airflow scheduler and web server"
 for ((i=1;i<=3;i++))
 do
-  kill $(cat ${AIFLOW_PID_DIR}/scheduler.pid) >/dev/null 2>&1 && sleep 1
-  kill $(cat ${AIFLOW_PID_DIR}/web.pid) >/dev/null 2>&1 && sleep 1
+  kill $(cat "${AIRFLOW_PID_DIR}"/scheduler.pid) >/dev/null 2>&1 && sleep 1
+  kill $(cat "${AIRFLOW_PID_DIR}"/web.pid) >/dev/null 2>&1 && sleep 1
 done
 
-rm ${AIFLOW_PID_DIR}/scheduler.pid
-rm ${AIFLOW_PID_DIR}/web.pid
+rm "${AIRFLOW_PID_DIR}"/scheduler.pid
+rm "${AIRFLOW_PID_DIR}"/web.pid
 echo "Airflow scheduler and web server killed"
