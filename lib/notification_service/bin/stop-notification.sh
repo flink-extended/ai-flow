@@ -19,11 +19,11 @@
 ##
 set -e
 
-BIN=`dirname "${BASH_SOURCE-$0}"`
-BIN=`cd "$BIN"; pwd`
-. ${BIN}/aiflow-config.sh
+BIN=$(dirname "${BASH_SOURCE-$0}")
+BIN=$(cd "$BIN"; pwd)
+. "${BIN}"/init-notification-env.sh
 
-if [ ! -e ${AIFLOW_PID_DIR}/notification_service.pid ]; then
+if [ ! -e "${NOTIFICATION_PID_DIR}"/notification_service.pid ]; then
   echo "No notification service running"
 fi
 
@@ -31,8 +31,8 @@ set +e
 echo "Killing notification service"
 for ((i=1;i<=3;i++))
 do
-  kill $(cat ${AIFLOW_PID_DIR}/notification_service.pid) >/dev/null 2>&1 && sleep 1
+  kill $(cat "${NOTIFICATION_PID_DIR}"/notification_service.pid) >/dev/null 2>&1 && sleep 1
 done
 
-rm ${AIFLOW_PID_DIR}/notification_service.pid
+rm "${NOTIFICATION_PID_DIR}"/notification_service.pid
 echo "notification service killed"
