@@ -21,6 +21,7 @@ from ai_flow.store.db.base_model import base
 from ai_flow.test.store.test_sqlalchemy_store import _get_store
 from ai_flow.endpoint.server.server import AIFlowServer
 import ai_flow as af
+from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server, _NS_URI
 
 _SQLITE_DB_FILE = 'aiflow.db'
 _SQLITE_DB_URI = '%s%s' % ('sqlite:///', _SQLITE_DB_FILE)
@@ -31,6 +32,7 @@ class TestAIFlowContext(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         print("TestAIFlowContext setUpClass")
+        cls.ns_server = start_notification_server()
         if os.path.exists(_SQLITE_DB_FILE):
             os.remove(_SQLITE_DB_FILE)
         cls.server = AIFlowServer(store_uri=_SQLITE_DB_URI, port=_PORT, start_scheduler_service=False)
@@ -40,6 +42,7 @@ class TestAIFlowContext(unittest.TestCase):
     def tearDownClass(cls) -> None:
         cls.server.stop()
         os.remove(_SQLITE_DB_FILE)
+        stop_notification_server(cls.ns_server)
 
     def setUp(self) -> None:
         _get_store(_SQLITE_DB_URI)
@@ -49,17 +52,17 @@ class TestAIFlowContext(unittest.TestCase):
         base.metadata.drop_all(store.db_engine)
 
     def test_init_ai_client(self):
-        af.init_ai_flow_client(server_uri='localhost:50051', project_name='test')
+        af.init_ai_flow_client(server_uri='localhost:50051', project_name='test', notification_uri=_NS_URI)
         project_meta = af.get_project_by_name('test')
         self.assertEqual('test', project_meta.name)
 
     def test_init_ai_client_no_project_name(self):
-        af.init_ai_flow_client(server_uri='localhost:50051', project_name=None)
+        af.init_ai_flow_client(server_uri='localhost:50051', project_name=None, notification_uri=_NS_URI)
         project_meta = af.get_project_by_name('Unknown')
         self.assertEqual('Unknown', project_meta.name)
 
     def test_init_ai_client_register_dataset(self):
-        af.init_ai_flow_client(server_uri='localhost:50051', project_name=None)
+        af.init_ai_flow_client(server_uri='localhost:50051', project_name=None, notification_uri=_NS_URI)
         af.register_dataset(name='test_dataset', uri='/test')
         dataset_meta = af.get_dataset_by_name('test_dataset')
         self.assertEqual('/test', dataset_meta.uri)

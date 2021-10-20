@@ -28,6 +28,7 @@ from ai_flow.meta.model_meta import ModelMeta
 from ai_flow.workflow.control_edge import ControlEdge, JobAction, AIFlowInternalEventType
 from ai_flow.workflow.periodic_config import PeriodicConfig
 from ai_flow.workflow.status import Status
+from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
 
 
 _SQLITE_DB_FILE = 'aiflow.db'
@@ -38,11 +39,10 @@ _PORT = '50051'
 class TestOps(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-
+        cls.ns_server = start_notification_server()
         if os.path.exists(_SQLITE_DB_FILE):
             os.remove(_SQLITE_DB_FILE)
         cls.server = AIFlowServer(store_uri=_SQLITE_DB_URI, port=_PORT,
-                                  start_default_notification=True,
                                   start_meta_service=True,
                                   start_metric_service=False,
                                   start_model_center_service=False,
@@ -55,6 +55,7 @@ class TestOps(unittest.TestCase):
         cls.server.stop()
         if os.path.exists(_SQLITE_DB_FILE):
             os.remove(_SQLITE_DB_FILE)
+        stop_notification_server(cls.ns_server)
 
     def setUp(self):
         init_ai_flow_context()
