@@ -71,6 +71,11 @@ public class NotificationClientTest {
         List<EventMeta> eventList =
                 this.client.listEvents("default", listenerKeys, latestVersion, "type", 0, "");
         assertEquals(3, eventList.size());
+        assertEquals(
+                Long.valueOf(3),
+                this.client
+                        .countEvents("default", listenerKeys, latestVersion, "type", 0, "")
+                        .getLeft());
     }
 
     @Test

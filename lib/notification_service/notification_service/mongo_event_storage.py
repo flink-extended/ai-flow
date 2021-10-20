@@ -97,6 +97,25 @@ class MongoEventStorage(BaseEventStorage):
         res = MongoEvent.get_base_events(key, version, event_type, start_time, namespace, sender)
         return res
 
+    def count_events(self,
+                     key: Union[str, Tuple[str]],
+                     version: int = None,
+                     event_type: str = None,
+                     start_time: int = None,
+                     namespace: str = None,
+                     sender: str = None):
+        key = None if key == "" else key
+        version = None if version == 0 else version
+        event_type = None if event_type == "" else event_type
+        namespace = None if namespace == "" else namespace
+        sender = None if sender == "" else sender
+        if isinstance(key, str):
+            key = (key,)
+        elif isinstance(key, Iterable):
+            key = tuple(key)
+        res = MongoEvent.count_base_events(key, version, event_type, start_time, namespace, sender)
+        return res
+
     def list_all_events(self, start_time: int):
         res = MongoEvent.get_base_events_by_time(start_time)
         return res

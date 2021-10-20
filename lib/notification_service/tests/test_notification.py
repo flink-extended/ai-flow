@@ -71,19 +71,31 @@ class NotificationTest(object):
         self.client._default_namespace = "a"
         events = self.client.list_events("key")
         self.assertEqual(1, len(events))
+        count = self.client.count_events("key")
+        self.assertEqual(1, count[0])
 
         self.client._default_namespace = "b"
         events = self.client.list_events("key")
         self.assertEqual(2, len(events))
+        count = self.client.count_events("key")
+        self.assertEqual(2, count[0])
 
         events = self.client.list_events("key", event_type="a")
         self.assertEqual(1, len(events))
+        count = self.client.count_events("key", event_type="a")
+        self.assertEqual(1, count[0])
 
         events = self.client.list_events("key", sender='s')
         self.assertEqual(2, len(events))
+        count = self.client.count_events("key", sender="s")
+        self.assertEqual(2, count[0])
+        self.assertEqual(2, count[1][0].event_count)
 
         events = self.client.list_events("key", sender='p')
         self.assertEqual(0, len(events))
+        count = self.client.count_events("key", sender="p")
+        self.assertEqual(0, count[0])
+        self.assertEqual([], count[1])
 
     def test_listen_events(self):
         event_list = []

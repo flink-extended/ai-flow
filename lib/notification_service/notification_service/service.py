@@ -26,7 +26,7 @@ from notification_service.high_availability import NotificationServerHaManager
 from notification_service.mongo_event_storage import MongoEventStorage
 from notification_service.proto import notification_service_pb2_grpc, notification_service_pb2
 from notification_service.util.utils import event_to_proto, event_list_to_proto, member_to_proto, event_proto_to_event, \
-    proto_to_member
+    proto_to_member, count_list_to_proto
 from notification_service.util.db import extract_db_engine_from_uri, DBType, parse_mongo_uri
 
 
@@ -167,6 +167,25 @@ class NotificationService(notification_service_pb2_grpc.NotificationServiceServi
 
     def _query_events(self, keys, event_type, start_time, start_version, namespace, sender):
         return self.storage.list_events(keys, start_version, event_type, start_time, namespace, sender)
+
+    def countEvents(self, request, context):
+        keys = request.keys
+        event_type = request.event_type
+        start_time = request.start_time
+        start_version = request.start_version
+        namespace = None if request.namespace == '' else request.namespace
+        sender = None if request.sender == '' else request.sender
+        try:
+            event_counts = self.storage.count_events(keys, start_version, event_type, start_time, namespace, sender)
+            event_count, count_proto_list = count_list_to_proto(event_counts)
+            return notification_service_pb2.CountEventsResponse(
+                return_code=notification_service_pb2.ReturnStatus.SUCCESS,
+                return_msg='',
+                event_count=event_count,
+                sender_event_counts=count_proto_list)
+        except Exception as e:
+            return notification_service_pb2.CountEventsResponse(
+                return_code=notification_service_pb2.ReturnStatus.ERROR, return_msg=str(e))
 
     @asyncio.coroutine
     def listAllEvents(self, request, context):

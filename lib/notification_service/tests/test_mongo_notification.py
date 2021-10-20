@@ -64,8 +64,12 @@ class MongoNotificationTest(unittest.TestCase):
         event = self.client.send_event(BaseEvent(key="key", value="value3"))
         events = self.client.list_events("key", version=first_version)
         self.assertEqual(2, len(events))
+        count = self.client.count_events("key", version=first_version)
+        self.assertEqual(2, count[0])
         events = self.client.list_events("key")
         self.assertEqual(3, len(events))
+        count = self.client.count_events("key")
+        self.assertEqual(3, count[0])
 
     def test_listen_events(self):
         event_list = []
