@@ -47,6 +47,11 @@ class NotificationServiceStub(object):
                 request_serializer=notification__service__pb2.ListEventsRequest.SerializeToString,
                 response_deserializer=notification__service__pb2.ListEventsResponse.FromString,
                 )
+        self.countEvents = channel.unary_unary(
+                '/notification_service.NotificationService/countEvents',
+                request_serializer=notification__service__pb2.CountEventsRequest.SerializeToString,
+                response_deserializer=notification__service__pb2.CountEventsResponse.FromString,
+                )
         self.listAllEvents = channel.unary_unary(
                 '/notification_service.NotificationService/listAllEvents',
                 request_serializer=notification__service__pb2.ListAllEventsRequest.SerializeToString,
@@ -105,6 +110,13 @@ class NotificationServiceServicer(object):
 
     def listEvents(self, request, context):
         """List events.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def countEvents(self, request, context):
+        """Count events.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -178,6 +190,11 @@ def add_NotificationServiceServicer_to_server(servicer, server):
                     servicer.listEvents,
                     request_deserializer=notification__service__pb2.ListEventsRequest.FromString,
                     response_serializer=notification__service__pb2.ListEventsResponse.SerializeToString,
+            ),
+            'countEvents': grpc.unary_unary_rpc_method_handler(
+                    servicer.countEvents,
+                    request_deserializer=notification__service__pb2.CountEventsRequest.FromString,
+                    response_serializer=notification__service__pb2.CountEventsResponse.SerializeToString,
             ),
             'listAllEvents': grpc.unary_unary_rpc_method_handler(
                     servicer.listAllEvents,
@@ -264,6 +281,23 @@ class NotificationService(object):
         return grpc.experimental.unary_unary(request, target, '/notification_service.NotificationService/listEvents',
             notification__service__pb2.ListEventsRequest.SerializeToString,
             notification__service__pb2.ListEventsResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def countEvents(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/notification_service.NotificationService/countEvents',
+            notification__service__pb2.CountEventsRequest.SerializeToString,
+            notification__service__pb2.CountEventsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

@@ -25,12 +25,12 @@ from enum import Enum
 from functools import wraps
 from typing import Tuple, Union
 
-from sqlalchemy import create_engine, Column, String, BigInteger, Text, Integer, text, Boolean
+from sqlalchemy import create_engine, Column, String, BigInteger, Text, Integer, Boolean, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from notification_service.base_notification import BaseEvent, Member, ANY_CONDITION
-from notification_service.util.utils import event_model_to_event
+from notification_service.util.utils import event_model_to_event, count_result_to_sender_event_count
 
 if not hasattr(time, 'time_ns'):
     time.time_ns = lambda: int(time.time() * 1e9)
@@ -244,6 +244,43 @@ class EventModel(Base):
             conditions.append(EventModel.key.in_(key))
         event_model_list = session.query(EventModel).filter(*conditions).all()
         return [event_model_to_event(event_model) for event_model in event_model_list]
+
+    @staticmethod
+    @provide_session
+    def count_events(key: Union[str, Tuple[str]],
+                     version: int = None,
+                     event_type: str = None,
+                     start_time: int = None,
+                     namespace: str = None,
+                     sender: str = None,
+                     session=None):
+        key = None if key == "" else key
+        event_type = None if event_type == "" else event_type
+        namespace = None if namespace == "" else namespace
+        sender = None if sender == "" else sender
+        if isinstance(key, str):
+            key = (key,)
+        elif isinstance(key, Iterable):
+            key = tuple(key)
+        if key is None:
+            raise Exception('key cannot be empty.')
+        conditions = []
+        if event_type is not None and event_type != ANY_CONDITION:
+            conditions.append(EventModel.event_type == event_type)
+        if start_time is not None and start_time > 0:
+            conditions.append(EventModel.create_time >= start_time)
+        if namespace is not None and ANY_CONDITION != namespace:
+            conditions.append(EventModel.namespace == namespace)
+        if sender is not None and ANY_CONDITION != sender:
+            conditions.append(EventModel.sender == sender)
+        if version > 0:
+            conditions.append(EventModel.version > version)
+        if ANY_CONDITION not in key:
+            conditions.append(EventModel.key.in_(key))
+
+        count_results = session.query(EventModel.sender, func.count('*').label('event_count')).filter(*conditions).group_by(
+            EventModel.sender)
+        return [count_result_to_sender_event_count(count_result) for count_result in count_results]
 
     @staticmethod
     @provide_session

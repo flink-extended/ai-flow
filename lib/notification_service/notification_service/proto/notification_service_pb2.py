@@ -42,7 +42,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n\035org.aiflow.notification.protoZ\025/notification_service\210\001\001\220\001\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1anotification_service.proto\x12\x14notification_service\x1a\x1cgoogle/api/annotations.proto\"\x96\x01\n\nEventProto\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\x12\x12\n\nevent_type\x18\x03 \x01(\t\x12\x0f\n\x07\x63ontext\x18\x04 \x01(\t\x12\x11\n\tnamespace\x18\x05 \x01(\t\x12\x0f\n\x07version\x18\x06 \x01(\x03\x12\x13\n\x0b\x63reate_time\x18\x07 \x01(\x03\x12\x0e\n\x06sender\x18\x08 \x01(\t\"m\n\x10SendEventRequest\x12/\n\x05\x65vent\x18\x01 \x01(\x0b\x32 .notification_service.EventProto\x12\x0c\n\x04uuid\x18\x02 \x01(\t\x12\x1a\n\x12\x65nable_idempotence\x18\x03 \x01(\x08\"/\n\nClientMeta\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0e\n\x06sender\x18\x02 \x01(\t\"\x92\x01\n\x12SendEventsResponse\x12/\n\x05\x65vent\x18\x01 \x01(\x0b\x32 .notification_service.EventProto\x12\x37\n\x0breturn_code\x18\x02 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x03 \x01(\t\"\x9c\x01\n\x11ListEventsRequest\x12\x0c\n\x04keys\x18\x01 \x03(\t\x12\x12\n\nevent_type\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\x03\x12\x15\n\rstart_version\x18\x04 \x01(\x03\x12\x17\n\x0ftimeout_seconds\x18\x05 \x01(\x05\x12\x11\n\tnamespace\x18\x06 \x01(\t\x12\x0e\n\x06sender\x18\x07 \x01(\t\"o\n\x14ListAllEventsRequest\x12\x17\n\x0ftimeout_seconds\x18\x01 \x01(\x05\x12\x12\n\nstart_time\x18\x02 \x01(\x03\x12\x15\n\rstart_version\x18\x03 \x01(\x03\x12\x13\n\x0b\x65nd_version\x18\x04 \x01(\x03\"\x93\x01\n\x12ListEventsResponse\x12\x37\n\x0breturn_code\x18\x01 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\x12\x30\n\x06\x65vents\x18\x03 \x03(\x0b\x32 .notification_service.EventProto\"W\n\x1cGetLatestVersionByKeyRequest\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x11\n\tnamespace\x18\x02 \x01(\t\x12\x17\n\x0ftimeout_seconds\x18\x03 \x01(\x05\"T\n\x18GetLatestVersionResponse\x12\x13\n\x0breturn_code\x18\x01 \x01(\t\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\x03\"G\n\x0bMemberProto\x12\x0f\n\x07version\x18\x01 \x01(\x03\x12\x12\n\nserver_uri\x18\x02 \x01(\t\x12\x13\n\x0bupdate_time\x18\x03 \x01(\x03\"(\n\x06Notify\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x11\n\tnamespace\x18\x02 \x01(\t\"?\n\rNotifyRequest\x12.\n\x08notifies\x18\x01 \x03(\x0b\x32\x1c.notification_service.Notify\"-\n\x12ListMembersRequest\x12\x17\n\x0ftimeout_seconds\x18\x01 \x01(\x05\"\x96\x01\n\x13ListMembersResponse\x12\x37\n\x0breturn_code\x18\x01 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\x12\x32\n\x07members\x18\x03 \x03(\x0b\x32!.notification_service.MemberProto\"K\n\x16NotifyNewMemberRequest\x12\x31\n\x06member\x18\x01 \x01(\x0b\x32!.notification_service.MemberProto\"N\n\x15RegisterClientRequest\x12\x35\n\x0b\x63lient_meta\x18\x01 \x01(\x0b\x32 .notification_service.ClientMeta\"x\n\x16RegisterClientResponse\x12\x37\n\x0breturn_code\x18\x01 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\x12\x11\n\tclient_id\x18\x03 \x01(\x03\"$\n\x0f\x43lientIdRequest\x12\x11\n\tclient_id\x18\x01 \x01(\x03\"]\n\x0e\x43ommonResponse\x12\x37\n\x0breturn_code\x18\x01 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\"x\n\x16isClientExistsResponse\x12\x37\n\x0breturn_code\x18\x01 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\x12\x11\n\tis_exists\x18\x03 \x01(\x08*&\n\x0cReturnStatus\x12\x0b\n\x07SUCCESS\x10\x00\x12\t\n\x05\x45RROR\x10\x01\x32\xb8\x0c\n\x13NotificationService\x12\x91\x01\n\tsendEvent\x12&.notification_service.SendEventRequest\x1a(.notification_service.SendEventsResponse\"2\x82\xd3\xe4\x93\x02,\"\'/aiflow/notification-service/send_event:\x01*\x12\x91\x01\n\nlistEvents\x12\'.notification_service.ListEventsRequest\x1a(.notification_service.ListEventsResponse\"0\x82\xd3\xe4\x93\x02*\x12(/aiflow/notification-service/list_events\x12\x9b\x01\n\rlistAllEvents\x12*.notification_service.ListAllEventsRequest\x1a(.notification_service.ListEventsResponse\"4\x82\xd3\xe4\x93\x02.\x12,/aiflow/notification-service/list_all_events\x12\x83\x01\n\x06notify\x12#.notification_service.NotifyRequest\x1a$.notification_service.CommonResponse\".\x82\xd3\xe4\x93\x02(\"#/aiflow/notification-service/notify:\x01*\x12\x95\x01\n\x0blistMembers\x12(.notification_service.ListMembersRequest\x1a).notification_service.ListMembersResponse\"1\x82\xd3\xe4\x93\x02+\x12)/aiflow/notification-service/list_members\x12\xa0\x01\n\x0fnotifyNewMember\x12,.notification_service.NotifyNewMemberRequest\x1a$.notification_service.CommonResponse\"9\x82\xd3\xe4\x93\x02\x33\"./aiflow/notification-service/notify_new_member:\x01*\x12\xbb\x01\n\x15getLatestVersionByKey\x12\x32.notification_service.GetLatestVersionByKeyRequest\x1a..notification_service.GetLatestVersionResponse\">\x82\xd3\xe4\x93\x02\x38\x12\x36/aiflow/notification-service/get_latest_version_by_key\x12\xa4\x01\n\x0eregisterClient\x12+.notification_service.RegisterClientRequest\x1a,.notification_service.RegisterClientResponse\"7\x82\xd3\xe4\x93\x02\x31\",/aiflow/notification-service/register_client:\x01*\x12\x92\x01\n\x0c\x64\x65leteClient\x12%.notification_service.ClientIdRequest\x1a$.notification_service.CommonResponse\"5\x82\xd3\xe4\x93\x02/\"*/aiflow/notification-service/delete_client:\x01*\x12\x9f\x01\n\x0eisClientExists\x12%.notification_service.ClientIdRequest\x1a,.notification_service.isClientExistsResponse\"8\x82\xd3\xe4\x93\x02\x32\"-/aiflow/notification-service/is_client_exists:\x01*B<\n\x1dorg.aiflow.notification.protoZ\x15/notification_service\x88\x01\x01\x90\x01\x01\x62\x06proto3'
+  serialized_pb=b'\n\x1anotification_service.proto\x12\x14notification_service\x1a\x1cgoogle/api/annotations.proto\"\x96\x01\n\nEventProto\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\x12\x12\n\nevent_type\x18\x03 \x01(\t\x12\x0f\n\x07\x63ontext\x18\x04 \x01(\t\x12\x11\n\tnamespace\x18\x05 \x01(\t\x12\x0f\n\x07version\x18\x06 \x01(\x03\x12\x13\n\x0b\x63reate_time\x18\x07 \x01(\x03\x12\x0e\n\x06sender\x18\x08 \x01(\t\"<\n\x15SenderEventCountProto\x12\x0e\n\x06sender\x18\x01 \x01(\t\x12\x13\n\x0b\x65vent_count\x18\x02 \x01(\x03\"m\n\x10SendEventRequest\x12/\n\x05\x65vent\x18\x01 \x01(\x0b\x32 .notification_service.EventProto\x12\x0c\n\x04uuid\x18\x02 \x01(\t\x12\x1a\n\x12\x65nable_idempotence\x18\x03 \x01(\x08\"/\n\nClientMeta\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0e\n\x06sender\x18\x02 \x01(\t\"\x92\x01\n\x12SendEventsResponse\x12/\n\x05\x65vent\x18\x01 \x01(\x0b\x32 .notification_service.EventProto\x12\x37\n\x0breturn_code\x18\x02 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x03 \x01(\t\"\x9c\x01\n\x11ListEventsRequest\x12\x0c\n\x04keys\x18\x01 \x03(\t\x12\x12\n\nevent_type\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\x03\x12\x15\n\rstart_version\x18\x04 \x01(\x03\x12\x17\n\x0ftimeout_seconds\x18\x05 \x01(\x05\x12\x11\n\tnamespace\x18\x06 \x01(\t\x12\x0e\n\x06sender\x18\x07 \x01(\t\"\x84\x01\n\x12\x43ountEventsRequest\x12\x0c\n\x04keys\x18\x01 \x03(\t\x12\x12\n\nevent_type\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\x03\x12\x15\n\rstart_version\x18\x04 \x01(\x03\x12\x11\n\tnamespace\x18\x05 \x01(\t\x12\x0e\n\x06sender\x18\x06 \x01(\t\"o\n\x14ListAllEventsRequest\x12\x17\n\x0ftimeout_seconds\x18\x01 \x01(\x05\x12\x12\n\nstart_time\x18\x02 \x01(\x03\x12\x15\n\rstart_version\x18\x03 \x01(\x03\x12\x13\n\x0b\x65nd_version\x18\x04 \x01(\x03\"\x93\x01\n\x12ListEventsResponse\x12\x37\n\x0breturn_code\x18\x01 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\x12\x30\n\x06\x65vents\x18\x03 \x03(\x0b\x32 .notification_service.EventProto\"\xc1\x01\n\x13\x43ountEventsResponse\x12\x37\n\x0breturn_code\x18\x01 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\x12\x13\n\x0b\x65vent_count\x18\x03 \x01(\x03\x12H\n\x13sender_event_counts\x18\x04 \x03(\x0b\x32+.notification_service.SenderEventCountProto\"W\n\x1cGetLatestVersionByKeyRequest\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x11\n\tnamespace\x18\x02 \x01(\t\x12\x17\n\x0ftimeout_seconds\x18\x03 \x01(\x05\"T\n\x18GetLatestVersionResponse\x12\x13\n\x0breturn_code\x18\x01 \x01(\t\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\x03\"G\n\x0bMemberProto\x12\x0f\n\x07version\x18\x01 \x01(\x03\x12\x12\n\nserver_uri\x18\x02 \x01(\t\x12\x13\n\x0bupdate_time\x18\x03 \x01(\x03\"(\n\x06Notify\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x11\n\tnamespace\x18\x02 \x01(\t\"?\n\rNotifyRequest\x12.\n\x08notifies\x18\x01 \x03(\x0b\x32\x1c.notification_service.Notify\"-\n\x12ListMembersRequest\x12\x17\n\x0ftimeout_seconds\x18\x01 \x01(\x05\"\x96\x01\n\x13ListMembersResponse\x12\x37\n\x0breturn_code\x18\x01 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\x12\x32\n\x07members\x18\x03 \x03(\x0b\x32!.notification_service.MemberProto\"K\n\x16NotifyNewMemberRequest\x12\x31\n\x06member\x18\x01 \x01(\x0b\x32!.notification_service.MemberProto\"N\n\x15RegisterClientRequest\x12\x35\n\x0b\x63lient_meta\x18\x01 \x01(\x0b\x32 .notification_service.ClientMeta\"x\n\x16RegisterClientResponse\x12\x37\n\x0breturn_code\x18\x01 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\x12\x11\n\tclient_id\x18\x03 \x01(\x03\"$\n\x0f\x43lientIdRequest\x12\x11\n\tclient_id\x18\x01 \x01(\x03\"]\n\x0e\x43ommonResponse\x12\x37\n\x0breturn_code\x18\x01 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\"x\n\x16isClientExistsResponse\x12\x37\n\x0breturn_code\x18\x01 \x01(\x0e\x32\".notification_service.ReturnStatus\x12\x12\n\nreturn_msg\x18\x02 \x01(\t\x12\x11\n\tis_exists\x18\x03 \x01(\x08*&\n\x0cReturnStatus\x12\x0b\n\x07SUCCESS\x10\x00\x12\t\n\x05\x45RROR\x10\x01\x32\xd0\r\n\x13NotificationService\x12\x91\x01\n\tsendEvent\x12&.notification_service.SendEventRequest\x1a(.notification_service.SendEventsResponse\"2\x82\xd3\xe4\x93\x02,\"\'/aiflow/notification-service/send_event:\x01*\x12\x91\x01\n\nlistEvents\x12\'.notification_service.ListEventsRequest\x1a(.notification_service.ListEventsResponse\"0\x82\xd3\xe4\x93\x02*\x12(/aiflow/notification-service/list_events\x12\x95\x01\n\x0b\x63ountEvents\x12(.notification_service.CountEventsRequest\x1a).notification_service.CountEventsResponse\"1\x82\xd3\xe4\x93\x02+\x12)/aiflow/notification-service/count_events\x12\x9b\x01\n\rlistAllEvents\x12*.notification_service.ListAllEventsRequest\x1a(.notification_service.ListEventsResponse\"4\x82\xd3\xe4\x93\x02.\x12,/aiflow/notification-service/list_all_events\x12\x83\x01\n\x06notify\x12#.notification_service.NotifyRequest\x1a$.notification_service.CommonResponse\".\x82\xd3\xe4\x93\x02(\"#/aiflow/notification-service/notify:\x01*\x12\x95\x01\n\x0blistMembers\x12(.notification_service.ListMembersRequest\x1a).notification_service.ListMembersResponse\"1\x82\xd3\xe4\x93\x02+\x12)/aiflow/notification-service/list_members\x12\xa0\x01\n\x0fnotifyNewMember\x12,.notification_service.NotifyNewMemberRequest\x1a$.notification_service.CommonResponse\"9\x82\xd3\xe4\x93\x02\x33\"./aiflow/notification-service/notify_new_member:\x01*\x12\xbb\x01\n\x15getLatestVersionByKey\x12\x32.notification_service.GetLatestVersionByKeyRequest\x1a..notification_service.GetLatestVersionResponse\">\x82\xd3\xe4\x93\x02\x38\x12\x36/aiflow/notification-service/get_latest_version_by_key\x12\xa4\x01\n\x0eregisterClient\x12+.notification_service.RegisterClientRequest\x1a,.notification_service.RegisterClientResponse\"7\x82\xd3\xe4\x93\x02\x31\",/aiflow/notification-service/register_client:\x01*\x12\x92\x01\n\x0c\x64\x65leteClient\x12%.notification_service.ClientIdRequest\x1a$.notification_service.CommonResponse\"5\x82\xd3\xe4\x93\x02/\"*/aiflow/notification-service/delete_client:\x01*\x12\x9f\x01\n\x0eisClientExists\x12%.notification_service.ClientIdRequest\x1a,.notification_service.isClientExistsResponse\"8\x82\xd3\xe4\x93\x02\x32\"-/aiflow/notification-service/is_client_exists:\x01*B<\n\x1dorg.aiflow.notification.protoZ\x15/notification_service\x88\x01\x01\x90\x01\x01\x62\x06proto3'
   ,
   dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,])
 
@@ -66,8 +66,8 @@ _RETURNSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2055,
-  serialized_end=2093,
+  serialized_start=2448,
+  serialized_end=2486,
 )
 _sym_db.RegisterEnumDescriptor(_RETURNSTATUS)
 
@@ -158,6 +158,45 @@ _EVENTPROTO = _descriptor.Descriptor(
 )
 
 
+_SENDEREVENTCOUNTPROTO = _descriptor.Descriptor(
+  name='SenderEventCountProto',
+  full_name='notification_service.SenderEventCountProto',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='sender', full_name='notification_service.SenderEventCountProto.sender', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='event_count', full_name='notification_service.SenderEventCountProto.event_count', index=1,
+      number=2, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=235,
+  serialized_end=295,
+)
+
+
 _SENDEVENTREQUEST = _descriptor.Descriptor(
   name='SendEventRequest',
   full_name='notification_service.SendEventRequest',
@@ -199,8 +238,8 @@ _SENDEVENTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=235,
-  serialized_end=344,
+  serialized_start=297,
+  serialized_end=406,
 )
 
 
@@ -238,8 +277,8 @@ _CLIENTMETA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=346,
-  serialized_end=393,
+  serialized_start=408,
+  serialized_end=455,
 )
 
 
@@ -284,8 +323,8 @@ _SENDEVENTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=396,
-  serialized_end=542,
+  serialized_start=458,
+  serialized_end=604,
 )
 
 
@@ -358,8 +397,75 @@ _LISTEVENTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=545,
-  serialized_end=701,
+  serialized_start=607,
+  serialized_end=763,
+)
+
+
+_COUNTEVENTSREQUEST = _descriptor.Descriptor(
+  name='CountEventsRequest',
+  full_name='notification_service.CountEventsRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='keys', full_name='notification_service.CountEventsRequest.keys', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='event_type', full_name='notification_service.CountEventsRequest.event_type', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='start_time', full_name='notification_service.CountEventsRequest.start_time', index=2,
+      number=3, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='start_version', full_name='notification_service.CountEventsRequest.start_version', index=3,
+      number=4, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='namespace', full_name='notification_service.CountEventsRequest.namespace', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sender', full_name='notification_service.CountEventsRequest.sender', index=5,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=766,
+  serialized_end=898,
 )
 
 
@@ -411,8 +517,8 @@ _LISTALLEVENTSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=703,
-  serialized_end=814,
+  serialized_start=900,
+  serialized_end=1011,
 )
 
 
@@ -457,8 +563,61 @@ _LISTEVENTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=817,
-  serialized_end=964,
+  serialized_start=1014,
+  serialized_end=1161,
+)
+
+
+_COUNTEVENTSRESPONSE = _descriptor.Descriptor(
+  name='CountEventsResponse',
+  full_name='notification_service.CountEventsResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='return_code', full_name='notification_service.CountEventsResponse.return_code', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='return_msg', full_name='notification_service.CountEventsResponse.return_msg', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='event_count', full_name='notification_service.CountEventsResponse.event_count', index=2,
+      number=3, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sender_event_counts', full_name='notification_service.CountEventsResponse.sender_event_counts', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1164,
+  serialized_end=1357,
 )
 
 
@@ -503,8 +662,8 @@ _GETLATESTVERSIONBYKEYREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=966,
-  serialized_end=1053,
+  serialized_start=1359,
+  serialized_end=1446,
 )
 
 
@@ -549,8 +708,8 @@ _GETLATESTVERSIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1055,
-  serialized_end=1139,
+  serialized_start=1448,
+  serialized_end=1532,
 )
 
 
@@ -595,8 +754,8 @@ _MEMBERPROTO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1141,
-  serialized_end=1212,
+  serialized_start=1534,
+  serialized_end=1605,
 )
 
 
@@ -634,8 +793,8 @@ _NOTIFY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1214,
-  serialized_end=1254,
+  serialized_start=1607,
+  serialized_end=1647,
 )
 
 
@@ -666,8 +825,8 @@ _NOTIFYREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1256,
-  serialized_end=1319,
+  serialized_start=1649,
+  serialized_end=1712,
 )
 
 
@@ -698,8 +857,8 @@ _LISTMEMBERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1321,
-  serialized_end=1366,
+  serialized_start=1714,
+  serialized_end=1759,
 )
 
 
@@ -744,8 +903,8 @@ _LISTMEMBERSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1369,
-  serialized_end=1519,
+  serialized_start=1762,
+  serialized_end=1912,
 )
 
 
@@ -776,8 +935,8 @@ _NOTIFYNEWMEMBERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1521,
-  serialized_end=1596,
+  serialized_start=1914,
+  serialized_end=1989,
 )
 
 
@@ -808,8 +967,8 @@ _REGISTERCLIENTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1598,
-  serialized_end=1676,
+  serialized_start=1991,
+  serialized_end=2069,
 )
 
 
@@ -854,8 +1013,8 @@ _REGISTERCLIENTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1678,
-  serialized_end=1798,
+  serialized_start=2071,
+  serialized_end=2191,
 )
 
 
@@ -886,8 +1045,8 @@ _CLIENTIDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1800,
-  serialized_end=1836,
+  serialized_start=2193,
+  serialized_end=2229,
 )
 
 
@@ -925,8 +1084,8 @@ _COMMONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1838,
-  serialized_end=1931,
+  serialized_start=2231,
+  serialized_end=2324,
 )
 
 
@@ -971,8 +1130,8 @@ _ISCLIENTEXISTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1933,
-  serialized_end=2053,
+  serialized_start=2326,
+  serialized_end=2446,
 )
 
 _SENDEVENTREQUEST.fields_by_name['event'].message_type = _EVENTPROTO
@@ -980,6 +1139,8 @@ _SENDEVENTSRESPONSE.fields_by_name['event'].message_type = _EVENTPROTO
 _SENDEVENTSRESPONSE.fields_by_name['return_code'].enum_type = _RETURNSTATUS
 _LISTEVENTSRESPONSE.fields_by_name['return_code'].enum_type = _RETURNSTATUS
 _LISTEVENTSRESPONSE.fields_by_name['events'].message_type = _EVENTPROTO
+_COUNTEVENTSRESPONSE.fields_by_name['return_code'].enum_type = _RETURNSTATUS
+_COUNTEVENTSRESPONSE.fields_by_name['sender_event_counts'].message_type = _SENDEREVENTCOUNTPROTO
 _NOTIFYREQUEST.fields_by_name['notifies'].message_type = _NOTIFY
 _LISTMEMBERSRESPONSE.fields_by_name['return_code'].enum_type = _RETURNSTATUS
 _LISTMEMBERSRESPONSE.fields_by_name['members'].message_type = _MEMBERPROTO
@@ -989,12 +1150,15 @@ _REGISTERCLIENTRESPONSE.fields_by_name['return_code'].enum_type = _RETURNSTATUS
 _COMMONRESPONSE.fields_by_name['return_code'].enum_type = _RETURNSTATUS
 _ISCLIENTEXISTSRESPONSE.fields_by_name['return_code'].enum_type = _RETURNSTATUS
 DESCRIPTOR.message_types_by_name['EventProto'] = _EVENTPROTO
+DESCRIPTOR.message_types_by_name['SenderEventCountProto'] = _SENDEREVENTCOUNTPROTO
 DESCRIPTOR.message_types_by_name['SendEventRequest'] = _SENDEVENTREQUEST
 DESCRIPTOR.message_types_by_name['ClientMeta'] = _CLIENTMETA
 DESCRIPTOR.message_types_by_name['SendEventsResponse'] = _SENDEVENTSRESPONSE
 DESCRIPTOR.message_types_by_name['ListEventsRequest'] = _LISTEVENTSREQUEST
+DESCRIPTOR.message_types_by_name['CountEventsRequest'] = _COUNTEVENTSREQUEST
 DESCRIPTOR.message_types_by_name['ListAllEventsRequest'] = _LISTALLEVENTSREQUEST
 DESCRIPTOR.message_types_by_name['ListEventsResponse'] = _LISTEVENTSRESPONSE
+DESCRIPTOR.message_types_by_name['CountEventsResponse'] = _COUNTEVENTSRESPONSE
 DESCRIPTOR.message_types_by_name['GetLatestVersionByKeyRequest'] = _GETLATESTVERSIONBYKEYREQUEST
 DESCRIPTOR.message_types_by_name['GetLatestVersionResponse'] = _GETLATESTVERSIONRESPONSE
 DESCRIPTOR.message_types_by_name['MemberProto'] = _MEMBERPROTO
@@ -1017,6 +1181,13 @@ EventProto = _reflection.GeneratedProtocolMessageType('EventProto', (_message.Me
   # @@protoc_insertion_point(class_scope:notification_service.EventProto)
   })
 _sym_db.RegisterMessage(EventProto)
+
+SenderEventCountProto = _reflection.GeneratedProtocolMessageType('SenderEventCountProto', (_message.Message,), {
+  'DESCRIPTOR' : _SENDEREVENTCOUNTPROTO,
+  '__module__' : 'notification_service_pb2'
+  # @@protoc_insertion_point(class_scope:notification_service.SenderEventCountProto)
+  })
+_sym_db.RegisterMessage(SenderEventCountProto)
 
 SendEventRequest = _reflection.GeneratedProtocolMessageType('SendEventRequest', (_message.Message,), {
   'DESCRIPTOR' : _SENDEVENTREQUEST,
@@ -1046,6 +1217,13 @@ ListEventsRequest = _reflection.GeneratedProtocolMessageType('ListEventsRequest'
   })
 _sym_db.RegisterMessage(ListEventsRequest)
 
+CountEventsRequest = _reflection.GeneratedProtocolMessageType('CountEventsRequest', (_message.Message,), {
+  'DESCRIPTOR' : _COUNTEVENTSREQUEST,
+  '__module__' : 'notification_service_pb2'
+  # @@protoc_insertion_point(class_scope:notification_service.CountEventsRequest)
+  })
+_sym_db.RegisterMessage(CountEventsRequest)
+
 ListAllEventsRequest = _reflection.GeneratedProtocolMessageType('ListAllEventsRequest', (_message.Message,), {
   'DESCRIPTOR' : _LISTALLEVENTSREQUEST,
   '__module__' : 'notification_service_pb2'
@@ -1059,6 +1237,13 @@ ListEventsResponse = _reflection.GeneratedProtocolMessageType('ListEventsRespons
   # @@protoc_insertion_point(class_scope:notification_service.ListEventsResponse)
   })
 _sym_db.RegisterMessage(ListEventsResponse)
+
+CountEventsResponse = _reflection.GeneratedProtocolMessageType('CountEventsResponse', (_message.Message,), {
+  'DESCRIPTOR' : _COUNTEVENTSRESPONSE,
+  '__module__' : 'notification_service_pb2'
+  # @@protoc_insertion_point(class_scope:notification_service.CountEventsResponse)
+  })
+_sym_db.RegisterMessage(CountEventsResponse)
 
 GetLatestVersionByKeyRequest = _reflection.GeneratedProtocolMessageType('GetLatestVersionByKeyRequest', (_message.Message,), {
   'DESCRIPTOR' : _GETLATESTVERSIONBYKEYREQUEST,
@@ -1161,8 +1346,8 @@ _NOTIFICATIONSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=2096,
-  serialized_end=3688,
+  serialized_start=2489,
+  serialized_end=4233,
   methods=[
   _descriptor.MethodDescriptor(
     name='sendEvent',
@@ -1185,9 +1370,19 @@ _NOTIFICATIONSERVICE = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
+    name='countEvents',
+    full_name='notification_service.NotificationService.countEvents',
+    index=2,
+    containing_service=None,
+    input_type=_COUNTEVENTSREQUEST,
+    output_type=_COUNTEVENTSRESPONSE,
+    serialized_options=b'\202\323\344\223\002+\022)/aiflow/notification-service/count_events',
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
     name='listAllEvents',
     full_name='notification_service.NotificationService.listAllEvents',
-    index=2,
+    index=3,
     containing_service=None,
     input_type=_LISTALLEVENTSREQUEST,
     output_type=_LISTEVENTSRESPONSE,
@@ -1197,7 +1392,7 @@ _NOTIFICATIONSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='notify',
     full_name='notification_service.NotificationService.notify',
-    index=3,
+    index=4,
     containing_service=None,
     input_type=_NOTIFYREQUEST,
     output_type=_COMMONRESPONSE,
@@ -1207,7 +1402,7 @@ _NOTIFICATIONSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='listMembers',
     full_name='notification_service.NotificationService.listMembers',
-    index=4,
+    index=5,
     containing_service=None,
     input_type=_LISTMEMBERSREQUEST,
     output_type=_LISTMEMBERSRESPONSE,
@@ -1217,7 +1412,7 @@ _NOTIFICATIONSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='notifyNewMember',
     full_name='notification_service.NotificationService.notifyNewMember',
-    index=5,
+    index=6,
     containing_service=None,
     input_type=_NOTIFYNEWMEMBERREQUEST,
     output_type=_COMMONRESPONSE,
@@ -1227,7 +1422,7 @@ _NOTIFICATIONSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='getLatestVersionByKey',
     full_name='notification_service.NotificationService.getLatestVersionByKey',
-    index=6,
+    index=7,
     containing_service=None,
     input_type=_GETLATESTVERSIONBYKEYREQUEST,
     output_type=_GETLATESTVERSIONRESPONSE,
@@ -1237,7 +1432,7 @@ _NOTIFICATIONSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='registerClient',
     full_name='notification_service.NotificationService.registerClient',
-    index=7,
+    index=8,
     containing_service=None,
     input_type=_REGISTERCLIENTREQUEST,
     output_type=_REGISTERCLIENTRESPONSE,
@@ -1247,7 +1442,7 @@ _NOTIFICATIONSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='deleteClient',
     full_name='notification_service.NotificationService.deleteClient',
-    index=8,
+    index=9,
     containing_service=None,
     input_type=_CLIENTIDREQUEST,
     output_type=_COMMONRESPONSE,
@@ -1257,7 +1452,7 @@ _NOTIFICATIONSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='isClientExists',
     full_name='notification_service.NotificationService.isClientExists',
-    index=9,
+    index=10,
     containing_service=None,
     input_type=_CLIENTIDREQUEST,
     output_type=_ISCLIENTEXISTSRESPONSE,

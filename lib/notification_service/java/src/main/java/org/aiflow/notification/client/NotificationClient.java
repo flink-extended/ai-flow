@@ -24,9 +24,11 @@ import com.speedment.common.tuple.internal.nonnullable.Tuple4Impl;
 import io.grpc.ManagedChannelBuilder;
 import org.aiflow.notification.conf.Configuration;
 import org.aiflow.notification.entity.EventMeta;
+import org.aiflow.notification.entity.SenderEventCount;
 import org.aiflow.notification.proto.NotificationServiceGrpc;
 import org.aiflow.notification.proto.NotificationServiceOuterClass;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -224,6 +226,20 @@ public class NotificationClient {
         }
     }
 
+    private static ImmutablePair<Long, List<SenderEventCount>> parseEventCountFromResponse(
+            NotificationServiceOuterClass.CountEventsResponse response) throws Exception {
+        if (response.getReturnCode() == NotificationServiceOuterClass.ReturnStatus.SUCCESS) {
+            List<SenderEventCount> senderEventCounts = new ArrayList<>();
+            for (NotificationServiceOuterClass.SenderEventCountProto eventCountProto :
+                    response.getSenderEventCountsList()) {
+                senderEventCounts.add(SenderEventCount.buildSenderEventCount(eventCountProto));
+            }
+            return new ImmutablePair<>(response.getEventCount(), senderEventCounts);
+        } else {
+            throw new Exception(response.getReturnMsg());
+        }
+    }
+
     protected static NotificationServiceGrpc.NotificationServiceBlockingStub wrapBlockingStub(
             NotificationServiceGrpc.NotificationServiceBlockingStub stub,
             String target,
@@ -408,6 +424,37 @@ public class NotificationClient {
                 eventType,
                 startTime,
                 0);
+    }
+
+    /**
+     * Count specific `key` or `version` notifications in Notification Service.
+     *
+     * @param namespace Namespace of notification for listening.
+     * @param sender The sender of the event.
+     * @param keys Keys of notification for listening.
+     * @param version (Optional) Version of notification for listening.
+     * @param eventType (Optional) Type of event for listening.
+     * @param startTime (Optional) Type of event for listening.
+     * @return Count of Notification updated in Notification Service.
+     */
+    public ImmutablePair<Long, List<SenderEventCount>> countEvents(
+            String namespace,
+            List<String> keys,
+            long version,
+            String eventType,
+            long startTime,
+            String sender)
+            throws Exception {
+        NotificationServiceOuterClass.CountEventsRequest request =
+                NotificationServiceOuterClass.CountEventsRequest.newBuilder()
+                        .addAllKeys(keys)
+                        .setStartVersion(version)
+                        .setEventType(eventType)
+                        .setStartTime(startTime)
+                        .setNamespace(StringUtils.isEmpty(namespace) ? defaultNamespace : namespace)
+                        .setSender(sender)
+                        .build();
+        return parseEventCountFromResponse(notificationServiceStub.countEvents(request));
     }
 
     /**

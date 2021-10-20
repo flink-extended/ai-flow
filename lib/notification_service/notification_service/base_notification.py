@@ -64,6 +64,23 @@ class BaseEvent(object):
             self.sender == other.sender
 
 
+class SenderEventCount(object):
+    def __init__(self,
+                 sender: str = None,
+                 event_count: int = None):
+        self.sender = sender
+        self.event_count = event_count
+
+    def __str__(self) -> str:
+        return 'sender:{0}, event_count:{1}'.format(self.sender, self.event_count)
+
+    def __eq__(self, other):
+        if not isinstance(other, SenderEventCount):
+            return False
+        return self.sender == other.sender and \
+               self.event_count == other.event_count
+
+
 class EventWatcher(metaclass=abc.ABCMeta):
     """
     SignalWatcher is used to represent a standard event handler, which defines the
