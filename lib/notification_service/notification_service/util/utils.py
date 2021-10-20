@@ -18,7 +18,7 @@
 #
 import time
 import socket
-from notification_service.base_notification import BaseEvent, Member
+from notification_service.base_notification import BaseEvent, Member, SenderEventCount
 from notification_service.proto import notification_service_pb2
 
 if not hasattr(time, 'time_ns'):
@@ -37,12 +37,27 @@ def event_to_proto(event: BaseEvent):
     return result_event_proto
 
 
+def count_to_proto(count: SenderEventCount):
+    sender_event_count_proto = notification_service_pb2.SenderEventCountProto(sender=count.sender,
+                                                                              event_count=count.event_count)
+    return sender_event_count_proto
+
+
 def event_list_to_proto(event_list):
     event_proto_list = []
     for event_model in event_list:
         event_proto = event_to_proto(event_model)
         event_proto_list.append(event_proto)
     return event_proto_list
+
+
+def count_list_to_proto(count_list):
+    event_count = 0
+    count_proto_list = []
+    for count in count_list:
+        event_count += count.event_count
+        count_proto_list.append(count_to_proto(count))
+    return event_count, count_proto_list
 
 
 def event_proto_to_event(event_proto):
@@ -56,6 +71,11 @@ def event_proto_to_event(event_proto):
                      sender=event_proto.sender)
 
 
+def event_count_proto_to_event_count(event_count_proto):
+    return SenderEventCount(sender=event_count_proto.sender,
+                            event_count=event_count_proto.event_count)
+
+
 def event_model_to_event(event_model):
     return BaseEvent(
         key=event_model.key,
@@ -66,6 +86,13 @@ def event_model_to_event(event_model):
         context=event_model.context,
         namespace=event_model.namespace,
         sender=event_model.sender
+    )
+
+
+def count_result_to_sender_event_count(count_result):
+    return SenderEventCount(
+        sender=count_result.sender,
+        event_count=count_result.event_count
     )
 
 

@@ -29,13 +29,14 @@ from typing import Union, List, Tuple, Dict, Any
 import grpc
 
 from notification_service.base_notification import BaseNotification, EventWatcher, BaseEvent, EventWatcherHandle, \
-    ANY_CONDITION
+    ANY_CONDITION, SenderEventCount
 from notification_service.proto import notification_service_pb2_grpc
 from notification_service.proto.notification_service_pb2 \
     import SendEventRequest, ListEventsRequest, EventProto, ReturnStatus, ListAllEventsRequest, \
     GetLatestVersionByKeyRequest, ListMembersRequest, RegisterClientRequest, ClientMeta, ClientIdRequest, \
-    isClientExistsResponse
-from notification_service.util.utils import event_proto_to_event, proto_to_member, sleep_and_detecting_running
+    CountEventsRequest
+from notification_service.util.utils import event_proto_to_event, proto_to_member, sleep_and_detecting_running, \
+    event_count_proto_to_event_count
 
 if not hasattr(time, 'time_ns'):
     time.time_ns = lambda: int(time.time() * 1e9)
@@ -272,6 +273,46 @@ class NotificationClient(BaseNotification):
                     event = event_proto_to_event(event_proto)
                     events.append(event)
                 return events
+        else:
+            raise Exception(response.return_msg)
+
+    def count_events(self,
+                     key: Union[str, List[str]],
+                     namespace: str = None,
+                     version: int = None,
+                     event_type: str = None,
+                     start_time: int = None,
+                     sender: str = None) -> Tuple[int, List[SenderEventCount]]:
+        """
+        Count specific events in Notification Service.
+
+        :param key: The key or the list of keys of the events for listening.
+        :param namespace: (Optional) Namespace of the event for listening.
+        :param version: (Optional) Version of the events must greater than this version.
+        :param event_type: (Optional) Type of the events.
+        :param start_time: (Optional) Start time of the events.
+        :param sender: The event sender.
+        :return: The total event count and the list of event counts of each sender.
+        """
+        if isinstance(key, str):
+            key = (key,)
+        elif isinstance(key, Iterable):
+            key = tuple(key)
+        request = CountEventsRequest(
+            keys=key,
+            start_version=version,
+            event_type=event_type,
+            start_time=start_time,
+            namespace=self._default_namespace if namespace is None else namespace,
+            sender=sender
+        )
+        response = self.notification_stub.countEvents(request)
+        if response.return_code == ReturnStatus.SUCCESS:
+            sender_event_counts = []
+            for sender_event_count_proto in response.sender_event_counts:
+                sender_event_count = event_count_proto_to_event_count(sender_event_count_proto)
+                sender_event_counts.append(sender_event_count)
+            return response.event_count, sender_event_counts
         else:
             raise Exception(response.return_msg)
 
