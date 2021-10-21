@@ -18,41 +18,8 @@
 # under the License.
 #
 import argparse
-
-from notification_service.high_availability import DbHighAvailabilityStorage, SimpleNotificationServerHaManager
-from notification_service.master import NotificationMaster
-from notification_service.service import NotificationService, HighAvailableNotificationService
-from notification_service.event_storage import DbEventStorage
-from notification_service.util.utils import get_ip_addr
-
-
-def start_notification_service(port: int = 50052,
-                               db_conn: str = None,
-                               enable_ha: bool = False,
-                               advertised_uri: str = None,
-                               create_table_if_not_exists: bool = True):
-    if db_conn:
-        storage = DbEventStorage(db_conn, create_table_if_not_exists)
-    else:
-        raise Exception('Failed to start notification service without database connection info.')
-
-    if enable_ha:
-        server_uri = advertised_uri if advertised_uri is not None else get_ip_addr() + ':' + str(port)
-        ha_storage = DbHighAvailabilityStorage(db_conn=db_conn)
-        ha_manager = SimpleNotificationServerHaManager()
-        service = HighAvailableNotificationService(
-            storage,
-            ha_manager,
-            server_uri,
-            ha_storage,
-            5000)
-        master = NotificationMaster(service=service,
-                                    port=int(port))
-    else:
-        master = NotificationMaster(service=NotificationService(storage),
-                                    port=port)
-
-    master.run(is_block=True)
+import logging
+from notification_service.master import NotificationServer
 
 
 def _prepare_args():
@@ -70,14 +37,17 @@ def _prepare_args():
 
 
 if __name__ == '__main__':
-
+    logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
+                        level=logging.INFO)
     args = _prepare_args()
     ns_port = args.port
     database_conn = args.database_conn
     enable_ha = args.enable_ha
     advertised_uri = args.advertised_uri
 
-    start_notification_service(port=ns_port,
-                               db_conn=database_conn,
-                               enable_ha=enable_ha,
-                               advertised_uri=advertised_uri)
+    ns = NotificationServer(port=ns_port,
+                            db_conn=database_conn,
+                            enable_ha=enable_ha,
+                            advertised_uri=advertised_uri)
+    logging.info('notification service start(port:{}).'.format(ns_port))
+    ns.start(is_block=True)
