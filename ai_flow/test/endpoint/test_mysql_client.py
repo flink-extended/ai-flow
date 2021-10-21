@@ -26,8 +26,12 @@ from ai_flow.store.db.base_model import base
 from ai_flow.test.endpoint import test_client
 from ai_flow.test.store.test_sqlalchemy_store import _get_store
 from ai_flow.test.test_util import get_mysql_server_url
+from notification_service.master import NotificationServer
+
 
 _PORT = '50051'
+_NS_PORT = '50052'
+_NS_URI = 'localhost:%s' % _NS_PORT
 
 
 @unittest.skip("To run this test you need to configure the mysql info in 'ai_flow/test/test_util.py'")
@@ -38,15 +42,22 @@ class TestAIFlowClientMySQL(test_client.TestAIFlowClientSqlite):
         print("TestAIFlowClientMySQL setUpClass")
         db_server_url = get_mysql_server_url()
         cls.db_name = 'test_aiflow_client'
+        cls.ns_db_name = 'test_ns_client'
         cls.engine = sqlalchemy.create_engine(db_server_url)
         cls.engine.execute('DROP DATABASE IF EXISTS %s' % cls.db_name)
         cls.engine.execute('CREATE DATABASE IF NOT EXISTS %s' % cls.db_name)
+        cls.engine.execute('DROP DATABASE IF EXISTS %s' % cls.ns_db_name)
+        cls.engine.execute('CREATE DATABASE IF NOT EXISTS %s' % cls.ns_db_name)
         cls.store_uri = '%s/%s' % (db_server_url, cls.db_name)
+        cls.ns_store_uri = '%s/%s' % (db_server_url, cls.ns_db_name)
+        cls.ns_server = NotificationServer(port=_NS_PORT, db_conn=cls.ns_store_uri)
+        cls.ns_server.start()
+
         cls.server = AIFlowServer(store_uri=cls.store_uri, port=_PORT)
         cls.server.run()
-        test_client.client = AIFlowClient(server_uri='localhost:' + _PORT)
-        test_client.client1 = AIFlowClient(server_uri='localhost:' + _PORT)
-        test_client.client2 = AIFlowClient(server_uri='localhost:' + _PORT)
+        test_client.client = AIFlowClient(server_uri='localhost:' + _PORT, notification_service_uri=_NS_URI)
+        test_client.client1 = AIFlowClient(server_uri='localhost:' + _PORT, notification_service_uri=_NS_URI)
+        test_client.client2 = AIFlowClient(server_uri='localhost:' + _PORT, notification_service_uri=_NS_URI)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -54,6 +65,7 @@ class TestAIFlowClientMySQL(test_client.TestAIFlowClientSqlite):
         test_client.client1.stop_listen_event()
         test_client.client2.stop_listen_event()
         cls.server.stop()
+        cls.ns_server.stop()
 
     def setUp(self) -> None:
         _get_store(self.store_uri)

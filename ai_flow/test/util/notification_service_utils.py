@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,7 +14,23 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
+import os
+from notification_service.master import NotificationServer
 
-port = 50051
-ns_port = 50052
+_NS_DB_FILE = 'ns.db'
+_NS_DB_URI = '%s%s' % ('sqlite:///', _NS_DB_FILE)
+_NS_PORT = '50052'
+_NS_URI = 'localhost:%s' % _NS_PORT
+
+
+def start_notification_server():
+    if os.path.exists(_NS_DB_FILE):
+        os.remove(_NS_DB_FILE)
+    ns_server = NotificationServer(port=_NS_PORT, db_conn=_NS_DB_URI)
+    ns_server.start()
+    return ns_server
+
+
+def stop_notification_server(ns_server):
+    ns_server.stop()
+    os.remove(_NS_DB_FILE)

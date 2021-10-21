@@ -24,6 +24,7 @@ from ai_flow.workflow.status import Status
 from ai_flow_plugins.job_plugins import python
 import ai_flow as af
 from test_python_processor import PyProcessor1, PyProcessor2
+from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
 
 project_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
@@ -31,6 +32,7 @@ project_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 class TestPython(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        cls.ns_server = start_notification_server()
         config_file = project_path + '/master.yaml'
         cls.master = AIFlowServerRunner(config_file=config_file)
         cls.master.start()
@@ -44,6 +46,7 @@ class TestPython(unittest.TestCase):
         temp = '{}/temp'.format(project_path)
         if os.path.exists(temp):
             shutil.rmtree(temp)
+        stop_notification_server(cls.ns_server)
 
     def setUp(self):
         self.master._clear_db()
