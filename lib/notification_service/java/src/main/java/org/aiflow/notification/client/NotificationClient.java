@@ -83,6 +83,27 @@ public class NotificationClient {
         this.retryTimeoutMs = retryTimeoutMs;
         this.conf = new Configuration(properties);
 
+        if (enableHa) {
+            String[] serverUris = StringUtils.split(target, ",");
+            boolean lastError = true;
+            for (String serverUri : serverUris) {
+                currentUri = serverUri;
+                try {
+                    initNotificationServiceStub();
+                    lastError = false;
+                    break;
+                } catch (Exception e) {
+                    continue;
+                }
+            }
+            if (lastError) {
+                logger.warn("Failed to initialize client");
+            }
+        } else {
+            currentUri = target;
+            initNotificationServiceStub();
+        }
+
         boolean enableIdempotence =
                 this.conf.getBoolean(
                         CLIENT_ENABLE_IDEMPOTENCE_CONFIG_KEY,
@@ -107,26 +128,6 @@ public class NotificationClient {
             this.sequenceNum = new AtomicInteger(initialSeqNum);
         }
 
-        if (enableHa) {
-            String[] serverUris = StringUtils.split(target, ",");
-            boolean lastError = true;
-            for (String serverUri : serverUris) {
-                currentUri = serverUri;
-                try {
-                    initNotificationServiceStub();
-                    lastError = false;
-                    break;
-                } catch (Exception e) {
-                    continue;
-                }
-            }
-            if (lastError) {
-                logger.warn("Failed to initialize client");
-            }
-        } else {
-            currentUri = target;
-            initNotificationServiceStub();
-        }
         threads = new HashMap<>();
         livingMembers = new HashSet<>();
         listMembersService =

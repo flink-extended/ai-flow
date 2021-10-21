@@ -94,7 +94,7 @@ public class AIFlowClient {
         this.metadataClient = new MetadataClient(channel);
         this.modelCenterClient = new ModelCenterClient(channel);
         Properties properties = new Properties();
-        properties.put(CLIENT_ENABLE_IDEMPOTENCE_CONFIG_KEY, "false");
+        properties.put(CLIENT_ENABLE_IDEMPOTENCE_CONFIG_KEY, "true");
         this.notificationClient =
                 new NotificationClient(
                         notificationServiceTarget,
