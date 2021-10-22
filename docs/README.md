@@ -7,7 +7,7 @@
 
 ### Build
 ```
-cd flink-ai-flow/docs/
+cd docs/
 bash docgen.sh
 make clean html
 ```
