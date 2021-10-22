@@ -31,8 +31,8 @@ sys.path.insert(0, os.path.abspath('../ai_flow_plugins'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Flink AI Flow'
-author = 'Alibaba'
+project = 'AI Flow'
+author = 'flink-ai-extended'
 
 # The full version, including alpha/beta/rc tags
 release = '1.0'
