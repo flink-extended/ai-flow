@@ -16,12 +16,12 @@
     limitations under the License.
    ################################################################################
    
-.. Flink AI Flow documentation master file, created by
+.. AI Flow documentation master file, created by
    sphinx-quickstart on Fri Jul 16 10:18:41 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Flink AI Flow's Documentation!
+Welcome to AI Flow's Documentation!
 =========================================
 
 .. toctree::
@@ -37,7 +37,7 @@ Core Classes/Modules
 
    :class:`ai_flow.ai_graph.ai_graph.AIGraph`
 
-   Core abstraction of Flink AI Flow. Workflows defined by users will be translated into AIGraph by the Flink AI Flow framework.
+   Core abstraction of AI Flow. Workflows defined by users will be translated into AIGraph by the AI Flow framework.
    AIGraph consists of AINode and edges. For edges, they are either the :class:`~ai_flow.ai_graph.data_edge.DataEdge`  between AINodes in a job 
    or the :class:`~ai_flow.workflow.control_edge.ControlEdge` between jobs.
 
