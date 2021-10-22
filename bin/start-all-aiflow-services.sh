@@ -18,28 +18,32 @@
 ## under the License.
 ##
 set -e
-usage="Usage: start-all-aiflow-services.sh [aiflow-mysql-conn]"
+BIN=$(dirname "${BASH_SOURCE-$0}")
+BIN=$(cd "$BIN"; pwd)
 
-if [ $# -ne 1 ]; then
-  echo $usage
+usage="Usage: start-all-aiflow-services.sh [notification-service-mysql-conn] [airflow-mysql-conn] [aiflow-mysql-conn]"
+if [ $# -ne 3 ]; then
+  echo "$usage"
   exit 1
 fi
-
-export AIFLOW_DB_CONN=$1
+NOTIFICATION_SERVICE_DB_CONN=$1
+AIRFLOW_DB_CONN=$2
+export AIFLOW_DB_CONN=$3
 export AIFLOW_DB_TYPE="MYSQL"
 
-BIN=`dirname "${BASH_SOURCE-$0}"`
-BIN=`cd "$BIN"; pwd`
+# start notification service
+source "${BIN}"/init-notification-env.sh
+"${BIN}"/start-notification.sh "${NOTIFICATION_SERVICE_DB_CONN}"
+echo "notification service address: ${NOTIFICATION_SERVER_URI}"
+sleep 3
 
-# init aiflow env
-. ${BIN}/init-aiflow-env.sh
-${BIN}/init-airflow-env.sh ${AIFLOW_DB_CONN}
+# start airflow scheduler and web server
+source "${BIN}"/init-airflow-env.sh
+"${BIN}"/start-airflow.sh "${AIRFLOW_DB_CONN}"
+echo "airflow dag dir: ${AIRFLOW_DAG_DIR}"
 
 # start AIFlow
-${BIN}/start-aiflow.sh
-# Wait for notification service to reach the running state
-sleep 5
-# start airflow scheduler and web server
-${BIN}/start-airflow.sh ${AIFLOW_DB_CONN}
+source "${BIN}"/init-aiflow-env.sh
+"${BIN}"/start-aiflow.sh "${AIFLOW_DB_CONN}"
 
 echo "Visit http://127.0.0.1:8080/ to access the airflow web server."
