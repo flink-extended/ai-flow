@@ -28,11 +28,12 @@ from ai_flow.meta.dataset_meta import DatasetMeta, Properties, DataType
 from ai_flow.meta.model_meta import ModelMeta, ModelVersionMeta
 from ai_flow.meta.model_relation_meta import ModelRelationMeta, ModelVersionRelationMeta
 from ai_flow.meta.project_meta import ProjectMeta
+from ai_flow.meta.workflow_snapshot_meta import WorkflowSnapshotMeta
 from ai_flow.metadata_store.utils.MetaToProto import MetaToProto
 from ai_flow.protobuf import metadata_service_pb2_grpc, metadata_service_pb2
 from ai_flow.protobuf.message_pb2 import DatasetProto, SchemaProto, ModelRelationProto, ModelProto, \
     ModelVersionRelationProto, ModelVersionProto, ProjectProto, \
-    ArtifactProto, ModelVersionStage, WorkflowMetaProto
+    ArtifactProto, ModelVersionStage, WorkflowMetaProto, WorkflowSnapshotProto
 from ai_flow.protobuf.metadata_service_pb2 import ModelNameRequest
 from ai_flow.endpoint.server import stringValue, int64Value
 from ai_flow.endpoint.client.base_client import BaseClient
@@ -40,7 +41,7 @@ from ai_flow.endpoint.server.util import _unwrap_dataset_response, \
     transform_dataset_type_list_to_proto, _unwrap_dataset_list_response, _unwrap_delete_response, \
     _unwrap_model_relation_response, _unwrap_model_relation_list_response, _unwrap_model_response, \
     _unwrap_model_version_relation_response, _unwrap_model_version_relation_list_response, \
-    _unwrap_model_version_response, \
+    _unwrap_model_version_response, _unwrap_workflow_snapshot_response, _unwrap_workflow_snapshot_list_response, \
     _unwrap_project_response, _unwrap_project_list_response, \
     _unwrap_artifact_response, _unwrap_artifact_list_response, _unwrap_workflow_response, _unwrap_workflow_list_response
 
@@ -785,3 +786,69 @@ class MetadataClient(BaseClient):
                                                              graph=stringValue(graph))
         response = self.metadata_store_stub.updateWorkflow(request)
         return _unwrap_workflow_response(response)
+
+    def register_workflow_snapshot(self, project_name: Text, workflow_name: Text,
+                                   uri: Text, signature: Text) -> Optional[WorkflowSnapshotMeta]:
+        """
+        Register a workflow snapshot
+
+        :param project_name: the name of project which contains the workflow snapshot
+        :param workflow_name: the name of workflow
+        :param uri: the uri of workflow snapshot
+        :param signature: the MD5 hash of the workflow directory
+        """
+        workflow = self.get_workflow_by_name(project_name=project_name,
+                                             workflow_name=workflow_name)
+        if not workflow:
+            raise Exception("Workflow doesn't exist, {}.{}".format(project_name, workflow_name))
+
+        workflow_snapshot_proto = WorkflowSnapshotProto(workflow_id=int64Value(workflow.uuid),
+                                                        uri=stringValue(uri),
+                                                        signature=stringValue(signature))
+        request = metadata_service_pb2.RegisterWorkflowSnapshotRequest(workflow_snapshot=workflow_snapshot_proto)
+        response = self.metadata_store_stub.registerWorkflowSnapshot(request)
+        return _unwrap_workflow_snapshot_response(response)
+
+    def get_workflow_snapshot(self, workflow_snapshot_id: int) -> Optional[WorkflowSnapshotMeta]:
+        """
+        Get a specific workflow snapshot in metadata store by snapshot id.
+
+        :param workflow_snapshot_id: the workflow snapshot id
+        :return: A single :py:class:`ai_flow.meta.workflow_snapshot_meta.WorkflowSnapshotMeta` object
+                 if exists, Otherwise, returns None if the workflow snapshot does not exist.
+        """
+        request = metadata_service_pb2.IdRequest(id=workflow_snapshot_id)
+        response = self.metadata_store_stub.getWorkflowSnapshot(request)
+        return _unwrap_workflow_snapshot_response(response)
+
+    def list_workflow_snapshots(self, project_name: Text, workflow_name: Text,
+                                page_size: int, offset: int) -> Optional[List[WorkflowSnapshotMeta]]:
+        """
+        List workflow snapshots of the specific workflow.
+
+        :param project_name: the name of project which contains the workflow snapshot
+        :param workflow_name: the name of workflow
+        :param page_size: the limitation of the listed workflow snapshots.
+        :param offset: the offset of listed workflow snapshots.
+        """
+        workflow = self.get_workflow_by_name(project_name=project_name,
+                                             workflow_name=workflow_name)
+        if not workflow:
+            raise Exception("Workflow doesn't exist, {}.{}".format(project_name, workflow_name))
+        request = metadata_service_pb2.ListWorkflowSnapshotsRequest(workflow_id=workflow.uuid,
+                                                                    page_size=page_size,
+                                                                    offset=offset)
+        response = self.metadata_store_stub.listWorkflowSnapshots(request)
+        return _unwrap_workflow_snapshot_list_response(response)
+
+    def delete_workflow_snapshot(self, workflow_snapshot_id: int) -> Status:
+        """
+        Delete the workflow snapshot by specific id
+
+        :param workflow_snapshot_id: the uuid of workflow snapshot
+        :return: Status.OK if the workflow snapshot is successfully deleted,
+                 Status.ERROR if the workflow snapshot does not exist otherwise.
+        """
+        request = metadata_service_pb2.IdRequest(id=workflow_snapshot_id)
+        response = self.metadata_store_stub.deleteWorkflowSnapshot(request)
+        return _unwrap_delete_response(response)

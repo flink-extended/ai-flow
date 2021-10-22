@@ -35,6 +35,7 @@ import org.aiflow.client.entity.ModelVersionRelationMeta;
 import org.aiflow.client.entity.ProjectMeta;
 import org.aiflow.client.entity.RegisteredModel;
 import org.aiflow.client.entity.WorkflowMeta;
+import org.aiflow.client.entity.WorkflowSnapshotMeta;
 import org.aiflow.client.exception.AIFlowException;
 import org.aiflow.client.proto.Message;
 
@@ -479,6 +480,67 @@ public class AIFlowClientTest {
                 });
         Assertions.assertEquals(
                 "value2", client.getWorkflowById(response.getUuid()).getProperties().get("key1"));
+    }
+
+    @Test
+    public void testWorkflowSnapshotOperation() throws Exception {
+        final String projectName = "project";
+        final String workflowName = "workflow";
+        final String workflowName2 = "workflow2";
+        final String uri = "/path/to/whatever";
+        final String signature = "md5sum";
+        ProjectMeta project = client.registerProject(projectName, uri, EMPTY_MAP);
+        WorkflowMeta workflow1 =
+                client.registerWorkflow(
+                        workflowName,
+                        project.getUuid(),
+                        new HashMap<String, String>() {
+                            {
+                                put("key1", "value1");
+                                put("key2", "value2");
+                            }
+                        });
+        WorkflowMeta workflow2 =
+                client.registerWorkflow(
+                        workflowName2,
+                        project.getUuid(),
+                        new HashMap<String, String>() {
+                            {
+                                put("key1", "value1");
+                                put("key2", "value2");
+                            }
+                        });
+        WorkflowSnapshotMeta workflowSnapshot =
+                client.registerWorkflowSnapshot(projectName, workflowName, uri, signature);
+        Assertions.assertEquals(
+                uri, client.getWorkflowSnapshot(workflowSnapshot.getUuid()).getUri());
+
+        WorkflowSnapshotMeta workflowSnapshot2 =
+                client.registerWorkflowSnapshot(projectName, workflowName, uri + "_2", signature);
+        WorkflowSnapshotMeta workflowSnapshot3 =
+                client.registerWorkflowSnapshot(projectName, workflowName2, uri + "_3", signature);
+        List<WorkflowSnapshotMeta> snapshots =
+                client.listWorkflowSnapshots(projectName, workflowName, 5L, 0L);
+        Assertions.assertEquals(2, snapshots.size());
+        Assertions.assertEquals(uri + "_2", snapshots.get(1).getUri());
+
+        client.deleteWorkflowSnapshot(workflowSnapshot2.getUuid());
+        snapshots = client.listWorkflowSnapshots(projectName, workflowName, 5L, 0L);
+        Assertions.assertEquals(1, snapshots.size());
+        Assertions.assertEquals(uri, snapshots.get(0).getUri());
+    }
+
+    @Test
+    public void testDeleteNonExistentWorkflowSnapshot() throws Exception {
+        Status status = client.deleteWorkflowSnapshot(Long.MAX_VALUE);
+        Assertions.assertEquals(Status.ERROR, status);
+    }
+
+    @Test
+    public void testGetNonExistentWorkflowSnapshot() throws Exception {
+        Assertions.assertNull(client.getWorkflowSnapshot(Long.MAX_VALUE));
+        Assertions.assertThrows(
+                Exception.class, () -> client.listWorkflowSnapshots("", "", 5L, 0L));
     }
 
     // test model

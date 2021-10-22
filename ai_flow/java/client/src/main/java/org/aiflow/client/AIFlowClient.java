@@ -34,6 +34,7 @@ import org.aiflow.client.entity.ModelVersionRelationMeta;
 import org.aiflow.client.entity.ProjectMeta;
 import org.aiflow.client.entity.RegisteredModel;
 import org.aiflow.client.entity.WorkflowMeta;
+import org.aiflow.client.entity.WorkflowSnapshotMeta;
 import org.aiflow.client.exception.AIFlowException;
 import org.aiflow.client.proto.Message;
 
@@ -659,6 +660,60 @@ public class AIFlowClient {
             String workflowName, String projectName, Map<String, String> properties)
             throws Exception {
         return this.metadataClient.updateWorkflow(workflowName, projectName, properties);
+    }
+
+    /**
+     * Register a workflow snapshot
+     *
+     * @param projectName the name of project which contains the workflow snapshot
+     * @param workflowName the name of workflow
+     * @param uri the uri of workflow snapshot
+     * @param signature the MD5 hash of the workflow directory
+     * @return {@link WorkflowSnapshotMeta} object registered in Metadata Store
+     */
+    public WorkflowSnapshotMeta registerWorkflowSnapshot(
+            String projectName, String workflowName, String uri, String signature)
+            throws Exception {
+        return this.metadataClient.registerWorkflowSnapshot(
+                projectName, workflowName, uri, signature);
+    }
+
+    /**
+     * Get a specific workflow snapshot in metadata store by snapshot id.
+     *
+     * @param workflowSnapshotId the workflow snapshot id
+     * @return: {@link WorkflowSnapshotMeta} if exists, otherwise returns null .
+     */
+    public WorkflowSnapshotMeta getWorkflowSnapshot(Long workflowSnapshotId) throws Exception {
+        return this.metadataClient.getWorkflowSnapshot(workflowSnapshotId);
+    }
+
+    /**
+     * List workflow snapshots of the specific workflow.
+     *
+     * @param projectName the name of project which contains the workflow snapshot
+     * @param workflowName the name of workflow
+     * @param pageSize the limitation of the listed workflow snapshots
+     * @param offset the offset of listed workflow snapshots
+     * @return List of {@link WorkflowSnapshotMeta} if exists,
+     * @throws Exception
+     */
+    public List<WorkflowSnapshotMeta> listWorkflowSnapshots(
+            String projectName, String workflowName, Long pageSize, Long offset) throws Exception {
+        return this.metadataClient.listWorkflowSnapshots(
+                projectName, workflowName, pageSize, offset);
+    }
+
+    /**
+     * Delete the workflow snapshot by specific id
+     *
+     * @param workflowSnapshotId the uuid of workflow snapshot
+     * @return {@link Status OK} if the workflow snapshot is successfully deleted, {@link Status
+     *     ERROR} if the workflow snapshot does not exist otherwise.
+     * @throws Exception
+     */
+    public Status deleteWorkflowSnapshot(Long workflowSnapshotId) throws Exception {
+        return this.metadataClient.deleteWorkflowSnapshot(workflowSnapshotId);
     }
 
     /**

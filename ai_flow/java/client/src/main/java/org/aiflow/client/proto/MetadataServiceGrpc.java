@@ -1626,6 +1626,130 @@ public final class MetadataServiceGrpc {
     return getListWorkflowsMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest,
+      org.aiflow.client.proto.Message.Response> getRegisterWorkflowSnapshotMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "registerWorkflowSnapshot",
+      requestType = org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest.class,
+      responseType = org.aiflow.client.proto.Message.Response.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest,
+      org.aiflow.client.proto.Message.Response> getRegisterWorkflowSnapshotMethod() {
+    io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest, org.aiflow.client.proto.Message.Response> getRegisterWorkflowSnapshotMethod;
+    if ((getRegisterWorkflowSnapshotMethod = MetadataServiceGrpc.getRegisterWorkflowSnapshotMethod) == null) {
+      synchronized (MetadataServiceGrpc.class) {
+        if ((getRegisterWorkflowSnapshotMethod = MetadataServiceGrpc.getRegisterWorkflowSnapshotMethod) == null) {
+          MetadataServiceGrpc.getRegisterWorkflowSnapshotMethod = getRegisterWorkflowSnapshotMethod =
+              io.grpc.MethodDescriptor.<org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest, org.aiflow.client.proto.Message.Response>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "registerWorkflowSnapshot"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.aiflow.client.proto.Message.Response.getDefaultInstance()))
+              .setSchemaDescriptor(new MetadataServiceMethodDescriptorSupplier("registerWorkflowSnapshot"))
+              .build();
+        }
+      }
+    }
+    return getRegisterWorkflowSnapshotMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest,
+      org.aiflow.client.proto.Message.Response> getGetWorkflowSnapshotMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "getWorkflowSnapshot",
+      requestType = org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest.class,
+      responseType = org.aiflow.client.proto.Message.Response.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest,
+      org.aiflow.client.proto.Message.Response> getGetWorkflowSnapshotMethod() {
+    io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest, org.aiflow.client.proto.Message.Response> getGetWorkflowSnapshotMethod;
+    if ((getGetWorkflowSnapshotMethod = MetadataServiceGrpc.getGetWorkflowSnapshotMethod) == null) {
+      synchronized (MetadataServiceGrpc.class) {
+        if ((getGetWorkflowSnapshotMethod = MetadataServiceGrpc.getGetWorkflowSnapshotMethod) == null) {
+          MetadataServiceGrpc.getGetWorkflowSnapshotMethod = getGetWorkflowSnapshotMethod =
+              io.grpc.MethodDescriptor.<org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest, org.aiflow.client.proto.Message.Response>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "getWorkflowSnapshot"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.aiflow.client.proto.Message.Response.getDefaultInstance()))
+              .setSchemaDescriptor(new MetadataServiceMethodDescriptorSupplier("getWorkflowSnapshot"))
+              .build();
+        }
+      }
+    }
+    return getGetWorkflowSnapshotMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest,
+      org.aiflow.client.proto.Message.Response> getListWorkflowSnapshotsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "listWorkflowSnapshots",
+      requestType = org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest.class,
+      responseType = org.aiflow.client.proto.Message.Response.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest,
+      org.aiflow.client.proto.Message.Response> getListWorkflowSnapshotsMethod() {
+    io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest, org.aiflow.client.proto.Message.Response> getListWorkflowSnapshotsMethod;
+    if ((getListWorkflowSnapshotsMethod = MetadataServiceGrpc.getListWorkflowSnapshotsMethod) == null) {
+      synchronized (MetadataServiceGrpc.class) {
+        if ((getListWorkflowSnapshotsMethod = MetadataServiceGrpc.getListWorkflowSnapshotsMethod) == null) {
+          MetadataServiceGrpc.getListWorkflowSnapshotsMethod = getListWorkflowSnapshotsMethod =
+              io.grpc.MethodDescriptor.<org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest, org.aiflow.client.proto.Message.Response>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "listWorkflowSnapshots"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.aiflow.client.proto.Message.Response.getDefaultInstance()))
+              .setSchemaDescriptor(new MetadataServiceMethodDescriptorSupplier("listWorkflowSnapshots"))
+              .build();
+        }
+      }
+    }
+    return getListWorkflowSnapshotsMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest,
+      org.aiflow.client.proto.Message.Response> getDeleteWorkflowSnapshotMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "deleteWorkflowSnapshot",
+      requestType = org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest.class,
+      responseType = org.aiflow.client.proto.Message.Response.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest,
+      org.aiflow.client.proto.Message.Response> getDeleteWorkflowSnapshotMethod() {
+    io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest, org.aiflow.client.proto.Message.Response> getDeleteWorkflowSnapshotMethod;
+    if ((getDeleteWorkflowSnapshotMethod = MetadataServiceGrpc.getDeleteWorkflowSnapshotMethod) == null) {
+      synchronized (MetadataServiceGrpc.class) {
+        if ((getDeleteWorkflowSnapshotMethod = MetadataServiceGrpc.getDeleteWorkflowSnapshotMethod) == null) {
+          MetadataServiceGrpc.getDeleteWorkflowSnapshotMethod = getDeleteWorkflowSnapshotMethod =
+              io.grpc.MethodDescriptor.<org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest, org.aiflow.client.proto.Message.Response>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "deleteWorkflowSnapshot"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.aiflow.client.proto.Message.Response.getDefaultInstance()))
+              .setSchemaDescriptor(new MetadataServiceMethodDescriptorSupplier("deleteWorkflowSnapshot"))
+              .build();
+        }
+      }
+    }
+    return getDeleteWorkflowSnapshotMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -2004,6 +2128,9 @@ public final class MetadataServiceGrpc {
     }
 
     /**
+     * <pre>
+     * workflow api
+     * </pre>
      */
     public void registerWorkflow(org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowRequest request,
         io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
@@ -2050,6 +2177,37 @@ public final class MetadataServiceGrpc {
     public void listWorkflows(org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowsRequest request,
         io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
       asyncUnimplementedUnaryCall(getListWorkflowsMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * workflow snapshot api
+     * </pre>
+     */
+    public void registerWorkflowSnapshot(org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest request,
+        io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
+      asyncUnimplementedUnaryCall(getRegisterWorkflowSnapshotMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void getWorkflowSnapshot(org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest request,
+        io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetWorkflowSnapshotMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void listWorkflowSnapshots(org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest request,
+        io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
+      asyncUnimplementedUnaryCall(getListWorkflowSnapshotsMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void deleteWorkflowSnapshot(org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest request,
+        io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
+      asyncUnimplementedUnaryCall(getDeleteWorkflowSnapshotMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -2411,6 +2569,34 @@ public final class MetadataServiceGrpc {
                 org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowsRequest,
                 org.aiflow.client.proto.Message.Response>(
                   this, METHODID_LIST_WORKFLOWS)))
+          .addMethod(
+            getRegisterWorkflowSnapshotMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest,
+                org.aiflow.client.proto.Message.Response>(
+                  this, METHODID_REGISTER_WORKFLOW_SNAPSHOT)))
+          .addMethod(
+            getGetWorkflowSnapshotMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest,
+                org.aiflow.client.proto.Message.Response>(
+                  this, METHODID_GET_WORKFLOW_SNAPSHOT)))
+          .addMethod(
+            getListWorkflowSnapshotsMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest,
+                org.aiflow.client.proto.Message.Response>(
+                  this, METHODID_LIST_WORKFLOW_SNAPSHOTS)))
+          .addMethod(
+            getDeleteWorkflowSnapshotMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest,
+                org.aiflow.client.proto.Message.Response>(
+                  this, METHODID_DELETE_WORKFLOW_SNAPSHOT)))
           .build();
     }
   }
@@ -2803,6 +2989,9 @@ public final class MetadataServiceGrpc {
     }
 
     /**
+     * <pre>
+     * workflow api
+     * </pre>
      */
     public void registerWorkflow(org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowRequest request,
         io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
@@ -2856,6 +3045,41 @@ public final class MetadataServiceGrpc {
         io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getListWorkflowsMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * workflow snapshot api
+     * </pre>
+     */
+    public void registerWorkflowSnapshot(org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest request,
+        io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getRegisterWorkflowSnapshotMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void getWorkflowSnapshot(org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest request,
+        io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetWorkflowSnapshotMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void listWorkflowSnapshots(org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest request,
+        io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getListWorkflowSnapshotsMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void deleteWorkflowSnapshot(org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest request,
+        io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getDeleteWorkflowSnapshotMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -3203,6 +3427,9 @@ public final class MetadataServiceGrpc {
     }
 
     /**
+     * <pre>
+     * workflow api
+     * </pre>
      */
     public org.aiflow.client.proto.Message.Response registerWorkflow(org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowRequest request) {
       return blockingUnaryCall(
@@ -3249,6 +3476,37 @@ public final class MetadataServiceGrpc {
     public org.aiflow.client.proto.Message.Response listWorkflows(org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowsRequest request) {
       return blockingUnaryCall(
           getChannel(), getListWorkflowsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * workflow snapshot api
+     * </pre>
+     */
+    public org.aiflow.client.proto.Message.Response registerWorkflowSnapshot(org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getRegisterWorkflowSnapshotMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.aiflow.client.proto.Message.Response getWorkflowSnapshot(org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetWorkflowSnapshotMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.aiflow.client.proto.Message.Response listWorkflowSnapshots(org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getListWorkflowSnapshotsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.aiflow.client.proto.Message.Response deleteWorkflowSnapshot(org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getDeleteWorkflowSnapshotMethod(), getCallOptions(), request);
     }
   }
 
@@ -3640,6 +3898,9 @@ public final class MetadataServiceGrpc {
     }
 
     /**
+     * <pre>
+     * workflow api
+     * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<org.aiflow.client.proto.Message.Response> registerWorkflow(
         org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowRequest request) {
@@ -3694,6 +3955,41 @@ public final class MetadataServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getListWorkflowsMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * workflow snapshot api
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.aiflow.client.proto.Message.Response> registerWorkflowSnapshot(
+        org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getRegisterWorkflowSnapshotMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.aiflow.client.proto.Message.Response> getWorkflowSnapshot(
+        org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetWorkflowSnapshotMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.aiflow.client.proto.Message.Response> listWorkflowSnapshots(
+        org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getListWorkflowSnapshotsMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.aiflow.client.proto.Message.Response> deleteWorkflowSnapshot(
+        org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getDeleteWorkflowSnapshotMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_DATASET_BY_ID = 0;
@@ -3747,6 +4043,10 @@ public final class MetadataServiceGrpc {
   private static final int METHODID_DELETE_WORKFLOW_BY_ID = 48;
   private static final int METHODID_DELETE_WORKFLOW_BY_NAME = 49;
   private static final int METHODID_LIST_WORKFLOWS = 50;
+  private static final int METHODID_REGISTER_WORKFLOW_SNAPSHOT = 51;
+  private static final int METHODID_GET_WORKFLOW_SNAPSHOT = 52;
+  private static final int METHODID_LIST_WORKFLOW_SNAPSHOTS = 53;
+  private static final int METHODID_DELETE_WORKFLOW_SNAPSHOT = 54;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -3969,6 +4269,22 @@ public final class MetadataServiceGrpc {
           serviceImpl.listWorkflows((org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowsRequest) request,
               (io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response>) responseObserver);
           break;
+        case METHODID_REGISTER_WORKFLOW_SNAPSHOT:
+          serviceImpl.registerWorkflowSnapshot((org.aiflow.client.proto.MetadataServiceOuterClass.RegisterWorkflowSnapshotRequest) request,
+              (io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response>) responseObserver);
+          break;
+        case METHODID_GET_WORKFLOW_SNAPSHOT:
+          serviceImpl.getWorkflowSnapshot((org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest) request,
+              (io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response>) responseObserver);
+          break;
+        case METHODID_LIST_WORKFLOW_SNAPSHOTS:
+          serviceImpl.listWorkflowSnapshots((org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest) request,
+              (io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response>) responseObserver);
+          break;
+        case METHODID_DELETE_WORKFLOW_SNAPSHOT:
+          serviceImpl.deleteWorkflowSnapshot((org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest) request,
+              (io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -4081,6 +4397,10 @@ public final class MetadataServiceGrpc {
               .addMethod(getDeleteWorkflowByIdMethod())
               .addMethod(getDeleteWorkflowByNameMethod())
               .addMethod(getListWorkflowsMethod())
+              .addMethod(getRegisterWorkflowSnapshotMethod())
+              .addMethod(getGetWorkflowSnapshotMethod())
+              .addMethod(getListWorkflowSnapshotsMethod())
+              .addMethod(getDeleteWorkflowSnapshotMethod())
               .build();
         }
       }

@@ -16,19 +16,20 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from ai_flow import Jsonable, Text
+from ai_flow.util.json_utils import Jsonable
+from typing import Text
 
 
-class ProjectSnapshotMeta(Jsonable):
-    """define project snapshot meta"""
+class WorkflowSnapshotMeta(Jsonable):
+    """define workflow snapshot meta"""
 
     def __init__(self,
-                 project_id: int,
+                 workflow_id: int,
                  uri: Text,
                  signature: Text,
                  create_time: int = None,
                  uuid: int = None):
-        self.project_id = project_id
+        self.workflow_id = workflow_id
         self.uri = uri
         self.signature = signature
         self.create_time = create_time
@@ -36,15 +37,14 @@ class ProjectSnapshotMeta(Jsonable):
 
     def __str__(self):
         return '<\n' \
-               'ProjectSnapshotMeta\n' \
+               'WorkflowSnapshotMeta\n' \
                'uuid:{},\n' \
-               'project_id:{},\n' \
+               'workflow_id:{},\n' \
                'uri:{},\n' \
                'signature:{},\n' \
                'create_time:{},\n' \
                '>'.format(self.uuid,
-                          self.project_id,
+                          self.workflow_id,
                           self.uri,
                           self.signature,
                           self.create_time)
-

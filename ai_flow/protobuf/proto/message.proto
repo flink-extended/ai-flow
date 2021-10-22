@@ -134,6 +134,14 @@ message WorkflowMetaProto {
     google.protobuf.StringValue graph = 8;
 }
 
+message WorkflowSnapshotProto {
+    int64 uuid = 1;
+    google.protobuf.Int64Value workflow_id = 2;
+    google.protobuf.StringValue uri = 3;
+    google.protobuf.StringValue signature = 4;
+    google.protobuf.Int64Value create_time = 5;
+}
+
 message ArtifactProto {
     int64 uuid = 1;
     string name = 2;

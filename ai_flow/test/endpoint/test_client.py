@@ -1043,6 +1043,51 @@ class AIFlowClientTestCases(object):
         self.assertEqual('auc', metric_summary.metric_key)
         self.assertEqual('0.7', metric_summary.metric_value)
 
+    def test_workflow_snapshot_operation(self):
+        project = client.register_project(name='project', uri='www.code.com')
+        workflow = client.register_workflow(name='workflow',
+                                            project_id=project.uuid,
+                                            properties=Properties({'a': 'b'}))
+        workflow2 = client.register_workflow(name='workflow2',
+                                             project_id=project.uuid,
+                                             properties=Properties({'a': 'b'}))
+        workflow_snapshot = client.register_workflow_snapshot(project_name=project.name,
+                                                              workflow_name=workflow.name,
+                                                              uri='/path/to/snapshot',
+                                                              signature='md5sum')
+        self.assertEqual(workflow_snapshot.uuid, 1)
+        snapshot = client.get_workflow_snapshot(workflow_snapshot.uuid)
+        self.assertEqual('/path/to/snapshot', snapshot.uri)
+
+        workflow_snapshot2 = client.register_workflow_snapshot(project_name=project.name,
+                                                               workflow_name=workflow.name,
+                                                               uri='/path/to/snapshot2',
+                                                               signature='md5sum2')
+        workflow_snapshot3 = client.register_workflow_snapshot(project_name=project.name,
+                                                               workflow_name=workflow2.name,
+                                                               uri='/path/to/snapshot3',
+                                                               signature='md5sum3')
+        snapshot_list = client.list_workflow_snapshots(project_name=project.name,
+                                                       workflow_name=workflow.name, page_size=5, offset=0)
+        self.assertEqual(2, len(snapshot_list))
+        self.assertEqual('/path/to/snapshot2', snapshot_list[1].uri)
+
+        client.delete_workflow_snapshot(workflow_snapshot2.uuid)
+        snapshot_list = client.list_workflow_snapshots(project_name=project.name,
+                                                       workflow_name=workflow.name, page_size=5, offset=0)
+        self.assertEqual(1, len(snapshot_list))
+        self.assertEqual('/path/to/snapshot', snapshot_list[0].uri)
+
+    def test_delete_non_existent_workflow_snapshot(self):
+        status = client.delete_workflow_snapshot(workflow_snapshot_id=10)
+        self.assertEqual(Status.ERROR, status)
+
+    def test_get_non_existent_workflow_snapshot(self):
+        response = client.get_workflow_snapshot(workflow_snapshot_id=10)
+        self.assertIsNone(response)
+        self.assertRaises(Exception, client.list_workflow_snapshots, project_name='',
+                          workflow_name='', page_size=5, offset=0)
+
     @staticmethod
     def register_workflow_job():
         project = client.register_project(name='project')

@@ -289,6 +289,8 @@ service MetadataService {
         body: "*"
         };
     };
+
+    // workflow api
     rpc registerWorkflow (RegisterWorkflowRequest) returns (Response) {
         option (google.api.http) = {
         post: "/aiflow/metadata_store/workflow/save"
@@ -326,6 +328,31 @@ service MetadataService {
     rpc listWorkflows (ListWorkflowsRequest) returns (Response) {
         option (google.api.http) = {
         get: "/aiflow/metadata_store/workflow/list"
+        };
+    }
+
+    // workflow snapshot api
+    rpc registerWorkflowSnapshot (RegisterWorkflowSnapshotRequest) returns (Response) {
+        option (google.api.http) = {
+        post: "/aiflow/metadata_store/workflow_snapshot/save"
+        body: "*"
+        };
+    }
+    rpc getWorkflowSnapshot (IdRequest) returns (Response) {
+        option (google.api.http) = {
+        post: "/aiflow/metadata_store/workflow_snapshot/delete/id"
+        body: "*"
+        };
+    }
+    rpc listWorkflowSnapshots (ListWorkflowSnapshotsRequest) returns (Response) {
+        option (google.api.http) = {
+        get: "/aiflow/metadata_store/workflow_snapshot/list"
+        };
+    }
+    rpc deleteWorkflowSnapshot (IdRequest) returns (Response) {
+        option (google.api.http) = {
+        post: "/aiflow/metadata_store/workflow_snapshot/delete/id"
+        body: "*"
         };
     }
 }
@@ -480,4 +507,19 @@ message ListWorkflowsRequest {
 message WorkflowNameRequest {
     string project_name = 1;
     string workflow_name = 2;
+}
+
+// workflow snapshot
+message RegisterWorkflowSnapshotRequest {
+    WorkflowSnapshotProto workflow_snapshot = 1;
+}
+
+message ListWorkflowSnapshotsRequest {
+    int64 workflow_id = 1;
+    int64 page_size = 2;
+    int64 offset = 3;
+}
+
+message WorkflowSnapshotListProto {
+    repeated WorkflowSnapshotProto workflow_snapshots = 1;
 }

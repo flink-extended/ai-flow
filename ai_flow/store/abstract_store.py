@@ -24,6 +24,7 @@ import cloudpickle
 from ai_flow.api.context_extractor import BroadcastAllContextExtractor
 from ai_flow.endpoint.server.high_availability import Member
 from ai_flow.meta.artifact_meta import ArtifactMeta
+from ai_flow.meta.workflow_snapshot_meta import WorkflowSnapshotMeta
 from ai_flow.meta.metric_meta import MetricMeta, MetricSummary
 from ai_flow.scheduler_service.service.workflow_execution_event_handler_state import WorkflowContextEventHandlerState
 
@@ -836,6 +837,54 @@ class AbstractStore(object):
     def list_metric_summaries(self, metric_name=None, metric_key=None, model_version=None, start_time=None,
                               end_time=None) -> Union[None, MetricSummary, List[MetricSummary]]:
         pass
+
+    """workflow snapshot api"""
+
+    def register_workflow_snapshot(self,
+                                   workflow_id: int,
+                                   uri: Text,
+                                   signature: Text):
+        """
+        register a workflow snapshot in metadata store.
+
+        :param workflow_id: the id of workflow
+        :param uri: the uri of workflow snapshot
+        :param signature: the MD5 hash of the workflow directory
+        """
+
+    def get_workflow_snapshot(self,
+                              workflow_snapshot_id: int) -> Optional[WorkflowSnapshotMeta]:
+        """
+        Get a specific workflow snapshot in metadata store by snapshot id.
+
+        :param workflow_snapshot_id: the workflow snapshot id
+        :return: A single :py:class:`ai_flow.meta.workflow_snapshot_meta.WorkflowSnapshotMeta` object
+                 if exists, Otherwise, returns None if the workflow snapshot does not exist.
+        """
+
+    def list_workflow_snapshots(self,
+                                workflow_id: int = None,
+                                page_size: int = None,
+                                offset: int = None,
+                                filters: Filters = None) -> Optional[List[WorkflowSnapshotMeta]]:
+        """
+        List workflow snapshots of the specific workflow.
+
+        :param workflow_id: the workflow id.
+        :param page_size: the limitation of the listed workflow snapshots.
+        :param offset: the offset of listed workflow snapshots.
+        :param filters: A Filter class that contains all filters to apply.
+        """
+
+    def delete_workflow_snapshot(self,
+                                 workflow_snapshot_id: int):
+        """
+        Delete the workflow snapshot by specific id
+
+        :param workflow_snapshot_id: the uuid of workflow snapshot
+        :return: Status.OK if the workflow snapshot is successfully deleted,
+                 Status.ERROR if the workflow snapshot does not exist otherwise.
+        """
 
     """For high availability:"""
 

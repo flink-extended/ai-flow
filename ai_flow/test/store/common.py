@@ -932,3 +932,33 @@ class AbstractTestStore(object):
         self.assertEqual('test_metric_summary_1', metric_summary.metric_name)
         self.assertEqual('auc', metric_summary.metric_key)
         self.assertEqual('0.7', metric_summary.metric_value)
+
+    def test_workflow_snapshot_operation(self):
+        project = self.store.register_project(name='project', uri='www.code.com')
+        workflow = self.store.register_workflow(name='workflow',
+                                                project_id=project.uuid,
+                                                properties=Properties({'a': 'b'}))
+        workflow2 = self.store.register_workflow(name='workflow2',
+                                                 project_id=project.uuid,
+                                                 properties=Properties({'a': 'b'}))
+        workflow_snapshot = self.store.register_workflow_snapshot(workflow_id=workflow.uuid,
+                                                                  uri='/path/to/snapshot',
+                                                                  signature='md5sum')
+        self.assertEqual(workflow_snapshot.uuid, 1)
+        snapshot = self.store.get_workflow_snapshot(workflow_snapshot.uuid)
+        self.assertEqual('/path/to/snapshot', snapshot.uri)
+
+        workflow_snapshot2 = self.store.register_workflow_snapshot(workflow_id=workflow.uuid,
+                                                                   uri='/path/to/snapshot2',
+                                                                   signature='md5sum2')
+        workflow_snapshot3 = self.store.register_workflow_snapshot(workflow_id=workflow2.uuid,
+                                                                   uri='/path/to/snapshot3',
+                                                                   signature='md5sum3')
+        snapshot_list = self.store.list_workflow_snapshots(workflow.uuid)
+        self.assertEqual(2, len(snapshot_list))
+        self.assertEqual('/path/to/snapshot2', snapshot_list[1].uri)
+
+        self.store.delete_workflow_snapshot(workflow_snapshot2.uuid)
+        snapshot_list = self.store.list_workflow_snapshots(workflow.uuid)
+        self.assertEqual(1, len(snapshot_list))
+        self.assertEqual('/path/to/snapshot', snapshot_list[0].uri)

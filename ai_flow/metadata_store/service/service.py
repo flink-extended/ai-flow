@@ -24,7 +24,8 @@ from ai_flow.endpoint.server.util import _wrap_meta_response, transform_dataset_
     _warp_model_relation_list_response, _warp_model_version_relation_list_response, \
     transform_model_version_relation_meta, _warp_project_list_response, transform_project_meta, catch_exception, \
     transform_model_meta, transform_model_version_meta, transform_artifact_meta, _warp_artifact_list_response, \
-    transform_workflow_meta, _wrap_workflow_list_response
+    transform_workflow_meta, _wrap_workflow_list_response, transform_workflow_snapshot_meta, \
+    _wrap_workflow_snapshot_list_response
 from ai_flow.meta.dataset_meta import DataType
 from ai_flow.metadata_store.utils.MetaToProto import MetaToProto
 from ai_flow.metadata_store.utils.ProtoToMeta import ProtoToMeta
@@ -441,3 +442,23 @@ class MetadataService(metadata_service_pb2_grpc.MetadataServiceServicer):
                                                        offset=request.offset)
         return _wrap_workflow_list_response(workflow_meta_list)
 
+    def registerWorkflowSnapshot(self, request, context):
+        workflow_snapshot = transform_workflow_snapshot_meta(request.workflow_snapshot)
+        response = self.store.register_workflow_snapshot(workflow_id=workflow_snapshot.workflow_id,
+                                                         uri=workflow_snapshot.uri,
+                                                         signature=workflow_snapshot.signature)
+        return _wrap_meta_response(MetaToProto.workflow_snapshot_meta_to_proto(response))
+
+    def getWorkflowSnapshot(self, request, context):
+        workflow_snapshot = self.store.get_workflow_snapshot(workflow_snapshot_id=request.id)
+        return _wrap_meta_response(MetaToProto.workflow_snapshot_meta_to_proto(workflow_snapshot))
+
+    def listWorkflowSnapshots(self, request, context):
+        workflow_snapshot_list = self.store.list_workflow_snapshots(workflow_id=request.workflow_id,
+                                                                    page_size=request.page_size,
+                                                                    offset=request.offset)
+        return _wrap_workflow_snapshot_list_response(workflow_snapshot_list)
+
+    def deleteWorkflowSnapshot(self, request, context):
+        status = self.store.delete_workflow_snapshot(workflow_snapshot_id=request.id)
+        return _wrap_delete_response(status)

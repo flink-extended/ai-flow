@@ -19,6 +19,7 @@
 from functools import wraps
 
 from ai_flow.meta.workflow_meta import WorkflowMeta
+from ai_flow.meta.workflow_snapshot_meta import WorkflowSnapshotMeta
 from google.protobuf.json_format import MessageToJson, Parse
 
 from ai_flow.common.status import Status
@@ -31,10 +32,10 @@ from ai_flow.metadata_store.utils.MetaToProto import MetaToProto
 from ai_flow.metadata_store.utils.ProtoToMeta import ProtoToMeta
 from ai_flow.protobuf.message_pb2 import Response, SUCCESS, ReturnCode, RESOURCE_DOES_NOT_EXIST, \
     DatasetProto, ModelProto, ModelVersionProto, ProjectProto, INTERNAL_ERROR, \
-    DataTypeProto, ArtifactProto, WorkflowMetaProto
+    DataTypeProto, ArtifactProto, WorkflowMetaProto, WorkflowSnapshotProto
 from ai_flow.protobuf.metadata_service_pb2 import DatasetListProto, \
     ProjectListProto, ModelVersionRelationListProto, ModelRelationListProto, ModelVersionListProto, \
-    ArtifactListProto, WorkflowListProto
+    ArtifactListProto, WorkflowListProto, WorkflowSnapshotListProto
 from ai_flow.endpoint.server.exception import AIFlowException
 from ai_flow.store.sqlalchemy_store import UPDATE_FAIL
 
@@ -191,6 +192,25 @@ def _unwrap_workflow_list_response(response):
         raise AIFlowException(response.return_msg)
 
 
+def _unwrap_workflow_snapshot_response(response):
+    if response.return_code == str(SUCCESS):
+        return ProtoToMeta.proto_to_workflow_snapshot_meta(Parse(response.data, WorkflowSnapshotProto()))
+    elif response.return_code == str(RESOURCE_DOES_NOT_EXIST):
+        return None
+    else:
+        raise AIFlowException(response.return_msg)
+
+
+def _unwrap_workflow_snapshot_list_response(response):
+    if response.return_code == str(SUCCESS):
+        workflow_snapshot_proto_list = Parse(response.data, WorkflowSnapshotListProto())
+        return ProtoToMeta.proto_to_workflow_snapshot_meta_list(workflow_snapshot_proto_list.workflow_snapshots)
+    elif response.return_code == str(RESOURCE_DOES_NOT_EXIST):
+        return None
+    else:
+        raise AIFlowException(response.return_msg)
+
+
 def _unwrap_artifact_response(response):
     if response.return_code == str(SUCCESS):
         return ProtoToMeta.proto_to_artifact_meta(Parse(response.data, ArtifactProto()))
@@ -324,6 +344,18 @@ def _wrap_workflow_list_response(workflow_list):
                         data=None)
 
 
+def _wrap_workflow_snapshot_list_response(workflow_snapshot_list):
+    if workflow_snapshot_list is not None:
+        workflow_snapshot_proto_list = MetaToProto.workflow_snapshot_meta_list_to_proto(workflow_snapshot_list)
+        return Response(return_code=str(SUCCESS), return_msg=ReturnCode.Name(SUCCESS).lower(),
+                        data=MessageToJson(WorkflowSnapshotListProto(workflow_snapshots=workflow_snapshot_proto_list),
+                                           preserving_proto_field_name=True))
+    else:
+        return Response(return_code=str(RESOURCE_DOES_NOT_EXIST),
+                        return_msg=ReturnCode.Name(RESOURCE_DOES_NOT_EXIST).lower(),
+                        data=None)
+
+
 def _warp_artifact_list_response(artifact_list):
     if artifact_list is not None:
         artifact_proto_list = MetaToProto.artifact_meta_list_to_proto(artifact_list)
@@ -393,6 +425,14 @@ def transform_workflow_meta(workflow_proto) -> WorkflowMeta:
                         context_extractor_in_bytes=workflow_proto.context_extractor_in_bytes,
                         graph=workflow_proto.graph.value if workflow_proto.HasField('graph') else None
                         )
+
+
+def transform_workflow_snapshot_meta(proto) -> WorkflowSnapshotMeta:
+    return WorkflowSnapshotMeta(workflow_id=proto.workflow_id.value if proto.HasField('workflow_id') else None,
+                                uri=proto.uri.value if proto.HasField('uri') else None,
+                                signature=proto.signature.value if proto.HasField('signature') else None,
+                                create_time=proto.create_time.value if proto.HasField('create_time') else None
+                                )
 
 
 def transform_artifact_meta(artifact_proto) -> ArtifactMeta:
