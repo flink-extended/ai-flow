@@ -77,7 +77,7 @@ class EventBasedScheduler(LoggingMixin):
                  task_event_manager: DagRunEventManager,
                  executor: BaseExecutor,
                  notification_client: NotificationClient,
-                 server_uri: str,
+                 notification_server_uri: str,
                  context=None,
                  periodic_manager: PeriodicManager = None):
         super().__init__(context)
@@ -90,7 +90,7 @@ class EventBasedScheduler(LoggingMixin):
         self._timer_handler = None
         self.timers = sched.scheduler()
         self.periodic_manager = periodic_manager
-        self.server_uri = server_uri
+        self.notification_server_uri = notification_server_uri
 
     def sync(self):
 
@@ -622,13 +622,13 @@ class EventBasedSchedulerJob(BaseJob):
     __mapper_args__ = {'polymorphic_identity': 'EventBasedSchedulerJob'}
 
     def __init__(self, dag_directory,
-                 server_uri=None,
+                 notification_server_uri=None,
                  event_start_time=None,
                  max_runs=-1,
                  refresh_dag_dir_interval=conf.getint('scheduler', 'refresh_dag_dir_interval', fallback=1),
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.log.info("Starting event based scheduler with notification server uri: {}".format(server_uri))
+        self.log.info("Starting event based scheduler with notification server uri: {}".format(notification_server_uri))
         self.mailbox: Mailbox = Mailbox()
         self.dag_trigger: DagTrigger = DagTrigger(
             dag_directory=dag_directory,
@@ -637,12 +637,12 @@ class EventBasedSchedulerJob(BaseJob):
             pickle_dags=False,
             mailbox=self.mailbox,
             refresh_dag_dir_interval=refresh_dag_dir_interval,
-            notification_service_uri=server_uri
+            notification_service_uri=notification_server_uri
         )
         self.task_event_manager = DagRunEventManager(self.mailbox)
         self.executor.set_mailbox(self.mailbox)
-        self.executor.set_server_uri(server_uri)
-        self.notification_client: NotificationClient = NotificationClient(server_uri=server_uri,
+        self.executor.set_notification_server_uri(notification_server_uri)
+        self.notification_client: NotificationClient = NotificationClient(server_uri=notification_server_uri,
                                                                           default_namespace=SCHEDULER_NAMESPACE)
         self.periodic_manager = PeriodicManager(self.mailbox)
         self.scheduler: EventBasedScheduler = EventBasedScheduler(
@@ -651,7 +651,7 @@ class EventBasedSchedulerJob(BaseJob):
             self.task_event_manager,
             self.executor,
             self.notification_client,
-            server_uri,
+            notification_server_uri,
             None,
             self.periodic_manager
         )

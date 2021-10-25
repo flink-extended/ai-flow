@@ -50,7 +50,7 @@ class LocalTaskJob(BaseJob):
         mark_success: bool = False,
         pickle_id: Optional[str] = None,
         pool: Optional[str] = None,
-        server_uri: str = None,
+        notification_server_uri: str = None,
         *args,
         **kwargs,
     ):
@@ -64,7 +64,7 @@ class LocalTaskJob(BaseJob):
         self.pickle_id = pickle_id
         self.mark_success = mark_success
         self.task_runner = None
-        self.server_uri = server_uri
+        self.notification_server_uri = notification_server_uri
 
         # terminating state is used so that a job don't try to
         # terminate multiple times
@@ -98,11 +98,11 @@ class LocalTaskJob(BaseJob):
             return
 
         try:
-            if self.server_uri is not None:
+            if self.notification_server_uri is not None:
                 try:
                     self._send_task_status_change_event()
                 except Exception as e:
-                    self.log.warning("failed to send event to {}".format(self.server_uri), exc_info=e)
+                    self.log.warning("failed to send event to {}".format(self.notification_server_uri), exc_info=e)
             self.task_runner.start()
 
             heartbeat_time_limit = conf.getint('scheduler', 'scheduler_zombie_task_threshold')
@@ -153,7 +153,7 @@ class LocalTaskJob(BaseJob):
                 self.task_instance.try_number
             )
             event = task_status_changed_event.to_event()
-            client = NotificationClient(self.server_uri, default_namespace=event.namespace, sender=event.sender)
+            client = NotificationClient(self.notification_server_uri, default_namespace=event.namespace, sender=event.sender)
             self.log.info("LocalTaskJob sending event: {}".format(event))
             client.send_event(event)
         finally:

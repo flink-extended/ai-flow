@@ -503,7 +503,7 @@ scheduler:
   # Command to use when running the Airflow scheduler (templated).
   command: ~
   # Args to use when running the Airflow scheduler (templated).
-  args: ["bash", "-c", "start-aiflow.sh && python -c 'from airflow.utils.serve_logs import serve_logs;serve_logs()' > /var/log/serve_log.log 2>&1 & exec airflow event_scheduler --subdir={{ .Values.ai_flow.airflow_deploy_path }} --server-uri={{ .Release.Name }}-notification:50052"]
+  args: ["bash", "-c", "start-aiflow.sh && python -c 'from airflow.utils.serve_logs import serve_logs;serve_logs()' > /var/log/serve_log.log 2>&1 & exec airflow event_scheduler --subdir={{ .Values.ai_flow.airflow_deploy_path }} --notification-server-uri={{ .Release.Name }}-notification:50052"]
 
   # Update Strategy when scheduler is deployed as a StatefulSet
   # (when using LocalExecutor and workers.persistence)
@@ -644,7 +644,7 @@ webserver:
   # Command to use when running the Airflow webserver (templated).
   command: ~
   # Args to use when running the Airflow webserver (templated).
-  args: ["bash", "-c", "exec airflow webserver --server-uri={{ .Release.Name }}-notification:50052"]
+  args: ["bash", "-c", "exec airflow webserver --notification-server-uri={{ .Release.Name }}-notification:50052"]
 
   # Create ServiceAccount
   serviceAccount:

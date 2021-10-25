@@ -344,7 +344,8 @@ def webserver(args):
 
     if args.debug:
         print(f"Starting the web server on port {args.port} and host {args.hostname}.")
-        app = create_app(testing=conf.getboolean('core', 'unit_test_mode'), server_uri=args.server_uri)
+        app = create_app(testing=conf.getboolean('core', 'unit_test_mode'),
+                         notification_server_uri=args.notification_server_uri)
         app.run(
             debug=True,
             use_reloader=not app.config['TESTING'],
@@ -452,7 +453,7 @@ def webserver(args):
                 ),
             ).start()
 
-        os.environ['SERVER_URI'] = args.server_uri
+        os.environ['NOTIFICATION_SERVER_URI'] = args.notification_server_uri
 
         if args.daemon:
             handle = setup_logging(log_file)

@@ -147,8 +147,8 @@ ARG_SUBDIR = Arg(
     ),
     default='[AIRFLOW_HOME]/dags' if BUILD_DOCS else settings.DAGS_FOLDER,
 )
-ARG_SERVER_URI = Arg(
-    ("--server-uri",),
+ARG_NOTIFICATION_SERVER_URI = Arg(
+    ("--notification-server-uri",),
     help=(
         "Notification service server uri."
     ),
@@ -985,7 +985,7 @@ TASKS_COMMANDS = (
             ARG_JOB_ID,
             ARG_INTERACTIVE,
             ARG_SHUT_DOWN_LOGGING,
-            ARG_SERVER_URI,
+            ARG_NOTIFICATION_SERVER_URI,
             ARG_DAG_SHA1_HASH,
             ARG_LOAD_DAG_FROM_DB
         ),
@@ -1447,7 +1447,7 @@ airflow_commands: List[CLICommand] = [
             ARG_SSL_CERT,
             ARG_SSL_KEY,
             ARG_DEBUG,
-            ARG_SERVER_URI,
+            ARG_NOTIFICATION_SERVER_URI
         ),
     ),
     ActionCommand(
@@ -1463,7 +1463,7 @@ airflow_commands: List[CLICommand] = [
             ARG_STDOUT,
             ARG_STDERR,
             ARG_LOG_FILE,
-            ARG_SERVER_URI,
+            ARG_NOTIFICATION_SERVER_URI,
         ),
         epilog=(
             'Signals:\n'
@@ -1480,7 +1480,7 @@ airflow_commands: List[CLICommand] = [
         func=lazy_load_command('airflow.cli.commands.event_based_scheduler_command.event_based_scheduler'),
         args=(
             ARG_SUBDIR,
-            ARG_SERVER_URI,
+            ARG_NOTIFICATION_SERVER_URI,
             ARG_EVENT_START_TIME,
             ARG_NUM_RUNS,
             ARG_DO_PICKLE,
