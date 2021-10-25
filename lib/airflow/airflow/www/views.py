@@ -435,10 +435,11 @@ class AirflowBaseView(BaseView):  # noqa: D101
 class Airflow(AirflowBaseView):  # noqa: D101  pylint: disable=too-many-public-methods
     """Main Airflow application."""
 
-    def __init__(self, server_uri=None, **kwargs):
+    def __init__(self, notification_server_uri=None, **kwargs):
         super().__init__(**kwargs)
-        if server_uri:
-            self.notification_client: NotificationClient = NotificationClient(server_uri, SCHEDULER_NAMESPACE)
+        if notification_server_uri:
+            self.notification_client: NotificationClient = NotificationClient(notification_server_uri,
+                                                                              SCHEDULER_NAMESPACE)
 
     @expose('/health')
     def health(self):

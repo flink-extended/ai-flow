@@ -48,9 +48,9 @@ class ResponseWatcher(EventWatcher):
 
 
 class EventSchedulerClient(object):
-    def __init__(self, server_uri=None, namespace=None, ns_client=None):
+    def __init__(self, notification_server_uri=None, namespace=None, ns_client=None):
         if ns_client is None:
-            self.ns_client = NotificationClient(server_uri, namespace)
+            self.ns_client = NotificationClient(notification_server_uri, namespace)
         else:
             self.ns_client = ns_client
 

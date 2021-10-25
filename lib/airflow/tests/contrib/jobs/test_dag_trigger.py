@@ -81,18 +81,18 @@ class TestDagTrigger(unittest.TestCase):
 
     def test_user_trigger_parse_dag(self):
         port = 50101
-        service_uri = 'localhost:{}'.format(port)
+        notification_server_uri = 'localhost:{}'.format(port)
         storage = MemoryEventStorage()
         master = NotificationMaster(NotificationService(storage), port)
         master.run()
         mailbox = Mailbox()
-        dag_trigger = DagTrigger("../../dags/test_scheduler_dags.py", -1, [], False, mailbox, 5, service_uri)
+        dag_trigger = DagTrigger("../../dags/test_scheduler_dags.py", -1, [], False, mailbox, 5, notification_server_uri)
         dag_trigger.start()
         message = mailbox.get_message()
         message = SchedulerInnerEventUtil.to_inner_event(message)
         # only one dag is executable
         assert "test_task_start_date_scheduling" == message.dag_id
-        sc = EventSchedulerClient(server_uri=service_uri, namespace='a')
+        sc = EventSchedulerClient(notification_server_uri=notification_server_uri, namespace='a')
         sc.trigger_parse_dag()
         dag_trigger.end()
         master.stop()
@@ -114,13 +114,13 @@ class TestDagTrigger(unittest.TestCase):
     def test_trigger_parse_dag(self):
         import os
         port = 50102
-        server_uri = "localhost:{}".format(port)
+        notification_server_uri = "localhost:{}".format(port)
         storage = MemoryEventStorage()
         master = NotificationMaster(NotificationService(storage), port)
         master.run()
         dag_folder = os.path.abspath(os.path.dirname(__file__)) + "/../../dags"
         mailbox = Mailbox()
-        dag_trigger = DagTrigger(dag_folder, -1, [], False, mailbox, notification_service_uri=server_uri)
+        dag_trigger = DagTrigger(dag_folder, -1, [], False, mailbox, notification_service_uri=notification_server_uri)
         dag_trigger.start()
 
         to_be_triggered = [dag_folder + "/test_event_based_scheduler.py",
@@ -129,12 +129,12 @@ class TestDagTrigger(unittest.TestCase):
                            dag_folder + "/test_scheduler_dags.py",
                            ]
         for file in to_be_triggered:
-            self._send_request_and_receive_response(server_uri, file)
+            self._send_request_and_receive_response(notification_server_uri, file)
         dag_trigger.end()
 
-    def _send_request_and_receive_response(self, server_uri, file_path):
+    def _send_request_and_receive_response(self, notification_server_uri, file_path):
         key = '{}_{}'.format(file_path, time.time_ns())
-        client = NotificationClient(server_uri=server_uri,
+        client = NotificationClient(server_uri=notification_server_uri,
                                     default_namespace=SCHEDULER_NAMESPACE)
         event = BaseEvent(key=key,
                           event_type=SchedulerInnerEventType.PARSE_DAG_REQUEST.value,

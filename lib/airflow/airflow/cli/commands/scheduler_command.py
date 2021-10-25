@@ -44,7 +44,7 @@ def scheduler(args):
     elif scheduler_name == SchedulerFactory.EVENT_BASED_SCHEDULER:
         job = EventBasedSchedulerJob(
             dag_directory=process_subdir(args.subdir),
-            server_uri=args.server_uri)
+            notification_server_uri=args.notification_server_uri)
     else:
         scheduler_class = SchedulerFactory.get_default_scheduler()
         job = scheduler_class()
