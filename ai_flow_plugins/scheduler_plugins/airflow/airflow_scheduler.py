@@ -101,7 +101,7 @@ class AirFlowSchedulerBase(Scheduler, ABC):
     @property
     def airflow_client(self):
         if self._airflow_client is None:
-            self._airflow_client = EventSchedulerClient(server_uri=self.config.get('notification_service_uri'),
+            self._airflow_client = EventSchedulerClient(notification_server_uri=self.config.get('notification_service_uri'),
                                                         namespace=SCHEDULER_NAMESPACE)
         return self._airflow_client
 

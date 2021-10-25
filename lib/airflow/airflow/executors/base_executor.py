@@ -71,13 +71,13 @@ class BaseExecutor(LoggingMixin):
         self.running: Set[TaskInstanceKey] = set()
         self.event_buffer: Dict[TaskInstanceKey, EventBufferValueType] = {}
         self._mailbox = None
-        self._server_uri = None
+        self._notification_server_uri = None
 
     def set_mailbox(self, mailbox):
         self._mailbox = mailbox
 
-    def set_server_uri(self, server_uri):
-        self._server_uri = server_uri
+    def notification_server_uri(self, notification_server_uri):
+        self._notification_server_uri = notification_server_uri
 
     def start(self):  # pragma: no cover
         """Executors may need to get things started."""
@@ -188,7 +188,7 @@ class BaseExecutor(LoggingMixin):
             pool=ti.pool,
             file_path=ti.dag_model.fileloc,
             pickle_id=ti.dag_model.pickle_id,
-            server_uri=self._server_uri,
+            notification_server_uri=self._notification_server_uri,
         )
         if ti.is_active is False:
             ti.reset_to_active()

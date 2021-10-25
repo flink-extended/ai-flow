@@ -116,7 +116,7 @@ def _run_task_by_local_task_job(args, ti):
         ignore_task_deps=args.ignore_dependencies,
         ignore_ti_state=args.force,
         pool=args.pool,
-        server_uri=args.server_uri
+        notification_server_uri=args.notification_server_uri
     )
     try:
         run_job.run()
@@ -151,7 +151,7 @@ def _run_raw_task(args, ti):
         mark_success=args.mark_success,
         job_id=args.job_id,
         pool=args.pool,
-        notification_server_uri=args.server_uri
+        notification_server_uri=args.notification_server_uri
     )
 
 

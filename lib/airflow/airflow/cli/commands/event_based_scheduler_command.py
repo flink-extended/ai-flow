@@ -33,7 +33,7 @@ def event_based_scheduler(args):
     print(settings.HEADER)
     job = EventBasedSchedulerJob(
         dag_directory=process_subdir(args.subdir),
-        server_uri=args.server_uri,
+        notification_server_uri=args.notification_server_uri,
         event_start_time=args.event_start_time
     )
 
