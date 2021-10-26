@@ -92,13 +92,13 @@ init_airflow_config "$MYSQL_CONN"
 
 echo "Starting Airflow Scheduler"
 SCHEDULER_LOG_FILE_NAME=scheduler-$(date "+%Y%m%d-%H%M%S").log
-airflow event_scheduler --subdir="${AIRFLOW_DAG_DIR}" --server-uri="${NOTIFICATION_SERVER_URI}" > "${AIRFLOW_LOG_DIR}"/"${SCHEDULER_LOG_FILE_NAME}" 2>&1 &
+airflow event_scheduler --subdir="${AIRFLOW_DAG_DIR}" --notification-server-uri="${NOTIFICATION_SERVER_URI}" > "${AIRFLOW_LOG_DIR}"/"${SCHEDULER_LOG_FILE_NAME}" 2>&1 &
 echo $! > "${AIRFLOW_PID_DIR}"/scheduler.pid
 echo "Airflow Scheduler started"
 
 echo "Starting Airflow Web Server"
 WEB_SERVER_LOG_FILE_NAME=web-$(date "+%Y%m%d-%H%M%S").log
-airflow webserver -p 8080 --server-uri="${NOTIFICATION_SERVER_URI}" > "${AIRFLOW_LOG_DIR}"/"${WEB_SERVER_LOG_FILE_NAME}" 2>&1 &
+airflow webserver -p 8080 --notification-server-uri="${NOTIFICATION_SERVER_URI}" > "${AIRFLOW_LOG_DIR}"/"${WEB_SERVER_LOG_FILE_NAME}" 2>&1 &
 echo $! > "${AIRFLOW_PID_DIR}"/web.pid
 wait_for_airflow_web_server "${WEB_SERVER_LOG_FILE_NAME}"
 echo "Airflow Web Server started"

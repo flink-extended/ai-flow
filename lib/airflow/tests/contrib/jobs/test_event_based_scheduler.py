@@ -166,7 +166,7 @@ class TestEventBasedScheduler(unittest.TestCase):
     def start_scheduler(self, file_path, event_start_time=int(time.time()*1000)):
         self.scheduler = EventBasedSchedulerJob(
             dag_directory=file_path,
-            server_uri="localhost:{}".format(self.port),
+            notification_server_uri="localhost:{}".format(self.port),
             event_start_time=event_start_time,
             executor=LocalExecutor(3),
             max_runs=-1,
@@ -613,7 +613,7 @@ class TestEventBasedScheduler(unittest.TestCase):
         dag_file = os.path.join(TEST_DAG_FOLDER, 'test_dag_context_extractor.py')
         scheduler = EventBasedSchedulerJob(
             dag_directory=dag_file,
-            server_uri="localhost:{}".format(self.port),
+            notification_server_uri="localhost:{}".format(self.port),
             executor=LocalExecutor(3),
             max_runs=-1,
             refresh_dag_dir_interval=30
@@ -643,7 +643,7 @@ class TestEventBasedScheduler(unittest.TestCase):
         dag_file = os.path.join(TEST_DAG_FOLDER, 'test_dag_context_extractor_throw_exception.py')
         scheduler = EventBasedSchedulerJob(
             dag_directory=dag_file,
-            server_uri="localhost:{}".format(self.port),
+            notification_server_uri="localhost:{}".format(self.port),
             executor=LocalExecutor(3),
             max_runs=-1,
             refresh_dag_dir_interval=30
@@ -667,7 +667,7 @@ class TestEventBasedScheduler(unittest.TestCase):
         dag_file = os.path.join(TEST_DAG_FOLDER, 'test_event_based_executor.py')
         scheduler = EventBasedSchedulerJob(
             dag_directory=dag_file,
-            server_uri="localhost:{}".format(self.port),
+            notification_server_uri="localhost:{}".format(self.port),
             executor=LocalExecutor(3),
             max_runs=-1,
             refresh_dag_dir_interval=30
