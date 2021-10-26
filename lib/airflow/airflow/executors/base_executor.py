@@ -76,7 +76,7 @@ class BaseExecutor(LoggingMixin):
     def set_mailbox(self, mailbox):
         self._mailbox = mailbox
 
-    def notification_server_uri(self, notification_server_uri):
+    def set_notification_server_uri(self, notification_server_uri):
         self._notification_server_uri = notification_server_uri
 
     def start(self):  # pragma: no cover
