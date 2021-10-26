@@ -359,6 +359,7 @@ class SqlWorkflowSnapshot(base, Base):
     signature = Column(String(1000))
     create_time = Column(BigInteger)
 
+    UniqueConstraint(workflow_id, signature)
     workflow = relationship("SqlWorkflow", backref=backref('workflow_snapshot', cascade='all'))
 
     def __repr__(self):
