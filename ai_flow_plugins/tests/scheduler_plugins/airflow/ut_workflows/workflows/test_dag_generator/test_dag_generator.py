@@ -24,11 +24,13 @@ import ai_flow as af
 from ai_flow.workflow.control_edge import JobAction
 from ai_flow.workflow.status import Status
 from ai_flow.test.api.mock_plugins import MockJobFactory
+from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
 
 
 class TestDagGenerator(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        cls.ns_server = start_notification_server()
         config_file = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '/master.yaml'
         cls.master = AIFlowServerRunner(config_file=config_file)
         cls.master.start()
@@ -36,6 +38,7 @@ class TestDagGenerator(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         cls.master.stop()
+        stop_notification_server(cls.ns_server)
 
     def setUp(self):
         self.master._clear_db()

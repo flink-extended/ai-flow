@@ -24,6 +24,7 @@ import os
 import sys
 import tempfile
 import threading
+import time
 from concurrent import futures
 from typing import Dict
 
@@ -44,8 +45,6 @@ from ai_flow.store.db.base_model import base
 from ai_flow.store.db.db_util import extract_db_engine_from_uri, create_db_store
 from ai_flow.store.mongo_store import MongoStoreConnManager
 from ai_flow.store.sqlalchemy_store import SqlAlchemyStore
-from notification_service.proto import notification_service_pb2_grpc
-from notification_service.service import NotificationService
 
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../../..")))
 
@@ -62,7 +61,6 @@ class AIFlowServer(object):
     """
 
     def __init__(self, store_uri=None, port=_PORT,
-                 start_default_notification: bool = True,
                  notification_uri=None,
                  start_meta_service: bool = True,
                  start_model_center_service: bool = True,
@@ -78,16 +76,10 @@ class AIFlowServer(object):
         self.db_type = DBType.value_of(extract_db_engine_from_uri(store_uri))
         self.executor = Executor(futures.ThreadPoolExecutor(max_workers=10))
         self.server = grpc.server(self.executor)
-        self.start_default_notification = start_default_notification
         self.enabled_ha = enabled_ha
         self.start_scheduler_service = start_scheduler_service
         server_uri = 'localhost:{}'.format(port)
-        notification_uri = server_uri if start_default_notification and notification_uri is None else notification_uri
-        if start_default_notification:
-            logging.info("start default notification service.")
-            notification_service_pb2_grpc.add_NotificationServiceServicer_to_server(
-                NotificationService.from_storage_uri(store_uri),
-                self.server)
+
         if start_model_center_service:
             logging.info("start model center service.")
 
@@ -170,6 +162,7 @@ class AIFlowServer(object):
         if self.db_type == DBType.SQLITE:
             store = SqlAlchemyStore(self.store_uri)
             base.metadata.drop_all(store.db_engine)
+            time.sleep(1)
             base.metadata.create_all(store.db_engine)
         elif self.db_type == DBType.MONGODB:
             MongoStoreConnManager().drop_all()

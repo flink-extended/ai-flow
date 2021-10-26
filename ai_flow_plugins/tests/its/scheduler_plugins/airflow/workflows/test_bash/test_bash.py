@@ -34,6 +34,7 @@ from ai_flow_plugins.job_plugins import bash
 from ai_flow_plugins.tests.airflow_scheduler_utils import run_ai_flow_workflow, get_dag_id, \
     get_workflow_execution_info, set_workflow_execution_info, start_airflow_web_server
 from ai_flow_plugins.tests import airflow_db_utils
+from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
 import ai_flow as af
 
 project_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -110,6 +111,7 @@ class TestBash(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        cls.ns_server = start_notification_server()
         airflow_path = '/tmp/airflow_deploy'
         if os.path.exists(airflow_path):
             shutil.rmtree(airflow_path)
@@ -130,6 +132,7 @@ class TestBash(unittest.TestCase):
         cls.web_process.kill()
         time.sleep(5)
         cls.master.stop()
+        stop_notification_server(cls.ns_server)
 
     def setUp(self):
         airflow_db_utils.clear_all()

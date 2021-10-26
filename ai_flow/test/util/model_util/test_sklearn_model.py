@@ -33,6 +33,7 @@ from notification_service.base_notification import EventWatcher
 from ai_flow.util.model_util.model_util import load_scikit_learn_model
 from ai_flow.client.ai_flow_client import AIFlowClient
 from ai_flow.endpoint.server.server import AIFlowServer
+from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server, _NS_URI
 
 ModelWithData = namedtuple('ModelWithData', ['model', 'inference_data'])
 
@@ -61,16 +62,18 @@ def save_model(sk_model, output_path, serialization_format):
 class TestSklearnModel(unittest.TestCase):
 
     def setUp(self) -> None:
+        self.ns_server = start_notification_server()
         if os.path.exists(_SQLITE_DB_FILE):
             os.remove(_SQLITE_DB_FILE)
         self.server = AIFlowServer(store_uri=_SQLITE_DB_URI, port=_PORT, start_scheduler_service=False)
         self.server.run()
-        self.client = AIFlowClient(server_uri='localhost:' + _PORT)
+        self.client = AIFlowClient(server_uri='localhost:' + _PORT, notification_service_uri=_NS_URI)
 
     def tearDown(self) -> None:
         self.client.stop_listen_event()
         self.server.stop()
         os.remove(_SQLITE_DB_FILE)
+        stop_notification_server(self.ns_server)
 
     def test_save_and_load_model(self):
         knn_model = fit_model()

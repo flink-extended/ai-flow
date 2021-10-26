@@ -70,6 +70,7 @@ public class AIFlowClientTest {
     @BeforeAll
     public static void beforeClass() throws Exception {
         int port = Integer.valueOf(getProperties("port"));
+        int nsPort = Integer.valueOf(getProperties("ns_port"));
         client =
                 new AIFlowClient(
                         LOCALHOST + ":" + port,
@@ -78,7 +79,8 @@ public class AIFlowClientTest {
                         false,
                         1 * SEC,
                         1 * SEC,
-                        1 * SEC);
+                        1 * SEC,
+                        LOCALHOST + ":" + nsPort);
     }
 
     @AfterAll
