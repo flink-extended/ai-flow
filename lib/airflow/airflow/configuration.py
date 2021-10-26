@@ -228,6 +228,7 @@ class AirflowConfigParser(ConfigParser):  # pylint: disable=too-many-ancestors
         is_executor_without_sqlite_support = self.get("core", "executor") not in (
             'DebugExecutor',
             'SequentialExecutor',
+            'LocalExecutor',
         )
         is_sqlite = "sqlite" in self.get('core', 'sql_alchemy_conn')
         if is_executor_without_sqlite_support and is_sqlite:
