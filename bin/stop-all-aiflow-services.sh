@@ -19,10 +19,12 @@
 ##
 set -e
 
-BIN=`dirname "${BASH_SOURCE-$0}"`
-BIN=`cd "$BIN"; pwd`
+BIN=$(dirname "${BASH_SOURCE-$0}")
+BIN=$(cd "$BIN"; pwd)
 
-${BIN}/stop-aiflow.sh
+"${BIN}"/stop-aiflow.sh
 
-${BIN}/stop-airflow.sh
+"${BIN}"/stop-airflow.sh
+
+"${BIN}"/stop-notification.sh
 

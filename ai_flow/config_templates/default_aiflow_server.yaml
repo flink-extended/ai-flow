@@ -18,7 +18,7 @@
 # Config of AIFlow server
 
 # port of AIFlow server
-server_port: 50051
+server_port: {AIFLOW_PORT}
 # uri of database backend for AIFlow server
 db_uri: {AIFLOW_DB_CONN}
 # type of database backend for AIFlow server, can be SQL_LITE, MYSQL, MONGODB
@@ -29,10 +29,8 @@ db_type: {AIFLOW_DB_TYPE}
 # TTL of the heartbeat of a server, i.e., if the server hasn't send heartbeat for the TTL time, it is down.
 #ha_ttl_ms: 10000
 
-# whether to start the default notification service, default is True
-# start_default_notification: True
-# uri of the notification service. Use the server_uri if not set.
-# notification_uri: localhost:50051
+# uri of the notification service
+notification_uri: {NOTIFICATION_SERVER_URI}
 
 # whether to start the metadata service, default is True
 #start_meta_service: True
@@ -52,6 +50,6 @@ scheduler_service:
     scheduler_class: ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.AirFlowScheduler
     scheduler_config:
       # AirFlow dag file deployment directory, i.e., where the airflow dag will be.
-      airflow_deploy_path: {AIFLOW_HOME}/airflow_deploy
+      airflow_deploy_path: {AIRFLOW_DAG_DIR}
       # Notification service uri used by the AirFlowScheduler.
       notification_service_uri: {NOTIFICATION_SERVER_URI}
