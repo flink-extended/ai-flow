@@ -27,7 +27,7 @@ import ai_flow
 from airflow.logging_config import configure_logging
 
 
-def create_default_sever_config(root_dir_path, param: Dict[str, str]):
+def create_default_sever_config(root_dir_path):
     """
     Generate default server config which use Apache Airflow as scheduler.
     """
@@ -43,7 +43,7 @@ def create_default_sever_config(root_dir_path, param: Dict[str, str]):
 
     aiflow_server_config_target_path = os.path.join(root_dir_path, "aiflow_server.yaml")
     with open(aiflow_server_config_path, encoding='utf-8') as config_file:
-        default_config = config_file.read().format(**param)
+        default_config = config_file.read().format(**{'AIFLOW_HOME': root_dir_path})
     with open(aiflow_server_config_target_path, mode='w', encoding='utf-8') as f:
         f.write(default_config)
     return aiflow_server_config_target_path
@@ -72,9 +72,6 @@ if __name__ == '__main__':
     aiflow_server_config = os.environ["AIFLOW_HOME"] + "/aiflow_server.yaml"
     if not os.path.exists(aiflow_server_config):
         logging.info("{} does not exist, creating the default aiflow server config".format(aiflow_server_config))
-        required_env = {'AIFLOW_HOME', 'AIFLOW_DB_CONN', 'AIFLOW_DB_TYPE'}
-        for key in required_env:
-            if key not in os.environ:
-                raise Exception("Failed to create default aiflow server config, {} env variable not set.".format(key))
-        aiflow_server_config = create_default_sever_config(os.environ["AIFLOW_HOME"], os.environ.copy())
+        aiflow_server_config = create_default_sever_config(os.environ["AIFLOW_HOME"])
+
     start_master(aiflow_server_config)

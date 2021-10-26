@@ -18,11 +18,11 @@
 # Config of AIFlow server
 
 # port of AIFlow server
-server_port: {AIFLOW_PORT}
+server_port: 50051
 # uri of database backend for AIFlow server
-db_uri: {AIFLOW_DB_CONN}
+db_uri: sqlite:///{AIFLOW_HOME}/aiflow.db
 # type of database backend for AIFlow server, can be SQL_LITE, MYSQL, MONGODB
-db_type: {AIFLOW_DB_TYPE}
+db_type: SQL_LITE
 
 # High availability is disabled by default
 #enable_ha: false
@@ -30,7 +30,7 @@ db_type: {AIFLOW_DB_TYPE}
 #ha_ttl_ms: 10000
 
 # uri of the notification service
-notification_uri: {NOTIFICATION_SERVER_URI}
+notification_uri: 127.0.0.1:50052
 
 # whether to start the metadata service, default is True
 #start_meta_service: True
@@ -54,7 +54,7 @@ scheduler_service:
       #airflow_deploy_path: /tmp/dags
 
       # Notification service uri used by the AirFlowScheduler.
-      notification_service_uri: {NOTIFICATION_SERVER_URI}
+      notification_service_uri: 127.0.0.1:50052
 
 # web server config
 web_server:
