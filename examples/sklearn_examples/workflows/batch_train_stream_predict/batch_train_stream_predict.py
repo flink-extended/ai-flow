@@ -19,6 +19,7 @@
 import os
 
 import ai_flow as af
+from ai_flow import ValueCondition, JobAction
 from ai_flow.model_center.entity.model_version_stage import ModelVersionEventType
 from ai_flow.util.path_util import get_file_dir
 from batch_train_stream_predict_executor import DatasetReader, DatasetTransformer, ModelTrainer, \
@@ -50,7 +51,8 @@ def run_workflow():
         train_model = af.register_model(model_name=artifact_prefix + 'logistic-regression',
                                         model_desc='logistic regression model')
         train_channel = af.train(input=[train_transform],
-                                 training_processor=ModelTrainer(),
+                                 training_processor=
+                                 ModelTrainer(af.current_project_config().get_notification_service_uri()),
                                  model_info=train_model)
     with af.job_config('validate'):
         # Validation of model
@@ -67,14 +69,18 @@ def run_workflow():
                                                  uri=get_file_dir(__file__) + '/validate_result')
         validate_channel = af.model_validate(input=[validate_transform],
                                              model_info=train_model,
-                                             model_validation_processor=ModelValidator(validate_artifact_name))
+                                             model_validation_processor=
+                                             ModelValidator(validate_artifact_name,
+                                                            af.current_project_config().get_notification_service_uri()))
     with af.job_config('push'):
         # Push model to serving
         # Register metadata of pushed model
         push_model_artifact_name = artifact_prefix + 'push_model_artifact'
         push_model_artifact = af.register_artifact(name=push_model_artifact_name,
                                                    uri=get_file_dir(__file__) + '/pushed_model')
-        af.push_model(model_info=train_model, pushing_model_processor=ModelPusher(push_model_artifact_name))
+        af.push_model(model_info=train_model,
+                      pushing_model_processor=ModelPusher(push_model_artifact_name,
+                                                          af.current_project_config().get_notification_service_uri()))
 
     with af.job_config('predict'):
         # Prediction(Inference)
@@ -99,12 +105,31 @@ def run_workflow():
     # pusher will be launched if the new model is better.
     # Prediction will start once the first round of training is done and
     # when pusher pushes(deploys) a new model, the predictor will use the latest deployed model as well.
-    af.action_on_model_version_event(job_name='validate',
-                                     model_version_event_type=ModelVersionEventType.MODEL_GENERATED,
-                                     model_name=train_model.name)
-    af.action_on_model_version_event(job_name='push',
-                                     model_version_event_type=ModelVersionEventType.MODEL_VALIDATED,
-                                     model_name=train_model.name)
+    af.action_on_event(job_name='validate',
+                       event_key=train_model.name,
+                       event_value="*",
+                       event_type=ModelVersionEventType.MODEL_GENERATED,
+                       action=JobAction.RESTART,
+                       value_condition=ValueCondition.UPDATED,
+                       namespace='default',
+                       sender='train'
+                       )
+    af.action_on_event(job_name='push',
+                       event_key=train_model.name,
+                       event_value="*",
+                       event_type=ModelVersionEventType.MODEL_VALIDATED,
+                       action=JobAction.RESTART,
+                       value_condition=ValueCondition.UPDATED,
+                       namespace='default',
+                       sender='validate')
+    af.action_on_event(job_name='predict',
+                       event_key=train_model.name,
+                       event_value="*",
+                       event_type=ModelVersionEventType.MODEL_DEPLOYED,
+                       action=JobAction.RESTART,
+                       value_condition=ValueCondition.UPDATED,
+                       namespace='default',
+                       sender='push')
 
     # Run workflow
     af.workflow_operation.submit_workflow(af.current_workflow_config().workflow_name)
