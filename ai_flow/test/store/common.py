@@ -948,6 +948,11 @@ class AbstractTestStore(object):
         snapshot = self.store.get_workflow_snapshot(workflow_snapshot.uuid)
         self.assertEqual('/path/to/snapshot', snapshot.uri)
 
+        snapshot_by_signature = self.store.get_workflow_snapshot_by_signature(workflow_id=workflow.uuid,
+                                                                              signature='md5sum')
+        self.assertEqual('/path/to/snapshot', snapshot.uri)
+        self.assertEqual('/path/to/snapshot', snapshot_by_signature.uri)
+
         workflow_snapshot2 = self.store.register_workflow_snapshot(workflow_id=workflow.uuid,
                                                                    uri='/path/to/snapshot2',
                                                                    signature='md5sum2')

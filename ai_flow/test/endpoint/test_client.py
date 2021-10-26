@@ -1071,6 +1071,10 @@ class AIFlowClientTestCases(object):
         self.assertEqual(workflow_snapshot.uuid, 1)
         snapshot = client.get_workflow_snapshot(workflow_snapshot.uuid)
         self.assertEqual('/path/to/snapshot', snapshot.uri)
+        snapshot_by_signature = client.get_workflow_snapshot_by_signature(project_name=project.name,
+                                                                          workflow_name=workflow.name,
+                                                                          signature='md5sum')
+        self.assertEqual('/path/to/snapshot', snapshot_by_signature.uri)
 
         workflow_snapshot2 = client.register_workflow_snapshot(project_name=project.name,
                                                                workflow_name=workflow.name,
@@ -1098,6 +1102,28 @@ class AIFlowClientTestCases(object):
     def test_get_non_existent_workflow_snapshot(self):
         response = client.get_workflow_snapshot(workflow_snapshot_id=10)
         self.assertIsNone(response)
+
+        project = client.register_project(name='project', uri='www.code.com')
+        workflow = client.register_workflow(name='workflow',
+                                            project_id=project.uuid,
+                                            properties=Properties({'a': 'b'}))
+        client.register_workflow_snapshot(project_name=project.name,
+                                          workflow_name=workflow.name,
+                                          uri='/path/to/snapshot',
+                                          signature='md5sum')
+        response_by_signature = client.get_workflow_snapshot_by_signature(project_name=project.name,
+                                                                          workflow_name=workflow.name,
+                                                                          signature='md5sum')
+        self.assertIsNotNone(response_by_signature)
+        response_by_signature = client.get_workflow_snapshot_by_signature(project_name=project.name,
+                                                                          workflow_name='whatever',
+                                                                          signature='md5sum')
+        self.assertIsNone(response_by_signature)
+        response_by_signature = client.get_workflow_snapshot_by_signature(project_name=project.name,
+                                                                          workflow_name=workflow.name,
+                                                                          signature='illegal_md5sum')
+        self.assertIsNone(response_by_signature)
+
         self.assertRaises(Exception, client.list_workflow_snapshots, project_name='',
                           workflow_name='', page_size=5, offset=0)
 

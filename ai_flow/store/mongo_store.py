@@ -596,6 +596,22 @@ class MongoStore(AbstractStore):
             return None
         return ResultToMeta.result_to_workflow_snapshot_meta(workflow_snapshot_result[0])
 
+    def get_workflow_snapshot_by_signature(self,
+                                           workflow_id: int,
+                                           signature: Text) -> Optional[WorkflowSnapshotMeta]:
+        """
+        Get a specific workflow snapshot in metadata store by workflow_id and signature.
+
+        :param workflow_id: the workflow id
+        :param signature: the signature of workflow snapshot
+        :return: A single :py:class:`ai_flow.meta.workflow_snapshot_meta.WorkflowSnapshotMeta` object
+                 if exists, Otherwise, returns None if the workflow snapshot does not exist.
+        """
+        workflow_snapshot_result = MongoWorkflowSnapshot.objects(workflow_id=workflow_id, signature=signature)
+        if len(workflow_snapshot_result) == 0:
+            return None
+        return ResultToMeta.result_to_workflow_snapshot_meta(workflow_snapshot_result[0])
+
     def list_workflow_snapshots(self,
                                 workflow_id: int = None,
                                 page_size: int = None,
