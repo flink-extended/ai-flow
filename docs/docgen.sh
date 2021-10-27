@@ -23,13 +23,17 @@ docs=$(dirname "${BASH_SOURCE[0]}")
 docs=$(cd "$docs"; pwd)
 workdir=$docs
 tmpdir="$workdir"/__tmp
+
 cd "$workdir"
-[ -e "$workdir"/source_rst ] && rm -r "$workdir"/source_rst/
-mkdir "$workdir"/source_rst/
+generated_source="$workdir"/content/api/python/source_rst
+[ -e "${generated_source}" ] && rm -r "${generated_source}"
+mkdir "${generated_source}"
+
 mkdir "$tmpdir"
 sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow "$workdir"/../ai_flow/*test*
-cp -a "$tmpdir"/. "$workdir"/source_rst/
+cp -a "$tmpdir"/. "${generated_source}"
 rm "$tmpdir"/*
 sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow_plugins "$workdir"/../ai_flow_plugins/*test*
-cp -a "$tmpdir"/. "$workdir"/source_rst/
+cp -a "$tmpdir"/. "${generated_source}"
 rm -r "$tmpdir"
+
