@@ -20,6 +20,7 @@ import asyncio
 import functools
 import inspect
 import logging
+import os
 import threading
 import time
 from concurrent import futures
@@ -34,26 +35,25 @@ from notification_service.event_storage import DbEventStorage
 from notification_service.high_availability import DbHighAvailabilityStorage, SimpleNotificationServerHaManager
 from notification_service.proto import notification_service_pb2_grpc
 from notification_service.service import NotificationService, HighAvailableNotificationService
+from notification_service.server_config import NotificationServerConfig
 from notification_service.util.utils import get_ip_addr
-
-# sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../../..")))
 
 _PORT = 50051
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 
-class NotificationMaster(object):
+class NotificationServer(object):
     """
     Block/Async server of Notification function service.
     """
 
     def __init__(self, service, port=_PORT):
         self.executor = Executor(futures.ThreadPoolExecutor(max_workers=10))
-        self.server = grpc.server(self.executor)
+        self.grpc_server = grpc.server(self.executor)
         self.service = service
         notification_service_pb2_grpc.add_NotificationServiceServicer_to_server(service,
-                                                                                self.server)
-        self.server.add_insecure_port('[::]:' + str(port))
+                                                                                self.grpc_server)
+        self.grpc_server.add_insecure_port('[::]:' + str(port))
 
     def run(self, is_block=False):
         """
@@ -62,8 +62,8 @@ class NotificationMaster(object):
         :return:
         """
         self.service.start()
-        self.server.start()
-        print('Notification master started.')
+        self.grpc_server.start()
+        logging.info('Notification server started.')
         if is_block:
             try:
                 while True:
@@ -79,27 +79,26 @@ class NotificationMaster(object):
         :return:
         """
         self.executor.shutdown()
-        self.server.stop(0)
         self.service.stop()
-        print('Notification master stopped.')
+        self.grpc_server.stop(0)
+        logging.info('Notification server stopped.')
 
 
-class NotificationServer(object):
-    def __init__(self,
-                 port=_PORT,
-                 db_conn: str = None,
-                 enable_ha: bool = False,
-                 advertised_uri: str = None,
-                 create_table_if_not_exists: bool = True
-                 ):
-        if db_conn:
-            self.storage = DbEventStorage(db_conn, create_table_if_not_exists)
+class NotificationServerRunner(object):
+    def __init__(self, config_file):
+        if not os.path.exists(config_file):
+            raise IOError('Config file {} not exist!'.format(config_file))
+        self.config = NotificationServerConfig(config_file=config_file)
+
+    def _init_server(self):
+        if self.config.db_uri:
+            self.storage = DbEventStorage(self.config.db_uri)
         else:
             raise Exception('Failed to start notification service without database connection info.')
-
-        if enable_ha:
-            server_uri = advertised_uri if advertised_uri is not None else get_ip_addr() + ':' + str(port)
-            ha_storage = DbHighAvailabilityStorage(db_conn=db_conn)
+        if self.config.enable_ha:
+            server_uri = self.config.advertised_uri \
+                if self.config.advertised_uri is not None else get_ip_addr() + ':' + str(self.config.port)
+            ha_storage = DbHighAvailabilityStorage(db_conn=self.config.db_uri)
             ha_manager = SimpleNotificationServerHaManager()
             service = HighAvailableNotificationService(
                 self.storage,
@@ -107,17 +106,18 @@ class NotificationServer(object):
                 server_uri,
                 ha_storage,
                 5000)
-            self.master = NotificationMaster(service=service,
-                                             port=int(port))
+            self.server = NotificationServer(service=service,
+                                             port=int(self.config.port))
         else:
-            self.master = NotificationMaster(service=NotificationService(self.storage),
-                                             port=port)
+            self.server = NotificationServer(service=NotificationService(self.storage),
+                                             port=int(self.config.port))
 
     def start(self, is_block=False):
-        self.master.run(is_block)
+        self._init_server()
+        self.server.run(is_block)
 
     def stop(self):
-        self.master.stop()
+        self.server.stop()
 
 
 def _loop(loop: asyncio.AbstractEventLoop):

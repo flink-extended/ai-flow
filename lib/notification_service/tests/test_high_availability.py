@@ -27,8 +27,9 @@ from notification_service.base_notification import BaseEvent, EventWatcher
 from notification_service.client import NotificationClient
 from notification_service.event_storage import DbEventStorage
 from notification_service.high_availability import SimpleNotificationServerHaManager, DbHighAvailabilityStorage
-from notification_service.master import NotificationMaster
+from notification_service.master import NotificationServer
 from notification_service.service import HighAvailableNotificationService
+from notification_service.util import db
 
 
 _SQLITE_DB_FILE = 'notification_service.db'
@@ -41,16 +42,15 @@ class HaServerTest(unittest.TestCase):
     def start_master(cls, host, port):
         port = str(port)
         server_uri = host + ":" + port
-        storage = DbEventStorage()
         ha_manager = SimpleNotificationServerHaManager()
         ha_storage = DbHighAvailabilityStorage(db_conn=_SQLITE_DB_URI)
         service = HighAvailableNotificationService(
-            storage,
+            cls.storage,
             ha_manager,
             server_uri,
             ha_storage,
             5000)
-        master = NotificationMaster(service, port=int(port))
+        master = NotificationServer(service, port=int(port))
         master.run()
         return master
 
@@ -67,7 +67,8 @@ class HaServerTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.storage = DbEventStorage()
+        db.create_all_tables(_SQLITE_DB_URI)
+        cls.storage = DbEventStorage(db_conn=_SQLITE_DB_URI)
         cls.master1 = None
         cls.master2 = None
         cls.master3 = None

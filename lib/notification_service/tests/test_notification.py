@@ -24,9 +24,9 @@ from notification_service.base_notification import BaseEvent, EventWatcher
 from notification_service.client import NotificationClient
 from notification_service.event_storage import MemoryEventStorage, DbEventStorage
 from notification_service.high_availability import SimpleNotificationServerHaManager, DbHighAvailabilityStorage
-from notification_service.master import NotificationMaster
+from notification_service.master import NotificationServer
 from notification_service.service import NotificationService, HighAvailableNotificationService
-
+from notification_service.util import db
 from notification_service.util.db import SQL_ALCHEMY_DB_FILE
 
 
@@ -40,7 +40,7 @@ def start_ha_master(host, port):
         ha_manager,
         server_uri,
         ha_storage)
-    master = NotificationMaster(service, port=port)
+    master = NotificationServer(service, port=port)
     master.run()
     return master
 
@@ -355,8 +355,9 @@ class DbStorageTest(unittest.TestCase, NotificationTest):
 
     @classmethod
     def set_up_class(cls):
+        db.create_all_tables()
         cls.storage = DbEventStorage()
-        cls.master = NotificationMaster(NotificationService(cls.storage))
+        cls.master = NotificationServer(NotificationService(cls.storage))
         cls.master.run()
 
     @classmethod
@@ -383,7 +384,7 @@ class MemoryStorageTest(unittest.TestCase, NotificationTest):
     @classmethod
     def set_up_class(cls):
         cls.storage = MemoryEventStorage()
-        cls.master = NotificationMaster(NotificationService(cls.storage))
+        cls.master = NotificationServer(NotificationService(cls.storage))
         cls.master.run()
 
     @classmethod
@@ -410,6 +411,7 @@ class HaDbStorageTest(unittest.TestCase, NotificationTest):
 
     @classmethod
     def set_up_class(cls):
+        db.create_all_tables()
         cls.storage = DbEventStorage()
         cls.master1 = start_ha_master("localhost", 50051)
         # The server startup is asynchronous, we need to wait for a while
@@ -460,8 +462,9 @@ class HaClientWithNonHaServerTest(unittest.TestCase, NotificationTest):
 
     @classmethod
     def set_up_class(cls):
+        db.create_all_tables()
         cls.storage = DbEventStorage()
-        cls.master = NotificationMaster(NotificationService(cls.storage))
+        cls.master = NotificationServer(NotificationService(cls.storage))
         cls.master.run()
 
     @classmethod

@@ -23,16 +23,16 @@ BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)
 . "${BIN}"/init-notification-env.sh
 
-if [ ! -e "${NOTIFICATION_PID_FILE}" ]; then
-  echo "No notification server running"
+usage="Usage: notification-config.sh --auto-generate"
+
+if [ $# -ne 1 ]; then
+  echo "$usage"
+  exit 1
 fi
 
-set +e
-echo "Stopping notification server"
-for ((i=1;i<=3;i++))
-do
-  kill $(cat "${NOTIFICATION_PID_FILE}") >/dev/null 2>&1 && sleep 1
-done
-
-rm "${NOTIFICATION_PID_FILE}"
-echo "notification server stopped"
+if [[ "$1" == "--auto-generate" ]]; then
+  python "${BIN}"/notification_utils.py --gen-config
+else
+  echo "$usage"
+  exit 1
+fi

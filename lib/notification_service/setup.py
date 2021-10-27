@@ -50,5 +50,6 @@ setup(
     url='https://github.com/alibaba/flink-ai-extended',
     packages=find_packages(exclude=['tests*']),
     scripts=get_script(),
-    install_requires=["protobuf==3.15.6", "grpcio==1.34.0", "sqlalchemy>=1.3.18, <2"]
+    include_package_data=True,
+    install_requires=["protobuf==3.15.6", "grpcio==1.34.0", "sqlalchemy>=1.3.18, <2", "pyyaml>=5.1, <5.4"]
 )
