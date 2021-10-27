@@ -236,6 +236,9 @@ class AirflowConfigParser(ConfigParser):  # pylint: disable=too-many-ancestors
                 "error: cannot use sqlite with the {}".format(self.get('core', 'executor'))
             )
 
+        if is_sqlite:
+            log.warning("SQLite is only meant to be used for testing. SQLite is strongly discouraged in production.")
+
         if self.has_option('core', 'mp_start_method'):
             mp_start_method = self.get('core', 'mp_start_method')
             start_method_options = multiprocessing.get_all_start_methods()
