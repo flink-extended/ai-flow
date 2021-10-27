@@ -61,9 +61,11 @@ class SequentialExecutor(BaseExecutor):
             try:
                 subprocess.check_call(command, close_fds=True)
                 self.change_state(key, State.SUCCESS)
+                self.send_message(key)
             except subprocess.CalledProcessError as e:
                 self.change_state(key, State.FAILED)
                 self.log.error("Failed to execute task %s.", str(e))
+                self.send_message(key)
 
         self.commands_to_run = []
 
