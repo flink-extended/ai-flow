@@ -18,6 +18,7 @@
 # under the License.
 #
 import os
+import sys
 
 from setuptools import setup, find_packages
 
@@ -29,9 +30,20 @@ def get_script():
     return [os.path.join("bin", filename) for filename in os.listdir(bin_dir)]
 
 
+version_file = os.path.join(CURRENT_DIR, 'notification_service/version.py')
+try:
+    exec(open(version_file).read())
+except IOError:
+    print("Failed to load notification_service version file for packaging. " +
+          "'%s' not found!" % version_file,
+          file=sys.stderr)
+    sys.exit(-1)
+VERSION = __version__ # noqa
+
+
 setup(
     name='notification_service',
-    version='0.2.0',
+    version=VERSION,
     description='A Python package which provides stable notification service.',
     author='',
     author_email='flink.aiflow@gmail.com',
