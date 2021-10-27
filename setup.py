@@ -71,7 +71,7 @@ except IOError:
           "'%s' not found!" % version_file,
           file=sys.stderr)
     sys.exit(-1)
-VERSION = __version__
+VERSION = __version__ # noqa
 
 
 try:
