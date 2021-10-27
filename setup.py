@@ -19,6 +19,7 @@
 #
 import os
 import subprocess
+import sys
 from shutil import copytree, rmtree
 from setuptools import setup, find_packages
 
@@ -62,6 +63,17 @@ def get_script():
     return [os.path.join("bin", filename) for filename in os.listdir(bin_dir)]
 
 
+version_file = os.path.join(CURRENT_DIR, 'ai_flow/version.py')
+try:
+    exec(open(version_file).read())
+except IOError:
+    print("Failed to load ai_flow version file for packaging. " +
+          "'%s' not found!" % version_file,
+          file=sys.stderr)
+    sys.exit(-1)
+VERSION = __version__
+
+
 try:
     if in_source:
         if os.getenv('INSTALL_AIRFLOW_WITHOUT_FRONTEND') != 'true':
@@ -81,7 +93,7 @@ try:
     with open(require_file) as f:
         context = f.read()
         require_file_lines = context.strip().split('\n')
-    require_packages = []
+    require_packages = ['notification-service=={}'.format(VERSION)]
 
     for line in require_file_lines:
         if os.getenv('BUILD_MINI_AI_FLOW_PACKAGE') == 'true' and line.startswith("# Optional"):
@@ -92,7 +104,7 @@ try:
     packages = find_packages()
     setup(
         name='ai_flow',
-        version='0.2.0',
+        version=VERSION,
         description='An open source framework that bridges big data and AI.',
         author='',
         author_email='flink.aiflow@gmail.com',
