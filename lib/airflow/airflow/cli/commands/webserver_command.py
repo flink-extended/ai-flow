@@ -345,7 +345,8 @@ def webserver(args):
     if args.debug:
         print(f"Starting the web server on port {args.port} and host {args.hostname}.")
         app = create_app(testing=conf.getboolean('core', 'unit_test_mode'),
-                         notification_server_uri=args.notification_server_uri)
+                         notification_server_uri=args.notification_server_uri,
+                         notification_sql_alchemy_conn=args.notification_sql_alchemy_conn)
         app.run(
             debug=True,
             use_reloader=not app.config['TESTING'],
@@ -454,6 +455,7 @@ def webserver(args):
             ).start()
 
         os.environ['NOTIFICATION_SERVER_URI'] = args.notification_server_uri
+        os.environ['NOTIFICATION_SQL_ALCHEMY_CONN'] = args.notification_sql_alchemy_conn
 
         if args.daemon:
             handle = setup_logging(log_file)

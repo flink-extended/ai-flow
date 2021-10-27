@@ -22,12 +22,13 @@ BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)
 . "${BIN}"/init-airflow-env.sh
 
-usage="Usage: start-airflow.sh [airflow-mysql-conn]"
-if [ $# -ne 1 ]; then
+usage="Usage: start-airflow.sh [airflow-mysql-conn] [notification-service-mysql-conn]"
+if [ $# -ne 2 ]; then
   echo "$usage"
   exit 1
 fi
-MYSQL_CONN=$1
+AIRFLOW_MYSQL_CONN=$1
+NOTIFICATION_MYSQL_CONN=$2
 
 init_airflow_config() {
   AIRFLOW_DB_CONN=$1
@@ -88,7 +89,7 @@ if [ -e "${AIRFLOW_PID_DIR}"/scheduler.pid ] || [ -e "${AIRFLOW_PID_DIR}"/web.pi
   "${BIN}"/stop-airflow.sh
 fi
 
-init_airflow_config "$MYSQL_CONN"
+init_airflow_config "$AIRFLOW_MYSQL_CONN"
 
 echo "Starting Airflow Scheduler"
 SCHEDULER_LOG_FILE_NAME=scheduler-$(date "+%Y%m%d-%H%M%S").log
@@ -98,7 +99,7 @@ echo "Airflow Scheduler started"
 
 echo "Starting Airflow Web Server"
 WEB_SERVER_LOG_FILE_NAME=web-$(date "+%Y%m%d-%H%M%S").log
-airflow webserver -p 8080 --notification-server-uri="${NOTIFICATION_SERVER_URI}" > "${AIRFLOW_LOG_DIR}"/"${WEB_SERVER_LOG_FILE_NAME}" 2>&1 &
+airflow webserver -p 8080 --notification-server-uri="${NOTIFICATION_SERVER_URI}" --notification-sql-alchemy-conn="$NOTIFICATION_MYSQL_CONN" > "${AIRFLOW_LOG_DIR}"/"${WEB_SERVER_LOG_FILE_NAME}" 2>&1 &
 echo $! > "${AIRFLOW_PID_DIR}"/web.pid
 wait_for_airflow_web_server "${WEB_SERVER_LOG_FILE_NAME}"
 echo "Airflow Web Server started"

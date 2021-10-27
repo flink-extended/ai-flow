@@ -154,6 +154,13 @@ ARG_NOTIFICATION_SERVER_URI = Arg(
     ),
     default='localhost:50051'
 )
+ARG_NOTIFICATION_SQL_ALCHEMY_CONN = Arg(
+    ("--notification-sql-alchemy-conn",),
+    help=(
+        "Notification SQL alchemy database connection uri."
+    ),
+    default='localhost:50051'
+)
 ARG_EVENT_START_TIME = Arg(
     ("--event-start-time",),
     help=(
@@ -1447,7 +1454,8 @@ airflow_commands: List[CLICommand] = [
             ARG_SSL_CERT,
             ARG_SSL_KEY,
             ARG_DEBUG,
-            ARG_NOTIFICATION_SERVER_URI
+            ARG_NOTIFICATION_SERVER_URI,
+            ARG_NOTIFICATION_SQL_ALCHEMY_CONN
         ),
     ),
     ActionCommand(
