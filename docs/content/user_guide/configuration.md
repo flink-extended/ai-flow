@@ -1,6 +1,6 @@
 # Configuration
 
-This document aims at introducing different kinds of configuration in Flink AI Flow.
+This document aims at introducing different kinds of configuration in AI Flow.
 
    * [AI Flow Server Config](#ai-flow-server-config)
       * [Basic Server Config](#basic-server-config)
@@ -82,7 +82,7 @@ Users must set the `airflow_deploy_path` and must make sure the `notification_se
 
 ### Experimental Config
 #### High Availability
-HA is currently an experimental feature of Flink AI Flow. To use this feature, users must set `enable_ha` to be true in `aiflow_server.yaml`.
+HA is currently an experimental feature of AI Flow. To use this feature, users must set `enable_ha` to be true in `aiflow_server.yaml`.
 ```yaml
 # High availability is disabled by default
 #enable_ha: false

@@ -48,7 +48,7 @@ If you modified the bundled Notification Services, you need to add relevant test
 
 ### Contact Us
 
-For more information, you can join the **Flink AI Flow Users Group** on [DingTalk](https://www.dingtalk.com) to contact us.
+For more information, you can join the **AI Flow Users Group** on [DingTalk](https://www.dingtalk.com) to contact us.
 The number of the DingTalk group is `35876083`. 
 
 You can also join the group by scanning the QR code below:
