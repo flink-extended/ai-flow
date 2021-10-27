@@ -20,7 +20,7 @@ import time
 import unittest
 
 from notification_service.event_storage import MemoryEventStorage
-from notification_service.master import NotificationMaster
+from notification_service.master import NotificationServer
 from notification_service.service import NotificationService
 
 from ai_flow.project.project_config import ProjectConfig
@@ -56,7 +56,7 @@ class TestHighAvailableAIFlowServer(unittest.TestCase):
 
     def setUp(self) -> None:
         SqlAlchemyStore(_SQLITE_DB_URI)
-        self.notification = NotificationMaster(service=NotificationService(storage=MemoryEventStorage()), port=30031)
+        self.notification = NotificationServer(service=NotificationService(storage=MemoryEventStorage()), port=30031)
         self.notification.run()
         self.server1 = AIFlowServer(
             store_uri=_SQLITE_DB_URI, port=50051, enabled_ha=True, start_scheduler_service=False,
