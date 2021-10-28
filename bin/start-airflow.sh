@@ -39,7 +39,7 @@ init_airflow_config() {
     # create the configuration file
     airflow config list >/dev/null 2>&1 || true
     mv airflow.cfg airflow.cfg.tmpl
-    awk "{gsub(\"sql_alchemy_conn = sqlite:///${AIRFLOW_HOME}/airflow.db\", \"sql_alchemy_conn = ${AIRFLOW_DB_CONN}\"); \
+    awk "{ \
         gsub(\"load_examples = True\", \"load_examples = False\"); \
         gsub(\"load_default_connections = True\", \"load_default_connections = False\"); \
         gsub(\"dag_dir_list_interval = 300\", \"dag_dir_list_interval = 3\"); \
