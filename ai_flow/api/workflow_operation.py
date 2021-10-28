@@ -14,6 +14,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import os
+import tempfile
+from datetime import datetime
+from pathlib import Path
+from ai_flow.util.file_util.zip_file_util import make_dir_zipfile
 from typing import Text, List, Optional
 
 from ai_flow.ai_graph.ai_graph import current_graph
@@ -32,6 +37,7 @@ from ai_flow.plugin_interface.job_plugin_interface import get_registered_job_plu
 from ai_flow.plugin_interface.scheduler_interface import JobExecutionInfo, WorkflowExecutionInfo, WorkflowInfo
 from ai_flow.translator.translator import get_translator
 from ai_flow.util import json_utils
+from ai_flow.util.file_util.hash_util import generate_file_md5
 from ai_flow.util.json_utils import dumps
 from ai_flow.workflow.control_edge import EventCondition
 from ai_flow.workflow.job import Job
@@ -46,12 +52,34 @@ def _upload_project_package(workflow: Workflow):
     :param workflow: The generated :class:`~ai_flow.workflow.workflow.Workflow`.
     """
     blob_config = BlobConfig(current_project_config().get(WorkflowPropertyKeys.BLOB))
-    blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
-                                                          blob_config.blob_manager_config())
-    uploaded_project_path = blob_manager.upload_project(str(workflow.workflow_snapshot_id),
-                                                        current_project_context().project_path)
-    workflow.project_uri = uploaded_project_path
+    with tempfile.TemporaryDirectory() as temp_dir:
+        zip_file_name = 'workflow_{}.zip'.format(workflow.workflow_name)
+        zip_file_path = Path(temp_dir) / zip_file_name
+        make_dir_zipfile(current_project_context().project_path, zip_file_path)
+        file_hash = generate_file_md5(zip_file_path)
+
+        workflow_snapshot = get_ai_flow_client().get_workflow_snapshot_by_signature(
+            project_name=current_project_config().get_project_name(),
+            workflow_name=workflow.workflow_name,
+            signature=file_hash
+        )
+        if workflow_snapshot is None:
+            blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
+                                                                  blob_config.blob_manager_config())
+            new_file_name = 'workflow_{}_{}.zip'.format(workflow.workflow_name, file_hash)
+            new_file_path = os.path.join(temp_dir, new_file_name)
+            zip_file_path.rename(new_file_path)
+            uploaded_project_path = blob_manager.upload(local_file_path=new_file_path)
+            workflow_snapshot = get_ai_flow_client().register_workflow_snapshot(
+                project_name=current_project_config().get_project_name(),
+                workflow_name=workflow.workflow_name,
+                uri=uploaded_project_path,
+                signature=file_hash
+            )
+    workflow.workflow_snapshot_id = workflow_snapshot.uuid
+    workflow.project_uri = workflow_snapshot.uri
     workflow.properties[WorkflowPropertyKeys.BLOB] = current_project_config().get(WorkflowPropertyKeys.BLOB)
+    workflow.properties[WorkflowPropertyKeys.SNAPSHOT_ID] = workflow_snapshot.uuid
 
 
 def _set_entry_module_path(workflow: Workflow, entry_module_path: Text):
@@ -119,11 +147,10 @@ def submit_workflow(workflow_name: Text = None) -> WorkflowInfo:
             raise Exception('The workflow name of the current workflow config({}) cannot be null.'.format(workflow))
         else:
             workflow_name = workflow.workflow_name
-    elif workflow.workflow_name != workflow_name:
+    if workflow.workflow_name != workflow_name:
         raise Exception('The name({}) of workflow submitted is different from '
                         'the workflow name of the current workflow config({})'.format(workflow_name,
                                                                                       workflow.workflow_name))
-    _apply_full_info_to_workflow(workflow, entry_module_path)
 
     workflow_meta = get_ai_flow_client().get_workflow_by_name(project_name=current_project_config().get_project_name(),
                                                               workflow_name=workflow_name)
@@ -137,6 +164,8 @@ def submit_workflow(workflow_name: Text = None) -> WorkflowInfo:
                                              project_name=current_project_config().get_project_name(),
                                              context_extractor=current_graph().get_context_extractor(),
                                              graph=dumps(current_graph()))
+
+    _apply_full_info_to_workflow(workflow, entry_module_path)
     current_graph().clear_graph()
     return proto_to_workflow(get_ai_flow_client()
                              .submit_workflow_to_scheduler(namespace=namespace,

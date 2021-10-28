@@ -17,6 +17,7 @@
 # under the License.
 #
 import threading
+import shutil
 import unittest
 from unittest import mock
 
@@ -27,7 +28,28 @@ from ai_flow.plugin_interface.blob_manager_interface import BlobConfig, BlobMana
 from ai_flow_plugins.blob_manager_plugins.oss_blob_manager import OssBlobManager
 
 
+_TMP_FOLDER = '/tmp/' + __name__
+_TMP_FILE = os.path.join(_TMP_FOLDER, 'file.txt')
+
+
 class TestOSSBlobManager(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        os.mkdir(_TMP_FOLDER)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        if os.path.exists(_TMP_FOLDER):
+            shutil.rmtree(_TMP_FOLDER)
+
+    def setUp(self) -> None:
+        file = open(_TMP_FILE, 'w')
+        file.close()
+
+    def tearDown(self) -> None:
+        if os.path.exists(_TMP_FILE):
+            os.remove(_TMP_FILE)
 
     @unittest.skipUnless((os.environ.get('blob_server.endpoint') is not None
                           and os.environ.get('blob_server.access_key_id') is not None
@@ -35,32 +57,32 @@ class TestOSSBlobManager(unittest.TestCase):
                           and os.environ.get('blob_server.bucket') is not None
                           and os.environ.get('blob_server.repo_name') is not None), 'need set oss')
     def test_project_upload_download_oss(self):
-        project_path = get_file_dir(__file__)
         config = {
             'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.oss_blob_manager.OssBlobManager',
             'blob_manager_config': {
-                'local_repository': '/tmp',
                 'access_key_id': os.environ.get('blob_server.access_key_id'),
                 'access_key_secret': os.environ.get('blob_server.access_key_secret'),
                 'endpoint': os.environ.get('blob_server.endpoint'),
                 'bucket': os.environ.get('blob_server.bucket'),
-                'repo_name': os.environ.get('blob_server.repo_name')
+                'root_directory': os.environ.get('blob_server.repo_name')
             }
         }
 
         blob_config = BlobConfig(config)
         blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
                                                               blob_config.blob_manager_config())
-        uploaded_path = blob_manager.upload_project('1', project_path)
+        uploaded_path = blob_manager.upload(_TMP_FILE)
+        self.assertEqual(os.path.join(os.environ.get('blob_server.repo_name'), os.path.basename(_TMP_FILE)),
+                         uploaded_path)
 
-        downloaded_path = blob_manager.download_project('1', uploaded_path)
-        self.assertEqual('/tmp/workflow_1_project/project', downloaded_path)
+        downloaded_path = blob_manager.download(uploaded_path, _TMP_FOLDER)
+        self.assertEqual(os.path.join(_TMP_FOLDER, os.path.basename(_TMP_FILE)), downloaded_path)
 
     def test_download_oss_file_concurrently(self):
         project_zip = '/tmp/workflow_1_project.zip'
         if os.path.exists(project_zip):
             os.remove(project_zip)
-        config = {}
+        config = {'root_directory': ''}
         oss_blob_manager = OssBlobManager(config)
 
         zip_file_path = None
@@ -81,7 +103,7 @@ class TestOSSBlobManager(unittest.TestCase):
 
             def download_loop():
                 for i in range(1000):
-                    oss_blob_manager.download_project('1', 'dummy_path', '/tmp')
+                    oss_blob_manager.download('dummy_path', '/tmp')
 
             try:
                 t1 = threading.Thread(target=download_loop)
@@ -96,7 +118,7 @@ class TestOSSBlobManager(unittest.TestCase):
                     os.remove(zip_file_path)
 
     def test_lazily_init_bucket(self):
-        config = {}
+        config = {'root_directory': ''}
         oss_blob_manager = OssBlobManager(config)
         self.assertIsNone(oss_blob_manager._bucket)
 
@@ -110,7 +132,8 @@ class TestOSSBlobManager(unittest.TestCase):
             self.assertEqual(mock_bucket, oss_blob_manager.bucket)
 
     def test__get_oss_object_retry(self):
-        config = {}
+        config = {'root_directory': ''}
+
         oss_blob_manager = OssBlobManager(config)
 
         with mock.patch.object(oss_blob_manager, '_bucket') as mock_bucket:

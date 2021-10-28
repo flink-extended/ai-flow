@@ -16,15 +16,11 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import tempfile
-from pathlib import Path
+import fcntl
+import os
 from typing import Text, Dict, Any
-
 from hdfs.client import InsecureClient
-
 from ai_flow.plugin_interface.blob_manager_interface import BlobManager
-from ai_flow.util.file_util.zip_file_util import make_dir_zipfile
-from ai_flow_plugins.blob_manager_plugins.blob_manager_utils import extract_project_zip_file
 
 
 class HDFSBlobManager(BlobManager):
@@ -34,57 +30,70 @@ class HDFSBlobManager(BlobManager):
     1. hdfs_url: Hostname or IP address of HDFS namenode, prefixed with protocol, followed by WebHDFS port on namenode
     2. hdfs_user: User default. Defaults to the current user's (as determined by `whoami`).
     3. repo_name: The upload directory of the project.
-    4. local_repository: The download directory of the project.
     """
 
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
+        if not self.root_dir:
+            raise Exception('`root_directory` option of blob manager config is not configured.')
         hdfs_url = config.get('hdfs_url', None)
         hdfs_user = config.get('hdfs_user', 'default')
         hdfs_client = InsecureClient(url=hdfs_url, user=hdfs_user)
         self._hdfs_client = hdfs_client
-        self._repo_name = config.get('repo_name', '')
-        self._local_repo = config.get('local_repository', None)
 
-    def upload_project(self, workflow_snapshot_id: Text, project_path: Text) -> Text:
+    def upload(self, local_file_path: Text) -> Text:
         """
-        Uploads a given project from local to hdfs file system for remote workflow execution.
+        Upload a given file to blob server. Uploaded file will be placed under self.root_dir.
 
-        :param workflow_snapshot_id: The id of the workflow snapshot, which is the unique identifier for each workflow
-                                                           generation.
-        :param project_path: The local path of the project.
-        :return: The hdfs path of the uploaded project in blob server.
+        :param local_file_path: the path of file to be uploaded.
+        :return the uri of the uploaded file in blob server.
         """
-        with tempfile.TemporaryDirectory() as temp_dir:
-            zip_file_name = 'workflow_{}_project.zip'.format(workflow_snapshot_id)
-            temp_dir_path = Path(temp_dir)
-            zip_file_path = temp_dir_path / zip_file_name
-            make_dir_zipfile(project_path, zip_file_path)
-            object_key = self._repo_name + '/' + zip_file_name
-            self._hdfs_client.upload(hdfs_path=object_key, local_path=str(zip_file_path))
-        return object_key
+        file_name = os.path.basename(local_file_path)
+        remote_file_path = os.path.join(self.root_dir, file_name)
+        self._hdfs_client.upload(hdfs_path=remote_file_path, local_path=local_file_path)
+        return remote_file_path
 
-    def download_project(self, workflow_snapshot_id, remote_path: Text, local_path: Text = None) -> Text:
+    def download(self, remote_file_path: Text, local_dir: Text) -> Text:
         """
-        Downloads a given project from hdfs file system to local for remote workflow execution.
+        Download file from remote blob server to local directory.
+        Only files located in self.root_dir can be downloaded by BlobManager.
 
-        :param workflow_snapshot_id: The id of the workflow snapshot, which is the unique identifier for each workflow
-                                                           generation.
-        :param remote_path: The hdfs path of the project.
-        :param local_path: The local root path of the downloaded project.
-        :return The local path of the download project.
+        :param remote_file_path: The path of file to be downloaded.
+        :param local_dir: the local directory.
+        :return the local uri of the downloaded file.
         """
-        local_zip_file_name = 'workflow_{}_project'.format(workflow_snapshot_id)
-        if local_path is not None:
-            repo_path = Path(local_path)
-        elif self._local_repo is not None:
-            repo_path = Path(self._local_repo)
+        self._check_remote_path_legality(remote_file_path)
+        file_name = os.path.basename(remote_file_path)
+        local_file_path = os.path.join(local_dir, file_name)
+
+        if not os.path.exists(local_file_path):
+            lock_file_path = "{}.lock".format(local_file_path)
+            lock_file = open(lock_file_path, 'w')
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            try:
+                if not os.path.exists(local_file_path):
+                    self.log.info("Downloading file from HDFS: {}".format(remote_file_path))
+                    self._hdfs_client.download(hdfs_path=remote_file_path, local_path=local_file_path)
+            except Exception as e:
+                self.log.error("Failed to download file: {}".format(remote_file_path), exc_info=e)
+            finally:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+                self.log.debug('Unlocked file {}'.format(lock_file_path))
+                lock_file.close()
+                if os.path.exists(lock_file_path):
+                    try:
+                        os.remove(lock_file_path)
+                    except OSError as e:
+                        self.log.warning("Failed to remove lock file: {}".format(lock_file_path), exc_info=e)
         else:
-            repo_path = Path(tempfile.gettempdir())
-        local_zip_file_path = str(repo_path / local_zip_file_name) + '.zip'
-        extract_path = str(repo_path / local_zip_file_name)
-        self._hdfs_client.download(hdfs_path=remote_path, local_path=local_zip_file_path)
-        return extract_project_zip_file(workflow_snapshot_id=workflow_snapshot_id,
-                                        local_root_path=repo_path,
-                                        zip_file_path=local_zip_file_path,
-                                        extract_project_path=extract_path)
+            self.log.info("HDFS file: {} already exist at {}".format(remote_file_path, local_file_path))
+        return local_file_path
+
+    def _check_remote_path_legality(self, file_path: Text):
+        """
+        Check if the file can be downloaded by blob manager.
+
+        :param file_path: The path of file to be checked.
+        """
+        if not file_path.startswith(self.root_dir):
+            raise Exception("Cannot download {} from blob server".format(file_path))

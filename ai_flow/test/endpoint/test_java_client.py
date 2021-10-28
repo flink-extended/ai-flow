@@ -17,14 +17,12 @@
 # under the License.
 #
 import os
-import os
 import subprocess
 import unittest
 
 from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.store.db.base_model import base
 from ai_flow.test.store.test_sqlalchemy_store import _get_store
-from notification_service.event_storage import DbEventStorage
 from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
 
 _SQLITE_DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'aiflow.db')
