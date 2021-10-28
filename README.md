@@ -40,22 +40,22 @@ Flink AI Flow's current components are:
 
 ### QuickStart
 
-You can use Flink AI Flow according to the guidelines of [Quick Start](https://github.com/alibaba/flink-ai-extended/wiki/Quick-Start). 
-Besides, you can also take a look at our [Tutorial](https://github.com/alibaba/flink-ai-extended/wiki/Tutorial) for writing your own workflow.
+You can use Flink AI Flow according to the guidelines of [Quick Start](https://github.com/flink-extended/ai-flow/wiki/Quick-Start). 
+Besides, you can also take a look at our [Tutorial](https://github.com/flink-extended/ai-flow/wiki/Tutorial) for writing your own workflow.
 
 ### API
 
-Please refer to the [API Documentation](https://flink-ai-flow-doc.readthedocs.io/en/latest/) to find the API supported by Flink AI Flow.
+Please refer to the [API Documentation](https://ai-flow.readthedocs.io/en/latest/) to find the API supported by Flink AI Flow.
 
 ### Design
 
-If you are interested in design principle of Flink AI Flow, please see the [Design Documentation](https://github.com/alibaba/flink-ai-extended/wiki/FlinkAIFlowDesign) for more 
+If you are interested in design principle of Flink AI Flow, please see the [Design Documentation](https://github.com/flink-extended/ai-flow/wiki/FlinkAIFlowDesign) for more 
 details.
 
 ### Examples
 
 You can refer to some examples of Flink AI Flow to have a better understanding of how to write a workflow.
-Please see the [Examples](https://github.com/alibaba/flink-ai-extended/tree/master/flink-ai-flow/examples/) directory.
+Please see the [Examples](https://github.com/flink-extended/ai-flow/tree/master/examples/) directory.
 
 
 ## Reporting bugs
@@ -65,7 +65,7 @@ as well.
 
 ## Contributing
 
-We happily welcome contributions to Flink AI Flow. Please see our [contribution guide](https://github.com/alibaba/flink-ai-extended/blob/master/CONTRIBUTING.md) for details.
+We happily welcome contributions to Flink AI Flow. Please see our [contribution guide](https://github.com/flink-extended/ai-flow/blob/master/CONTRIBUTING.md) for details.
 
 
 ## Contact Us
