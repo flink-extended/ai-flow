@@ -1,5 +1,3 @@
-# coding:utf-8
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -18,26 +16,21 @@
 # under the License.
 #
 import os
-
-from setuptools import setup, find_packages
-
-CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
+import unittest
+from notification_service.server_config import NotificationServerConfig
 
 
-def get_script():
-    bin_dir = os.path.join(CURRENT_DIR, "bin")
-    return [os.path.join("bin", filename) for filename in os.listdir(bin_dir)]
+class TestNotificationServerConfig(unittest.TestCase):
+
+    def test_load_notification_server_config(self):
+        config_file = os.path.join(os.path.dirname(__file__), 'notification_server.yaml')
+        ns_config = NotificationServerConfig(config_file)
+        self.assertEqual(50052, ns_config.port)
+        self.assertEqual('127.0.0.1:50052', ns_config.advertised_uri)
+        self.assertEqual('sqlite:///ns.db', ns_config.db_uri)
+        self.assertFalse(ns_config.enable_ha)
+        self.assertEqual(10000, ns_config.ha_ttl_ms)
 
 
-setup(
-    name='notification_service',
-    version='0.2.dev0',
-    description='A Python package which provides stable notification service.',
-    author='',
-    author_email='flink.aiflow@gmail.com',
-    url='https://github.com/alibaba/flink-ai-extended',
-    packages=find_packages(exclude=['tests*']),
-    scripts=get_script(),
-    include_package_data=True,
-    install_requires=["protobuf==3.15.6", "grpcio==1.34.0", "sqlalchemy>=1.3.18, <2", "pyyaml>=5.1, <5.4"]
-)
+if __name__ == '__main__':
+    unittest.main()

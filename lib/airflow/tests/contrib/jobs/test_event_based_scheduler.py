@@ -36,7 +36,7 @@ from airflow.models.taskexecution import TaskExecution
 from notification_service.base_notification import BaseEvent, UNDEFINED_EVENT_TYPE
 from notification_service.client import NotificationClient
 from notification_service.event_storage import MemoryEventStorage
-from notification_service.master import NotificationMaster
+from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 
 from airflow.contrib.jobs.event_based_scheduler_job import EventBasedSchedulerJob, SchedulerEventWatcher, \
@@ -68,14 +68,14 @@ class TestEventBasedScheduler(unittest.TestCase):
         self.scheduler = None
         self.port = 50102
         self.storage = MemoryEventStorage()
-        self.master = NotificationMaster(NotificationService(self.storage), self.port)
-        self.master.run()
+        self.server = NotificationServer(NotificationService(self.storage), self.port)
+        self.server.run()
         self.client = NotificationClient(server_uri="localhost:{}".format(self.port),
                                          default_namespace="test_namespace")
         time.sleep(1)
 
     def tearDown(self):
-        self.master.stop()
+        self.server.stop()
 
     def _get_task_instance(self, dag_id, task_id, session):
         return session.query(TaskInstance).filter(

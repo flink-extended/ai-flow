@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import os.path
 import unittest
 
 import sqlalchemy
@@ -26,7 +27,7 @@ from ai_flow.store.db.base_model import base
 from ai_flow.test.endpoint import test_client
 from ai_flow.test.store.test_sqlalchemy_store import _get_store
 from ai_flow.test.test_util import get_mysql_server_url
-from notification_service.master import NotificationServer
+from notification_service.server import NotificationServerRunner
 
 
 _PORT = '50051'
@@ -50,7 +51,12 @@ class TestAIFlowClientMySQL(test_client.TestAIFlowClientSqlite):
         cls.engine.execute('CREATE DATABASE IF NOT EXISTS %s' % cls.ns_db_name)
         cls.store_uri = '%s/%s' % (db_server_url, cls.db_name)
         cls.ns_store_uri = '%s/%s' % (db_server_url, cls.ns_db_name)
-        cls.ns_server = NotificationServer(port=_NS_PORT, db_conn=cls.ns_store_uri)
+        config_file = os.path.dirname(os.path.dirname(__file__)) + '/notification_server.yaml'
+        cls.ns_server = NotificationServerRunner(config_file=config_file)
+        cls.ns_server.config.port = _NS_PORT
+        cls.ns_server.config.db_uri = cls.ns_store_uri
+        from notification_service.util import db
+        db.create_all_tables(cls.ns_store_uri)
         cls.ns_server.start()
 
         cls.server = AIFlowServer(store_uri=cls.store_uri, port=_PORT)

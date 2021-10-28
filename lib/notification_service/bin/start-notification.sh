@@ -23,23 +23,29 @@ BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)
 . "${BIN}"/init-notification-env.sh
 
-usage="Usage: start-notification_service.sh [database-conn]"
+function start_server() {
+  if [ -e "${NOTIFICATION_PID_FILE}" ]; then
+    echo "Notification server is running, stop it first."
+    "${BIN}"/stop-notification.sh
+  fi
 
-if [ $# -ne 1 ]; then
+  echo "Starting notification server"
+  LOG_FILE_NAME=notification_service-$(date "+%Y%m%d-%H%M%S").log
+  start_notification_service.py --config-file="$CONFIG_FILE" > "${NOTIFICATION_LOG_DIR}"/"${LOG_FILE_NAME}" 2>&1 &
+  echo $! > "${NOTIFICATION_PID_FILE}"
+
+  echo "notification server started"
+  echo "Notification server log: ${NOTIFICATION_LOG_DIR}/${LOG_FILE_NAME}"
+  echo "Notification server pid: $(cat "${NOTIFICATION_PID_FILE}")"
+}
+
+usage="Usage: start-notification.sh"
+
+if [ $# -eq 0 ]; then
+  CONFIG_FILE=${NOTIFICATION_CONFIG_FILE}
+else
   echo "$usage"
   exit 1
 fi
 
-if [ -e "${NOTIFICATION_PID_DIR}"/notification_service.pid ]; then
-  echo "Notification service is running, stopping first"
-  "${BIN}"/stop-notification.sh
-fi
-
-echo "Starting notification service"
-LOG_FILE_NAME=notification_service-$(date "+%Y%m%d-%H%M%S").log
-start_notification_service.py --database-conn="$1" > "${NOTIFICATION_LOG_DIR}"/"${LOG_FILE_NAME}" 2>&1 &
-echo $! > "${NOTIFICATION_PID_DIR}"/notification_service.pid
-
-echo "notification service started"
-echo "Notification service log: ${NOTIFICATION_LOG_DIR}/${LOG_FILE_NAME}"
-echo "Notification service pid: $(cat "${NOTIFICATION_PID_DIR}"/notification_service.pid)"
+start_server

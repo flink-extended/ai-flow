@@ -23,7 +23,7 @@ from typing import Union, Tuple
 
 from notification_service.base_notification import BaseEvent, ANY_CONDITION, SenderEventCount
 from notification_service.util import db
-from notification_service.util.db import EventModel, ClientModel
+from notification_service.util.db import EventModel, ClientModel, MemberModel
 
 
 class BaseEventStorage(ABC):
@@ -216,12 +216,10 @@ class MemoryEventStorage(BaseEventStorage):
 
 class DbEventStorage(BaseEventStorage):
 
-    def __init__(self, db_conn=None, create_table_if_not_exists=True):
+    def __init__(self, db_conn=None):
         if db_conn is not None:
             db.SQL_ALCHEMY_CONN = db_conn
-        if create_table_if_not_exists:
-            EventModel.create_table(db.SQL_ALCHEMY_CONN)
-            ClientModel.create_table(db.SQL_ALCHEMY_CONN)
+        db.prepare_db()
 
     def add_event(self, event: BaseEvent, uuid: str):
         return EventModel.add_event(event, uuid)
@@ -267,3 +265,4 @@ class DbEventStorage(BaseEventStorage):
 
     def clean_up(self):
         EventModel.cleanup()
+        ClientModel.cleanup()

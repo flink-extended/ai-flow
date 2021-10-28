@@ -22,7 +22,7 @@ from unittest import mock
 from ai_flow import WorkflowMeta
 from notification_service.base_notification import BaseEvent
 
-from notification_service.master import NotificationMaster
+from notification_service.server import NotificationServer
 
 from notification_service.event_storage import MemoryEventStorage
 
@@ -34,7 +34,7 @@ from ai_flow.scheduler_service.service.workflow_event_manager import WorkflowEve
 
 class TestWorkflowEventManager(unittest.TestCase):
     def setUp(self) -> None:
-        self.notification = NotificationMaster(NotificationService(MemoryEventStorage()), 50051)
+        self.notification = NotificationServer(NotificationService(MemoryEventStorage()), 50051)
         self.notification.run()
         self.config = \
             {'scheduler':
