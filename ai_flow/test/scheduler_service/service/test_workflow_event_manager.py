@@ -22,7 +22,7 @@ from unittest import mock
 from ai_flow import WorkflowMeta
 from notification_service.base_notification import BaseEvent
 
-from notification_service.master import NotificationServer
+from notification_service.server import NotificationServer
 
 from notification_service.event_storage import MemoryEventStorage
 

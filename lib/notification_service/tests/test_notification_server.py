@@ -20,7 +20,7 @@ import unittest
 
 from notification_service.base_notification import BaseEvent
 from notification_service.client import NotificationClient
-from notification_service.master import NotificationServerRunner
+from notification_service.server import NotificationServerRunner
 from notification_service.util import db
 from notification_service.server_config import NotificationServerConfig
 

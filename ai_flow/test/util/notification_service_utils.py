@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import os
-from notification_service.master import NotificationServerRunner
+from notification_service.server import NotificationServerRunner
 from notification_service.util import db
 
 _NS_DB_FILE = 'ns.db'

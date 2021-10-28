@@ -162,14 +162,14 @@ class TestSubDagOperator(unittest.TestCase):
     def test_event_based(self):
         from notification_service.client import NotificationClient
         from notification_service.event_storage import DbEventStorage
-        from notification_service.master import NotificationMaster
+        from notification_service.server import NotificationServer
         from notification_service.service import NotificationService
         from airflow.events.scheduler_events import DagRunCreatedEvent
 
         storage = DbEventStorage()
         storage.clean_up()
-        master = NotificationMaster(NotificationService(storage), port=50060)
-        master.run()
+        server = NotificationServer(NotificationService(storage), port=50060)
+        server.run()
 
         dag = DAG('parent', default_args=default_args)
         subdag = DAG('parent.test', default_args=default_args)
@@ -182,7 +182,7 @@ class TestSubDagOperator(unittest.TestCase):
         dag_run_created_event = DagRunCreatedEvent.from_base_event(events[0])
         self.assertEqual('parent.test', dag_run_created_event.dag_id)
 
-        master.stop()
+        server.stop()
         storage.clean_up()
 
     def test_execute_create_dagrun_with_conf(self):

@@ -24,7 +24,7 @@ from notification_service.base_notification import BaseEvent, EventWatcher
 from notification_service.client import NotificationClient
 from notification_service.event_storage import MemoryEventStorage, DbEventStorage
 from notification_service.high_availability import SimpleNotificationServerHaManager, DbHighAvailabilityStorage
-from notification_service.master import NotificationServer
+from notification_service.server import NotificationServer
 from notification_service.service import NotificationService, HighAvailableNotificationService
 from notification_service.util import db
 from notification_service.util.db import SQL_ALCHEMY_DB_FILE

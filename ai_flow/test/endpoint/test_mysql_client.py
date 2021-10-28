@@ -27,7 +27,7 @@ from ai_flow.store.db.base_model import base
 from ai_flow.test.endpoint import test_client
 from ai_flow.test.store.test_sqlalchemy_store import _get_store
 from ai_flow.test.test_util import get_mysql_server_url
-from notification_service.master import NotificationServerRunner
+from notification_service.server import NotificationServerRunner
 
 
 _PORT = '50051'

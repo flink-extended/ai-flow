@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 from notification_service.event_storage import MemoryEventStorage
-from notification_service.master import NotificationServer
+from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 
 

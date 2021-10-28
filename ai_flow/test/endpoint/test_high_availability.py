@@ -20,7 +20,7 @@ import time
 import unittest
 
 from notification_service.event_storage import MemoryEventStorage
-from notification_service.master import NotificationServer
+from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 
 from ai_flow.project.project_config import ProjectConfig
