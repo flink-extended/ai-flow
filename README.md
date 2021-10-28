@@ -49,7 +49,7 @@ Please refer to the [API Documentation](https://ai-flow.readthedocs.io/en/latest
 
 ### Design
 
-If you are interested in design principle of Flink AI Flow, please see the [Design Documentation](https://github.com/flink-extended/ai-flow/wiki/FlinkAIFlowDesign) for more 
+If you are interested in design principle of Flink AI Flow, please see the [Design Documentation](https://github.com/flink-extended/ai-flow/wiki/Design) for more 
 details.
 
 ### Examples
