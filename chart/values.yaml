@@ -646,7 +646,7 @@ webserver:
   # Command to use when running the Airflow webserver (templated).
   command: ~
   # Args to use when running the Airflow webserver (templated).
-  args: ["bash", "-c", "exec airflow webserver --notification-server-uri={{ .Release.Name }}-notification:50052"]
+  args: ["bash", "-c", "exec airflow webserver --notification-server-uri={{ .Release.Name }}-notification:50052 --notification-sql-alchemy-conn=$(NOTIFICATION_DB_CONN)"]
 
   # Create ServiceAccount
   serviceAccount:
@@ -671,6 +671,13 @@ webserver:
       # Ports for webserver NetworkPolicy ingress (if `from` is set)
       ports:
         - port: airflow-ui
+
+  env:
+    - name: NOTIFICATION_DB_CONN
+      valueFrom:
+        secretKeyRef:
+          name: {{ template "airflow_metadata_secret" . }}
+          key: connection
 
   resources: {}
   #   limits:
