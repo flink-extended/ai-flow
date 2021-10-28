@@ -15,22 +15,18 @@
 # specific language governing permissions and limitations
 # under the License.
 import logging
-import unittest
-import tempfile
 import os
+import tempfile
+import unittest
+from unittest.mock import Mock, patch
 
 import cloudpickle
+
 from ai_flow.api.context_extractor import BroadcastAllContextExtractor
-
-from ai_flow.project.project_config import ProjectConfig
-
-from ai_flow.workflow.workflow_config import WorkflowConfig
-
 from ai_flow.context.project_context import ProjectContext
-
+from ai_flow.project.project_config import ProjectConfig
 from ai_flow.workflow.workflow import Workflow
-from mock import Mock
-
+from ai_flow.workflow.workflow_config import WorkflowConfig
 from ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler import AirFlowScheduler
 
 
@@ -44,6 +40,12 @@ class TestAirflowScheduler(unittest.TestCase):
                                            'notification_service_uri': 'localhost:50051'})
         self.scheduler._airflow_client = Mock()
         self.scheduler.dag_generator = Mock()
+
+    def test_airflow_scheduler_without_dag_deploy_path(self):
+        with patch("airflow.settings") as s:
+            s.DAGS_FOLDER = 'test_folder'
+            scheduler = AirFlowScheduler({'notification_service_uri': 'localhost:50051'})
+            self.assertEqual('test_folder', scheduler.config['airflow_deploy_path'])
 
     def test_airflow_scheduler_submit_workflow(self):
         workflow_name = 'test_workflow'
@@ -82,7 +84,8 @@ class TestAirflowScheduler(unittest.TestCase):
             mock_generated_code = 'mock generated code'
             self.scheduler.dag_generator.generate.return_value = mock_generated_code
 
-            self.scheduler.submit_workflow(workflow, context_extractor=context_extractor, project_context=project_context)
+            self.scheduler.submit_workflow(workflow, context_extractor=context_extractor,
+                                           project_context=project_context)
 
             dag_file_path = os.path.join(self.temp_deploy_path, '.'.join([project_name, workflow_name, 'py']))
             self.assertTrue(os.path.exists(dag_file_path))
