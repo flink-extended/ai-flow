@@ -15,21 +15,14 @@
      See the License for the specific language governing permissions and
     limitations under the License.
    ################################################################################
-   
-.. AI Flow documentation master file, created by
-   sphinx-quickstart on Fri Jul 16 10:18:41 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
-Welcome to AI Flow's Documentation!
+
+API
 =========================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents
 
-   content/get_started/index
-   content/user_guide/index
-   content/developer_guide/index
-   content/api/index
-
+   python/index
+   java-api

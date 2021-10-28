@@ -1,3 +1,4 @@
+#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -14,27 +15,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-version: 2
-formats: all
-sphinx:
-  configuration: docs/conf.py
-  fail_on_warning: false
+#
+# Required dependencies
 
-build:
-  image: latest
-  apt_packages:
-    - default-libmysqlclient-dev
-    - build-essential
-
-python:
-  # For available versions, see:
-  # https://docs.readthedocs.io/en/stable/config-file/v2.html#build-image
-  version: 3.7  # Flink AI Flow currently only support py3.7
-  install:
-    - method: pip
-      path: lib/notification_service
-    - method: pip
-      path: lib/airflow
-    - method: pip
-      path: .
-    - requirements: docs/requirements.txt
+myst-parser==0.13.6
+docutils==0.16
