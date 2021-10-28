@@ -18,8 +18,45 @@
 # under the License.
 #
 import argparse
+import os
 import logging
+from typing import Dict
+from notification_service.util import db
+from notification_service.server_config import NotificationServerConfig
 from notification_service.master import NotificationServerRunner
+
+
+def create_sever_config(root_dir_path, param: Dict[str, str]):
+    """
+    Generate default server config which use Apache Airflow as scheduler.
+    """
+    import notification_service.config_templates
+    default_config_file_name = 'default_notification_server.yaml'
+    config_file_name = 'notification_server.yaml'
+
+    if not os.path.exists(root_dir_path):
+        logging.info("{} does not exist, creating the directory".format(root_dir_path))
+        os.makedirs(root_dir_path, exist_ok=False)
+    default_server_config_path = os.path.join(
+        os.path.dirname(notification_service.config_templates.__file__), default_config_file_name
+    )
+    if not os.path.exists(default_server_config_path):
+        raise Exception("default notification server config is not found at {}.".format(default_server_config_path))
+
+    server_config_target_path = os.path.join(root_dir_path, config_file_name)
+    with open(default_server_config_path, encoding='utf-8') as config_file:
+        default_config = config_file.read().format(**param)
+    with open(server_config_target_path, mode='w', encoding='utf-8') as f:
+        f.write(default_config)
+    return server_config_target_path
+
+
+def create_all_tables(db_uri):
+    db.create_all_tables(db_uri)
+
+
+def drop_all_tables(db_uri):
+    db.drop_all_tables(db_uri)
 
 
 def _prepare_args():
@@ -34,6 +71,12 @@ if __name__ == '__main__':
                         level=logging.INFO)
     args = _prepare_args()
     config_file = args.config_file
+    if not os.path.exists(config_file):
+        create_sever_config(os.environ.get("NOTIFICATION_HOME"), os.environ.copy())
+        config = NotificationServerConfig(config_file)
+        drop_all_tables(db_uri=config.db_uri)
+        create_all_tables(db_uri=config.db_uri)
+
     ns = NotificationServerRunner(config_file=config_file)
     logging.info('notification service start(port:{}).'.format(ns.config.port))
     ns.start(is_block=True)

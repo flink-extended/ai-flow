@@ -24,11 +24,6 @@ BIN=$(cd "$BIN"; pwd)
 . "${BIN}"/init-notification-env.sh
 
 function start_server() {
-  if [ ! -e "${CONFIG_FILE}" ]; then
-    "${BIN}"/notification-config.sh --auto-generate
-    "${BIN}"/notification-db.sh reset
-  fi
-
   if [ -e "${NOTIFICATION_PID_FILE}" ]; then
     echo "Notification server is running, stopping first"
     "${BIN}"/stop-notification.sh
@@ -44,12 +39,10 @@ function start_server() {
   echo "Notification server pid: $(cat "${NOTIFICATION_PID_FILE}")"
 }
 
-usage="Usage: start-notification.sh [config-file]"
+usage="Usage: start-notification.sh"
 
 if [ $# -eq 0 ]; then
   CONFIG_FILE=${NOTIFICATION_CONFIG_FILE}
-elif [ $# -eq 1 ]; then
-  CONFIG_FILE=$1
 else
   echo "$usage"
   exit 1

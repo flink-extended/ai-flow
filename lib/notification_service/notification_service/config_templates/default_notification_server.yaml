@@ -16,12 +16,12 @@
 # under the License.
 
 # port of notification server
-server_port: {NOTIFICATION_SERVER_PORT}
+server_port: 50052
 # uri of database backend for notification server
-db_uri: {NOTIFICATION_DB_CONN}
+db_uri: sqlite:///{NOTIFICATION_HOME}/ns.db
 # High availability is disabled by default
 enable_ha: false
 # TTL of the heartbeat of a server, i.e., if the server hasn't send heartbeat for the TTL time, it is down.
 ha_ttl_ms: 10000
 # Hostname and port the server will advertise to clients.. If not set, it will use the local ip and configured port.
-advertised_uri: {NOTIFICATION_ADVERTISED_URI}
+advertised_uri: 127.0.0.1:50052
