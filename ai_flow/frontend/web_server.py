@@ -19,9 +19,15 @@
 import getopt
 import json
 import sys
+import logging
 from logging.config import dictConfig
 from typing import List, Dict
 
+from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
+
+from ai_flow.endpoint.server.server_config import AIFlowServerConfig
+
+from ai_flow.common.configuration import AIFlowConfiguration
 from django.core.paginator import Paginator
 from flask import Flask, request, render_template
 from flask_cors import CORS
@@ -31,7 +37,7 @@ from ai_flow.ai_graph.ai_graph import AIGraph
 from ai_flow.ai_graph.ai_node import AINode, ReadDatasetNode, WriteDatasetNode
 from ai_flow.ai_graph.data_edge import DataEdge
 from ai_flow.meta.workflow_meta import WorkflowMeta
-from ai_flow.plugin_interface.scheduler_interface import Scheduler, SchedulerFactory
+from ai_flow.plugin_interface.scheduler_interface import Scheduler, SchedulerFactory, SchedulerConfig
 from ai_flow.store.abstract_store import Filters, AbstractStore
 from ai_flow.store.db.db_util import create_db_store
 from ai_flow.util.json_utils import loads, Jsonable, dumps
@@ -59,7 +65,7 @@ CORS(app=app)
 store: AbstractStore = None
 scheduler: Scheduler = None
 airflow: str = None
-
+logger = logging.getLogger(__name__)
 
 def init(store_uri: str, scheduler_class: str, airflow_web_server_uri: str):
     global store
@@ -437,19 +443,36 @@ def artifact_metadata():
 
 
 usage_message = """
-usage: web_server.py -c <scheduler_class> -a <airflow_web_server_uri> [-H <host>] [-p <port>]
+usage: web_server.py -c <config_path>
 """
 
 
+class AIFlowWebServerConfig:
+
+    def __init__(self, config: Dict):
+        self.config = config
+
+    def host(self):
+        return self.config['host']
+
+    def port(self):
+        return self.config['port']
+
+    def get(self, key):
+        return self.config.get(key)
+
+    def __repr__(self):
+        return self.config.__repr__()
+
+    def __eq__(self, other):
+        return self.config.__eq__(other.config)
+
+
 def main(argv):
-    store_uri = ''
-    scheduler_class = ''
-    airflow_web_server_uri = ''
-    web_server_host = ''
-    web_server_port = ''
+    config_file = None
     try:
-        opts, args = getopt.getopt(argv, "hs:c:a:H:p:",
-                                   ["store_uri=", "scheduler_class=", "airflow_web_server_uri=", "host=", "port="])
+        opts, args = getopt.getopt(argv, "hc:",
+                                   ["config="])
     except getopt.GetoptError:
         print(usage_message)
         sys.exit(2)
@@ -457,26 +480,28 @@ def main(argv):
         if opt == '-h':
             print(usage_message)
             sys.exit()
-        elif opt in ("-s", "--store_uri"):
-            store_uri = arg
-        elif opt in ("-c", "--scheduler_class"):
-            scheduler_class = arg
-        elif opt in ("-a", "--airflow_web_server_uri"):
-            airflow_web_server_uri = arg
-        elif opt in ("-H", "--host"):
-            web_server_host = arg
-        elif opt in ("-p", "--port"):
-            web_server_port = arg
-    if not scheduler_class:
-        scheduler_class = 'ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.AirFlowScheduler'
-    if not airflow_web_server_uri:
-        airflow_web_server_uri = 'http://localhost:8080'
-    if not web_server_host:
-        web_server_host = '127.0.0.1'
-    if not web_server_port:
-        web_server_port = '8000'
-    init(store_uri, scheduler_class, airflow_web_server_uri)
-    app.run(host=web_server_host, port=int(web_server_port))
+        elif opt in ("-c", "--config"):
+            config_file = arg
+
+    if config_file is None:
+        print(usage_message)
+        sys.exit(2)
+
+    config = AIFlowServerConfig()
+    config.load_from_file(config_file)
+    store_uri = config.get_db_uri()
+    scheduler_service_config = SchedulerServiceConfig(config.get_scheduler_service_config())
+    scheduler_class = scheduler_service_config.scheduler().scheduler_class()
+    web_server_config = AIFlowWebServerConfig(config.get_web_server_config())
+
+    start_web_server(scheduler_class, store_uri, web_server_config)
+
+
+def start_web_server(scheduler_class, store_uri, web_server_config):
+    logger.info("Starting web server with scheduler class: {}, store_uri: {}, web_server_config: {}"
+                .format(scheduler_class, store_uri, web_server_config))
+    init(store_uri, scheduler_class, web_server_config.get('airflow_web_server_uri'))
+    app.run(host=web_server_config.host(), port=int(web_server_config.port()))
 
 
 if __name__ == '__main__':
