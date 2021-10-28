@@ -122,3 +122,6 @@ class AIFlowServerConfig(AIFlowConfiguration):
             return False
         else:
             return True
+
+    def get_web_server_config(self):
+        return self.get('web_server')

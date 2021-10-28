@@ -40,12 +40,11 @@ def stop_web(signum, frame):
 
 if __name__ == '__main__':
     signal.signal(signal.SIGTERM, stop_web)
+    if "AIFLOW_HOME" not in os.environ:
+        os.environ["AIFLOW_HOME"] = os.environ["HOME"] + "/aiflow"
+        logging.info("Set env variable AIFLOW_HOME to {}".format(os.environ["AIFLOW_HOME"]))
+
     aiflow_web_command = ['python', ai_flow.frontend.web_server.__file__,
-                          '-s', os.environ["AIFLOW_DB_CONN"],
-                          '-H', os.environ["AIFLOW_WEB_SERVER_HOST"],
-                          '-p', os.environ["AIFLOW_WEB_SERVER_PORT"]]
-    airflow_web_server_uri = os.environ.get("AIFLOW_WEB_SERVER_AIRFLOW_WEB_SERVER_URI")
-    if airflow_web_server_uri is not None:
-        aiflow_web_command.extend(['-a', airflow_web_server_uri])
+                          '-c', os.path.join(os.environ["AIFLOW_HOME"], 'aiflow_server.yaml')]
     sub_process = Popen(aiflow_web_command)
     sub_process.wait()

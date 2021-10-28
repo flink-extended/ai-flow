@@ -41,8 +41,8 @@ class SchedulerServiceConfig(AIFlowConfiguration):
     def set_repository(self, value):
         self['repository'] = value
 
-    def scheduler(self):
+    def scheduler(self) -> SchedulerConfig:
         return self['scheduler']
 
-    def set_scheduler(self, value):
+    def set_scheduler(self, value: SchedulerConfig):
         self['scheduler'] = value
