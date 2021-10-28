@@ -17,7 +17,7 @@
 version: 2
 formats: all
 sphinx:
-  configuration: flink-ai-flow/docs/conf.py
+  configuration: docs/conf.py
   fail_on_warning: false
 
 build:
@@ -32,8 +32,8 @@ python:
   version: 3.7  # Flink AI Flow currently only support py3.7
   install:
     - method: pip
-      path: flink-ai-flow/
+      path: lib/notification_service
     - method: pip
-      path: flink-ai-flow/lib/notification_service
+      path: lib/airflow
     - method: pip
-      path: flink-ai-flow/lib/airflow
+      path: .
