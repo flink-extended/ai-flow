@@ -19,25 +19,12 @@
 ##
 set -e
 export NOTIFICATION_HOME=${NOTIFICATION_HOME:-~/notification_service}
-export NOTIFICATION_PID_DIR=${NOTIFICATION_PID_DIR:-${NOTIFICATION_HOME}}
+export NOTIFICATION_PID_FILE="${NOTIFICATION_HOME}/notification_server.pid"
 export NOTIFICATION_LOG_DIR="${NOTIFICATION_HOME}/logs"
-export NOTIFICATION_SERVICE_PORT=${NOTIFICATION_SERVICE_PORT:-50052}
+export NOTIFICATION_CONFIG_FILE="${NOTIFICATION_HOME}/notification_server.yaml"
 
-[ -d "${NOTIFICATION_HOME}" ] || mkdir "${NOTIFICATION_HOME}"
-[ -d "${NOTIFICATION_PID_DIR}" ] || mkdir "${NOTIFICATION_PID_DIR}"
-[ -d "${NOTIFICATION_LOG_DIR}" ] || mkdir "${NOTIFICATION_LOG_DIR}"
-
-DEFAULT_NOTIFICATION_SERVER_URI="localhost:${NOTIFICATION_SERVICE_PORT}"
-function get_ip_addr() {
-  SYSTEM=$(uname -s)
-  if [[ ${SYSTEM} == "Darwin" ]]; then
-    DEFAULT_NOTIFICATION_SERVER_URI="$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'):${NOTIFICATION_SERVICE_PORT}"
-  elif [[ ${SYSTEM} == "Linux" ]]; then
-    DEFAULT_NOTIFICATION_SERVER_URI="$(hostname -I | xargs):${NOTIFICATION_SERVICE_PORT}"
-  else
-    echo "Please init AIFlow on Linux or macOS."
-    exit 1
-  fi
+function create_notification_dirs() {
+  [ -d "${NOTIFICATION_HOME}" ] || mkdir "${NOTIFICATION_HOME}"
+  [ -d "${NOTIFICATION_LOG_DIR}" ] || mkdir "${NOTIFICATION_LOG_DIR}"
 }
-get_ip_addr
-export NOTIFICATION_SERVER_URI=${NOTIFICATION_SERVER_URI:-${DEFAULT_NOTIFICATION_SERVER_URI}}
+create_notification_dirs

@@ -14,16 +14,23 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from notification_service.event_storage import MemoryEventStorage
-from notification_service.server import NotificationServer
-from notification_service.service import NotificationService
+#
+import os
+import unittest
+from notification_service.server_config import NotificationServerConfig
 
 
-def run_server():
-    storage = MemoryEventStorage()
-    master = NotificationServer(service=NotificationService(storage), port=50051)
-    master.run(is_block=True)
+class TestNotificationServerConfig(unittest.TestCase):
+
+    def test_load_notification_server_config(self):
+        config_file = os.path.join(os.path.dirname(__file__), 'notification_server.yaml')
+        ns_config = NotificationServerConfig(config_file)
+        self.assertEqual(50052, ns_config.port)
+        self.assertEqual('127.0.0.1:50052', ns_config.advertised_uri)
+        self.assertEqual('sqlite:///ns.db', ns_config.db_uri)
+        self.assertFalse(ns_config.enable_ha)
+        self.assertEqual(10000, ns_config.ha_ttl_ms)
 
 
 if __name__ == '__main__':
-    run_server()
+    unittest.main()

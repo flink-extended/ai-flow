@@ -15,7 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 import os
-from notification_service.master import NotificationServer
+from notification_service.server import NotificationServerRunner
+from notification_service.util import db
 
 _NS_DB_FILE = 'ns.db'
 _NS_DB_URI = '%s%s' % ('sqlite:///', _NS_DB_FILE)
@@ -26,7 +27,9 @@ _NS_URI = 'localhost:%s' % _NS_PORT
 def start_notification_server():
     if os.path.exists(_NS_DB_FILE):
         os.remove(_NS_DB_FILE)
-    ns_server = NotificationServer(port=_NS_PORT, db_conn=_NS_DB_URI)
+    config_file = os.path.dirname(os.path.dirname(__file__)) + '/notification_server.yaml'
+    ns_server = NotificationServerRunner(config_file=config_file)
+    db.create_all_tables(ns_server.config.db_uri)
     ns_server.start()
     return ns_server
 

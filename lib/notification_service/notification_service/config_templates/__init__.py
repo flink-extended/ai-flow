@@ -14,16 +14,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from notification_service.event_storage import MemoryEventStorage
-from notification_service.server import NotificationServer
-from notification_service.service import NotificationService
-
-
-def run_server():
-    storage = MemoryEventStorage()
-    master = NotificationServer(service=NotificationService(storage), port=50051)
-    master.run(is_block=True)
-
-
-if __name__ == '__main__':
-    run_server()

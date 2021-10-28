@@ -78,11 +78,10 @@ class HighAvailabilityStorage(ABC):
 
 class DbHighAvailabilityStorage(HighAvailabilityStorage):
 
-    def __init__(self, db_conn=None, create_table_if_not_exists=True):
+    def __init__(self, db_conn=None):
         if db_conn is not None:
             db.SQL_ALCHEMY_CONN = db_conn
-        if create_table_if_not_exists:
-            MemberModel.create_table(db.SQL_ALCHEMY_CONN)
+        db.prepare_db()
 
     def list_living_members(self, ttl_ms):
         return MemberModel.get_living_members(ttl_ms)

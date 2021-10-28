@@ -26,15 +26,14 @@ if [ $# -ne 3 ]; then
   echo "$usage"
   exit 1
 fi
-NOTIFICATION_SERVICE_DB_CONN=$1
 AIRFLOW_DB_CONN=$2
 export AIFLOW_DB_CONN=$3
 export AIFLOW_DB_TYPE="MYSQL"
 
 # start notification service
 source "${BIN}"/init-notification-env.sh
-"${BIN}"/start-notification.sh "${NOTIFICATION_SERVICE_DB_CONN}"
-echo "notification service address: ${NOTIFICATION_SERVER_URI}"
+"${BIN}"/start-notification.sh
+echo "start notification server."
 sleep 3
 
 # start airflow scheduler and web server

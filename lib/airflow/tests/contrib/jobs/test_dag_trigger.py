@@ -22,7 +22,7 @@ import pendulum.datetime
 from notification_service.base_notification import BaseEvent
 from notification_service.client import NotificationClient
 from notification_service.event_storage import MemoryEventStorage
-from notification_service.master import NotificationMaster
+from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 from airflow.models.serialized_dag import SerializedDagModel
 
@@ -83,8 +83,8 @@ class TestDagTrigger(unittest.TestCase):
         port = 50101
         notification_server_uri = 'localhost:{}'.format(port)
         storage = MemoryEventStorage()
-        master = NotificationMaster(NotificationService(storage), port)
-        master.run()
+        server = NotificationServer(NotificationService(storage), port)
+        server.run()
         mailbox = Mailbox()
         dag_trigger = DagTrigger("../../dags/test_scheduler_dags.py", -1, [], False, mailbox, 5, notification_server_uri)
         dag_trigger.start()
@@ -95,7 +95,7 @@ class TestDagTrigger(unittest.TestCase):
         sc = EventSchedulerClient(notification_server_uri=notification_server_uri, namespace='a')
         sc.trigger_parse_dag()
         dag_trigger.end()
-        master.stop()
+        server.stop()
 
     def test_file_processor_manager_kill(self):
         mailbox = Mailbox()
@@ -116,8 +116,8 @@ class TestDagTrigger(unittest.TestCase):
         port = 50102
         notification_server_uri = "localhost:{}".format(port)
         storage = MemoryEventStorage()
-        master = NotificationMaster(NotificationService(storage), port)
-        master.run()
+        server = NotificationServer(NotificationService(storage), port)
+        server.run()
         dag_folder = os.path.abspath(os.path.dirname(__file__)) + "/../../dags"
         mailbox = Mailbox()
         dag_trigger = DagTrigger(dag_folder, -1, [], False, mailbox, notification_service_uri=notification_server_uri)

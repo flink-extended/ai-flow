@@ -14,16 +14,14 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from notification_service.event_storage import MemoryEventStorage
-from notification_service.server import NotificationServer
-from notification_service.service import NotificationService
 
-
-def run_server():
-    storage = MemoryEventStorage()
-    master = NotificationServer(service=NotificationService(storage), port=50051)
-    master.run(is_block=True)
-
-
-if __name__ == '__main__':
-    run_server()
+# port of notification server
+server_port: 50052
+# uri of database backend for notification server
+db_uri: sqlite:///{NOTIFICATION_HOME}/ns.db
+# High availability is disabled by default
+enable_ha: false
+# TTL of the heartbeat of a server, i.e., if the server hasn't send heartbeat for the TTL time, it is down.
+ha_ttl_ms: 10000
+# Hostname and port the server will advertise to clients.. If not set, it will use the local ip and configured port.
+advertised_uri: 127.0.0.1:50052
