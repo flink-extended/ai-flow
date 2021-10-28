@@ -38,7 +38,7 @@ sleep 3
 
 # start airflow scheduler and web server
 source "${BIN}"/init-airflow-env.sh
-"${BIN}"/start-airflow.sh "${AIRFLOW_DB_CONN}"
+"${BIN}"/start-airflow.sh "${AIRFLOW_DB_CONN}" "${NOTIFICATION_SERVICE_DB_CONN}"
 echo "airflow dag dir: ${AIRFLOW_DAG_DIR}"
 
 # start AIFlow

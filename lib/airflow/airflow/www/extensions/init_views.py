@@ -41,7 +41,7 @@ def init_flash_views(app):
     app.register_blueprint(routes)
 
 
-def init_appbuilder_views(app, notification_server_uri):
+def init_appbuilder_views(app, notification_server_uri, notification_sql_alchemy_conn):
     """Initialize Web UI views"""
     appbuilder = app.appbuilder
     from airflow.www import views
@@ -82,7 +82,7 @@ def init_appbuilder_views(app, notification_server_uri):
         category=permissions.RESOURCE_BROWSE_MENU,
     )
     appbuilder.add_view(
-        views.EventModelView,
+        views.EventModelView(notification_sql_alchemy_conn),
         permissions.RESOURCE_EVENT,
         category=permissions.RESOURCE_BROWSE_MENU,
     )

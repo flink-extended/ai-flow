@@ -32,11 +32,42 @@ from operator import itemgetter
 from typing import Dict, List, Optional, Set, Tuple
 from urllib.parse import parse_qsl, unquote, urlencode, urlparse
 
-import airflow
 import lazy_object_proxy
 import nvd3
 import sqlalchemy as sqla
 import yaml
+from flask import (
+    Markup,
+    Response,
+    abort,
+    current_app,
+    escape,
+    flash,
+    g,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    session as flask_session,
+    url_for,
+)
+from flask_appbuilder import BaseView, ModelView, expose, has_access
+from flask_appbuilder.actions import action
+from flask_appbuilder.fieldwidgets import Select2Widget
+from flask_appbuilder.models.sqla.filters import BaseFilter  # noqa
+from flask_appbuilder.widgets import FormWidget
+from flask_babel import lazy_gettext
+from jinja2.utils import htmlsafe_json_dumps, pformat  # type: ignore
+from pygments import highlight, lexers
+from pygments.formatters import HtmlFormatter  # noqa pylint: disable=no-name-in-module
+from sqlalchemy import and_, desc, func, or_, union_all, create_engine
+from sqlalchemy.orm import joinedload
+from sqlalchemy.orm.session import Session
+from wtforms import SelectField, validators
+from wtforms.validators import InputRequired
+
+import airflow
 from airflow import models, plugins_manager, settings
 from airflow.api.common.experimental.mark_tasks import (
     set_dag_run_state_to_failed,
@@ -78,36 +109,6 @@ from airflow.www.forms import (
     TaskInstanceEditForm,
 )
 from airflow.www.widgets import AirflowModelListWidget
-from flask import (
-    Markup,
-    Response,
-    abort,
-    current_app,
-    escape,
-    flash,
-    g,
-    jsonify,
-    make_response,
-    redirect,
-    render_template,
-    request,
-    session as flask_session,
-    url_for,
-)
-from flask_appbuilder import BaseView, ModelView, expose
-from flask_appbuilder.actions import action
-from flask_appbuilder.fieldwidgets import Select2Widget
-from flask_appbuilder.models.sqla.filters import BaseFilter  # noqa
-from flask_appbuilder.widgets import FormWidget
-from flask_babel import lazy_gettext
-from jinja2.utils import htmlsafe_json_dumps, pformat  # type: ignore
-from pygments import highlight, lexers
-from pygments.formatters import HtmlFormatter  # noqa pylint: disable=no-name-in-module
-from sqlalchemy import and_, desc, func, or_, union_all
-from sqlalchemy.orm import joinedload
-from wtforms import SelectField, validators
-from wtforms.validators import InputRequired
-
 from notification_service.client import NotificationClient
 from notification_service.util.db import EventModel
 
@@ -4207,6 +4208,11 @@ class TaskInstanceModelView(AirflowModelView):
 class EventModelView(AirflowModelView):
     """View to show records from Event table"""
 
+    def __init__(self, notification_sql_alchemy_conn: str = None, **kwargs):
+        super(AirflowModelView, self).__init__(**kwargs)
+        if notification_sql_alchemy_conn:
+            self.notification_session = Session(bind=create_engine(notification_sql_alchemy_conn))
+
     route_base = '/event'
 
     datamodel = AirflowModelView.CustomSQLAInterface(EventModel)  # noqa # type: ignore
@@ -4231,6 +4237,13 @@ class EventModelView(AirflowModelView):
     base_order = ('key', 'asc')
 
     base_filters = [['key', DagFilter, lambda: []]]
+
+    @expose("/list/")
+    @has_access
+    def list(self):
+        if self.notification_session:
+            self.datamodel.session = self.notification_session
+        return super().list()
 
 
 class DagModelView(AirflowModelView):
