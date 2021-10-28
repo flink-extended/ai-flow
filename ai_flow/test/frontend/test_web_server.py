@@ -17,12 +17,14 @@
 # under the License.
 #
 import json
+import os
 import unittest
+from unittest import mock
 
 from cloudpickle import cloudpickle
 
 from ai_flow import WorkflowMeta
-from ai_flow.frontend.web_server import generate_graph
+from ai_flow.frontend.web_server import generate_graph, AIFlowWebServerConfig
 from ai_flow.test.scheduler_service.service.test_workflow_event_processor import MyContextExtractor
 from ai_flow.workflow.control_edge import WorkflowSchedulingRule, WorkflowAction, MeetAllEventCondition
 
@@ -70,6 +72,19 @@ class TestWebServer(unittest.TestCase):
                 self.assertEqual(graph_node['layer'], 2)
             if graph_node['id'] == 'task_3':
                 self.assertEqual(graph_node['layer'], 1)
+
+    def test_web_server_read_config(self):
+        import ai_flow.frontend.web_server as web_server
+        aiflow_server_config_path = os.path.join(
+            os.path.dirname(__file__), "test_aiflow_server.yaml"
+        )
+
+        with mock.patch('ai_flow.frontend.web_server.start_web_server') as start_web_server:
+            web_server.main(['-c', aiflow_server_config_path])
+
+            config = AIFlowWebServerConfig({'airflow_web_server_uri': 'http://localhost:8080', 'host': '127.0.0.1',
+                                            'port': 8000})
+            start_web_server.assert_called_once_with('scheduler_class_testing', 'db_uri_testing', config)
 
 
 if __name__ == '__main__':
