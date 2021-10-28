@@ -23,10 +23,37 @@ export AIRFLOW_HOME=${AIRFLOW_HOME:-~/airflow}
 export AIRFLOW_LOG_DIR=${AIRFLOW_HOME}/logs
 [ -d "${AIRFLOW_LOG_DIR}" ] || mkdir "${AIRFLOW_LOG_DIR}"
 
-export AIRFLOW_PID_DIR=${AIRFLOW_PID_DIR:-${AIRFLOW_HOME}}
-[ -d "${AIRFLOW_PID_DIR}" ] || mkdir "${AIRFLOW_PID_DIR}"
+export AIRFLOW_SCHEDULER_PID_FILE="${AIRFLOW_HOME}/scheduler.pid"
+export AIRFLOW_WEB_PID_FILE="${AIRFLOW_HOME}/web.pid"
 
-export AIRFLOW_DAG_DIR=${AIRFLOW_DAG_DIR:-${AIRFLOW_HOME}/dags}
+export AIRFLOW_DAG_DIR="${AIRFLOW_HOME}/dags"
 [ -d "${AIRFLOW_DAG_DIR}" ] || mkdir "${AIRFLOW_DAG_DIR}"
 
-export NOTIFICATION_SERVER_URI=${NOTIFICATION_SERVER_URI:-127.0.0.1:50052}
+init_airflow_config() {
+  if [[ ! -f "${AIRFLOW_HOME}/airflow.cfg" ]] ; then
+    echo "${AIRFLOW_HOME}/airflow.cfg does not exist creating one."
+    CURRENT_DIR=$(pwd)
+    cd "${AIRFLOW_HOME}" || exit
+
+    # create the configuration file
+    airflow config list >/dev/null 2>&1 || true
+
+    # init database
+    airflow db init
+
+    # create a default Admin user for airflow
+    echo "Creating admin airflow user"
+    airflow users create \
+        --username admin \
+        --password admin \
+        --firstname admin \
+        --lastname admin \
+        --role Admin \
+        --email admin@example.org
+
+    cd "${CURRENT_DIR}" || exit
+  else
+    echo "${AIRFLOW_HOME}/airflow.cfg already exist. Using the existing airflow.cfg"
+  fi
+}
+init_airflow_config

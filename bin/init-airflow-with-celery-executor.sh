@@ -18,30 +18,24 @@
 ## under the License.
 ##
 set -e
-usage="Usage: init-airflow-with-celery-executor.sh [airflow-mysql-conn] [celery-broker_url] [celery-result_backend]"
+usage="Usage: init-airflow-with-celery-executor.sh"
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 0 ]; then
   echo "$usage"
   exit 1
 fi
-
-MYSQL_CONN=$1
-BROKER_URL=$2
-RESULT_BACKEND=$3
 
 BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)
 
 if [[ ! -f "${AIRFLOW_HOME}/airflow.cfg" ]] ; then
-  "${BIN}"/init-airflow-env.sh "${MYSQL_CONN}"
+  "${BIN}"/init-airflow-env.sh
 fi
 
 CURRENT_DIR=$(pwd)
 cd "${AIRFLOW_HOME}"
 mv airflow.cfg airflow.cfg.tmpl
 awk "{gsub(\"executor = LocalExecutor\", \"executor = CeleryExecutor\"); \
-    gsub(\"broker_url = redis://redis:6379/0\", \"broker_url = ${BROKER_URL}\"); \
-    gsub(\"result_backend = db\+postgresql://postgres:airflow@postgres/airflow\", \"result_backend = ${RESULT_BACKEND}\"); \
     print \$0}" airflow.cfg.tmpl > airflow.cfg
 rm airflow.cfg.tmpl >/dev/null 2>&1 || true
 cd "${CURRENT_DIR}"
