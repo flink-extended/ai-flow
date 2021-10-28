@@ -17,6 +17,7 @@
 import os
 import sys
 import sphinx_rtd_theme
+import myst_parser
 import subprocess
 
 sys.path.insert(0, os.path.abspath('../ai_flow/api'))
@@ -46,6 +47,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.autosectionlabel',
+    'myst_parser',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -95,6 +97,12 @@ autodoc_docstring_signature = True
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+
+source_suffix = ['.rst', '.md', '.MD']
+
+source_parsers = {
+    '.md': myst_parser  # noqa
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
