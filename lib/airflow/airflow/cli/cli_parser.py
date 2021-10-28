@@ -158,8 +158,7 @@ ARG_NOTIFICATION_SQL_ALCHEMY_CONN = Arg(
     ("--notification-sql-alchemy-conn",),
     help=(
         "Notification SQL alchemy database connection uri."
-    ),
-    default='localhost:50051'
+    )
 )
 ARG_EVENT_START_TIME = Arg(
     ("--event-start-time",),
