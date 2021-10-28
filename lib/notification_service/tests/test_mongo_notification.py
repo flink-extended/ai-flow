@@ -22,7 +22,7 @@ from typing import List
 from notification_service.base_notification import BaseEvent, EventWatcher
 from notification_service.client import NotificationClient
 from notification_service.mongo_event_storage import MongoEventStorage
-from notification_service.master import NotificationMaster
+from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 
 properties = {'enable.idempotence': 'True'}
@@ -39,7 +39,7 @@ class MongoNotificationTest(unittest.TestCase):
             "db": "test"
         }
         cls.storage = MongoEventStorage(**kwargs)
-        cls.master = NotificationMaster(NotificationService(cls.storage))
+        cls.master = NotificationServer(NotificationService(cls.storage))
         cls.master.run()
         cls.client = NotificationClient(server_uri="localhost:50051", properties=properties)
 

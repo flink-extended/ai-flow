@@ -21,7 +21,7 @@ from typing import List
 from notification_service.base_notification import EventWatcher, BaseEvent
 from notification_service.client import NotificationClient
 from notification_service.event_storage import MemoryEventStorage
-from notification_service.master import NotificationMaster
+from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 from airflow.contrib.jobs.scheduler_client import EventSchedulerClient, ExecutionContext
 from airflow.events.scheduler_events import SchedulerInnerEventType
@@ -52,8 +52,8 @@ class TestSchedulerClient(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.storage = MemoryEventStorage()
-        cls.master = NotificationMaster(NotificationService(cls.storage), PORT)
-        cls.master.run()
+        cls.server = NotificationServer(NotificationService(cls.storage), PORT)
+        cls.server.run()
 
     @classmethod
     def tearDownClass(cls) -> None:

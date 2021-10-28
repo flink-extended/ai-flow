@@ -396,6 +396,12 @@ class ClientModel(Base):
         if not engine.dialect.has_table(engine, ClientModel.__tablename__):
             Base.metadata.create_all(engine)
 
+    @staticmethod
+    @provide_session
+    def cleanup(session=None):
+        session.query(ClientModel).delete()
+        session.commit()
+
 
 class MemberModel(Base):
     __tablename__ = "member_model"
@@ -478,3 +484,19 @@ class MemberModel(Base):
             .filter(MemberModel.update_time < time.time_ns() / 1000000 - ttl) \
             .delete()
         session.commit()
+
+
+def create_all_tables(db_conn=None):
+    if db_conn is not None:
+        global SQL_ALCHEMY_CONN
+        SQL_ALCHEMY_CONN = db_conn
+    prepare_db()
+    Base.metadata.create_all(engine)
+
+
+def drop_all_tables(db_conn=None):
+    if db_conn is not None:
+        global SQL_ALCHEMY_CONN
+        SQL_ALCHEMY_CONN = db_conn
+    prepare_db()
+    Base.metadata.drop_all(engine)
