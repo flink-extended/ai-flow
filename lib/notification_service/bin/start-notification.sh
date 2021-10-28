@@ -25,7 +25,7 @@ BIN=$(cd "$BIN"; pwd)
 
 function start_server() {
   if [ -e "${NOTIFICATION_PID_FILE}" ]; then
-    echo "Notification server is running, stopping first"
+    echo "Notification server is running, stop it first."
     "${BIN}"/stop-notification.sh
   fi
 
