@@ -66,7 +66,8 @@ def sync_appbuilder_roles(flask_app):
         security_manager.sync_resource_permissions()
 
 
-def create_app(config=None, testing=False, app_name="Airflow", notification_server_uri=None):
+def create_app(config=None, testing=False, app_name="Airflow", notification_server_uri=None,
+               notification_sql_alchemy_conn=None):
     """Create a new instance of Airflow WWW app"""
     flask_app = Flask(__name__)
     flask_app.secret_key = conf.get('webserver', 'SECRET_KEY')
@@ -113,7 +114,7 @@ def create_app(config=None, testing=False, app_name="Airflow", notification_serv
     with flask_app.app_context():
         init_appbuilder(flask_app)
 
-        init_appbuilder_views(flask_app, notification_server_uri)
+        init_appbuilder_views(flask_app, notification_server_uri, notification_sql_alchemy_conn)
         init_appbuilder_links(flask_app)
         init_plugins(flask_app)
         init_connection_form()
@@ -134,5 +135,6 @@ def cached_app(config=None, testing=False):
     global app  # pylint: disable=global-statement
     if not app:
         app = create_app(config=config, testing=testing,
-                         notification_server_uri=os.getenv('NOTIFICATION_SERVER_URI',  None))
+                         notification_server_uri=os.getenv('NOTIFICATION_SERVER_URI', None),
+                         notification_sql_alchemy_conn=os.getenv('NOTIFICATION_SQL_ALCHEMY_CONN', None))
     return app
