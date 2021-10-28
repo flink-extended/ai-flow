@@ -49,7 +49,9 @@ scheduler_service:
   scheduler:
     scheduler_class: ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.AirFlowScheduler
     scheduler_config:
-      # AirFlow dag file deployment directory, i.e., where the airflow dag will be.
-      airflow_deploy_path: {AIRFLOW_DAG_DIR}
+      # AirFlow dag file deployment directory, i.e., where the airflow dag will be. If it is not set, the dags_folder in
+      # airflow config will be used
+      #airflow_deploy_path: /tmp/dags
+
       # Notification service uri used by the AirFlowScheduler.
       notification_service_uri: {NOTIFICATION_SERVER_URI}

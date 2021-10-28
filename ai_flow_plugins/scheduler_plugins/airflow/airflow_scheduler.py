@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import datetime
+import logging
 import os
 import shutil
 from abc import ABC
@@ -40,6 +41,8 @@ from airflow.utils.state import State
 from airflow.contrib.jobs.scheduler_client import EventSchedulerClient, SCHEDULER_NAMESPACE, ExecutionContext
 from airflow.utils.dates import parse_execution_date
 
+logger = logging.getLogger(__name__)
+
 
 class AirFlowSchedulerBase(Scheduler, ABC):
     """
@@ -54,8 +57,10 @@ class AirFlowSchedulerBase(Scheduler, ABC):
             raise Exception('`notification_service_uri` option of scheduler config is not configured. '
                             'Please add the `notification_service_uri` option under `scheduler_config` option!')
         if 'airflow_deploy_path' not in config:
-            raise Exception('`airflow_deploy_path` option of scheduler config is not configured. '
-                            'Please add the `notification_service_uri` option under `scheduler_config` option!')
+            from airflow import settings
+            dags_folder = settings.DAGS_FOLDER
+            config['airflow_deploy_path'] = dags_folder
+            logger.info("airflow_deploy_path is set to {} from airflow config".format(dags_folder))
         super().__init__(config)
         self.dag_generator = DAGGenerator()
         self._airflow_client = None
@@ -101,8 +106,9 @@ class AirFlowSchedulerBase(Scheduler, ABC):
     @property
     def airflow_client(self):
         if self._airflow_client is None:
-            self._airflow_client = EventSchedulerClient(notification_server_uri=self.config.get('notification_service_uri'),
-                                                        namespace=SCHEDULER_NAMESPACE)
+            self._airflow_client = EventSchedulerClient(
+                notification_server_uri=self.config.get('notification_service_uri'),
+                namespace=SCHEDULER_NAMESPACE)
         return self._airflow_client
 
     def submit_workflow(self, workflow: Workflow, context_extractor, project_context: ProjectContext) -> WorkflowInfo:
