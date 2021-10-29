@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import json
 import os
 import shutil
 import threading
@@ -24,6 +25,7 @@ from typing import List
 
 import numpy as np
 from joblib import dump, load
+from notification_service.client import NotificationClient
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import StandardScaler
@@ -31,7 +33,7 @@ from sklearn.utils import check_random_state
 from streamz import Stream
 
 import ai_flow as af
-from ai_flow.model_center.entity.model_version_stage import ModelVersionStage
+from ai_flow.model_center.entity.model_version_stage import ModelVersionStage, ModelVersionEventType
 from ai_flow.util.path_util import get_file_dir
 from ai_flow_plugins.job_plugins.python import PythonProcessor
 from ai_flow_plugins.job_plugins.python.python_processor import ExecutionContext
@@ -68,6 +70,10 @@ class DatasetTransformer(PythonProcessor):
 
 class ModelTrainer(PythonProcessor):
 
+    def __init__(self, notification_server_uri: str) -> None:
+        super(PythonProcessor).__init__()
+        self.notification_server_uri = notification_server_uri
+
     def process(self, execution_context: ExecutionContext, input_list: List) -> List:
         # https://scikit-learn.org/stable/auto_examples/linear_model/plot_sparse_logistic_regression_mnist.html
         clf = LogisticRegression(C=50. / 5000, penalty='l1', solver='saga', tol=1)
@@ -80,8 +86,12 @@ class ModelTrainer(PythonProcessor):
         model_path = model_path + '/' + model_timestamp
         dump(clf, model_path)
         model_meta: af.ModelMeta = execution_context.config.get('model_info')
-        af.register_model_version(model=model_meta, model_path=model_path)
+        model_version = af.register_model_version(model=model_meta, model_path=model_path)
         print("Done for {}".format(self.__class__.__name__))
+        notification_client = NotificationClient(server_uri=self.notification_server_uri, default_namespace='default',
+                                                 sender=execution_context.job_execution_info.job_name)
+        notification_client.send_event(BaseEvent(key=model_meta.name, value=model_version.version,
+                                                 event_type=ModelVersionEventType.MODEL_GENERATED))
         return []
 
 
@@ -105,9 +115,10 @@ class ValidateTransformer(PythonProcessor):
 
 class ModelValidator(PythonProcessor):
 
-    def __init__(self, artifact_name):
+    def __init__(self, artifact_name, notification_server_uri):
         super().__init__()
         self.artifact_name = artifact_name
+        self.notification_server_uri = notification_server_uri
         self.model_name = None
         self.model_path = None
         self.model_version = None
@@ -132,6 +143,11 @@ class ModelValidator(PythonProcessor):
             af.update_model_version(model_name=self.model_name,
                                     model_version=self.model_version,
                                     current_stage=ModelVersionStage.VALIDATED)
+            notification_client = NotificationClient(server_uri=self.notification_server_uri,
+                                                     default_namespace='default',
+                                                     sender=execution_context.job_execution_info.job_name)
+            notification_client.send_event(BaseEvent(key=self.model_name, value=self.model_version,
+                                                     event_type=ModelVersionEventType.MODEL_VALIDATED))
         else:
             deployed_clf = load(deployed_model_version.model_path)
             deployed_scores = cross_val_score(deployed_clf, x_validate, y_validate, scoring='precision_macro')
@@ -153,9 +169,10 @@ class ModelValidator(PythonProcessor):
 
 
 class ModelPusher(PythonProcessor):
-    def __init__(self, artifact):
+    def __init__(self, artifact, notification_server_uri):
         super().__init__()
         self.artifact = artifact
+        self.notification_server_uri = notification_server_uri
 
     def process(self, execution_context: ExecutionContext, input_list: List) -> List:
         model_meta: af.ModelMeta = execution_context.config.get('model_info')
@@ -170,6 +187,10 @@ class ModelPusher(PythonProcessor):
         af.update_model_version(model_name=model_name,
                                 model_version=validated_model.version,
                                 current_stage=ModelVersionStage.DEPLOYED)
+        notification_client = NotificationClient(server_uri=self.notification_server_uri, default_namespace='default',
+                                                 sender=execution_context.job_execution_info.job_name)
+        notification_client.send_event(BaseEvent(key=model_name, value=validated_model.version,
+                                                 event_type=ModelVersionEventType.MODEL_DEPLOYED))
 
         af.get_ai_flow_client().send_event(BaseEvent(key='START_PREDICTION', value=validated_model.version))
         print(validated_model.version)
