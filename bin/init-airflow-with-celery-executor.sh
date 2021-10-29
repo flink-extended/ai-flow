@@ -18,12 +18,6 @@
 ## under the License.
 ##
 set -e
-usage="Usage: init-airflow-with-celery-executor.sh"
-
-if [ $# -ne 0 ]; then
-  echo "$usage"
-  exit 1
-fi
 
 BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)

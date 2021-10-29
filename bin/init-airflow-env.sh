@@ -37,23 +37,25 @@ init_airflow_config() {
 
     # create the configuration file
     airflow config list >/dev/null 2>&1 || true
-
-    # init database
-    airflow db init
-
-    # create a default Admin user for airflow
-    echo "Creating admin airflow user"
-    airflow users create \
-        --username admin \
-        --password admin \
-        --firstname admin \
-        --lastname admin \
-        --role Admin \
-        --email admin@example.org
-
     cd "${CURRENT_DIR}" || exit
   else
     echo "${AIRFLOW_HOME}/airflow.cfg already exist. Using the existing airflow.cfg"
   fi
 }
+init_airflow_db(){
+  # init database
+  airflow db init
+  # create a default Admin user for airflow
+  echo "Creating admin airflow user"
+  airflow users create \
+      --username admin \
+      --password admin \
+      --firstname admin \
+      --lastname admin \
+      --role Admin \
+      --email admin@example.org
+}
+
 init_airflow_config
+
+init_airflow_db
