@@ -29,8 +29,8 @@ db_type: SQL_LITE
 # TTL of the heartbeat of a server, i.e., if the server hasn't send heartbeat for the TTL time, it is down.
 #ha_ttl_ms: 10000
 
-# uri of the notification service
-notification_uri: 127.0.0.1:50052
+# uri of the server of notification service
+notification_server_uri: 127.0.0.1:50052
 
 # whether to start the metadata service, default is True
 #start_meta_service: True

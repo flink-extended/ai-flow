@@ -69,7 +69,7 @@ class AIFlowServerRunner(object):
         self.server = AIFlowServer(
             store_uri=self.server_config.get_db_uri(),
             port=str(self.server_config.get_server_port()),
-            notification_uri=self.server_config.get_notification_uri(),
+            notification_server_uri=self.server_config.get_notification_server_uri(),
             start_meta_service=self.server_config.start_meta_service(),
             start_model_center_service=self.server_config.start_model_center_service(),
             start_metric_service=self.server_config.start_metric_service(),

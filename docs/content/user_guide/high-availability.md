@@ -22,9 +22,9 @@ By default the AI Flow contains an embedded Notification Service. In order to us
 ```text
 start_default_notification: False
 ```
-2. conf[notification_uri]: Set the URIs of Notification servers you started with comma separated.
+2. conf[notification_server_uri]: Set the URIs of Notification servers you started with comma separated.
 ```text
-notification_uri: node1:50052,node2:50052,node3:50052
+notification_server_uri: node1:50052,node2:50052,node3:50052
 ```
 3. env[NOTIFICATION_SERVER_URI]: Run following command before starting scheduler service to use HA-cluster. 
 ```
@@ -44,6 +44,6 @@ scheduler_service:
 ### Configure project.yaml
 If you are connecting the HA Notification service in your project, all you need to do is adding below configuration to project.yaml.
 ```
-notification_uri: node1:50052,node2:50052,node3:50052
+notification_server_uri: node1:50052,node2:50052,node3:50052
 ```
 

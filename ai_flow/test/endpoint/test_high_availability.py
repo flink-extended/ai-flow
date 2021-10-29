@@ -42,7 +42,7 @@ class TestHighAvailableAIFlowServer(unittest.TestCase):
         server_uri = host + ":" + port
         server = AIFlowServer(
             store_uri=_SQLITE_DB_URI, port=port, enabled_ha=True, start_scheduler_service=False,
-            ha_server_uri=server_uri, notification_uri='localhost:30031')
+            ha_server_uri=server_uri, notification_server_uri='localhost:30031')
         server.run()
         return server
 
@@ -60,7 +60,7 @@ class TestHighAvailableAIFlowServer(unittest.TestCase):
         self.notification.run()
         self.server1 = AIFlowServer(
             store_uri=_SQLITE_DB_URI, port=50051, enabled_ha=True, start_scheduler_service=False,
-            ha_server_uri='localhost:50051', notification_uri='localhost:30031')
+            ha_server_uri='localhost:50051', notification_server_uri='localhost:30031')
         self.server1.run()
         self.server2 = None
         self.server3 = None

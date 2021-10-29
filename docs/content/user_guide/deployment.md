@@ -125,7 +125,7 @@ db_type: MYSQL
 # whether to start the default notification service, default is True
 start_default_notification: False
 # uri of the notification service. Use the server_ip: server_port if not set.
-notification_uri: localhost:50052
+notification_server_uri: localhost:50052
 
 # whether to start the metadata service, default is True
 #start_meta_service: True
@@ -151,7 +151,7 @@ scheduler:
 
 Note:
 - You need to specify the database connection string
-- We start the notification service in the previous section so we set start_default_notification to false. And the notification_uri must match the notification service we started.
+- We start the notification service in the previous section so we set start_default_notification to false. And the notification_server_uri must match the notification service we started.
 - airflow_deploy_path in scheduler config must match the airflow_deploy_path when we start the airflow event-based scheduler.
 
 ### Start the aiflow server

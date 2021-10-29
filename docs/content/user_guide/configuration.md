@@ -52,7 +52,7 @@ An AIFlow server contains multiple services: notification service, meta_service,
 # whether to start the default notification service, default is True
 # start_default_notification: True
 # uri of the notification service. Use the server_ip: server_port if not set.
-# notification_uri: localhost:50051
+# notification_server_uri: localhost:50051
 
 # whether to start the metadata service, default is True
 #start_meta_service: True
@@ -77,7 +77,7 @@ scheduler:
 ```
 Note, for scheduler config, users must offer the full class name of the scheduler and add necessary configs depending on the type of scheduler they choose. 
 Take the `AirFlow` scheduler as an example: 
-Users must set the `airflow_deploy_path` and must make sure the `notification_service_uri` is the same with the `notification_uri` used by `AIFlowServer`.
+Users must set the `airflow_deploy_path` and must make sure the `notification_service_uri` is the same with the `notification_server_uri` used by `AIFlowServer`.
 
 
 ### Experimental Config
@@ -109,7 +109,7 @@ For an AI Flow project, we need to set some basic configs and besides, we must s
 project_name: wide_and_deep
 server_ip: localhost
 server_port: 50051
-notification_uri: localhost:50051
+notification_server_uri: localhost:50051
 ```
 
 ### Blob Manager Config

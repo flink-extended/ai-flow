@@ -61,13 +61,13 @@ class ProjectConfig(AIFlowConfiguration):
         """
         return: The notification service(notification_service.server.NotificationServer) uri.
         """
-        if "notification_uri" in self:
-            return self["notification_uri"]
+        if "notification_server_uri" in self:
+            return self["notification_server_uri"]
         else:
             return self.get_server_uri()
 
     def set_notification_service_uri(self, uri):
-        self["notification_uri"] = uri
+        self["notification_server_uri"] = uri
 
     def get_enable_ha(self):
         """
