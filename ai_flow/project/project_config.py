@@ -57,7 +57,7 @@ class ProjectConfig(AIFlowConfiguration):
     def set_project_uuid(self, value):
         self["project_uuid"] = value
 
-    def get_notification_service_uri(self):
+    def get_notification_server_uri(self):
         """
         return: The notification service(notification_service.server.NotificationServer) uri.
         """
@@ -66,7 +66,7 @@ class ProjectConfig(AIFlowConfiguration):
         else:
             return self.get_server_uri()
 
-    def set_notification_service_uri(self, uri):
+    def set_notification_server_uri(self, uri):
         self["notification_server_uri"] = uri
 
     def get_enable_ha(self):

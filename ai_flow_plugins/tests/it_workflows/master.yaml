@@ -26,4 +26,4 @@ scheduler_service:
     scheduler_class: ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.AirFlowScheduler
     scheduler_config:
       airflow_deploy_path: /tmp/airflow
-      notification_service_uri: localhost:50052
+      notification_server_uri: localhost:50052

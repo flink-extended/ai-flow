@@ -25,4 +25,4 @@ scheduler_service:
   scheduler:
     scheduler_class: ai_flow.test.endpoint.server.test_server_runner.MockScheduler
     scheduler_config:
-      notification_service_uri: localhost:9999
+      notification_server_uri: localhost:9999

@@ -66,7 +66,7 @@ class TestHighAvailableAIFlowServer(unittest.TestCase):
         self.server3 = None
         self.config = ProjectConfig()
         self.config.set_enable_ha(True)
-        self.config.set_notification_service_uri('localhost:30031')
+        self.config.set_notification_server_uri('localhost:30031')
         self.config.set_project_name('test_project')
         self.client = AIFlowClient(server_uri='localhost:50051', project_config=self.config)
 

@@ -54,7 +54,7 @@ scheduler_service:
       #airflow_deploy_path: /tmp/dags
 
       # Notification service uri used by the AirFlowScheduler.
-      notification_service_uri: 127.0.0.1:50052
+      notification_server_uri: 127.0.0.1:50052
 
 # web server config
 web_server:

@@ -120,7 +120,7 @@ class TestDagTrigger(unittest.TestCase):
         server.run()
         dag_folder = os.path.abspath(os.path.dirname(__file__)) + "/../../dags"
         mailbox = Mailbox()
-        dag_trigger = DagTrigger(dag_folder, -1, [], False, mailbox, notification_service_uri=notification_server_uri)
+        dag_trigger = DagTrigger(dag_folder, -1, [], False, mailbox, notification_server_uri=notification_server_uri)
         dag_trigger.start()
 
         to_be_triggered = [dag_folder + "/test_event_based_scheduler.py",

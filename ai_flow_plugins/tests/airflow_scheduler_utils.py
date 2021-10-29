@@ -36,7 +36,7 @@ def start_scheduler(file_path, port=50051, executor=None):
 
     scheduler = EventBasedSchedulerJob(
         dag_directory=file_path,
-        server_uri="localhost:{}".format(port),
+        notification_server_uri="localhost:{}".format(port),
         executor=executor,
         max_runs=-1,
         refresh_dag_dir_interval=30

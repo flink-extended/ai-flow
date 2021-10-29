@@ -25,7 +25,7 @@ scheduler_service:
     scheduler_class: ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.AirFlowSchedulerRestful
     scheduler_config:
       airflow_deploy_path: /tmp/airflow_deploy
-      notification_service_uri: localhost:50051
+      notification_server_uri: localhost:50051
       endpoint_url: http://localhost:8080
       username: admin
       password: admin

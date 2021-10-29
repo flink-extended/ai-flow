@@ -73,11 +73,11 @@ scheduler:
     # AirFlow dag file deployment directory, i.e., where the airflow dag will be.
     airflow_deploy_path: {AIFLOW_HOME}/airflow_deploy
     # Notification service uri used by the scheduler service.
-    notification_service_uri: localhost:50051
+    notification_server_uri: localhost:50051
 ```
 Note, for scheduler config, users must offer the full class name of the scheduler and add necessary configs depending on the type of scheduler they choose. 
 Take the `AirFlow` scheduler as an example: 
-Users must set the `airflow_deploy_path` and must make sure the `notification_service_uri` is the same with the `notification_server_uri` used by `AIFlowServer`.
+Users must set the `airflow_deploy_path` and must make sure the `notification_server_uri` is the same with the `notification_server_uri` used by `AIFlowServer`.
 
 
 ### Experimental Config
@@ -98,7 +98,7 @@ scheduler:
   scheduler_class_name: ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.AirFlowScheduler
   scheduler_config:
     airflow_deploy_path: /path/to/airflow_deploy
-    notification_service_uri: localhost:50051
+    notification_server_uri: localhost:50051
 ```
 
 ## AI Flow Project Config

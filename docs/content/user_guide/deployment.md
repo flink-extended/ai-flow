@@ -146,7 +146,7 @@ scheduler:
     # AirFlow dag file deployment directory, i.e., where the airflow dag will be.
     airflow_deploy_path: ~/aiflow/airflow_deploy
     # Notification service uri used by the scheduler service.
-    notification_service_uri: localhost:50052
+    notification_server_uri: localhost:50052
 ```
 
 Note:
