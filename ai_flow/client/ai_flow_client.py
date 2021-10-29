@@ -114,21 +114,14 @@ class AIFlowClient(NotificationClient, MetadataClient, ModelCenterClient, Metric
         self.server_uri = server_uri
         self.wait_for_ready_and_throw_error()
         if notification_server_uri is None:
-            NotificationClient.__init__(
-                self,
-                server_uri,
-                list_member_interval_ms=self.list_member_interval_ms,
-                retry_interval_ms=self.retry_interval_ms,
-                retry_timeout_ms=self.retry_timeout_ms,
-                default_namespace=project_name)
-        else:
-            NotificationClient.__init__(
-                self,
-                notification_server_uri,
-                list_member_interval_ms=self.list_member_interval_ms,
-                retry_interval_ms=self.retry_interval_ms,
-                retry_timeout_ms=self.retry_timeout_ms,
-                default_namespace=project_name)
+            raise Exception('Config notification_server_uri not set.')
+        NotificationClient.__init__(
+            self,
+            notification_server_uri,
+            list_member_interval_ms=self.list_member_interval_ms,
+            retry_interval_ms=self.retry_interval_ms,
+            retry_timeout_ms=self.retry_timeout_ms,
+            default_namespace=project_name)
         if self.aiflow_ha_enabled:
             server_uris = server_uri.split(",")
             self.living_aiflow_members = []
