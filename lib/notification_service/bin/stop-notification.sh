@@ -23,16 +23,20 @@ BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)
 . "${BIN}"/init-notification-env.sh
 
-if [ ! -e "${NOTIFICATION_PID_FILE}" ]; then
-  echo "No notification server running"
-fi
+kill_with_pid_file() {
+  if [ ! -e "$2" ]; then
+    echo "No $1 running"
+  else
+    echo "Stopping $1"
+    for ((i=1;i<=3;i++))
+    do
+      kill $(cat "$2") >/dev/null 2>&1 && sleep 1
+    done
+
+    rm "$2" 2>/dev/null
+    echo "$1 stopped"
+  fi
+}
 
 set +e
-echo "Stopping notification server"
-for ((i=1;i<=3;i++))
-do
-  kill $(cat "${NOTIFICATION_PID_FILE}") >/dev/null 2>&1 && sleep 1
-done
-
-rm "${NOTIFICATION_PID_FILE}"
-echo "notification server stopped"
+kill_with_pid_file "notification server" "${NOTIFICATION_PID_FILE}"

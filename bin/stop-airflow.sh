@@ -23,22 +23,21 @@ BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)
 source "${BIN}"/init-airflow-env.sh
 
-if [ ! -e "${AIRFLOW_PID_DIR}"/scheduler.pid ]; then
-  echo "No airflow scheduler running"
-fi
+kill_with_pid_file() {
+  if [ ! -e "$2" ]; then
+    echo "No $1 running"
+  else
+    echo "Stopping $1"
+    for ((i=1;i<=3;i++))
+    do
+      kill $(cat "$2") >/dev/null 2>&1 && sleep 1
+    done
 
-if [ ! -e "${AIRFLOW_PID_DIR}"/web.pid ]; then
-  echo "No airflow web server running"
-fi
+    rm "$2" 2>/dev/null
+    echo "$1 stopped"
+  fi
+}
 
 set +e
-echo "Killing Airflow scheduler and web server"
-for ((i=1;i<=3;i++))
-do
-  kill $(cat "${AIRFLOW_PID_DIR}"/scheduler.pid) >/dev/null 2>&1 && sleep 1
-  kill $(cat "${AIRFLOW_PID_DIR}"/web.pid) >/dev/null 2>&1 && sleep 1
-done
-
-rm "${AIRFLOW_PID_DIR}"/scheduler.pid
-rm "${AIRFLOW_PID_DIR}"/web.pid
-echo "Airflow scheduler and web server killed"
+kill_with_pid_file "airflow scheduler" "${AIRFLOW_PID_DIR}"/scheduler.pid
+kill_with_pid_file "airflow web server" "${AIRFLOW_PID_DIR}"/web.pid
