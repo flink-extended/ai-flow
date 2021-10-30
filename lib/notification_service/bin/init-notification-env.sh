@@ -28,3 +28,12 @@ function create_notification_dirs() {
   [ -d "${NOTIFICATION_LOG_DIR}" ] || mkdir "${NOTIFICATION_LOG_DIR}"
 }
 create_notification_dirs
+
+if [ ! -e ${NOTIFICATION_CONFIG_FILE} ]; then
+  echo "Notification server config doesn't exist generating at ${NOTIFICATION_CONFIG_FILE}"
+  BIN=$(dirname "${BASH_SOURCE-$0}")
+  BIN=$(cd "$BIN"; pwd)
+  "$BIN"/start_notification_service.py --generate-config-only > /dev/null 2>&1
+else
+  echo "Notification server config already exist at ${NOTIFICATION_CONFIG_FILE}"
+fi
