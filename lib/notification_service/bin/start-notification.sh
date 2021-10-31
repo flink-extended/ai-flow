@@ -29,8 +29,8 @@ if [ -e "${NOTIFICATION_PID_FILE}" ]; then
 fi
 
 echo "Starting notification server"
-LOG_FILE_NAME=notification_service-$(date "+%Y%m%d-%H%M%S").log
-"$BIN"/start_notification_service.py > "${NOTIFICATION_LOG_DIR}"/"${LOG_FILE_NAME}" 2>&1 &
+LOG_FILE_NAME=notification_server-$(date "+%Y%m%d-%H%M%S").log
+"$BIN"/start_notification_server.py > "${NOTIFICATION_LOG_DIR}"/"${LOG_FILE_NAME}" 2>&1 &
 echo $! > "${NOTIFICATION_PID_FILE}"
 
 echo "notification server started"
