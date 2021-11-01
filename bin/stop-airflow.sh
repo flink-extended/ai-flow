@@ -39,5 +39,5 @@ kill_with_pid_file() {
 }
 
 set +e
-kill_with_pid_file "airflow scheduler" "${AIRFLOW_PID_DIR}"/scheduler.pid
-kill_with_pid_file "airflow web server" "${AIRFLOW_PID_DIR}"/web.pid
+kill_with_pid_file "airflow scheduler" "${AIRFLOW_SCHEDULER_PID_FILE}"
+kill_with_pid_file "airflow web server" "${AIRFLOW_WEB_PID_FILE}"
