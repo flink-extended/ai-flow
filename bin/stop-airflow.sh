@@ -21,7 +21,9 @@ set -e
 
 BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)
-source "${BIN}"/init-airflow-env.sh
+export AIRFLOW_HOME=${AIRFLOW_HOME:-~/airflow}
+export AIRFLOW_SCHEDULER_PID_FILE="${AIRFLOW_HOME}/scheduler.pid"
+export AIRFLOW_WEB_PID_FILE="${AIRFLOW_HOME}/web.pid"
 
 kill_with_pid_file() {
   if [ ! -e "$2" ]; then

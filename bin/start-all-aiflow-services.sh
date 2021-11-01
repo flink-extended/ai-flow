@@ -21,25 +21,16 @@ set -e
 BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)
 
-usage="Usage: start-all-aiflow-services.sh"
-if [ $# -ne 0 ]; then
-  echo "$usage"
-  exit 1
-fi
-
 # start notification service
-source "${BIN}"/init-notification-env.sh
 "${BIN}"/start-notification.sh
 echo "start notification server."
 sleep 3
 
 # start airflow scheduler and web server
-source "${BIN}"/init-airflow-env.sh
 "${BIN}"/start-airflow.sh
 echo "airflow dag dir: ${AIRFLOW_DAG_DIR}"
 
 # start AIFlow
-source "${BIN}"/init-aiflow-env.sh
 "${BIN}"/start-aiflow.sh
 
 echo "Visit http://127.0.0.1:8080/ to access the airflow web server."
