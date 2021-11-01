@@ -67,7 +67,7 @@ class TestSklearnModel(unittest.TestCase):
             os.remove(_SQLITE_DB_FILE)
         self.server = AIFlowServer(store_uri=_SQLITE_DB_URI, port=_PORT, start_scheduler_service=False)
         self.server.run()
-        self.client = AIFlowClient(server_uri='localhost:' + _PORT, notification_service_uri=_NS_URI)
+        self.client = AIFlowClient(server_uri='localhost:' + _PORT, notification_server_uri=_NS_URI)
 
     def tearDown(self) -> None:
         self.client.stop_listen_event()

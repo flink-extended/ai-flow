@@ -40,7 +40,7 @@ class TestWorkflowEventManager(unittest.TestCase):
             {'scheduler':
                 {
                     'scheduler_class': 'ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.AirFlowScheduler',
-                    'scheduler_config': {'airflow_deploy_path': '/tmp', 'notification_service_uri': 'localhost:50051'}
+                    'scheduler_config': {'airflow_deploy_path': '/tmp', 'notification_server_uri': 'localhost:50051'}
                 }}
         scheduler_service_config = SchedulerServiceConfig(self.config)
         self.workflow_event_manager = \

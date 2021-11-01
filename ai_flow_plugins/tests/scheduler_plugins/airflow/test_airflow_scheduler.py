@@ -37,14 +37,14 @@ class TestAirflowScheduler(unittest.TestCase):
         self.temp_deploy_path = tempfile.TemporaryDirectory().name
         self.logger.info("temp airflow deploy path: {}".format(self.temp_deploy_path))
         self.scheduler = AirFlowScheduler({'airflow_deploy_path': self.temp_deploy_path,
-                                           'notification_service_uri': 'localhost:50051'})
+                                           'notification_server_uri': 'localhost:50051'})
         self.scheduler._airflow_client = Mock()
         self.scheduler.dag_generator = Mock()
 
     def test_airflow_scheduler_without_dag_deploy_path(self):
         with patch("airflow.settings") as s:
             s.DAGS_FOLDER = 'test_folder'
-            scheduler = AirFlowScheduler({'notification_service_uri': 'localhost:50051'})
+            scheduler = AirFlowScheduler({'notification_server_uri': 'localhost:50051'})
             self.assertEqual('test_folder', scheduler.config['airflow_deploy_path'])
 
     def test_airflow_scheduler_submit_workflow(self):

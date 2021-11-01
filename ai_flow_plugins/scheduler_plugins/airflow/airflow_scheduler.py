@@ -48,14 +48,14 @@ class AirFlowSchedulerBase(Scheduler, ABC):
     """
     AirFlowScheduler is an implementation of a Scheduler interface based on AirFlow.
     AirFlowScheduler contains two configuration items:
-    1. notification_service_uri: The address of NotificationService.
+    1. notification_server_uri: The address of NotificationService.
     2. airflow_deploy_path: AirFlow dag file deployment directory.
     """
 
     def __init__(self, config: Dict):
-        if 'notification_service_uri' not in config:
-            raise Exception('`notification_service_uri` option of scheduler config is not configured. '
-                            'Please add the `notification_service_uri` option under `scheduler_config` option!')
+        if 'notification_server_uri' not in config:
+            raise Exception('`notification_server_uri` option of scheduler config is not configured. '
+                            'Please add the `notification_server_uri` option under `scheduler_config` option!')
         if 'airflow_deploy_path' not in config:
             from airflow import settings
             dags_folder = settings.DAGS_FOLDER
@@ -107,7 +107,7 @@ class AirFlowSchedulerBase(Scheduler, ABC):
     def airflow_client(self):
         if self._airflow_client is None:
             self._airflow_client = EventSchedulerClient(
-                notification_server_uri=self.config.get('notification_service_uri'),
+                notification_server_uri=self.config.get('notification_server_uri'),
                 namespace=SCHEDULER_NAMESPACE)
         return self._airflow_client
 
@@ -159,7 +159,7 @@ class AirFlowScheduler(AirFlowSchedulerBase):
     """
     AirFlowScheduler is an implementation of a Scheduler interface based on AirFlow.
     AirFlowScheduler contains two configuration items:
-    1. notification_service_uri: The address of NotificationService.
+    1. notification_server_uri: The address of server of NotificationService.
     2. airflow_deploy_path: AirFlow dag file deployment directory.
     """
 

@@ -637,7 +637,7 @@ class EventBasedSchedulerJob(BaseJob):
             pickle_dags=False,
             mailbox=self.mailbox,
             refresh_dag_dir_interval=refresh_dag_dir_interval,
-            notification_service_uri=notification_server_uri
+            notification_server_uri=notification_server_uri
         )
         self.task_event_manager = DagRunEventManager(self.mailbox)
         self.executor.set_mailbox(self.mailbox)

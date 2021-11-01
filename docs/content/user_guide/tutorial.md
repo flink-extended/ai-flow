@@ -31,13 +31,13 @@ start_scheduler_service: True
 # whether to start the default notification service, default is True
 # start_default_notification: True
 # uri of the notification service. 
-# notification_uri: localhost:50051
+# notification_server_uri: localhost:50051
 # scheduler config
 scheduler:
   scheduler_class: ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.AirFlowScheduler
   scheduler_config:
     airflow_deploy_path: /absolute/path/to/airflow/airflow_deploy
-    notification_service_uri: localhost:50052
+    notification_server_uri: localhost:50052
 ```
 
 ## Prepare Project Directory

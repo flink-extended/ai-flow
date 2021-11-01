@@ -60,8 +60,10 @@ class AIFlowServer(object):
     Block/Async server of an AIFlow Rest Endpoint that provides Metadata/Model/Notification function service.
     """
 
-    def __init__(self, store_uri=None, port=_PORT,
-                 notification_uri=None,
+    def __init__(self,
+                 store_uri=None,
+                 port=_PORT,
+                 notification_server_uri=None,
                  start_meta_service: bool = True,
                  start_model_center_service: bool = True,
                  start_metric_service: bool = True,
@@ -85,7 +87,7 @@ class AIFlowServer(object):
 
             model_center_service_pb2_grpc.add_ModelCenterServiceServicer_to_server(
                 ModelCenterService(store_uri=store_uri,
-                                   notification_uri=notification_uri),
+                                   notification_server_uri=notification_server_uri),
                 self.server)
         if start_meta_service:
             logging.info("start meta service.")
@@ -96,7 +98,7 @@ class AIFlowServer(object):
             metric_service_pb2_grpc.add_MetricServiceServicer_to_server(MetricService(db_uri=store_uri), self.server)
 
         if start_scheduler_service:
-            self._add_scheduler_service(scheduler_service_config, store_uri, notification_uri)
+            self._add_scheduler_service(scheduler_service_config, store_uri, notification_server_uri)
 
         if enabled_ha:
             self._add_ha_service(ha_manager, ha_server_uri, ha_storage, store_uri, ttl_ms)
@@ -105,10 +107,10 @@ class AIFlowServer(object):
 
         self._stop = threading.Event()
 
-    def _add_scheduler_service(self, scheduler_service_config, db_uri, notification_uri):
+    def _add_scheduler_service(self, scheduler_service_config, db_uri, notification_server_uri):
         logging.info("start scheduler service.")
         real_config = SchedulerServiceConfig(scheduler_service_config)
-        self.scheduler_service = SchedulerService(real_config, db_uri, notification_uri)
+        self.scheduler_service = SchedulerService(real_config, db_uri, notification_server_uri)
         scheduling_service_pb2_grpc.add_SchedulingServiceServicer_to_server(self.scheduler_service,
                                                                             self.server)
 
