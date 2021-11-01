@@ -48,20 +48,20 @@ class SchedulerService(SchedulingServiceServicer):
     def __init__(self,
                  scheduler_service_config: SchedulerServiceConfig,
                  db_uri,
-                 notification_uri):
+                 notification_server_uri):
         self._scheduler_service_config = scheduler_service_config
         self._scheduler: Scheduler \
             = SchedulerFactory.create_scheduler(scheduler_service_config.scheduler().scheduler_class(),
                                                 scheduler_service_config.scheduler().scheduler_config())
         self.store = create_db_store(db_uri)
 
-        if notification_uri is not None:
-            self.workflow_event_manager = WorkflowEventManager(notification_uri=notification_uri,
+        if notification_server_uri is not None:
+            self.workflow_event_manager = WorkflowEventManager(notification_server_uri=notification_server_uri,
                                                                db_uri=db_uri,
                                                                scheduler_service_config=scheduler_service_config)
         else:
             self.workflow_event_manager = None
-            logging.warning('notification_uri is None, workflow event manager did not start. '
+            logging.warning('notification_server_uri is None, workflow event manager did not start. '
                             'WorkflowExecution will not start/stop on events')
 
     def start(self):

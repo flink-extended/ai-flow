@@ -65,7 +65,7 @@ def get_ai_flow_client():
             _default_server_uri = current_uri
             _default_ai_flow_client \
                 = AIFlowClient(server_uri=_default_server_uri,
-                               notification_service_uri=current_project_config().get_notification_service_uri(),
+                               notification_server_uri=current_project_config().get_notification_server_uri(),
                                project_config=current_project_config())
             return _default_ai_flow_client
     else:
@@ -74,7 +74,7 @@ def get_ai_flow_client():
             _default_server_uri = current_uri
             _default_ai_flow_client \
                 = AIFlowClient(server_uri=_default_server_uri,
-                               notification_service_uri=current_project_config().get_notification_service_uri(),
+                               notification_server_uri=current_project_config().get_notification_server_uri(),
                                project_config=current_project_config())
         else:
             # when reuse previous client, confirm once whether server is available
@@ -90,7 +90,7 @@ class AIFlowClient(NotificationClient, MetadataClient, ModelCenterClient, Metric
 
     def __init__(self,
                  server_uri=_SERVER_URI,
-                 notification_service_uri=None,
+                 notification_server_uri=None,
                  project_config: ProjectConfig = None):
         MetadataClient.__init__(self, server_uri)
         ModelCenterClient.__init__(self, server_uri)
@@ -104,8 +104,8 @@ class AIFlowClient(NotificationClient, MetadataClient, ModelCenterClient, Metric
         if project_config is not None:
             if server_uri is None:
                 server_uri = project_config.get_server_uri()
-            if notification_service_uri is None:
-                notification_service_uri = project_config.get_notification_service_uri()
+            if notification_server_uri is None:
+                notification_server_uri = project_config.get_notification_server_uri()
             project_name = project_config.get_project_name()
             self.aiflow_ha_enabled = project_config.get_enable_ha()
             self.list_member_interval_ms = project_config.get_list_member_interval_ms()
@@ -113,7 +113,7 @@ class AIFlowClient(NotificationClient, MetadataClient, ModelCenterClient, Metric
             self.retry_timeout_ms = project_config.get_retry_timeout_ms()
         self.server_uri = server_uri
         self.wait_for_ready_and_throw_error()
-        if notification_service_uri is None:
+        if notification_server_uri is None:
             NotificationClient.__init__(
                 self,
                 server_uri,
@@ -124,7 +124,7 @@ class AIFlowClient(NotificationClient, MetadataClient, ModelCenterClient, Metric
         else:
             NotificationClient.__init__(
                 self,
-                notification_service_uri,
+                notification_server_uri,
                 list_member_interval_ms=self.list_member_interval_ms,
                 retry_interval_ms=self.retry_interval_ms,
                 retry_timeout_ms=self.retry_timeout_ms,

@@ -1072,9 +1072,9 @@ class TestAIFlowClientSqlite(AIFlowClientTestCases, unittest.TestCase):
             os.remove(_SQLITE_DB_FILE)
         cls.server = AIFlowServer(store_uri=_SQLITE_DB_URI, port=_PORT, start_scheduler_service=False)
         cls.server.run()
-        client = AIFlowClient(server_uri='localhost:' + _PORT, notification_service_uri=_NS_URI)
-        client1 = AIFlowClient(server_uri='localhost:' + _PORT, notification_service_uri=_NS_URI)
-        client2 = AIFlowClient(server_uri='localhost:' + _PORT, notification_service_uri=_NS_URI)
+        client = AIFlowClient(server_uri='localhost:' + _PORT, notification_server_uri=_NS_URI)
+        client1 = AIFlowClient(server_uri='localhost:' + _PORT, notification_server_uri=_NS_URI)
+        client2 = AIFlowClient(server_uri='localhost:' + _PORT, notification_server_uri=_NS_URI)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -1113,7 +1113,7 @@ class TestAIFlowClientSqliteWithSingleHighAvailableServer(
         config.set_server_uri('localhost:50051')
         config.set_project_name('test_project')
         config.set_enable_ha(True)
-        config.set_notification_service_uri(_NS_URI)
+        config.set_notification_server_uri(_NS_URI)
         client = AIFlowClient(server_uri='localhost:' + _PORT, project_config=config)
         client1 = AIFlowClient(server_uri='localhost:' + _PORT, project_config=config)
         client2 = AIFlowClient(server_uri='localhost:' + _PORT, project_config=config)

@@ -19,4 +19,4 @@
 server_port: 50051
 db_uri: sqlite:///aiflow.db
 db_type: sql_lite
-notification_uri: localhost:50052
+notification_server_uri: localhost:50052

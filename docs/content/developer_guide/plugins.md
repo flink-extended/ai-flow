@@ -102,7 +102,7 @@ To let AIFlow use a custom scheduler, one should set the ``scheduler.scheduler_c
         scheduler_class_name: ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.AirFlowScheduler
         scheduler_config:
             airflow_deploy_path: /root/airflow/dag
-            notification_service_uri: localhost:50052
+            notification_server_uri: localhost:50052
 
 ```
 

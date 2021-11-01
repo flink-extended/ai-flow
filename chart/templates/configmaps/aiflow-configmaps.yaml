@@ -61,10 +61,10 @@ data:
     # when using the airflow scheduler 
     start_default_notification: False
     # uri of the notification service
-    notification_uri: {{ .Release.Name }}-notification:50052
+    notification_server_uri: {{ .Release.Name }}-notification:50052
     scheduler_service:
       scheduler:
         scheduler_class: ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.AirFlowScheduler
         scheduler_config:
           airflow_deploy_path: {{ .Values.ai_flow.airflow_deploy_path }}
-          notification_service_uri: {{ .Release.Name }}-notification:50052
+          notification_server_uri: {{ .Release.Name }}-notification:50052

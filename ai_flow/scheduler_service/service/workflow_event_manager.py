@@ -48,12 +48,12 @@ class WorkflowEventManager(object):
     WorkflowEventManager
     """
 
-    def __init__(self, notification_uri: Text,
+    def __init__(self, notification_server_uri: Text,
                  db_uri: Text,
                  scheduler_service_config: SchedulerServiceConfig):
         self.db_uri = db_uri
         self.scheduler_service_config = scheduler_service_config
-        self._notification_uri = notification_uri
+        self._notification_server_uri = notification_server_uri
         self._notification_client = None
         self.listen_event_handler = None
 
@@ -65,7 +65,7 @@ class WorkflowEventManager(object):
     @property
     def notification_client(self) -> NotificationClient:
         if self._notification_client is None:
-            self._notification_client = NotificationClient(server_uri=self._notification_uri)
+            self._notification_client = NotificationClient(server_uri=self._notification_server_uri)
         return self._notification_client
 
     def _create_event_processor_process(self):

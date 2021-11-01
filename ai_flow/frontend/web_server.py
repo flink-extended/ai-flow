@@ -72,7 +72,7 @@ def init(store_uri: str, scheduler_class: str, airflow_web_server_uri: str):
     store = create_db_store(store_uri)
     global scheduler
     scheduler = SchedulerFactory.create_scheduler(scheduler_class,
-                                                  {'notification_service_uri': None, 'airflow_deploy_path': None})
+                                                  {'notification_server_uri': None, 'airflow_deploy_path': None})
     global airflow
     airflow = airflow_web_server_uri
 
