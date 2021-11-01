@@ -43,21 +43,23 @@ from ai_flow.store.db.db_util import create_db_store
 from ai_flow.util.json_utils import loads, Jsonable, dumps
 from ai_flow.workflow.control_edge import ControlEdge
 
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
-    }},
-    'handlers': {'wsgi': {
-        'class': 'logging.StreamHandler',
-        'stream': 'ext://flask.logging.wsgi_errors_stream',
-        'formatter': 'default'
-    }},
-    'root': {
-        'level': 'INFO',
-        'handlers': ['wsgi']
-    }
-})
+
+def config_logging():
+    dictConfig({
+        'version': 1,
+        'formatters': {'default': {
+            'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+        }},
+        'handlers': {'wsgi': {
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://flask.logging.wsgi_errors_stream',
+            'formatter': 'default'
+        }},
+        'root': {
+            'level': 'INFO',
+            'handlers': ['wsgi']
+        }
+    })
 
 app = Flask(__name__, static_folder='./dist', template_folder='./dist', static_url_path='')
 CORS(app=app)
@@ -469,6 +471,7 @@ class AIFlowWebServerConfig:
 
 
 def main(argv):
+    config_logging()
     config_file = None
     try:
         opts, args = getopt.getopt(argv, "hc:",

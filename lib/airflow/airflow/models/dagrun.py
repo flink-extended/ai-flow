@@ -678,6 +678,10 @@ class DagRun(Base, LoggingMixin):
         # check for missing tasks
         for task in dag.task_dict.values():
             if task.start_date > self.execution_date and not self.is_backfill and not self.is_manual:
+                self.log.warning("Skip creating task: {} for dag_run {}, task start_data "
+                                 "{} is greater than dag_run execution date {} and it is not backfill "
+                                 "or manually dagrun."
+                                 .format(task, self, task.start_date, self.execution_date))
                 continue
 
             if task.task_id not in task_ids:

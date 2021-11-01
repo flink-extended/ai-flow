@@ -2338,6 +2338,16 @@ class DagModel(Base):
 
         return with_row_locks(query, of=cls, **skip_locked(session=session))
 
+    @classmethod
+    def dag_needing_dagruns(cls, session: Session, dag_id) -> Boolean:
+        return session.query(cls).filter(
+            cls.is_paused.is_(False),
+            cls.is_active.is_(True),
+            cls.next_dagrun_create_after <= func.now(),
+            cls.dag_id == dag_id
+        ).first() is not None
+
+
     def calculate_dagrun_date_fields(
         self, dag: DAG, most_recent_dag_run: Optional[pendulum.DateTime], active_runs_of_dag: int
     ) -> None:
