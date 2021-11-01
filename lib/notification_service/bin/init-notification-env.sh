@@ -18,7 +18,7 @@
 ## under the License.
 ##
 set -e
-export NOTIFICATION_HOME=${NOTIFICATION_HOME:-~/notification_server}
+export NOTIFICATION_HOME=${NOTIFICATION_HOME:-~/notification_service}
 export NOTIFICATION_PID_FILE="${NOTIFICATION_HOME}/notification_server.pid"
 export NOTIFICATION_LOG_DIR="${NOTIFICATION_HOME}/logs"
 export NOTIFICATION_CONFIG_FILE="${NOTIFICATION_HOME}/notification_server.yaml"

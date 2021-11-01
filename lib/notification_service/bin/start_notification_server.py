@@ -71,7 +71,7 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s',
                         level=logging.INFO)
     if "NOTIFICATION_HOME" not in os.environ:
-        os.environ["NOTIFICATION_HOME"] = os.environ["HOME"] + "/notification_server"
+        os.environ["NOTIFICATION_HOME"] = os.environ["HOME"] + "/notification_service"
         logging.info("Set env variable NOTIFICATION_HOME to {}".format(os.environ["NOTIFICATION_HOME"]))
     if not os.path.exists(os.environ["NOTIFICATION_HOME"]):
         os.makedirs(os.environ["NOTIFICATION_HOME"])

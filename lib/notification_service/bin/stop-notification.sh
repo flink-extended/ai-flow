@@ -19,7 +19,7 @@
 ##
 set -e
 
-NOTIFICATION_HOME=${NOTIFICATION_HOME:-~/notification_server}
+NOTIFICATION_HOME=${NOTIFICATION_HOME:-~/notification_service}
 NOTIFICATION_PID_FILE="${NOTIFICATION_HOME}/notification_server.pid"
 
 kill_with_pid_file() {
