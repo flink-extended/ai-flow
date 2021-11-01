@@ -164,9 +164,11 @@ class EventBasedScheduler(LoggingMixin):
                     self.log.warning("dagrun is None for dag_id:{} execution_date: {}".format(
                         event.dag_id, event.execution_date))
             elif isinstance(event, DagExecutableEvent):
-                dagrun = self._create_dag_run(event.dag_id, session=session)
-                tasks = self._find_scheduled_tasks(dagrun, session)
-                self._send_scheduling_task_events(tasks, SchedulingAction.START)
+                dag_models = DagModel.dags_needing_dagruns(session).all()
+                if event.dag_id in [dag_model.dag_id for dag_model in dag_models]:
+                    dagrun = self._create_dag_run(event.dag_id, session=session)
+                    tasks = self._find_scheduled_tasks(dagrun, session)
+                    self._send_scheduling_task_events(tasks, SchedulingAction.START)
             elif isinstance(event, EventHandleEvent):
                 dag_runs = DagRun.find(dag_id=event.dag_id, run_id=event.dag_run_id)
                 assert len(dag_runs) == 1
