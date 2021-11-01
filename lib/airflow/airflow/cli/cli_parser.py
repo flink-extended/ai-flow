@@ -152,7 +152,7 @@ ARG_NOTIFICATION_SERVER_URI = Arg(
     help=(
         "Notification service server uri."
     ),
-    default='localhost:50051'
+    default=None
 )
 ARG_NOTIFICATION_SQL_ALCHEMY_CONN = Arg(
     ("--notification-sql-alchemy-conn",),

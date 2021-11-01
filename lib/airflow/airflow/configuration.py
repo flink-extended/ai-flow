@@ -710,6 +710,11 @@ class AirflowConfigParser(ConfigParser):  # pylint: disable=too-many-ancestors
             )
 
 
+def get_home():
+    """Get path to Home"""
+    return expand_env_var(os.environ.get('HOME', '~/'))
+
+
 def get_airflow_home():
     """Get path to Airflow Home"""
     return expand_env_var(os.environ.get('AIRFLOW_HOME', '~/airflow'))
@@ -722,9 +727,9 @@ def get_airflow_config(airflow_home):
     return expand_env_var(os.environ['AIRFLOW_CONFIG'])
 
 
-# Setting AIRFLOW_HOME and AIRFLOW_CONFIG from environment variables, using
-# "~/airflow" and "$AIRFLOW_HOME/airflow.cfg" respectively as defaults.
-
+# Setting HOME AIRFLOW_HOME and AIRFLOW_CONFIG from environment variables, using
+# "~/" "~/airflow" and "$AIRFLOW_HOME/airflow.cfg" respectively as defaults.
+HOME = get_home()
 AIRFLOW_HOME = get_airflow_home()
 AIRFLOW_CONFIG = get_airflow_config(AIRFLOW_HOME)
 pathlib.Path(AIRFLOW_HOME).mkdir(parents=True, exist_ok=True)
