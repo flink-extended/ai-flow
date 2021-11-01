@@ -69,6 +69,16 @@ data:
           airflow_deploy_path: {{ .Values.ai_flow.airflow_deploy_path }}
           notification_server_uri: {{ .Release.Name }}-notification:50052
 
+    # web server config
+    web_server:
+      {{- if .Values.ingress.enabled }}
+      airflow_web_server_uri:  http{{ if .Values.ingress.web.tls.enabled }}s{{ end }}://{{ .Values.ingress.web.host }}{{ .Values.ingress.web.path }}
+      {{- else}}
+      airflow_web_server_uri:  http://localhost:8080
+      {{- end}}
+      host: 0.0.0.0
+      port: {{ .Values.ports.aiflowUI }}
+
   notification_server.yaml: |
     # port of notification server
     server_port: 50052
