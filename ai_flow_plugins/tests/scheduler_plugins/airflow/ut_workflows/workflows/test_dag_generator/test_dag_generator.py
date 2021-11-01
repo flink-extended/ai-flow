@@ -117,6 +117,18 @@ class TestDagGenerator(unittest.TestCase):
         self.assertTrue('schedule_interval' in code.split('default_args')[1])
         self.assertTrue('utc' not in code.split('default_args')[1])
 
+    def test_periodic_cron_workflow_without_start_date(self):
+        workflow_config_ = af.current_workflow_config()
+        workflow_config_.periodic_config = PeriodicConfig(trigger_config={'cron': "*/5 * * * * * *"})
+        with af.job_config('task_1'):
+            af.user_define_operation(processor=None)
+        w = af.workflow_operation.submit_workflow(workflow_name='test_dag_generator')
+        code = w.properties.get('code')
+        self.assertTrue('op_0 = AIFlowOperator' in code)
+        self.assertTrue('datetime.fromisoformat' in code.split('default_args')[1])
+        self.assertTrue('schedule_interval' in code.split('default_args')[1])
+        self.assertTrue('utc' not in code.split('default_args')[1])
+
     def test_periodic_cron_workflow_with_timezone(self):
         workflow_config_ = af.current_workflow_config()
         workflow_config_.periodic_config = PeriodicConfig(trigger_config={'start_date': "2020,1,1,,,,",
@@ -140,6 +152,18 @@ class TestDagGenerator(unittest.TestCase):
         code = w.properties.get('code')
         self.assertTrue('op_0 = AIFlowOperator' in code)
         self.assertTrue('datetime' in code)
+        self.assertTrue('schedule_interval' in code)
+        self.assertTrue('timedelta' in code)
+
+    def test_periodic_interval_workflow_without_start_date(self):
+        workflow_config_ = af.current_workflow_config()
+        workflow_config_.periodic_config = PeriodicConfig(trigger_config={'interval': "1,1,1,"})
+        with af.job_config('task_1'):
+            af.user_define_operation(processor=None)
+        w = af.workflow_operation.submit_workflow(workflow_name='test_dag_generator')
+        code = w.properties.get('code')
+        self.assertTrue('op_0 = AIFlowOperator' in code)
+        self.assertTrue('datetime.fromisoformat' in code)
         self.assertTrue('schedule_interval' in code)
         self.assertTrue('timedelta' in code)
 
