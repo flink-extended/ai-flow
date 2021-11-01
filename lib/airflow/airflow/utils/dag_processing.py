@@ -204,7 +204,7 @@ class DagFileProcessorAgent(LoggingMixin, MultiprocessingStartMethodMixin):
         pickle_dags: bool,
         async_mode: bool,
         refresh_dag_dir_interval=0,
-        notification_service_uri=None
+        notification_server_uri=None
     ):
         super().__init__()
         self._file_path_queue: List[str] = []
@@ -227,7 +227,7 @@ class DagFileProcessorAgent(LoggingMixin, MultiprocessingStartMethodMixin):
 
         self._last_parsing_stat_received_at: float = time.monotonic()
         self.refresh_dag_dir_interval = refresh_dag_dir_interval
-        self.notification_service_uri = notification_service_uri
+        self.notification_server_uri = notification_server_uri
 
     def start(self) -> None:
         """Launch DagFileProcessorManager processor and start DAG parsing loop in manager."""
@@ -249,7 +249,7 @@ class DagFileProcessorAgent(LoggingMixin, MultiprocessingStartMethodMixin):
                 self._pickle_dags,
                 self._async_mode,
                 self.refresh_dag_dir_interval,
-                self.notification_service_uri
+                self.notification_server_uri
             ),
         )
         self._process = process
@@ -341,7 +341,7 @@ class DagFileProcessorAgent(LoggingMixin, MultiprocessingStartMethodMixin):
         pickle_dags: bool,
         async_mode: bool,
         refresh_dag_dir_interval=0,
-        notification_service_uri=None
+        notification_server_uri=None
     ) -> None:
 
         # Make this process start as a new process group - that makes it easy
@@ -372,7 +372,7 @@ class DagFileProcessorAgent(LoggingMixin, MultiprocessingStartMethodMixin):
             pickle_dags,
             async_mode,
             refresh_dag_dir_interval,
-            notification_service_uri
+            notification_server_uri
         )
 
         processor_manager.start()
@@ -522,7 +522,7 @@ class DagFileProcessorManager(LoggingMixin):  # pylint: disable=too-many-instanc
         pickle_dags: bool,
         async_mode: bool = True,
         refresh_dag_dir_interval=0,
-        notification_service_uri=None
+        notification_server_uri=None
     ):
         super().__init__()
         self._file_paths: List[str] = []
@@ -536,10 +536,10 @@ class DagFileProcessorManager(LoggingMixin):  # pylint: disable=too-many-instanc
         self._async_mode = async_mode
         self._parsing_start_time: Optional[int] = None
         self._refresh_dag_dir_interval = refresh_dag_dir_interval
-        self.notification_service_uri = notification_service_uri
+        self.notification_server_uri = notification_server_uri
         self.ns_client: BaseNotification = None
         self.signal_queue = queue.Queue()
-        if notification_service_uri is not None:
+        if notification_server_uri is not None:
             self.watcher = ProcessorManagerWatcher(self.signal_queue)
             self.message_buffer: Dict[str, (BaseEvent, datetime)] = {}
 
@@ -631,9 +631,9 @@ class DagFileProcessorManager(LoggingMixin):  # pylint: disable=too-many-instanc
         return self._run_parsing_loop()
 
     def _listen_parse_dag_event(self):
-        if self.notification_service_uri is not None:
-            self.log.info('start listen PARSE_DAG_REQUEST {}'.format(self.notification_service_uri))
-            self.ns_client = NotificationClient(server_uri=self.notification_service_uri,
+        if self.notification_server_uri is not None:
+            self.log.info('start listen PARSE_DAG_REQUEST {}'.format(self.notification_server_uri))
+            self.ns_client = NotificationClient(server_uri=self.notification_server_uri,
                                                 default_namespace=SCHEDULER_NAMESPACE)
             self.ns_client.start_listen_event(key='*',
                                               event_type='PARSE_DAG_REQUEST',
@@ -765,7 +765,7 @@ class DagFileProcessorManager(LoggingMixin):  # pylint: disable=too-many-instanc
                 wait_time = self._refresh_dag_dir_interval - refresh_dag_dir_interval
             else:
                 wait_time = 1.0
-            if self.notification_service_uri is not None and len(self.message_buffer) > 0:
+            if self.notification_server_uri is not None and len(self.message_buffer) > 0:
                 self._process_and_send_response()
                 self.collect_results()
                 time.sleep(wait_time)

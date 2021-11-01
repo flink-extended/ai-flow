@@ -26,7 +26,7 @@ from notification_service.server_config import NotificationServerConfig
 from notification_service.server import NotificationServerRunner
 
 
-def create_sever_config(root_dir_path, param: Dict[str, str]):
+def create_server_config(root_dir_path, param: Dict[str, str]):
     """
     Generate default server config which use Apache Airflow as scheduler.
     """
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     args = _prepare_args()
     config_file = args.config_file
     if not os.path.exists(config_file):
-        create_sever_config(os.environ.get("NOTIFICATION_HOME"), os.environ.copy())
+        create_server_config(os.environ.get("NOTIFICATION_HOME"), os.environ.copy())
         config = NotificationServerConfig(config_file)
         drop_all_tables(db_uri=config.db_uri)
         create_all_tables(db_uri=config.db_uri)

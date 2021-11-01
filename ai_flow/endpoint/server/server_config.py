@@ -87,11 +87,11 @@ class AIFlowServerConfig(AIFlowConfiguration):
         else:
             return True
 
-    def set_notification_uri(self, notification_uri):
-        self['notification_uri'] = notification_uri
+    def set_notification_server_uri(self, notification_server_uri):
+        self['notification_server_uri'] = notification_server_uri
 
-    def get_notification_uri(self):
-        return self.get('notification_uri')
+    def get_notification_server_uri(self):
+        return self.get('notification_server_uri')
 
     def get_scheduler_service_config(self):
         return self.get('scheduler_service')
