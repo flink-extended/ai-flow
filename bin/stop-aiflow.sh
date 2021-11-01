@@ -19,9 +19,8 @@
 ##
 set -e
 
-BIN=$(dirname "${BASH_SOURCE-$0}")
-BIN=$(cd "$BIN"; pwd)
-. "${BIN}"/init-aiflow-env.sh
+AIFLOW_HOME=${AIFLOW_HOME:-~/aiflow}
+AIFLOW_PID_DIR=${AIFLOW_PID_DIR:-${AIFLOW_HOME}}
 
 kill_with_pid_file() {
   if [ ! -e "$2" ]; then

@@ -19,9 +19,8 @@
 ##
 set -e
 
-BIN=$(dirname "${BASH_SOURCE-$0}")
-BIN=$(cd "$BIN"; pwd)
-. "${BIN}"/init-notification-env.sh
+NOTIFICATION_HOME=${NOTIFICATION_HOME:-~/notification_service}
+NOTIFICATION_PID_FILE="${NOTIFICATION_HOME}/notification_server.pid"
 
 kill_with_pid_file() {
   if [ ! -e "$2" ]; then
