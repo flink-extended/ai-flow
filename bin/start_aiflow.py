@@ -17,14 +17,12 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import argparse
 import logging
 import os
 import signal
 
-from typing import Dict
-
 import ai_flow
-from airflow.logging_config import configure_logging
 
 
 def create_default_sever_config(root_dir_path):
@@ -61,17 +59,30 @@ def stop_master(signum, frame):
         server_runner.stop()
 
 
+def _prepare_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--generate-config-only', default=None, action='store_true',
+                        help='Only generate notification server configuration file.')
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
     signal.signal(signal.SIGTERM, stop_master)
     server_runner = None
-    configure_logging()
     if "AIFLOW_HOME" not in os.environ:
         os.environ["AIFLOW_HOME"] = os.environ["HOME"] + "/aiflow"
         logging.info("Set env variable AIFLOW_HOME to {}".format(os.environ["AIFLOW_HOME"]))
     logging.info("Looking for aiflow_server.yaml at {}".format(os.environ["AIFLOW_HOME"]))
     aiflow_server_config = os.environ["AIFLOW_HOME"] + "/aiflow_server.yaml"
+
+    args = _prepare_args()
     if not os.path.exists(aiflow_server_config):
         logging.info("{} does not exist, creating the default aiflow server config".format(aiflow_server_config))
         aiflow_server_config = create_default_sever_config(os.environ["AIFLOW_HOME"])
+    else:
+        logging.info("AIFlow server config exists at {}".format(aiflow_server_config))
+
+    if args.generate_config_only:
+        exit(0)
 
     start_master(aiflow_server_config)

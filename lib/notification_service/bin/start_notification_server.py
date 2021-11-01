@@ -48,6 +48,7 @@ def create_server_config(root_dir_path, param: Dict[str, str]):
         default_config = config_file.read().format(**param)
     with open(server_config_target_path, mode='w', encoding='utf-8') as f:
         f.write(default_config)
+    logging.info("Notification server config generated at {}".format(server_config_target_path))
     return server_config_target_path
 
 
@@ -61,8 +62,8 @@ def drop_all_tables(db_uri):
 
 def _prepare_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config-file', type=str, default=None,
-                        help='The notification server configuration file.')
+    parser.add_argument('--generate-config-only', default=None, action='store_true',
+                        help='Only generate notification server configuration file.')
     return parser.parse_args()
 
 
@@ -74,14 +75,20 @@ if __name__ == '__main__':
         logging.info("Set env variable NOTIFICATION_HOME to {}".format(os.environ["NOTIFICATION_HOME"]))
     if not os.path.exists(os.environ["NOTIFICATION_HOME"]):
         os.makedirs(os.environ["NOTIFICATION_HOME"])
+    config_file = os.environ["NOTIFICATION_HOME"] + "/notification_server.yaml"
+
     args = _prepare_args()
-    config_file = args.config_file
+
     if not os.path.exists(config_file):
         create_server_config(os.environ.get("NOTIFICATION_HOME"), os.environ.copy())
-        config = NotificationServerConfig(config_file)
-        drop_all_tables(db_uri=config.db_uri)
-        create_all_tables(db_uri=config.db_uri)
+    else:
+        logging.info("Notification server config exists at {}".format(config_file))
 
+    if args.generate_config_only:
+        exit(0)
+
+    config = NotificationServerConfig(config_file)
+    create_all_tables(db_uri=config.db_uri)
     ns = NotificationServerRunner(config_file=config_file)
-    logging.info('notification service start(port:{}).'.format(ns.config.port))
+    logging.info('notification server start(port:{}).'.format(ns.config.port))
     ns.start(is_block=True)
