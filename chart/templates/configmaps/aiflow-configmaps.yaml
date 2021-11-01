@@ -68,3 +68,17 @@ data:
         scheduler_config:
           airflow_deploy_path: {{ .Values.ai_flow.airflow_deploy_path }}
           notification_server_uri: {{ .Release.Name }}-notification:50052
+
+  notification_server.yaml: |
+    # port of notification server
+    server_port: 50052
+    # uri of database backend for notification server
+    {{- with .Values.data.metadataConnection }}
+    db_uri: {{ urlJoin (dict "scheme" .protocol "userinfo" (printf "%s:%s" (.user | urlquery) (.pass | urlquery) ) "host" (printf "%s:%s" $host $port) "path" (printf "/%s" $database) "query" $query) | quote }}
+    {{- end }}
+    # High availability is disabled by default
+    enable_ha: false
+    # TTL of the heartbeat of a server, i.e., if the server hasn't send heartbeat for the TTL time, it is down.
+    ha_ttl_ms: 10000
+    # Hostname and port the server will advertise to clients.. If not set, it will use the local ip and configured port.
+    advertised_uri: {{ .Release.Name }}-notification.{{ .Release.Namespace }}:50052
