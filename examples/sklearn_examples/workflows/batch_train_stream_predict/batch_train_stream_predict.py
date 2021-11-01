@@ -52,7 +52,7 @@ def run_workflow():
                                         model_desc='logistic regression model')
         train_channel = af.train(input=[train_transform],
                                  training_processor=
-                                 ModelTrainer(af.current_project_config().get_notification_service_uri()),
+                                 ModelTrainer(af.current_project_config().get_notification_server_uri()),
                                  model_info=train_model)
     with af.job_config('validate'):
         # Validation of model
@@ -71,7 +71,7 @@ def run_workflow():
                                              model_info=train_model,
                                              model_validation_processor=
                                              ModelValidator(validate_artifact_name,
-                                                            af.current_project_config().get_notification_service_uri()))
+                                                            af.current_project_config().get_notification_server_uri()))
     with af.job_config('push'):
         # Push model to serving
         # Register metadata of pushed model
@@ -80,7 +80,7 @@ def run_workflow():
                                                    uri=get_file_dir(__file__) + '/pushed_model')
         af.push_model(model_info=train_model,
                       pushing_model_processor=ModelPusher(push_model_artifact_name,
-                                                          af.current_project_config().get_notification_service_uri()))
+                                                          af.current_project_config().get_notification_server_uri()))
 
     with af.job_config('predict'):
         # Prediction(Inference)
