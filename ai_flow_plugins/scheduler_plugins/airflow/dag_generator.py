@@ -17,6 +17,7 @@
 # under the License.
 #
 import base64
+from datetime import datetime
 from typing import Text, List, Dict
 
 from cloudpickle import cloudpickle
@@ -225,7 +226,7 @@ op_{0} = AIFlowOperator(task_id='{2}', job=job_{0}, workflow=workflow, dag=dag""
                                                                               stat_date_items[5],
                                                                               stat_date_items[6])
         else:
-            exec_args['start_date'] = 'datetime.utcnow()'
+            exec_args['start_date'] = 'datetime.fromisoformat(\'{}\')'.format(datetime.utcnow())
         if periodic_config.trigger_config.get('cron') is not None:
             cron_items = periodic_config.get_cron_items()
             # airflow cron: minutes hours days months years weeks seconds
