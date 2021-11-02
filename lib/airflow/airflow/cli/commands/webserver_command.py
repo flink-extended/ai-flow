@@ -342,7 +342,8 @@ def webserver(args):
     notification_sql_alchemy_conn = args.notification_sql_alchemy_conn \
                                     or conf.get('webserver',
                                                 'notification_sql_alchemy_conn',
-                                                fallback='sqlite:///{}/notification_service/ns.db'.format(os.environ['HOME']))
+                                                fallback='sqlite:///{}/notification_service/ns.db'.format(
+                                                    os.environ['HOME']))
 
     if not ssl_cert and ssl_key:
         raise AirflowException('An SSL certificate must also be provided for use with ' + ssl_key)
@@ -431,7 +432,8 @@ def webserver(args):
         if ssl_cert:
             run_args += ['--certfile', ssl_cert, '--keyfile', ssl_key]
 
-        run_args += ["airflow.www.app:cached_app()"]
+        run_args += ["airflow.www.app:cached_app(notification_server_uri='{}', notification_sql_alchemy_conn='{}')"
+                     .format(notification_server_uri, notification_sql_alchemy_conn)]
 
         gunicorn_master_proc = None
 
@@ -461,9 +463,6 @@ def webserver(args):
                 ),
             ).start()
 
-        os.environ['NOTIFICATION_SERVER_URI'] = notification_server_uri
-        os.environ['NOTIFICATION_SQL_ALCHEMY_CONN'] = notification_sql_alchemy_conn
-
         if args.daemon:
             handle = setup_logging(log_file)
 
@@ -476,7 +475,7 @@ def webserver(args):
                     stderr=stderr,
                 )
                 with ctx:
-                    subprocess.Popen(run_args, close_fds=True, env=os.environ)
+                    subprocess.Popen(run_args, close_fds=True)
 
                     # Reading pid of gunicorn master as it will be different that
                     # the one of process spawned above.
@@ -491,5 +490,5 @@ def webserver(args):
                     monitor_gunicorn(gunicorn_master_proc.pid)
 
         else:
-            gunicorn_master_proc = subprocess.Popen(run_args, close_fds=True, env=os.environ)
+            gunicorn_master_proc = subprocess.Popen(run_args, close_fds=True)
             monitor_gunicorn(gunicorn_master_proc.pid)
