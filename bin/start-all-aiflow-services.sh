@@ -33,4 +33,4 @@ echo "airflow dag dir: ${AIRFLOW_DAG_DIR}"
 # start AIFlow
 "${BIN}"/start-aiflow.sh
 
-echo "Visit http://127.0.0.1:8080/ to access the airflow web server."
+echo "All services have been started!"
