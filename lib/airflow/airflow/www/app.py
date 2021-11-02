@@ -130,11 +130,11 @@ def create_app(config=None, testing=False, app_name="Airflow", notification_serv
     return flask_app
 
 
-def cached_app(config=None, testing=False):
+def cached_app(config=None, testing=False, notification_server_uri=None, notification_sql_alchemy_conn=None):
     """Return cached instance of Airflow WWW app"""
     global app  # pylint: disable=global-statement
     if not app:
         app = create_app(config=config, testing=testing,
-                         notification_server_uri=os.getenv('NOTIFICATION_SERVER_URI', None),
-                         notification_sql_alchemy_conn=os.getenv('NOTIFICATION_SQL_ALCHEMY_CONN', None))
+                         notification_server_uri=notification_server_uri,
+                         notification_sql_alchemy_conn=notification_sql_alchemy_conn)
     return app
