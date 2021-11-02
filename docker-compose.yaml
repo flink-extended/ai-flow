@@ -17,16 +17,16 @@
 #
 ---
 version: '3'
-x-airflow-common:
-  &airflow-common
-  image: flinkaiflow/flink-ai-flow:0.2.0
+x-aiflow-common:
+  &aiflow-common
+  image: ai-flow:latest
   # build: .
   environment:
-    &airflow-common-env
+    AIFLOW_HOME: /usr/local/aiflow
     AIRFLOW_HOME: /usr/local/airflow
-    MYSQL_CONN: mysql://root@mysql/airflow?charset=utf8mb4
-    BROKER_URL: redis://:@redis:6379/0
-    RESULT_BACKEND: redis://:@redis:6379/0
+    NOTIFICATION_HOME: /usr/local/notification_service
+    AIRFLOW_MYSQL_CONN: mysql://root@mysql/airflow
+    AIRFLOW_NOTIFICATION_SERVER_URI: aiflow-server:50052
   depends_on:
     redis:
       condition: service_healthy
@@ -44,15 +44,21 @@ services:
     restart: always
 
   aiflow-server:
-    <<: *airflow-common
+    <<: *aiflow-common
     stdin_open: true
     tty: true
-    entrypoint: /bin/bash
+    command: /bin/bash -c "
+      init-airflow-with-celery-executor.sh $${AIRFLOW_MYSQL_CONN} $${AIRFLOW_NOTIFICATION_SERVER_URI}
+      && /bin/bash"
     cap_add:
       - SYS_PTRACE
     ports:
       - "8080:8080"
       - "50051:50051"
+      - "50052:50052"
+    volumes:
+      - ./logs/aiflow:/usr/local/aiflow/logs
+      - ./logs/airflow:/usr/local/airflow/logs
     restart: always
     depends_on:
       airflow-worker:
@@ -67,13 +73,12 @@ services:
       - MYSQL_ROOT_HOST=%
       - MYSQL_DATABASE=airflow
     volumes:
-      - ../mysql/conf.d:/etc/mysql/conf.d:ro
+      - ./mysql/conf.d:/etc/mysql/conf.d:ro
       - /dev/urandom:/dev/random
-      - mysql-db-volume:/var/lib/mysql
     ports:
-      - 3307:3306
-    command: ['mysqld', '--character-set-server=utf8mb4',
-              '--collation-server=utf8mb4_unicode_ci']
+      - 13306:3306
+    command: ['mysqld', '--character-set-server=utf8mb3',
+              '--collation-server=utf8_general_ci']
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       interval: 10s
@@ -81,10 +86,21 @@ services:
       retries: 5
     restart: always
 
+  hadoop-dfs:
+    image: pravega/hdfs:2.7.7
+    ports:
+      - "22022:22"
+      - "8020:8020"
+      - "50010:50010"
+      - "50020:50020"
+      - "50070:50070"
+      - "50075:50075"
+    restart: always
+
   airflow-worker:
-    <<: *airflow-common
+    <<: *aiflow-common
     command: /bin/bash -c "
-        init-airflow-with-celery-executor.sh $${MYSQL_CONN} $${BROKER_URL} $${RESULT_BACKEND}
+        init-airflow-with-celery-executor.sh $${AIRFLOW_MYSQL_CONN} $${AIRFLOW_NOTIFICATION_SERVER_URI}
         && airflow celery worker"
     ports:
       - 8793
@@ -99,9 +115,9 @@ services:
     restart: always
 
   flower:
-    <<: *airflow-common
+    <<: *aiflow-common
     command: /bin/bash -c "
-        init-airflow-with-celery-executor.sh $${MYSQL_CONN} $${BROKER_URL} $${RESULT_BACKEND}
+        init-airflow-with-celery-executor.sh $${AIRFLOW_MYSQL_CONN} $${AIRFLOW_NOTIFICATION_SERVER_URI}
         && airflow celery flower"
     ports:
       - 5555:5555
@@ -111,6 +127,3 @@ services:
       timeout: 10s
       retries: 5
     restart: always
-
-volumes:
-  mysql-db-volume:
