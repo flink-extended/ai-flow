@@ -124,20 +124,12 @@ spec:
               mountPath: {{ template "airflow_config_path" . }}
               subPath: airflow.cfg
               readOnly: true
+            - name: aiflow-config
+              mountPath: /usr/local/aiflow/aiflow_server.yaml
+              subPath: aiflow_server.yaml
+              readOnly: true
           env:
           {{- include "standard_airflow_environment" . | indent 10 }}
-            - name: AIFLOW_WEB_SERVER_PORT
-              value: "{{ .Values.ports.aiflowUI }}"
-            - name: AIFLOW_WEB_SERVER_HOST
-              value: "0.0.0.0"
-            {{- with .Values.data.metadataConnection }}
-            - name: AIFLOW_DB_CONN
-              value: {{ urlJoin (dict "scheme" .protocol "userinfo" (printf "%s:%s" (.user | urlquery) (.pass | urlquery) ) "host" (printf "%s:%s" $host $port) "path" (printf "/%s" $database) "query" $query) | quote }}
-            {{- end }}
-            {{- if .Values.ingress.enabled }}
-            - name: AIFLOW_WEB_SERVER_AIRFLOW_WEB_SERVER_URI
-              value: http{{ if .Values.ingress.web.tls.enabled }}s{{ end }}://{{ .Values.ingress.web.host }}{{ .Values.ingress.web.path }}
-            {{- end}}
 {{- if .Values.aiflowWebserver.extraContainers }}
 {{- toYaml .Values.aiflowWebserver.extraContainers | nindent 8 }}
 {{- end }}
@@ -145,6 +137,9 @@ spec:
         - name: config
           configMap:
             name: {{ template "airflow_config" . }}
+        - name: aiflow-config
+          configMap:
+            name: {{ .Release.Name }}-aiflow-config
 {{- if .Values.aiflowWebserver.extraVolumes }}
 {{ toYaml .Values.aiflowWebserver.extraVolumes | indent 8 }}
 {{- end }}
