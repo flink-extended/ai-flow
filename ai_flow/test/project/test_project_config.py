@@ -29,6 +29,7 @@ class TestProjectConfig(unittest.TestCase):
         project_config = ProjectConfig()
         project_config.load_from_file(os.path.join(project_path, 'project.yaml'))
         self.assertEqual(project_config.get_server_uri(), "localhost:50051,localhost:50052")
+        self.assertEqual(project_config.get_notification_server_uri(), "localhost:50053")
         self.assertIsNone(project_config.get('ai_flow config', None))
         self.assertEqual(project_config['ai_flow_home'], '/opt/ai_flow')
         self.assertEqual(project_config['ai_flow_job_master.host'], 'localhost')
