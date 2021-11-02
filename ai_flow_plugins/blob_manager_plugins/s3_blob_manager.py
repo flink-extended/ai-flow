@@ -101,9 +101,11 @@ class S3BlobManager(BlobManager):
                 if not os.path.exists(local_zip_file_path):
                     logger.info("Downloading S3 object: {}".format(remote_path))
                     self._get_s3_object(local_zip_file_path, remote_path)
+                    logger.info("Downloaded S3 object: {}".format(local_zip_file_path))
             except Exception as e:
                 logger.error("Failed to download S3 file: {}".format(remote_path), exc_info=e)
             finally:
+                logger.debug('Locked file {}'.format(lock_file_path))
                 fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
                 logger.debug('Unlocked file {}'.format(lock_file_path))
                 lock_file.close()
@@ -131,4 +133,4 @@ class S3BlobManager(BlobManager):
                                                                                                retry_sleep_sec),
                              exc_info=e)
                 time.sleep(retry_sleep_sec)
-            raise RuntimeError("Failed to download S3 file: {}".format(object_key))
+        raise RuntimeError("Failed to download S3 file: {}".format(object_key))
