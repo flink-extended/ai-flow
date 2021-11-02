@@ -19,6 +19,16 @@
 ##
 set -e
 
+usage="Usage: init-airflow-with-celery-executor.sh [airflow-mysql-conn] [notification_server_uri]"
+
+if [ $# -ne 2 ]; then
+  echo "${usage}"
+  exit 1
+fi
+
+export AIRFLOW_HOME=${AIRFLOW_HOME:-~/airflow}
+MYSQL_CONN=$1
+NOTIFICATION_SERVER_URI=$2
 BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)
 
@@ -30,6 +40,8 @@ CURRENT_DIR=$(pwd)
 cd "${AIRFLOW_HOME}"
 mv airflow.cfg airflow.cfg.tmpl
 awk "{gsub(\"executor = LocalExecutor\", \"executor = CeleryExecutor\"); \
+    gsub(\"sql_alchemy_conn = sqlite:///${AIRFLOW_HOME}/airflow.db\", \"sql_alchemy_conn = ${MYSQL_CONN}\"); \
+    gsub(\"notification_server_uri = 127.0.0.1:50052\", \"notification_server_uri = ${NOTIFICATION_SERVER_URI}\"); \
     print \$0}" airflow.cfg.tmpl > airflow.cfg
 rm airflow.cfg.tmpl >/dev/null 2>&1 || true
 cd "${CURRENT_DIR}"
