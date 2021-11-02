@@ -49,13 +49,3 @@ spec:
   {{- if .Values.notification.service.loadBalancerIP }}
   loadBalancerIP: {{ .Values.notification.service.loadBalancerIP }}
   {{- end }}
-
-# spec:
-#   type: NodePort
-#   ports:
-#   - name: ai-notification
-#     port: 50052
-#     nodePort: 30052
-#   selector:
-#     app: ai-flow
-#     component: ai-flow-notification

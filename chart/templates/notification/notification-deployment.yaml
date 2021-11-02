@@ -81,8 +81,7 @@ spec:
             periodSeconds: {{ .Values.notification.livenessProbe.periodSeconds | default 5 }}
           image: {{ template "notification_image" . }}
           args:
-            - "start_notification_service.py"
-            - "--database-conn=$(NOTIFICATION_DB_CONN)"
+            - "start_notification_server.py"
           imagePullPolicy: {{ .Values.images.notification.pullPolicy }}
           ports:
             - containerPort: 50052
@@ -90,12 +89,18 @@ spec:
           resources:
 {{ toYaml .Values.notification.resources | indent 12 }}
           env:
-            - name: NOTIFICATION_DB_CONN
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "airflow_metadata_secret" . }}
-                  key: connection
             - name: PYTHONUNBUFFERED
               value: '1'
             - name: PYTHONIOENCODING
               value: 'UTF-8'
+            - name: NOTIFICATION_HOME
+              value: /opt/notification_service
+          volumeMounts:
+            - name: notification-config
+              mountPath: /opt/notification_service/notification_server.yaml
+              subPath: notification_server.yaml
+              readOnly: true
+      volumes:
+        - name: notification-config
+          configMap:
+            name: {{ .Release.Name }}-aiflow-config

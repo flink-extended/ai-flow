@@ -59,6 +59,11 @@ If release name contains chart name it will be used as a full name.
       secretKeyRef:
         name: {{ template "webserver_secret_key_secret" . }}
         key: webserver-secret-key
+  - name: AIRFLOW__WEBSERVER__NOTIFICATION_SQL_ALCHEMY_CONN
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "airflow_metadata_secret" . }}
+        key: connection
   {{- if or (eq .Values.executor "CeleryExecutor") (eq .Values.executor "CeleryKubernetesExecutor") }}
   - name: AIRFLOW__CELERY__CELERY_RESULT_BACKEND
     valueFrom:
