@@ -56,6 +56,7 @@ services:
       - "8080:8080"
       - "50051:50051"
       - "50052:50052"
+      - "8000:8000"
     volumes:
       - ./logs/aiflow:/usr/local/aiflow/logs
       - ./logs/airflow:/usr/local/airflow/logs
