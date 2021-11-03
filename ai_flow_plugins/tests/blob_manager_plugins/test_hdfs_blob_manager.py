@@ -16,10 +16,14 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import time
 import unittest
 import os
+from unittest import mock
+
 from ai_flow.util.path_util import get_file_dir
 from ai_flow.plugin_interface.blob_manager_interface import BlobManagerFactory
+from ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager import HDFSBlobManager
 
 
 class TestOSSBlobManager(unittest.TestCase):
@@ -42,6 +46,21 @@ class TestOSSBlobManager(unittest.TestCase):
 
         downloaded_path = blob_manager.download_project('1', uploaded_path)
         self.assertEqual('/tmp/workflow_1_project/project', downloaded_path)
+
+    def test_download_existed_file(self):
+        config = {'hdfs_url': 'localhost:50070'}
+        hdfs_blob_manager = HDFSBlobManager(config)
+        workflow_snapshot_id = round(time.time() * 1000)
+
+        def mock_download_file_from_hdfs(hdfs_path, local_path):
+            with open(local_path, 'w') as f:
+                f.write(str(workflow_snapshot_id))
+
+        hdfs_blob_manager._download_file_from_hdfs = mock_download_file_from_hdfs
+        with mock.patch(
+                'ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager.extract_project_zip_file'):
+            hdfs_blob_manager.download_project(workflow_snapshot_id, 'dummy', '/tmp/')
+            hdfs_blob_manager.download_project(workflow_snapshot_id, 'dummy', '/tmp/')
 
 
 if __name__ == '__main__':
