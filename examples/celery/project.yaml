@@ -17,8 +17,8 @@
 ## under the License.
 ##
 project_name: celery_examples
-server_uri: localhost:50051
-notification_server_uri: localhost:50052
+server_uri: aiflow-server:50051
+notification_server_uri: aiflow-server:50052
 blob:
   blob_manager_class: ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager.HDFSBlobManager
   blob_manager_config:
