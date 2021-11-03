@@ -44,10 +44,6 @@ place. And the configuration file we will be using is the following.
 server_port: 50052
 # uri of database backend for notification server
 db_uri: mysql://username:password@database/notification
-# High availability is disabled by default
-enable_ha: false
-# TTL of the heartbeat of a server, i.e., if the server hasn't sent heartbeat for the TTL time, it is down.
-ha_ttl_ms: 10000
 # Hostname and port the server will advertise to clients. If not set, it will use the local ip and configured port.
 advertised_uri: 127.0.0.1:50052
 ```
@@ -143,11 +139,6 @@ server_port: 50051
 db_uri: mysql://username:password@database/aiflow
 # type of database backend for AIFlow server, can be SQL_LITE, MYSQL, MONGODB
 db_type: MYSQL
-
-# High availability is disabled by default
-#enable_ha: false
-# TTL of the heartbeat of a server, i.e., if the server hasn't send heartbeat for the TTL time, it is down.
-#ha_ttl_ms: 10000
 
 # uri of the server of notification service
 notification_server_uri: 127.0.0.1:50052
