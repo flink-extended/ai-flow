@@ -16,7 +16,11 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import fcntl
+import logging
+import os
 import tempfile
+import time
 from pathlib import Path
 from typing import Text, Dict, Any
 
@@ -25,6 +29,9 @@ from hdfs.client import InsecureClient
 from ai_flow.plugin_interface.blob_manager_interface import BlobManager
 from ai_flow.util.file_util.zip_file_util import make_dir_zipfile
 from ai_flow_plugins.blob_manager_plugins.blob_manager_utils import extract_project_zip_file
+
+
+logger = logging.getLogger(__name__)
 
 
 class HDFSBlobManager(BlobManager):
@@ -83,8 +90,39 @@ class HDFSBlobManager(BlobManager):
             repo_path = Path(tempfile.gettempdir())
         local_zip_file_path = str(repo_path / local_zip_file_name) + '.zip'
         extract_path = str(repo_path / local_zip_file_name)
-        self._hdfs_client.download(hdfs_path=remote_path, local_path=local_zip_file_path)
+
+        if not os.path.exists(local_zip_file_path):
+            lock_file_path = os.path.join(repo_path, "{}.lock".format(local_zip_file_name))
+            lock_file = open(lock_file_path, 'w')
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            try:
+                if not os.path.exists(local_zip_file_path):
+                    logger.info("Downloading HDFS file: {}".format(remote_path))
+                    self._download_file_from_hdfs(hdfs_path=remote_path, local_path=local_zip_file_path)
+            except Exception as e:
+                logger.error("Failed to download HDFS file: {}".format(remote_path), exc_info=e)
+            finally:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+                lock_file.close()
+                if os.path.exists(lock_file_path):
+                    try:
+                        os.remove(lock_file_path)
+                    except OSError as e:
+                        logger.warning("Failed to remove lock file: {}".format(lock_file_path), exc_info=e)
+        else:
+            logger.info("HDFS file: {} already exist at {}".format(remote_path, local_zip_file_path))
         return extract_project_zip_file(workflow_snapshot_id=workflow_snapshot_id,
                                         local_root_path=repo_path,
                                         zip_file_path=local_zip_file_path,
                                         extract_project_path=extract_path)
+
+    def _download_file_from_hdfs(self, hdfs_path, local_path, retry_sleep_sec=5):
+        for i in range(3):
+            try:
+                self._hdfs_client.download(hdfs_path=hdfs_path, local_path=local_path)
+                return
+            except Exception as e:
+                logger.error("Downloading file {} failed, retrying {}/3 in {} second".format(
+                    hdfs_path, i+1, retry_sleep_sec), exc_info=e)
+                time.sleep(retry_sleep_sec)
+        raise RuntimeError("Failed to download HDFS file: {}".format(hdfs_path))
