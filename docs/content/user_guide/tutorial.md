@@ -1,7 +1,7 @@
 
 # Tutorial
 
-This tutorial will show you how to write a workflow using AI Flow and walk you through some fundamental AI Flow concepts, objects, and their usage.
+This tutorial will show you how to write a workflow using AIFlow and walk you through some fundamental AIFlow concepts, objects, and their usage.
 
 ## Target
 
@@ -10,20 +10,20 @@ In the tutorial, we will write a simplified machine learning workflow to train a
 Furthermore, in this workflow, the training job will be a periodical batch job using scikit learn library. Once the batch training job finishes, we will start a validation job to validate the correctness and generalization ability of the generated model. Finally, when a model is validated, we will start a flink  job to utilize the model to do prediction(inference) and save prediction results to a local file.
 
 
-## Configuration of AI Flow Server
-To work with AI Flow, we should add some configurations for AI Flow Server.
+## Configuration of AIFlow Server
+To work with AIFlow, we should add some configurations for AIFlow Server.
 The config file, named as `aiflow_server.yaml`, should locate in `$AIFLOW_HOME` or `~/aiflow` directory.
 
 Remember to update fields according to your own environment.
 
 ### aiflow_server.yaml
 ```yaml
- # Config of AI Flow Server
-# endpoint of AI Flow Server
+ # Config of AIFlow Server
+# endpoint of AIFlow Server
 server_port: 50051
 # uri of database backend of AIFlow server
 db_uri: {db_uri} # sqlite:////path/to/airflow/aiflow.db or mysql://username:password@127.0.0.1/airflow
-# type of database backend in AI Flow Server
+# type of database backend in AIFlow Server
 db_type: {db_type} # sql_lite or mysql
 # whether to start the scheduler service
 start_scheduler_service: True
@@ -76,11 +76,11 @@ blob:
 ```
 In `project_name`, we define the project name, which will be the default namespace of workflows in this project as well. 
 
-> Namespace in AI Flow is used for isolation. Each workflow can only send events to its own namespace while it can listen on multiple namespaces. The reason for enabling listening on multiple namespaces is that the workflow could be triggered by external events from notification service.
+> Namespace in AIFlow is used for isolation. Each workflow can only send events to its own namespace while it can listen on multiple namespaces. The reason for enabling listening on multiple namespaces is that the workflow could be triggered by external events from notification service.
 
 For `server_uri`,  they tell where the `AIFlowServer` is running on.
 
-Then, we configure the `blob` property which tells AI Flow where to execute workflows in this project(i.e., local or remote env).
+Then, we configure the `blob` property which tells AIFlow where to execute workflows in this project(i.e., local or remote env).
 
 Here we choose to use `LocalBlobManager` and as a result, the project will run locally. 
 
@@ -118,13 +118,13 @@ For `predict` job, we set its job type to be `flink`, which means this job is a 
 Now, let's start coding to implement workflow described in Target section
 
 ### Importing Modules
-In AI Flow, a workflow is just a Python script. Let’s create `tutorial_workflow.py` and start by importing the libraries we will need.
+In AIFlow, a workflow is just a Python script. Let’s create `tutorial_workflow.py` and start by importing the libraries we will need.
 
 
 ```python
 import os
 
-# Entry of accessing AI Flow API
+# Entry of accessing AIFlow API
 import ai_flow as af
 
 # Enum class for marking different stages of our workflow
@@ -143,15 +143,15 @@ DATASET_URI = os.path.abspath(os.path.join(__file__, "../../../")) + '/resources
 ```
 
 ###  Defining a Training Job
-In our design, the workflow in AI Flow is a DAG(Directed Acyclic Graph) or to be more specific, it is a [AIGraph](). Each node in the graph is an [AINode](), which contains a processor. Users should write their custom logic in the processor. 
+In our design, the workflow in AIFlow is a DAG(Directed Acyclic Graph) or to be more specific, it is a [AIGraph](). Each node in the graph is an [AINode](), which contains a processor. Users should write their custom logic in the processor. 
 
 In the AIGraph, nodes are connected by 2 types of edges. The first one is named as `DataEdge` which means the destination node depends on the output of the source node. The other is `ControlEdge` which means the destination node depends on the control conditions from source node. We will dive deeper into this kind of edges later.
 
-For now, let's concentrate on the set of AINodes connected by only data edges. Such a set of nodes and data edges between them constitutes a sub-graph. This sub-graph, together with the predefined job config in workflow config yaml, is mapped to a Job by AI Flow framework.
+For now, let's concentrate on the set of AINodes connected by only data edges. Such a set of nodes and data edges between them constitutes a sub-graph. This sub-graph, together with the predefined job config in workflow config yaml, is mapped to a Job by AIFlow framework.
 
-So, to summarize, each AI Flow job is made up of a job config, some AINodes and the data edges between those nodes. 
+So, to summarize, each AIFlow job is made up of a job config, some AINodes and the data edges between those nodes. 
 
-These concepts seem to be a little difficult, but do not worry. Let's look at some code snippets, and you will find it pretty easy to define a job with provided API of AI Flow.
+These concepts seem to be a little difficult, but do not worry. Let's look at some code snippets, and you will find it pretty easy to define a job with provided API of AIFlow.
 
 In the following codes, we define a training job of our workflow:
 ```python
@@ -178,7 +178,7 @@ In the above codes, methods like `register_dataset` and `register_model` are jus
 
 On the other hand, `read_dataset()` and `train()` are of another type. We call them `Operators` as they have some specific semantics and will create corresponding `AINodes`. Then, how do we define the data dependency of those newly created nodes? We just put the output of `read_dataset` method into the `input` arg of `train()` method. Such codes imply input of the training node created by`train()` is the output of the node created by `read_dataset()` .  The return values of methods like `train()` are `Channel` or list of `Channel`s.
 
-In AI Flow, `Channel` represents the output of AINodes. More vividly, `Channel` is one end of the `DataEdge`. The following picture shows the relation among `AINodes`, `DataEdges` and `Channels`:
+In AIFlow, `Channel` represents the output of AINodes. More vividly, `Channel` is one end of the `DataEdge`. The following picture shows the relation among `AINodes`, `DataEdges` and `Channels`:
 
 ![Alt text](../images/tutorial/channels.png)
 
@@ -228,9 +228,9 @@ Here we define the left 2 jobs of our workflow. They are pretty similar to what 
 
 ```
 
-In above codes, we use 3 new predefined operators by AI Flow: `model_validate()` , `predict()`, `write_dataset()`. 
+In above codes, we use 3 new predefined operators by AIFlow: `model_validate()` , `predict()`, `write_dataset()`. 
 
-In addition, in AI Flow, if they don't find the operators needed, users can also define their own operators with the `user_define_operation()` API.
+In addition, in AIFlow, if they don't find the operators needed, users can also define their own operators with the `user_define_operation()` API.
 
 ### Defining the Relation between Jobs
 We now have defined 3 jobs. Each job is a sub-graph and have some nodes connected by `DataEdge`s. Then we will need to define the relation between jobs to make sure our workflow is scheduled and run correctly. As we have mentioned in [Target](#Target) section, the training job will run periodically and once the training finishes, the validation job should be started to validate the latest generated model. If there is a model passes the validation and get deployed, we should (re)start the downstream prediction job using flink to get better inference.
@@ -239,7 +239,7 @@ We now have defined 3 jobs. Each job is a sub-graph and have some nodes connecte
 
 After reviewing above description, we find that some upstream jobs control the downstream jobs. For instance, the training job controls the (re)start of validation job. We keep using AIGraph abstraction to depicts these control relations. But at this time, each AINode in this new AIGraph is a job(a subgraph in fact!). Edges to connect these job nodes are named as `ControlEdge`. We also call such control relation as *control dependencies*.
 
-In AI Flow, we implement control dependencies via *Events*. That is, the upstream job can send specific events to downstream jobs and downstream jobs will take actions due to the events and rules defined by users.
+In AIFlow, we implement control dependencies via *Events*. That is, the upstream job can send specific events to downstream jobs and downstream jobs will take actions due to the events and rules defined by users.
 
 ```python
 		# Define relation graph connected by control edge: train -> validate -> predict
@@ -253,7 +253,7 @@ In AI Flow, we implement control dependencies via *Events*. That is, the upstrea
 
 In above codes, the first `ControlEdge` we defined is that the `validate` job (Note, this job name is defined in the yaml file of workflow configs) will be restarted(the default action) when there is a `MODEL_GENERATED` event of training model received by the scheduler. The second  `ControlEdge` we defined is that the `predict` job will be restarted when there is a `MODEL_VALIDATED` event of training model received by the scheduler. 
 
-Besides, the well-defined out-of-box API for managing machine learning jobs, AI Flow exposes the extremely expressive API `action_on_events()` to allow users write their own event-based control dependencies.
+Besides, the well-defined out-of-box API for managing machine learning jobs, AIFlow exposes the extremely expressive API `action_on_events()` to allow users write their own event-based control dependencies.
 
 ## Managing the Workflow
 
@@ -298,7 +298,7 @@ In fact, in our design, `Workflow` defines the execution logic of a set of jobs 
 
 ## Implementing custom processors
 
-As we have mentioned, users need to write their own logic in processors for each job. Currently, AI Flow supports `bash`, `python` and `flink` processors.
+As we have mentioned, users need to write their own logic in processors for each job. Currently, AIFlow supports `bash`, `python` and `flink` processors.
 
 The following codes are the `DatasetReader` processor whose type is `python`:
 
@@ -359,12 +359,12 @@ It is written in Pyflink for convenience but Flink Java Processor is also suppor
 
 
 
-Note, if you use some special dependencies and choose to submit the workflow to a remote environment for execution, you should put your dependencies in the `tutorial_workflow/dependencies` folder and refer them properly. That's because AI Flow will upload the whole project directory to remote for execution and users need to make sure in the remote env, the python processors can run correctly.
+Note, if you use some special dependencies and choose to submit the workflow to a remote environment for execution, you should put your dependencies in the `tutorial_workflow/dependencies` folder and refer them properly. That's because AIFlow will upload the whole project directory to remote for execution and users need to make sure in the remote env, the python processors can run correctly.
 
 ## Run the whole workflow
 Now we have finished the introduction of how to write a workflow. For the whole codes, please go to check [tutorial_project](https://github.com/alibaba/flink-ai-extended/tree/master/flink-ai-flow/examples/tutorial_project) directory. After configuring the yaml file according to your own environment, it is time to run the workflow. 
 
-Before running, please make sure you have installed AI Flow and started AIFlowServer, notification service and scheduler correctly according to the QuickStart document.
+Before running, please make sure you have installed AIFlow and started AIFlowServer, notification service and scheduler correctly according to the QuickStart document.
 
 Then, type following commands in your terminal:
 ```bash
