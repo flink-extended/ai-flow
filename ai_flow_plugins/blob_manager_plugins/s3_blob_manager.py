@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Text, Dict, Any
 
 import boto3
+from botocore.config import Config
 
 from ai_flow.plugin_interface.blob_manager_interface import BlobManager
 from ai_flow.util.file_util.zip_file_util import make_dir_zipfile
@@ -37,20 +38,32 @@ class S3BlobManager(BlobManager):
     """
     S3BlobManager is an implementation of BlobManager based on the S3 file system
     S3BlobManager contains configuration items:
-    1. endpoint_url: The complete URL to use for the constructed client.
-    2. access_key_id: The access key for your AWS account.
-    3. secret_access_key: The secret key for your AWS account.
-    4. session_token: The session key for your AWS account.
-    5. bucket_name: The S3 bucket name.
-    6. local_repository: It represents the root path of the downloaded project package.
+    1. service_name: The name of a service, e.g. 's3' or 'ec2'.
+    2. region_name: The name of the region associated with the client.
+    3. api_version: The API version to use.
+    4. use_ssl: Whether or not to use SSL.
+    5. verify: Whether or not to verify SSL certificates.
+    6. endpoint_url: The complete URL to use for the constructed client.
+    7. access_key_id: The access key for your AWS account.
+    8. secret_access_key: The secret key for your AWS account.
+    9. session_token: The session key for your AWS account.
+    10. config: Advanced client configuration options.
+    11. bucket_name: The S3 bucket name.
+    12. local_repository: It represents the root path of the downloaded project package.
     """
 
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
-        self.s3_client = boto3.client('s3', endpoint_url=config.get('endpoint_url', None),
+        self.s3_client = boto3.client(service_name=config.get('service_name', None),
+                                      region_name=config.get('region_name', None),
+                                      api_version=config.get('api_version', None),
+                                      use_ssl=config.get('use_ssl', None),
+                                      verify=config.get('verify', None),
+                                      endpoint_url=config.get('endpoint_url', None),
                                       aws_access_key_id=config.get('access_key_id', None),
                                       aws_secret_access_key=config.get('secret_access_key', None),
-                                      aws_session_token=config.get('session_token', None))
+                                      aws_session_token=config.get('session_token', None),
+                                      config=Config(**config.get('config', {})))
         self.bucket_name = config.get('bucket_name', None)
         self.local_repository = config.get('local_repository', None)
 
@@ -101,9 +114,11 @@ class S3BlobManager(BlobManager):
                 if not os.path.exists(local_zip_file_path):
                     logger.info("Downloading S3 object: {}".format(remote_path))
                     self._get_s3_object(local_zip_file_path, remote_path)
+                    logger.info("Downloaded S3 object: {}".format(local_zip_file_path))
             except Exception as e:
                 logger.error("Failed to download S3 file: {}".format(remote_path), exc_info=e)
             finally:
+                logger.debug('Locked file {}'.format(lock_file_path))
                 fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
                 logger.debug('Unlocked file {}'.format(lock_file_path))
                 lock_file.close()
@@ -131,4 +146,4 @@ class S3BlobManager(BlobManager):
                                                                                                retry_sleep_sec),
                              exc_info=e)
                 time.sleep(retry_sleep_sec)
-            raise RuntimeError("Failed to download S3 file: {}".format(object_key))
+        raise RuntimeError("Failed to download S3 file: {}".format(object_key))

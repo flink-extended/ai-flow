@@ -30,7 +30,12 @@ from ai_flow_plugins.blob_manager_plugins.s3_blob_manager import S3BlobManager
 
 class TestS3BlobManager(unittest.TestCase):
 
-    @unittest.skipUnless((os.environ.get('blob_server.endpoint_url') is not None
+    @unittest.skipUnless((os.environ.get('blob_server.service_name') is not None
+                          and os.environ.get('blob_server.region_name') is not None
+                          and os.environ.get('blob_server.api_version') is not None
+                          and os.environ.get('blob_server.use_ssl') is not None
+                          and os.environ.get('blob_server.verify') is not None
+                          and os.environ.get('blob_server.endpoint_url') is not None
                           and os.environ.get('blob_server.access_key_id') is not None
                           and os.environ.get('blob_server.secret_access_key') is not None
                           and os.environ.get('blob_server.bucket_name') is not None), 'need set s3')
@@ -39,6 +44,11 @@ class TestS3BlobManager(unittest.TestCase):
         config = {
             'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.s3_blob_manager.S3BlobManager',
             'blob_manager_config': {
+                'service_name': os.environ.get('blob_server.service_name'),
+                'region_name': os.environ.get('blob_server.region_name'),
+                'api_version': os.environ.get('blob_server.api_version'),
+                'use_ssl': os.environ.get('blob_server.use_ssl'),
+                'verify': os.environ.get('blob_server.verify'),
                 'endpoint_url': os.environ.get('blob_server.endpoint_url'),
                 'access_key_id': os.environ.get('blob_server.access_key_id'),
                 'secret_access_key': os.environ.get('blob_server.secret_access_key'),
@@ -59,7 +69,7 @@ class TestS3BlobManager(unittest.TestCase):
         project_zip = '/tmp/workflow_1_project.zip'
         if os.path.exists(project_zip):
             os.remove(project_zip)
-        config = {}
+        config = {'service_name': 's3'}
         s3_blob_manager = S3BlobManager(config)
         zip_file_path = None
         call_count = 0
@@ -89,7 +99,7 @@ class TestS3BlobManager(unittest.TestCase):
                     os.remove(zip_file_path)
 
     def test__get_s3_object_retry(self):
-        config = {}
+        config = {'service_name': 's3'}
         s3_blob_manager = S3BlobManager(config)
 
         with mock.patch.object(s3_blob_manager, 's3_client') as mock_client:
