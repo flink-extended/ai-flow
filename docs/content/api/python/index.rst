@@ -26,6 +26,7 @@ Python API
 
    source_rst/ai_flow
    source_rst/ai_flow_plugins
+   notification_service
 
 ====================
 Core Classes/Modules

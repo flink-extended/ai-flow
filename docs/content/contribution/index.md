@@ -1,9 +1,7 @@
-# Developer Guide
+# Contribution
 
 ```{toctree}
 :maxdepth: 2
 
-design
-plugins
 contribution
 ```
