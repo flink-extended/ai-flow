@@ -1,18 +1,18 @@
 # What's AIFlow
 
 ## Introduction
-AI Flow is an open source framework that bridges big data and artificial intelligence. 
+AIFlow is an open source framework that bridges big data and artificial intelligence. 
 It manages the entire machine learning project lifecycle as a unified workflow, including feature engineering, 
 model training, model evaluation, model service, model inference, monitoring, etc. 
 Throughout the entire workflow, Flink is used as the general purpose computing engine.
 
 In addition to the capability of orchestrating a group of batch jobs, 
 by leveraging an event-based scheduler(enhanced version of Apache Airflow), 
-AI Flow also supports workflows that contain streaming jobs. Such capability is quite useful for complicated
+AIFlow also supports workflows that contain streaming jobs. Such capability is quite useful for complicated
 real-time machine learning systems as well as other real-time workflows in general.
 
 ## Features
-You can use AI Flow to do the following:
+You can use AIFlow to do the following:
 
 1. Define the machine learning workflows including batch/stream jobs.
 
@@ -24,9 +24,9 @@ You can use AI Flow to do the following:
 
 
 To support online machine learning scenarios, notification service and event-based schedulers are introduced.
-AI Flow's current components are:
+AIFlow's current components are:
 
-1. SDK: It defines how to build a machine learning workflow and contains the api of the AI Flow.
+1. SDK: It defines how to build a machine learning workflow and contains the api of the AIFlow.
 
 2. Notification Service: It provides event listening and notification functions.
 
@@ -37,7 +37,7 @@ AI Flow's current components are:
 
 ## Contact Us
 
-For more information, you can join the **AI Flow Users Group** on [DingTalk](https://www.dingtalk.com) to contact us.
+For more information, you can join the **AIFlow Users Group** on [DingTalk](https://www.dingtalk.com) to contact us.
 The number of the DingTalk group is `35876083`. 
 
 You can also join the group by scanning the QR code below:
