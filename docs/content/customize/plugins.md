@@ -18,7 +18,7 @@ We encourage users and developers to share their plugin implementations with eac
 
 Before we explain how to implement a job plugin, it is helpful to understand how AIFlow takes the user processing logic, compiles them into executable jobs and schedules the jobs to run.
 
-As explained in the [[Overview]], users of AIFlow describe each job in a `with` block which defines the job name and corresponding `JobConfig`. Inside each `with` block, users can define the logic of the job by connecting several `AINode` with `DataEdge`, where each `AINode` has a processor hosting the processing logic. All the connected `AINode`s within the `with` block compose an `AISubGraph`. Therefore, each `Job` in AIFlow is associated with a `JobConfig` and an `AISubGraph`. 
+As explained in the [Overview](../architecture/overview.md), users of AIFlow describe each job in a `with` block which defines the job name and corresponding `JobConfig`. Inside each `with` block, users can define the logic of the job by connecting several `AINode` with `DataEdge`, where each `AINode` has a processor hosting the processing logic. All the connected `AINode`s within the `with` block compose an `AISubGraph`. Therefore, each `Job` in AIFlow is associated with a `JobConfig` and an `AISubGraph`. 
 
 In order to run the `AISubGraph`, AIFlow relies on `JobGenerator`s to translate the `AISubGraph` to an executable `Job` format which can then be submitted and run by a corresponding `JobController`.
 
