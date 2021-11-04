@@ -1,9 +1,9 @@
 # High Availability
-This guide provides an overview of High Availability feature of each component in AI Flow. 
+This guide provides an overview of High Availability feature of each component in AIFlow. 
 Also it will show you how to configure and use them.
 
 ## Notification Service
-AI Flow leverages Notification Service for message distribution among all processes so it's essential to keep it available. Notification Service is an embedded service in AI Flow Server by default for easier deployment, however, if you want to enable High Availability feature, 
+AIFlow leverages Notification Service for message distribution among all processes so it's essential to keep it available. Notification Service is an embedded service in AIFlow Server by default for easier deployment, however, if you want to enable High Availability feature, 
 it must be started as separate service.
 
 ### Start Notification Service Cluster
@@ -16,8 +16,8 @@ start_notification_service.py --enable-ha=True --database-conn=${DATABASE_CONN} 
 ```
 Now you can see ```Notification master started``` on each node and the cluster of Notification Service is ready.
 
-### Configure AI Flow Server
-By default the AI Flow contains an embedded Notification Service. In order to use the HA-cluster, you have to modify some configuration in ```aiflow_server.yaml``` and environment variables. Suppose you started Notification Service on node1, node2 and node3.
+### Configure AIFlow Server
+By default the AIFlow contains an embedded Notification Service. In order to use the HA-cluster, you have to modify some configuration in ```aiflow_server.yaml``` and environment variables. Suppose you started Notification Service on node1, node2 and node3.
 1. conf[start_default_notification]: Turn off the default embedded Notification Service.
 ```text
 start_default_notification: False
