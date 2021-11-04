@@ -3,9 +3,7 @@
 ```{toctree}
 :maxdepth: 2
 
-installation
-tutorial
-deployment
-configuration
-high-availability
+run_aiflow_service/index
+develop_and_run_workflows/index
+
 ```

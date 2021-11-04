@@ -21,13 +21,13 @@ Before sending your pull requests, make sure you followed this list.
 - Wait for approval.
 - Once the pull request is approved and merged you can pull the changes from `upstream` to your local repo and delete your extra branches.
 
-### Prerequisites
+## Prerequisites
 
 1. Python
 2. Java
 3. Maven
 
-### Establish Development Environment
+## Establish Development Environment
 
 We strongly recommend using [virtualenv](https://virtualenv.pypa.io/en/latest/index.html) or other similar tools for an isolated Python environment in case of dependencies conflict error, e.g.
 
@@ -38,7 +38,7 @@ source /path/to/new/virtual/environment/bin/activate
 
 Now you can configure it as the Project Interpreter if you are using PyCharm as your IDE.
 
-### Run Tests
+## Run Tests
 
 You can run the shell script `run_tests.sh` to verify the modification of AI Flow. 
 
@@ -46,7 +46,7 @@ If you modified the bundled Airflow, you need to add relevant test cases and run
 
 If you modified the bundled Notification Services, you need to add relevant test cases to `lib/notification_service/tests/test_notification.py` and run the test script.
 
-### Contact Us
+## Contact Us
 
 For more information, you can join the **AI Flow Users Group** on [DingTalk](https://www.dingtalk.com) to contact us.
 The number of the DingTalk group is `35876083`. 

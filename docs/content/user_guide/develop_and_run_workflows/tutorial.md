@@ -1,4 +1,3 @@
-
 # Tutorial
 
 This tutorial will show you how to write a workflow using AI Flow and walk you through some fundamental AI Flow concepts, objects, and their usage.
@@ -180,7 +179,7 @@ On the other hand, `read_dataset()` and `train()` are of another type. We call t
 
 In AI Flow, `Channel` represents the output of AINodes. More vividly, `Channel` is one end of the `DataEdge`. The following picture shows the relation among `AINodes`, `DataEdges` and `Channels`:
 
-![Alt text](../images/tutorial/channels.png)
+![Alt text](../../images/tutorial/channels.png)
 
 
 In the example, AINode N0 has 3 outputs(i.e., 3 channels whose source node is N0). We can make N1 accepts the c0 and c1 channels and N2 accepts c1 and c2 channels. Accordingly, there are 4 DataEdges in all. With such design, we can manipulate the data dependencies more flexibly and reuse the data easier.
@@ -374,7 +373,7 @@ python workflows/tutorial_workflow/tutorial_workflow.py
 
 Once the bash command returns(it should take no longer than 1 minute), go to check the airflow WebUI to see if the workflow is submitted successfully. If it is success, wait a minute(because we set the training job to be executed every 1 minute in the yaml file) then you can see the graph like this:
 
-![Alt text](../images/tutorial/success_workflow.png)
+![Alt text](../../images/tutorial/success_workflow.png)
 
 You can view the prediction output under in the file `examples/tutorial_project/workflows/tutorial_workflow/predict_result.csv` as well.
 

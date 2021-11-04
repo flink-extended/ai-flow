@@ -1,0 +1,3 @@
+# Notification Server
+
+## Configuration
