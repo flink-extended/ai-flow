@@ -1,6 +1,6 @@
 # Java API
 
-AI Flow 0.2.1 is our latest stable release.
+AIFlow 0.2.1 is our latest stable release.
 
 ## Maven Dependencies
 
