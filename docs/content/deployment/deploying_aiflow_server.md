@@ -37,7 +37,7 @@ AIFlow server requires notification server to work. Please make sure you have
 config file accordingly. 
 ```
 
-You can start the aiflow server with the following command.
+You can start the AIFlow server with the following command.
 
 ```bash
 start-aiflow.sh
