@@ -48,7 +48,7 @@ AIFlow consists of three components: SDK, AIFlow Server, Notification Server and
    * __Scheduling Service__: Scheduling Service is responsible for processing requests to submit workflow, 
      run workflow, stop workflow, etc.
 
-3. __Notification Server__: Notification Server provides event listening and notification functions.
+3. __Notification Server__: Notification Server provides notification service which support the event publishing and subscription.
 
 4. __Scheduler__: Scheduler provides the function of executing workflow.
 
