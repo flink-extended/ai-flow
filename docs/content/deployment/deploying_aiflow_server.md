@@ -29,7 +29,7 @@ you existing config, you need to remove it manually and then run the script agai
 
 You can refer to [here](configuration) if you want to learn all the configuration you can change.
 
-### Start the aiflow server
+### Start the AIFlow server
 
 ```{note}
 AIFlow server requires notification server to work. Please make sure you have 
