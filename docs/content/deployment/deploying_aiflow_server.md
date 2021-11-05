@@ -11,19 +11,19 @@ Scheduler, as they rely on the filesystem to submit workflows.
 
 In this section, we will show you how to use the default configuration to start an AIFlow server.
 
-### Generate default configuration
+### Initialize AIFlow environment
 
-To generate the default configuration of AIFlow server, you can run the following command:
+To intialzie the environment of AIFlow server and generate the default configuration, you can run the following command:
 
 ```bash
 init-aiflow-env.sh
 ```
 
 This command will generate the [default configuration](default_aiflow_server_config) file `aiflow_server.yaml` in
-the `$AIFLOW_HOME` directory or `$HOME/aiflow` directory if `$AIFLOW_HOME` is not set.
+the `$AIFLOW_HOME` directory(default is `$USER_HOME/aiflow`).
 
 ```{note}
-If the config file already exist, the script will not overwrite the config. If you intend to overwrite 
+If the config file already exists, the script will not overwrite the config. If you intend to overwrite 
 your existing config, you need to remove it manually and then run the script again.
 ```
 
@@ -47,7 +47,7 @@ It will start the AIFlow server and AIFlow web server in background processes. Y
 `$AIFLOW_HOME/logs` or `$HOME/aiflow/logs` directory. The pid of the background process is stored at 
 `$AIFLOW_HOME` or `$HOME/aiflow/logs` directory. 
 
-The AIFlow web server listen on port 8000 by default. If you didn't change the port in the configuration you can visit
+The AIFlow web server listens on port 8000 by default. If you use the port of the default configuration you can visit
 http://127.0.0.1:8000 to see the AIFlow web server UI.
 
 (configuration)=

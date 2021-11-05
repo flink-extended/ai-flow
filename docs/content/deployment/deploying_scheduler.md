@@ -1,6 +1,6 @@
 # Deploying Scheduler
 
-In this guide, we demonstrate how to deploy a Scheduler.
+In this guide, we demonstrate how to deploy a Scheduler. At present, the default Scheduler is the Airflow scheduler. The deployment of the Airflow scheduler is as follows:
 
 ## Starting Airflow EventBased Scheduler
 

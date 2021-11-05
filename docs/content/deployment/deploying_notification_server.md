@@ -4,7 +4,7 @@ In this guide, we demonstrate how to deploy a Notification server.
 
 ## Starting Notification Server
 
-In this section, we will show you how to use the default configuration to start an AIFlow server.
+In this section, we will show you how to use the default configuration to start an Notification server.
 
 ### Generate default configuration
 

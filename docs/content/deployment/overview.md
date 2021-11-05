@@ -6,7 +6,7 @@ below shows the components of an AIFlow deployment.
 AIFlow Server is the main component, which is responsible for submitting workflows to the scheduler, manage the life
 cycle of the workflows, and bookkeeping the metadata of the AIFlow projects. Notification service is used to handle
 event sending and event listening. The scheduler should support event-based scheduling and is responsible for scheduling
-the workflow. All the components above need a database, and we use MySQL as the database.For detail explanations of each
+the workflow. All the components above need a database, and we use MySQL as the database. For more detail explanations of each
 component, please refer to [Architecture Overview](../architecture/overview.md).
 
 ![Alt text](../images/AIFlow-Deploy-Overview.png)
