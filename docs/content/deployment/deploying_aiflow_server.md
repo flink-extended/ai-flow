@@ -24,7 +24,7 @@ the `$AIFLOW_HOME` directory or `$HOME/aiflow` directory if `$AIFLOW_HOME` is no
 
 ```{note}
 If the config file already exist, the script will not overwrite the config. If you intend to overwrite 
-you existing config, you need to remove it manually and then run the script again.
+your existing config, you need to remove it manually and then run the script again.
 ```
 
 You can refer to [here](configuration) if you want to learn all the configuration you can change.
