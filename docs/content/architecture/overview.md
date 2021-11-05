@@ -1,4 +1,4 @@
-# Design
+# Overview
 
 ## Introduction
 
@@ -11,10 +11,10 @@ The following figure shows the components of AIFlow:
 
 ![Alt text](../images/architecture/architecture.png)
 
-AIFlow consists of three parts: SDK, AIFlow Server, Notification Server and Scheduler.
+AIFlow consists of three components: SDK, AIFlow Server, Notification Server and Scheduler.
 
-1. __SDK__: Define how to build a machine learning workflow and the client api of Meta Service
-   and Scheduler Service. The SDK consists of four parts: AIFlow API, AI Graph, Translator and Workflow.
+1. __SDK__: Provides the API of workflow operation, Meta Service and Scheduler Service.
+   The SDK consists of four parts: AIFlow API, AI Graph, Translator and Workflow.
    
     * __AIFlow API__:  The functions it provides are: defining a machine learning workflow,
       controlling workflow  (submit, run, stop, etc.), sending/listening event, managing meta-information 
@@ -38,12 +38,12 @@ AIFlow consists of three parts: SDK, AIFlow Server, Notification Server and Sche
       
       * Control Edge: It describes the event trigger conditions for controlling Job.
       
-    * __Translator__: The role of the Translator is to convert the AI Graph defined by the AIFlow program 
+    * __Translator__: The role of the Translator is to translate the AI Graph defined by the AIFlow program 
       into a Workflow.
    
 2. __AIFlow Server__: AIFlow Server provides meta information management and scheduling services.
-   * __Meta Service__: Meta service is responsible for managing meta information of AIFlow project. 
-     It includes dataset meta, model meta, job meta, artifact meta, metric meta and project meta, etc.
+   * __Meta Service__: Meta service is responsible for managing meta information of AIFlow projects. 
+     It includes dataset meta, model meta, workflow meta, artifact meta, metric meta, project meta, etc.
      
    * __Scheduling Service__: Scheduling Service is responsible for processing requests to submit workflow, 
      run workflow, stop workflow, etc.
@@ -141,14 +141,12 @@ The services provided are shown in the figure below:
 2. Project: It provides project meta-information services, 
    including project name, project description and other information.
    Users can organize the machine learning workflow of different projects based on it.
-3. Workflow&Jobs: It provides workflows and jobs meta-information services, 
-   including workflow description, job description and other information.
-   Users can view the submitted workflow's meta-information, 
-   and the job's meta-information according to it.
-4. Model Center: It provides Models meta-information services.
+3. Workflow: It provides workflows meta-information services.
+   Users can view the submitted workflow's meta-information according to it.
+4. Model: It provides Models meta-information services.
    It contains the description information of the model and the version information of the model.
-5. Metric: It provides metric meta-information services, such as model version evaluate metric, etc.
-6. Artifacts: It provides artifacts meta-information services such as configuration files, jar packages etc.
+5. Metric: It provides metric meta-information services, such as model version evaluate metric.
+6. Artifact: It provides artifacts meta-information services such as configuration files, jar packages etc.
 
 ### Scheduling Service
 
@@ -168,7 +166,7 @@ The following figure shows the principle of Scheduler Service:
 
 ## Notification Server
 
-Notification Server: It is a service that provides event sending and event notification.
+Notification Server: It provides notification service which support the event publishing and subscription.
 The functions of the Notification Server in the AIFlow system are as follows:
 1. It provides sending/listening events for the scheduler. 
    For example, when a job ends, it will send an event representing the end of the job, 
@@ -198,13 +196,14 @@ The figure below shows its working steps:
 
 ## Scheduler
 
-Scheduler: Scheduler is responsible for executing workflow and must support event-based scheduling.
-Currently, we have implemented an [event-based scheduler](https://github.com/flink-extended/ai-flow/tree/master/lib/airflow) by combining AirFlow and Notification Server.
+Scheduler: Scheduler is responsible for workflow&job execution and support event-based scheduling.
+At present, the default scheduler is an [event-based scheduler](https://github.com/flink-extended/ai-flow/tree/master/lib/airflow),
+which is based on airflow.
 
 ## AIFlow Plugins
 
-AIFlow provides a plug-in interface for easy connection with external systems.
-It now provides 3 types of plugin interfaces:
+AIFlow provides a series of plugin interfaces for the connection with the external systems, 
+which interfaces are as follows:
 
 1. Scheduler plugin: It provides an interface to integrate with the scheduler. 
    Users can implement this interface to connect to different schedulers, such as AirFlow.
