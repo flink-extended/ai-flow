@@ -1,9 +1,12 @@
 # Quickstart
 
 The Quickstart will show you how to start AIFlow and help you get started with an example in AIFlow.
-Please make sure you have [AIFlow installed](../deployment/installation.md).
 
 ## Start AIFlow
+
+### Start AIFlow Locally
+
+Note: running AIFlow locally requires that you have [AIFlow installed](../deployment/installation.md) on your workstation.
 
 AIFlow contains three long-running servers, 
 AIFlow Server, Notification server and Scheduler(Apache Airflow by default).
@@ -22,7 +25,19 @@ Starting notification server
 All services have been started!
 ```
 
-You can visit the AIFlow Web [[http://127.0.0.1:8000](http://127.0.0.1:8000)] with the default username(admin) and password(admin):
+### Start AIFlow in Docker
+
+You can also start AIFlow in Docker if you don't want to install AIFlow locally. 
+Please run following commands to enter the docker container in interactive mode and start servers inner docker. 
+
+```shell script
+docker run -it -p 8080:8080 -p 8000:8000 flinkaiflow/flink-ai-flow:latest /bin/bash
+start-all-aiflow-services.sh
+```
+
+## View Web Server
+
+Once all servers started, you can visit the AIFlow Web [[http://127.0.0.1:8000](http://127.0.0.1:8000)] with the default username(admin) and password(admin):
 
 ![aiflow login ui](../images/ai_flow_webui.jpg)
 
@@ -40,7 +55,7 @@ We have prepared some [examples](https://github.com/alibaba/flink-ai-extended/re
 You can run following commands to download the examples and run the sklearn example.
 
 ```shell
-curl https://github.com/alibaba/flink-ai-extended/releases/download/ai-flow-release-0.2.2/ai-flow-examples.tar.gz -O /tmp/ai-flow-examples.tar.gz
+curl -Lf https://github.com/flink-extended/ai-flow/releases/download/ai-flow-release-0.2.2/examples.tar.gz -o /tmp/ai-flow-examples.tar.gz
 tar -zxvf /tmp/ai-flow-examples.tar.gz -C /tmp
 python /tmp/examples/sklearn_examples/workflows/batch_train_stream_predict/batch_train_stream_predict.py
 ```
