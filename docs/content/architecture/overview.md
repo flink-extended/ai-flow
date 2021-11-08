@@ -7,16 +7,16 @@ model training, model evaluation, model serving, model inference, metric monitor
 
 ## Architecture
  
-The following figure shows the components of AIFlow:
+The overall architecture of AIFlow is shown in the figure blew:
 
 ![Alt text](../images/architecture/architecture.png)
 
-AIFlow consists of three components: SDK, AIFlow Server, Notification Server and Scheduler.
+AIFlow consists of components: AIFlow SDK, AIFlow Server, Notification Server, Scheduler.
 
-1. __SDK__: Provides the API of workflow operation, Meta Service and Scheduler Service.
+1. __SDK__: AIFlow SDK provides the API of workflow operation and the client of the Meta Service and Scheduler Service.
    The SDK consists of four parts: AIFlow API, AI Graph, Translator and Workflow.
    
-    * __AIFlow API__:  The functions it provides are: defining a machine learning workflow,
+    * __AIFlow API__:  AIFlow API provides the functions like defining a machine learning workflow,
       controlling workflow  (submit, run, stop, etc.), sending/listening event, managing meta-information 
       and developing plugins.
 
@@ -43,7 +43,7 @@ AIFlow consists of three components: SDK, AIFlow Server, Notification Server and
    
 2. __AIFlow Server__: AIFlow Server provides meta information management and scheduling services.
    * __Meta Service__: Meta service is responsible for managing meta information of AIFlow projects. 
-     It includes dataset meta, model meta, workflow meta, artifact meta, metric meta, project meta, etc.
+     The metas in Meta Service include the meta of the dataset, model, project, workflow, artifact and metric.
      
    * __Scheduling Service__: Scheduling Service is responsible for processing requests to submit workflow, 
      run workflow, stop workflow, etc.
@@ -136,23 +136,23 @@ The services provided are shown in the figure below:
 
 ![Alt text](../images/architecture/meta.png)
 
-1. Dataset: It provides dataset meta-information services, including data address, data format and other information.
+1. Dataset: It provides dataset meta services, including data address, data format and other information.
    Users can define the program for reading and writing data according to it.
-2. Project: It provides project meta-information services, 
+2. Project: It provides project meta services, 
    including project name, project description and other information.
    Users can organize the machine learning workflow of different projects based on it.
-3. Workflow: It provides workflows meta-information services.
-   Users can view the submitted workflow's meta-information according to it.
-4. Model: It provides Models meta-information services.
+3. Workflow: It provides workflows meta services.
+   Users can view the submitted workflow's meta according to it.
+4. Model: It provides Models meta services.
    It contains the description information of the model and the version information of the model.
-5. Metric: It provides metric meta-information services, such as model version evaluate metric.
-6. Artifact: It provides artifacts meta-information services such as configuration files, jar packages etc.
+5. Metric: It provides metric meta services, such as model version evaluate metric.
+6. Artifact: It provides artifacts meta services such as configuration files, jar packages etc.
 
 ### Scheduling Service
 
-Scheduling Service: The Scheduling Service converts the workflow into an object that can be recognized by the scheduler 
+Scheduling Service: The Scheduling Service converts the workflow into an executable workflow 
 and submits it to the scheduler.
-The traditional scheduler can only schedule batch jobs (when upstream job finished then downstream jobs can run) 
+The traditional scheduler could only support the scheduling of the batch jobs(It means that after upstream job finished, downstream jobs could run.) 
 but in the online learning scenario where we have jobs that will never finish, it does not meet the demand. 
 The scheduler for Scheduler Service docking must support event-based scheduling.
 
@@ -166,7 +166,7 @@ The following figure shows the principle of Scheduler Service:
 
 ## Notification Server
 
-Notification Server: It provides notification service which support the event publishing and subscription.
+Notification Server: It provides Notification Service that supports the event publishing and subscription.
 The functions of the Notification Server in the AIFlow system are as follows:
 1. It provides sending/listening events for the scheduler. 
    For example, when a job ends, it will send an event representing the end of the job, 
@@ -197,6 +197,18 @@ The figure below shows its working steps:
 ## Scheduler
 
 Scheduler: Scheduler is responsible for workflow&job execution and support event-based scheduling.
+The figure below shows the difference between traditional scheduling and event-based scheduling:
+![scheduler](../images/architecture/scheduler.png)
+With the traditional scheduler, after upstream jobs finished, downstream jobs can run.
+As shown above, after Job_1 and Job_2 are finished,Job_3 can run. 
+After Job_3 and Job_4 are finished, Job_5 can run. 
+After Job_3 is finished, Job_6 can run.
+
+With the event-based scheduler, after receiving necessary events, downstream jobs can run.
+As shown above, After receiving event_1 and event_2, Job_3 can run.
+After receiving event_3 and event_4, Job_5 can run.
+After receiving event_5, Job_6 can run.
+
 At present, the default scheduler is an [event-based scheduler](https://github.com/flink-extended/ai-flow/tree/master/lib/airflow),
 which is based on airflow.
 
