@@ -4,7 +4,7 @@ In this guide, we demonstrate how to deploy an AIFlow server.
 
 ```{note}
 If you use Airflow as the scheduler, the AIFlow server should run on the same machine with the Airflow
-Scheduler, as they rely on the filesystem to submit workflows.
+Scheduler, such that the AIFlow server can put the Airflow Dag files to the Airflow Scheduler dag folder.
 ```
 
 ## Starting an AIFlow server
@@ -20,7 +20,7 @@ init-aiflow-env.sh
 ```
 
 This command will generate the [default configuration](default_aiflow_server_config) file `aiflow_server.yaml` in
-the `$AIFLOW_HOME` directory(default is `$USER_HOME/aiflow`).
+the `$AIFLOW_HOME` directory(default is `$HOME/aiflow`).
 
 ```{note}
 If the config file already exists, the script will not overwrite the config. If you intend to overwrite 
@@ -44,13 +44,15 @@ start-aiflow.sh
 ```
 
 It will start the AIFlow server and AIFlow web server in background processes. You can check the log at
-`$AIFLOW_HOME/logs` or `$HOME/aiflow/logs` directory. The pid of the background process is stored at 
-`$AIFLOW_HOME` or `$HOME/aiflow/logs` directory. 
+`$AIFLOW_HOME/logs` or `$HOME/aiflow/logs` directory. `aiflow-server-*.log` is the log of AIFlow server
+and `aiflow-webserver-*.log` is the log of AIFlow web server. The pid of the background process is stored at
+`$AIFLOW_HOME` or `$HOME/aiflow/logs` directory.
 
 The AIFlow web server listens on port 8000 by default. If you use the port of the default configuration you can visit
 http://127.0.0.1:8000 to see the AIFlow web server UI.
 
 (configuration)=
+
 ## Configuration
 
 This section shows an exhaustive list of available configuration of the AIFlow server.
@@ -67,8 +69,8 @@ This section shows an exhaustive list of available configuration of the AIFlow s
 |start_model_center_service|Boolean|True|Whether to start the model center service in AIFlow server.|
 |start_metric_service|Boolean|True|Whether to start the metric service in AIFlow server.|
 |start_scheduler_service|Boolean|True|Whether to start the scheduler service in AIFlow server.|
-|scheduler_service|Dict| |The configuration of the [Scheduler Service](scheduler_service).|
-|web_server|Dict| |The configuration of the [AIFlow Web Server](aiflow_web_server). |
+|scheduler_service|Dict|[Scheduler Service](scheduler_service)|The configuration of the [Scheduler Service](scheduler_service).|
+|web_server|Dict|[AIFlow Web Server](aiflow_web_server)|The configuration of the [AIFlow Web Server](aiflow_web_server). |
 
 (scheduler_service)=
 
@@ -76,7 +78,7 @@ This section shows an exhaustive list of available configuration of the AIFlow s
 
 |Key|Type|Default|Description|
 |---|---|---|---|
-|scheduler|Dict| |The configuration of the [Scheduler](scheduler).|
+|scheduler|Dict|[Scheduler](scheduler)|The configuration of the [Scheduler](scheduler).|
 
 (scheduler)=
 
@@ -85,7 +87,7 @@ This section shows an exhaustive list of available configuration of the AIFlow s
 |Key|Type|Default|Description|
 |---|---|---|---|
 |scheduler_class|String|ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.AirFlowScheduler|The class of the scheduler plugin.|
-|scheduler_config|Dict| |Configuration of the scheduler plugin implementation. The configuration of [Airflow Scheduler](airflow_scheduler).|
+|scheduler_config|Dict|[Airflow Scheduler](airflow_scheduler)|Configuration of the scheduler plugin implementation. The configuration of [Airflow Scheduler](airflow_scheduler).|
 
 (airflow_scheduler)=
 
@@ -110,13 +112,19 @@ port|Integer|8000|The port where the AIFlow Web server is exposed.|
 
 ## Default AIFlow server Configuration example
 
+```{note}
+The environment variable is replaced during generation of the default config, i.e., calling `init-aiflow-env.sh`.
+Therefore, if you want to prepare the config yourself from the following default config, you must replace the 
+environment variable, `AIFLOW_HOME`, manually. 
+```
+
 ```yaml
 # Config of AIFlow server
 
 # port of AIFlow server
 server_port: 50051
 # uri of database backend for AIFlow server
-db_uri: sqlite:///{AIFLOW_HOME}/aiflow.db
+db_uri: sqlite:///${AIFLOW_HOME}/aiflow.db
 # type of database backend for AIFlow server, can be SQL_LITE, MYSQL, MONGODB
 db_type: SQL_LITE
 

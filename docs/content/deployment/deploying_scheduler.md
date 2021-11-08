@@ -1,6 +1,7 @@
 # Deploying Scheduler
 
-In this guide, we demonstrate how to deploy a Scheduler. At present, the default Scheduler is the Airflow scheduler. The deployment of the Airflow scheduler is as follows:
+In this guide, we demonstrate how to deploy a Scheduler. At present, the default Scheduler is the Airflow scheduler. The
+deployment of the Airflow scheduler is as follows:
 
 ## Starting Airflow EventBased Scheduler
 
@@ -30,7 +31,8 @@ steps to initialize configuration and start the Airflow scheduler.
    ```
 
    You can check the log of the scheduler and Airflow webserver at `$AIRFLOW_HOME/logs` or `$HOME/airflow/logs`
-   directory. You can visit http://127.0.0.1:8080 to see the Airflow web server UI.
+   directory. `scheduler-*.log` is log of scheduler and `web-*.log` is log of Airflow web server. You can
+   visit http://127.0.0.1:8080 to see the Airflow web server UI.
 
 ### CeleryExecutor
 
@@ -81,5 +83,5 @@ other configurations.
 
 |Section|Key|Type|Default|Description|
 |---|---|---|---|---|
-|webserver|notification_sql_alchemy_conn|String|sqlite:///{HOME}/notification_service/ns.db|The notification service db connection.|
+|webserver|notification_sql_alchemy_conn|String|sqlite:///${HOME}/notification_service/ns.db|The notification service db connection.|
 |scheduler|notification_server_uri|String|127.0.0.1:50052|The notification server uri used by EventBasedSchedulerJob.|

@@ -15,11 +15,11 @@ init-notification-env.sh
 ```
 
 This command will generate the [default configuration](default_config) file `notification_server.yaml` in
-the `$NOTIFICATION_HOME` directory or `$HOME/notification_service` directory if `$NOTIFICATION_HOME` is not set.
+the `$NOTIFICATION_HOME` directory(default is `$HOME/notification_service`).
 
 ```{note}
 If the config file already exist, the script will not overwrite the config. If you intend to overwrite 
-you existing config, you need to remove it manually and then run the script again.
+your existing config, you need to remove it manually and then run the script again.
 ```
 
 You can refer to [here](configuration) if you want to learn all the configuration you can change.
@@ -33,8 +33,8 @@ start-notification.sh
 ```
 
 It will start the notification server in a background process. You can check the log of the notification server
-at `$NOTIFICATION_HOME/logs` directory. If you see "Notification server started." in the log, the notification service
-is successfully started.
+at `$NOTIFICATION_HOME/logs` directory. `notification_server-*.log` is the log of Notification server. If you see "
+Notification server started." in the log, the notification service is successfully started.
 
 (configuration)=
 
@@ -47,15 +47,21 @@ This section shows an exhaustive list of available configuration of the Notifica
 |Key|Type|Default|Description|
 |---|---|---|---|
 |server_port|Integer|50052|The port where the Notification server is exposed.|
-|db_uri|String|sqlite:///{NOTIFICATION_HOME}/ns.db|The uri of the database backend for Notification server.|
+|db_uri|String|sqlite:///${NOTIFICATION_HOME}/ns.db|The uri of the database backend for Notification server.|
 
 (default_config)=
 
 ## Default Notification Server Configuration Example
 
+```{note}
+The environment variable is replaced during generation of the default config, i.e., calling 
+`init-notification-env.sh`. Therefore, if you want to prepare the config yourself from the following default config, 
+you must replace the environment variable, `NOTIFICATION_HOME`, manually. 
+```
+
 ```yaml
 # port of notification server
 server_port: 50052
 # uri of database backend for notification server
-db_uri: sqlite:///{NOTIFICATION_HOME}/ns.db
+db_uri: sqlite:///${NOTIFICATION_HOME}/ns.db
 ```
