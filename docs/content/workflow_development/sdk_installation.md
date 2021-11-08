@@ -15,10 +15,13 @@ python --version
 Please make sure the Python version is 3.6.x or 3.7.x. If not, we strongly recommend using [virtualenv](https://virtualenv.pypa.io/en/latest/index.html) or other similar tools for an isolated Python environment in case of dependencies conflict error, e.g.
 
 ```shell
-pip install virtualenv
 # install the Python 3.6 version
-# virtualenv my_venv --python=python3.6
+pip install virtualenv
+virtualenv my_venv --python=python3.6
+source my_venv/bin/activate
+
 # install the Python 3.7 version
+pip install virtualenv
 virtualenv my_venv --python=python3.7
 source my_venv/bin/activate
 ```
