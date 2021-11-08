@@ -1,6 +1,6 @@
 # SDK Installation
 
-This page describes the installation of the Airflow SDK used for the workflow deployment. You should also check-out the `Prerequisites` that must be fulfilled when installing AIFlow SDK.
+This page describes the installation of the AIFlow SDK used for the workflow deployment. You should also check-out the `Prerequisites` that must be fulfilled when installing AIFlow SDK.
 
 ## Prerequisites
 
