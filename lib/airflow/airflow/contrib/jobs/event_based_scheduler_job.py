@@ -170,18 +170,24 @@ class EventBasedScheduler(LoggingMixin):
                     self._send_scheduling_task_events(tasks, SchedulingAction.START)
             elif isinstance(event, EventHandleEvent):
                 dag_runs = DagRun.find(dag_id=event.dag_id, run_id=event.dag_run_id)
-                assert len(dag_runs) == 1
-                ti = dag_runs[0].get_task_instance(event.task_id)
-                self._send_scheduling_task_event(ti, event.action)
+                if len(dag_runs) < 1:
+                    self.log.warning("DagRun not found by dag_id:{}, run_id:{}".format(
+                        event.dag_id, event.dag_run_id))
+                else:
+                    ti = dag_runs[0].get_task_instance(event.task_id)
+                    self._send_scheduling_task_event(ti, event.action)
             elif isinstance(event, StopDagEvent):
                 self._stop_dag(event.dag_id, session)
             elif isinstance(event, DagRunFinishedEvent):
                 self._remove_periodic_events(event.dag_id, event.execution_date)
             elif isinstance(event, PeriodicEvent):
                 dag_runs = DagRun.find(dag_id=event.dag_id, execution_date=event.execution_date)
-                assert len(dag_runs) == 1
-                ti = dag_runs[0].get_task_instance(event.task_id)
-                self._send_scheduling_task_event(ti, SchedulingAction.RESTART)
+                if len(dag_runs) < 1:
+                    self.log.warning("DagRun not found by dag_id:{}, run_id:{}".format(
+                        event.dag_id, event.dag_run_id))
+                else:
+                    ti = dag_runs[0].get_task_instance(event.task_id)
+                    self._send_scheduling_task_event(ti, SchedulingAction.RESTART)
             elif isinstance(event, StopSchedulerEvent):
                 self.log.info("{} {}".format(self.id, event.job_id))
                 if self.id == event.job_id or 0 == event.job_id:
