@@ -17,14 +17,12 @@
 ## under the License.
 ##
 project_name: celery_examples
-server_uri:
-notification_server_uri:
+server_uri: aiflow-server:50051
+notification_server_uri: aiflow-server:50052
 blob:
-  blob_manager_class: ai_flow_plugins.blob_manager_plugins.oss_blob_manager.OssBlobManager
+  blob_manager_class: ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager.HDFSBlobManager
   blob_manager_config:
-    access_key_id:
-    access_key_secret:
-    endpoint:
-    bucket:
-    repo_name:
-    local_repository:
+    hdfs_url: http://hadoop-dfs:50070
+    hdfs_user: hdfs
+    repo_name: /tmp
+    local_repository: /tmp
