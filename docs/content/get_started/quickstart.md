@@ -28,7 +28,7 @@ All services have been started!
 ### Start AIFlow in Docker
 
 You can also start AIFlow in Docker if you don't want to install AIFlow locally. 
-Please run following command to enter the docker container in interactive mode and start servers inner docker. 
+Please run following commands to enter the docker container in interactive mode and start servers inner docker. 
 
 ```shell script
 docker run -it -p 8080:8080 -p 8000:8000 flinkaiflow/flink-ai-flow:latest /bin/bash
