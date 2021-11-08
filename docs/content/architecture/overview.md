@@ -196,7 +196,8 @@ The figure below shows its working steps:
 
 ## Scheduler
 
-Scheduler: Scheduler is responsible for workflow&job execution and support event-based scheduling.
+Scheduler: Scheduler is responsible for scheduling the workflow.
+
 The figure below shows the difference between traditional scheduling and event-based scheduling:
 ![scheduler](../images/architecture/scheduler.png)
 With the traditional scheduler, after upstream jobs finished, downstream jobs can run.
