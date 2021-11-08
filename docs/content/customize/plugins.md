@@ -10,8 +10,6 @@ At this point, AIFlow supports the following plugins.
 
 We encourage users and developers to share their plugin implementations with each other so people don't have to implement the same plugins repeatedly.
 
-# Implement the plugins
-
 ## Job Plugin
 
 ### Implement a job plugin

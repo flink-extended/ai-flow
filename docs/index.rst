@@ -33,6 +33,5 @@ Welcome to AI Flow's Documentation!
    content/workflow_development/index
    content/deployment/index
    content/customize/index
-   content/contribution/index
    content/api/index
 
