@@ -13,7 +13,7 @@ In this section, we will show you how to use the default configuration to start 
 
 ### Initialize AIFlow environment
 
-To intialzie the environment of AIFlow server and generate the default configuration, you can run the following command:
+To initialize the environment of AIFlow server and generate the default configuration, you can run the following command:
 
 ```bash
 init-aiflow-env.sh
@@ -79,6 +79,7 @@ This section shows an exhaustive list of available configuration of the AIFlow s
 |Key|Type|Default|Description|
 |---|---|---|---|
 |scheduler|Dict|[Scheduler](scheduler)|The configuration of the [Scheduler](scheduler).|
+|repository|String|/tmp|The path to a local directory where the scheduler service download the Workflow codes.|
 
 (scheduler)=
 
@@ -154,6 +155,8 @@ scheduler_service:
 
       # Notification service uri used by the AirFlowScheduler.
       notification_server_uri: 127.0.0.1:50052
+  # The path to a local directory where the scheduler service download the Workflow codes.
+  #repository: /tmp
 
 # web server config
 web_server:

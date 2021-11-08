@@ -50,6 +50,8 @@ scheduler_service:
 
       # Notification service uri used by the AirFlowScheduler.
       notification_server_uri: 127.0.0.1:50052
+  # The path to a local directory where the scheduler service download the Workflow codes.
+  #repository: /tmp
 
 # web server config
 web_server:
