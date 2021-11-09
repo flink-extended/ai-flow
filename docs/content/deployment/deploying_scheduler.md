@@ -132,7 +132,7 @@ docker exec ai-flow_aiflow-server_1 bash -c "python /opt/aiflow/examples/celery/
 
 ## Configuration
 
-This section show a list of all the configurations we added to Airflow to make it works with AIFlow. Please refer to
+This section shows a list of all Airflow configurations that should be considered. Please refer to
 [Airflow Configuration Reference](https://airflow.apache.org/docs/apache-airflow/2.0.0/configurations-ref.html) for all
 other configurations.
 
