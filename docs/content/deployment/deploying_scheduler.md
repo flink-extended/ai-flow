@@ -99,7 +99,7 @@ curl -LfO http://raw.githubusercontent.com/flink-extended/ai-flow/master/docker-
 
 This file contains several service definitions:
 
-* AI Flow servers - AI Flow Server, Notification Server and Scheduler deployed in one container.
+* AIFlow servers - AIFlow Server, Notification Server and Scheduler deployed in one container.
 * Workers - The workers who execute the tasks given by the Scheduler.
 * Redis - The broker that forwards messages from Scheduler to worker.
 * Flower -  The [flower app](https://flower.readthedocs.io/en/latest/) for monitoring the environment. It is available at http://localhost:5555.
