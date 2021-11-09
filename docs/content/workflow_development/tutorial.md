@@ -37,7 +37,7 @@ The `project.yaml` is for configuring the whole project.
 
 Now let's go over above config files one by one.
 
-* project.yaml
+#### project.yaml
 
 Here is an example of the project.yaml for tutorial project.
 
@@ -57,13 +57,13 @@ For `server_uri`,  they tell where the `AIFlowServer` is running on.
 
 For `notification_server_uri`,  they tell where the `NotificationServer` is running on.
 
-Then, we configure the `blob` property which tells AIFlow where to execute workflows in this project(i.e., local or remote env).
+Then, we configure the `blob` property which specifies where the workflow code will be updated when submitting. It also tells the AIFlow server where and how to download the workflow code.
 
-Here we choose to use `LocalBlobManager` and as a result, the project will run locally. 
+Here we choose to use `LocalBlobManager` and as a result, the AIFlow server will download the workflow code locally. Please note that `LocalBlobManager` can only work when you submit your workflow locally, i.e., your workflow code is in the same machine as the AIFlow server.
 
-We currently also provide other implementations of `BlobManager` like `OssBlobManager` and `HDFSBlobManager` which allows users to submit and run their workflow remotely.
+We currently also provide other implementations of `BlobManager` like `OssBlobManager` and `HDFSBlobManager` which allows users to submit their workflow to a remote AIFlow server.
 
-* tutorial_workflow.yaml 
+#### tutorial_workflow.yaml 
 
 Next, we will introduce how to write the workflow configuration yaml file.
 
@@ -95,7 +95,7 @@ For `predict` job, we set its job type to be `flink`, which means this job is a 
 
 ### Define a Workflow
 
-Now, let's start to define a workflow described in `Target` section using the AIFlow SDK.
+Now, let's start to define a workflow described in [Target](#Target) section using the AIFlow SDK.
 
 #### Import Modules
 
@@ -124,7 +124,7 @@ DATASET_URI = os.path.abspath(os.path.join(__file__, "../../../")) + '/resources
 
 #### Define a Training Job
 
-In our design, the workflow in AIFlow is a DAG(Directed Acyclic Graph) or to be more specific, it is a [AIGraph](). Each node in the graph is an [AINode](), which contains a processor. Users should write their custom logic in the processor. 
+In our design, the workflow in AIFlow is a DAG(Directed Acyclic Graph) or to be more specific, it is a [AIGraph](https://github.com/flink-extended/ai-flow/blob/master/ai_flow/ai_graph/ai_graph.py#L28). Each node in the graph is an [AINode](https://github.com/flink-extended/ai-flow/blob/master/ai_flow/ai_graph/ai_node.py#L29), which contains a processor. Users should write their custom logic in the processor. 
 
 In the AIGraph, nodes are connected by 2 types of edges. The first one is named as `DataEdge` which means the destination node depends on the output of the source node. The other is `ControlEdge` which means the destination node depends on the control conditions from source node. We will dive deeper into this kind of edges later.
 
@@ -169,7 +169,7 @@ Currently, the only puzzle left is how to implement the processors including `Da
 
 #### Define a Validation Job and a Prediction Job
 
-Here we define the left 2 jobs of our workflow. They are pretty similar to what we have done in defining the training job.
+Here we define the other two jobs of our workflow. They are pretty similar to what we have done in defining the training job.
 
 ```python
 		# Validation of model
@@ -230,7 +230,7 @@ In AIFlow, we implement control dependencies via *Events*. That is, the upstream
 
 In above codes, the first `ControlEdge` we defined is that the `validate` job (Note, this job name is defined in the yaml file of workflow configs) will be restarted(the default action) when there is a `MODEL_GENERATED` event of training model received by the scheduler. The second  `ControlEdge` we defined is that the `predict` job will be restarted when there is a `MODEL_VALIDATED` event of training model received by the scheduler. 
 
-Besides, the well-defined out-of-box API for managing machine learning jobs, AIFlow exposes the extremely expressive API `action_on_events()` to allow users write their own event-based control dependencies.
+Besides, the well-defined out-of-box API for managing machine learning jobs, AIFlow exposes the most flexible API `action_on_events()` to allow users write their own event-based control dependencies.
 
 ## Manage a Workflow
 
@@ -273,7 +273,7 @@ In fact, in our design, `Workflow` defines the execution logic of a set of jobs 
 
 ## Implement custom Processors
 
-As we have mentioned, users need to write their own logic in processors for each job. Currently, AIFlow supports `bash`, `python` and `flink` processors.
+As we have mentioned, users need to write their own logic in processors for each job. Currently, AIFlow provides `bash`, `python` and `flink` processors.
 
 The following codes are the `DatasetReader` processor whose type is `python`:
 
