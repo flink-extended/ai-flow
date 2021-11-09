@@ -4,6 +4,8 @@ This tutorial will show you how to create and run a workflow using AIFlow SDK an
 
 ## Creating a workflow
 
+(target)=
+
 ### Target
 
 In the tutorial, we will write a simplified machine learning workflow to train a KNN model using iris training dataset and verify the effectiveness of the model in prediction job. 
@@ -95,7 +97,7 @@ For `predict` job, we set its job type to be `flink`, which means this job is a 
 
 ### Define a Workflow
 
-Now, let's start to define a workflow described in [Target](#Target) section using the AIFlow SDK.
+Now, let's start to define a workflow described in [Target](target) section using the AIFlow SDK.
 
 #### Import Modules
 
@@ -165,7 +167,7 @@ In AIFlow, `Channel` represents the output of AINodes. More vividly, `Channel` i
 
 In the example, AINode N0 has 3 outputs(i.e., 3 channels whose source node is N0). We can make N1 accepts the c0 and c1 channels and N2 accepts c1 and c2 channels. Accordingly, there are 4 DataEdges in all. With such design, we can manipulate the data dependencies more flexibly and reuse the data easier.
 
-Currently, the only puzzle left is how to implement the processors including `DatasetReader()` and `ModelTrainer()`. We will introduce them later in [Implementing custom processor Processors](#implementing-custom-processors) section. Next, let's pay attention to defining the Validation and Prediction jobs.
+Currently, the only puzzle left is how to implement the processors including `DatasetReader()` and `ModelTrainer()`. We will introduce them later in [Implement Custom Processors](implement-custom-processors) section. Next, let's pay attention to defining the Validation and Prediction jobs.
 
 #### Define a Validation Job and a Prediction Job
 
@@ -212,7 +214,7 @@ In addition, in AIFlow, if they don't find the operators needed, users can also 
 
 #### Define the Relation between Jobs
 
-We now have defined 3 jobs. Each job is a sub-graph and have some nodes connected by `DataEdge`s. Then we will need to define the relation between jobs to make sure our workflow is scheduled and run correctly. As we have mentioned in [Target](#Target) section, the training job will run periodically and once the training finishes, the validation job should be started to validate the latest generated model. If there is a model passes the validation and get deployed, we should (re)start the downstream prediction job using flink to get better inference.
+We now have defined 3 jobs. Each job is a sub-graph and have some nodes connected by `DataEdge`s. Then we will need to define the relation between jobs to make sure our workflow is scheduled and run correctly. As we have mentioned in [Target](target) section, the training job will run periodically and once the training finishes, the validation job should be started to validate the latest generated model. If there is a model passes the validation and get deployed, we should (re)start the downstream prediction job using flink to get better inference.
 
 After reviewing above description, we find that some upstream jobs control the downstream jobs. For instance, the training job controls the (re)start of validation job. We keep using AIGraph abstraction to depicts these control relations. But at this time, each AINode in this new AIGraph is a job(a subgraph in fact!). Edges to connect these job nodes are named as `ControlEdge`. We also call such control relation as *control dependencies*.
 
@@ -271,7 +273,9 @@ Above codes show the basic use of workflow administration API. You may notice th
 
 In fact, in our design, `Workflow` defines the execution logic of a set of jobs together with control edges among them. But after definition, the workflow will not be run. Instead, the workflow will be scheduled and triggered by the scheduler(e.g., Airflow scheduler) after calling `start_new_workflow_execution()`. The execution entity of workflow is named as `WorkflowExecution`, which is created by the scheduler. One advantage of this design is that reproducing a workflow can be much easier as we can locate the past workflow execution with all environments conveniently.
 
-## Implement custom Processors
+(implement-custom-processors)=
+
+## Implement Custom Processors
 
 As we have mentioned, users need to write their own logic in processors for each job. Currently, AIFlow provides `bash`, `python` and `flink` processors.
 
@@ -336,7 +340,7 @@ Note, if you use some special dependencies and choose to submit the workflow to 
 
 ## Run a Workflow
 
-Now we have finished the introduction of how to write a workflow. For the whole codes, please go to check [tutorial_project](https://github.com/alibaba/flink-ai-extended/tree/master/flink-ai-flow/examples/tutorial_project) directory. After configuring the yaml file according to your own environment, it is time to run the workflow. 
+Now we have finished the introduction of how to write a workflow. For the whole codes, please go to check [tutorial_project](https://github.com/flink-extended/ai-flow/tree/master/examples/tutorial_project) directory. After configuring the yaml file according to your own environment, it is time to run the workflow. 
 
 Before running, please make sure you have installed AIFlow and started AIFlowServer, notification service and scheduler correctly according to the QuickStart document.
 
@@ -356,4 +360,4 @@ If you find any job fails, you can go to check logs under directory like `exampl
 
 ## Conclusion
 
-Congratulations! You have been equipped with necessary knowledge to write your own workflow. For further reading, you can check our [Overview](../architecture/overview.md), [API](https://ai-flow.readthedocs.io/en/latest/index.html) and [Examples](https://github.com/flink-extended/ai-flow/tree/master/examples/). 
+Congratulations! You have been equipped with necessary knowledge to write your own workflow. For further reading, you can check our [Overview](../architecture/overview.md), [API](../api/index.rst) and [Examples](https://github.com/flink-extended/ai-flow/tree/master/examples/). 
