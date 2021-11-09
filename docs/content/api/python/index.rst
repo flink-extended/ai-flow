@@ -25,8 +25,7 @@ Python API
    :caption: Contents
 
    source_rst/ai_flow
-   source_rst/ai_flow_plugins
-   notification_service
+   source_rst/notification_service
 
 ====================
 Core Classes/Modules
@@ -34,15 +33,12 @@ Core Classes/Modules
 
    :class:`ai_flow.ai_graph.ai_graph.AIGraph`
 
-   Core abstraction of AI Flow. Workflows defined by users will be translated into AIGraph by the AI Flow framework.
-   AIGraph consists of AINode and edges. For edges, they are either the :class:`~ai_flow.ai_graph.data_edge.DataEdge`  between AINodes in a job
-   or the :class:`~ai_flow.workflow.control_edge.ControlEdge` between jobs.
+   Core abstraction of AI Flow. Workflow defined by users will be translated into AIGraph by the AI Flow framework. :class:`~ai_flow.ai_graph.ai_graph.AIGraph` consists of :class:`~ai_flow.ai_graph.ai_node.AINode` and edges. For edges, they are either the :class:`~ai_flow.ai_graph.data_edge.DataEdge`  between AINodes in a job or the :class:`~ai_flow.workflow.control_edge.ControlEdge` between jobs.
 
    :py:mod:`ai_flow.api.ops`
 
    Main module for defining customized workflow. It provides users with a variety of methods(e.g. :py:meth:`~ai_flow.api.ops.transform`, :py:meth:`~ai_flow.api.ops.train`) to define their own machine learning workflow.
 
-
    :py:mod:`ai_flow.api.workflow_operation`
 
-   Module for manipulating workflows including managing a workflow's scheduling and execution.
+   Module for manipulating workflow including managing a workflow's scheduling and execution.
