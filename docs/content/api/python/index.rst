@@ -33,7 +33,7 @@ Core Classes/Modules
 
    :class:`ai_flow.ai_graph.ai_graph.AIGraph`
 
-   Core abstraction of AI Flow. Workflow defined by users will be translated into AIGraph by the AI Flow framework. :class:`~ai_flow.ai_graph.ai_graph.AIGraph` consists of :class:`~ai_flow.ai_graph.ai_node.AINode` and edges. For edges, they are either the :class:`~ai_flow.ai_graph.data_edge.DataEdge`  between AINodes in a job or the :class:`~ai_flow.workflow.control_edge.ControlEdge` between jobs.
+   Core abstraction of AIFlow. Workflow defined by users will be translated into AIGraph by the AIFlow framework. :class:`~ai_flow.ai_graph.ai_graph.AIGraph` consists of :class:`~ai_flow.ai_graph.ai_node.AINode` and edges. For edges, they are either the :class:`~ai_flow.ai_graph.data_edge.DataEdge`  between AINodes in a job or the :class:`~ai_flow.workflow.control_edge.ControlEdge` between jobs.
 
    :py:mod:`ai_flow.api.ops`
 
