@@ -38,10 +38,10 @@ steps to initialize configuration and start the Airflow scheduler.
 
 #### Standalone Deployment
 
-1. Set up Celery broker and result backend. CeleryExecutor take advantage of the [Celery](https://docs.celeryproject.org/en/stable/index.html) to 
-   scale out the number of workers. For this to work, you need to setup a broker and a result backend (RabbitMQ, Redis, ...). 
+1. Set up Celery broker and result backend. `CeleryExecutor` takes advantage of the [Celery](https://docs.celeryproject.org/en/stable/index.html) to
+   scale out the number of workers. For this to work, you need to set up a broker and a result backend refer to the exhaustive [Celery documentation](https://docs.celeryproject.org/en/latest/getting-started/backends-and-brokers/index.html).
    
-2. Change the Airflow configuration. You need to change your airflow.cfg to point the executor parameter to CeleryExecutor and provide the neccess related Celery settings.
+2. Change the Airflow configuration. You need to change your airflow.cfg to point the `executor` parameter to `CeleryExecutor` and provide the neccess related Celery settings.
 
 3. Set up and kick off all Celery workers. Here are some imperative requirements for your workers:
    * Airflow needs to be installed, and the CLI needs to be in the path.
@@ -55,35 +55,43 @@ steps to initialize configuration and start the Airflow scheduler.
    ```
    airflow celery stop
    ```
-   
-4. Start the Scheduler
-    ```
-    start-airflow.sh
-    ```
+
+4. \[Optional\] Set up Flower.
+   [Flower](https://flower.readthedocs.io/en/latest/) is a web based tool for monitoring and administrating Celery clusters, you can start Flower on any
+   machine which has the same Airflow Configuration with workers.
+   ```shell script
+   airflow celery flower
+   ```
+   You can visit the Flower web on port 5555 to view the celery workers.
+
+5. Start the Scheduler:
+   ```
+   start-airflow.sh
+   ```
 
 #### Deploy with Docker Compose
 
-Deploying CeleryExecutor is a bit complicated, you can follow this guide to quickly start AIFlow and Scheduler with CeleryExecutor within Docker.
+You can follow this guide to quickly start AIFlow and Scheduler with `CeleryExecutor` within Docker.
 
 Note: the Docker Compose below may be not enough to run production-ready Docker Compose AIFlow installation using it.
-This is truly quick-start docker-compose for you to get your hands dirty with AIFlow and CeleryExecutor.
+This is truly quick-start docker-compose for you to get your hands dirty with AIFlow and `CeleryExecutor`.
 
 ##### Before you begin
 
 Make sure you have Docker and Docker Compose installed on your workstation,
 otherwise please follow these steps to install the tools.
 
-1. Install [Docker Community Edition (CE)](https://docs.docker.com/engine/install/) on your workstation. Depending on the OS, you may need to configure your Docker instance to use 4.00 GB of memory for all containers to run properly.
+1. Install [Docker Community Edition (CE)](https://docs.docker.com/engine/install/) on your workstation. Depending on the OS, you may need to configure your Docker instance to use at least 4.00 GB of memory for all containers to run properly.
 2. Install [Docker Compose](https://docs.docker.com/compose/install/) on your workstation.
 
-Run following commands to check if the tools are installed successfully.
+Run the following commands to check whether the tools are installed successfully:
 ```shell script
 docker --version
 docker-compose --version
 ```
 
 ##### docker-compose.yaml
-To deploy AIFlow with CeleryExecutor on Docker Compose, you should fetch [docker-compose.yaml](http://raw.githubusercontent.com/flink-extended/ai-flow/master/docker-compose.yaml).
+To deploy AIFlow with `CeleryExecutor` on Docker Compose, you should fetch [docker-compose.yaml](http://raw.githubusercontent.com/flink-extended/ai-flow/master/docker-compose.yaml).
 
 ```shell script
 curl -LfO http://raw.githubusercontent.com/flink-extended/ai-flow/master/docker-compose.yaml
@@ -100,11 +108,12 @@ This file contains several service definitions:
 
 ##### Initializing Environment
 
-This command should be executed in the directory that contains docker-compose.yaml you just downloaded.
-It will help start up database, redis, hdfs and 2 workers and also initialize execution environment of all servers.
+This command will help start up database, redis, hdfs and 3 workers and also initialize execution environment of all servers.
+It should be executed in the directory that contains docker-compose.yaml you just downloaded.
 ```shell script
-docker-compose up -d --scale airflow-worker=2
+docker-compose up -d --scale airflow-worker=3
 ```
+You can run ```docker ps ``` to check whether all components are started and healthy.
 
 ##### Starting Services
 
@@ -132,6 +141,6 @@ other configurations.
 |webserver|notification_sql_alchemy_conn|String|sqlite:///${HOME}/notification_service/ns.db|The notification service db connection.|
 |scheduler|notification_server_uri|String|127.0.0.1:50052|The notification server uri used by EventBasedSchedulerJob.|
 |scheduler|executor|String|LocalExecutor|The executor class that airflow should use. Choices include ``LocalExecutor``, ``CeleryExecutor``.|
-|celery|broker_url|String|redis://redis:6379/0|The Celery broker URL. Celery supports RabbitMQ, Redis and experimentally a sqlalchemy database. Refer to the Celery documentation for more information. This is useful when using CeleryExecutor.|
-|celery|result_backend|String|redis://redis:6379/0|The Celery result_backend. This status is used by the scheduler to update the state of the task. The use of a database is highly recommended. This is useful when using CeleryExecutor.|
-|celery|worker_log_server_port|Integer|8793|The port on which the logs are served. It needs to be unused, and open visible from the main web server to connect into the workers. This is useful when using CeleryExecutor.|
+|celery|broker_url|String|redis://redis:6379/0|The Celery broker URL. Celery supports RabbitMQ, Redis and experimentally a sqlalchemy database. Refer to the Celery documentation for more information. This is useful when using ``CeleryExecutor``.|
+|celery|result_backend|String|redis://redis:6379/0|The Celery result_backend. This status is used by the scheduler to update the state of the task. The use of a database is highly recommended. This is useful when using ``CeleryExecutor``.|
+|celery|worker_log_server_port|Integer|8793|The port on which the logs are served. It needs to be unused, and open visible from the main web server to connect into the workers. This is useful when using ``CeleryExecutor``.|
