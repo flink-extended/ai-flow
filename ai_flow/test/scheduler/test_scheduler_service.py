@@ -14,6 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import grpc
 import mock
 import os
 import unittest
@@ -109,6 +110,9 @@ class TestSchedulerService(unittest.TestCase):
                                    start_scheduler_service=True,
                                    scheduler_service_config=config)
         self.server.run()
+        client = SchedulerClient("localhost:{}".format(_PORT))
+        fut = grpc.channel_ready_future(client.channel)
+        fut.result(2)
 
     def tearDown(self):
         self.server.stop()

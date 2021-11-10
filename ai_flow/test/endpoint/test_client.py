@@ -51,7 +51,6 @@ client2 = None
 
 
 class AIFlowClientTestCases(object):
-
     """test dataset"""
 
     def test_save_dataset_get_dataset_by_id_and_name(self):
@@ -158,7 +157,7 @@ class AIFlowClientTestCases(object):
     """test project"""
 
     def test_save_project_get_project_by_id_and_name(self):
-        response = client.register_project(name='project', uri='www.code.com',)
+        response = client.register_project(name='project', uri='www.code.com', )
         project_id = client.get_project_by_id(response.uuid)
         project_name = client.get_project_by_name('project')
         self.assertEqual(project_id.name, 'project')
@@ -279,7 +278,8 @@ class AIFlowClientTestCases(object):
         graph = '{"__af_object_type__":"jsonable","__class__":"AIGraph","__module__":"ai_flow.ai_graph.ai_graph","edges":{"AINode_0":[{"__af_object_type__":"jsonable","__class__":"DataEdge","__module__":"ai_flow.ai_graph.data_edge","destination":"AINode_0","port":0,"source":"ReadDatasetNode_0"}],"WriteDatasetNode_0":[{"__af_object_type__":"jsonable","__class__":"DataEdge","__module__":"ai_flow.ai_graph.data_edge","destination":"WriteDatasetNode_0","port":0,"source":"AINode_0"}]},"name":null,"node_id":"AIGraph_0","nodes":{"AINode_0":{"__af_object_type__":"jsonable","__class__":"AINode","__module__":"ai_flow.ai_graph.ai_node","config":{"__af_object_type__":"jsonable","__class__":"JobConfig","__module__":"ai_flow.workflow.job_config","job_name":"data_processing","job_type":"python","properties":{}},"name":null,"node_config":{"name":null,"node_type":"transform","properties":null},"node_id":"AINode_0","output_num":1,"processor":{"__af_object_type__":"bytes","__class__":"bytes","__data__":"\u0080\u0003c__main__\nDataProcessingProcessor\nq\u0000)\u0081q\u0001.","__module__":"builtins"},"properties":{}},"ReadDatasetNode_0":{"__af_object_type__":"jsonable","__class__":"ReadDatasetNode","__module__":"ai_flow.ai_graph.ai_node","config":{"__af_object_type__":"jsonable","__class__":"JobConfig","__module__":"ai_flow.workflow.job_config","job_name":"data_processing","job_type":"python","properties":{}},"name":null,"node_config":{"dataset":{"__af_object_type__":"jsonable","__class__":"DatasetMeta","__module__":"ai_flow.meta.dataset_meta","catalog_connection_uri":null,"catalog_database":null,"catalog_name":null,"catalog_table":null,"catalog_type":null,"create_time":1629894260861,"data_format":null,"description":null,"name":"daily_data","properties":null,"schema":{"__af_object_type__":"jsonable","__class__":"Schema","__module__":"ai_flow.meta.dataset_meta","name_list":null,"type_list":null},"update_time":1629894260861,"uri":"/tmp/daily_data","uuid":3},"name":null,"node_type":"read_dataset","properties":null},"node_id":"ReadDatasetNode_0","output_num":1,"processor":{"__af_object_type__":"bytes","__class__":"bytes","__data__":"\u0080\u0003c__main__\nDataProcessingReader\nq\u0000)\u0081q\u0001.","__module__":"builtins"},"properties":{}},"WriteDatasetNode_0":{"__af_object_type__":"jsonable","__class__":"WriteDatasetNode","__module__":"ai_flow.ai_graph.ai_node","config":{"__af_object_type__":"jsonable","__class__":"JobConfig","__module__":"ai_flow.workflow.job_config","job_name":"data_processing","job_type":"python","properties":{}},"name":null,"node_config":{"dataset":{"__af_object_type__":"jsonable","__class__":"DatasetMeta","__module__":"ai_flow.meta.dataset_meta","catalog_connection_uri":null,"catalog_database":null,"catalog_name":null,"catalog_table":null,"catalog_type":null,"create_time":1629894260868,"data_format":null,"description":null,"name":"daily_data_result","properties":null,"schema":{"__af_object_type__":"jsonable","__class__":"Schema","__module__":"ai_flow.meta.dataset_meta","name_list":null,"type_list":null},"update_time":1629894260868,"uri":"/tmp/daily_result","uuid":4},"name":null,"node_type":"write_dataset","properties":null},"node_id":"WriteDatasetNode_0","output_num":0,"processor":{"__af_object_type__":"bytes","__class__":"bytes","__data__":"\u0080\u0003c__main__\nDataProcessingWriter\nq\u0000)\u0081q\u0001.","__module__":"builtins"},"properties":{}}},"output_num":0,"properties":{}}'
         updated_workflow = client.update_workflow(project_name=project_response.name,
                                                   workflow_name='workflow',
-                                                  context_extractor=cloudpickle.loads(response.context_extractor_in_bytes),
+                                                  context_extractor=cloudpickle.loads(
+                                                      response.context_extractor_in_bytes),
                                                   properties=Properties({'a': 'c'}),
                                                   graph=graph)
         self.assertEqual(updated_workflow.properties, Properties({'a': 'c'}))
@@ -1138,6 +1138,7 @@ class TestAIFlowClientSqlite(AIFlowClientTestCases, unittest.TestCase):
         base.metadata.drop_all(store.db_engine)
 
 
+@unittest.skip("Skip until HA is re-implemented.")
 class TestAIFlowClientSqliteWithSingleHighAvailableServer(
         AIFlowClientTestCases, unittest.TestCase):
     """
