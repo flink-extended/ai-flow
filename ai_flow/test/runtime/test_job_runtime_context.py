@@ -43,6 +43,13 @@ class TestJobRuntimeContext(unittest.TestCase):
         self.assertEqual('workflow_1', current_workflow_config().workflow_name)
         self.assertEqual('task_1', current_workflow_config().job_configs[current_job_name()].job_name)
         self.assertEqual('test_project', current_project_config().get_project_name())
+        workflow_dir = os.path.abspath(os.path.join(working_dir, 'workflows', 'workflow_1'))
+        self.assertEqual(workflow_dir, job_runtime_env.workflow_dir)
+        hello_file = os.path.join(job_runtime_env.resource_dir, 'hello.txt')
+        self.assertTrue(os.path.exists(hello_file))
+        with open(hello_file, 'r') as f:
+            content = f.read()
+        self.assertEqual('Hello World!', content)
 
 
 if __name__ == '__main__':

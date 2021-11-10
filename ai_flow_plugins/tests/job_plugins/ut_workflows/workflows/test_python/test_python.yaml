@@ -19,3 +19,6 @@
 
 task_1:
   job_type: python
+  properties:
+    a: a
+    b: b
