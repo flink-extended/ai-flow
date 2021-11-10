@@ -106,7 +106,7 @@ This section shows an exhaustive list of available configuration of the AIFlow s
 |Key|Type|Default|Description|
 |---|---|---|---|
 airflow_web_server_uri|String|http://localhost:8080|The Airflow web server uri.|
-host|String|127.0.0.1|The hostname the AIFlow Web server to listen on. Set this to ``'0.0.0.0'`` to have the server available externally as well.|
+host|String|0.0.0.0|The hostname the AIFlow Web server to listen on.|
 port|Integer|8000|The port where the AIFlow Web server is exposed.|
 
 (default_aiflow_server_config)=
@@ -161,6 +161,6 @@ scheduler_service:
 # web server config
 web_server:
   airflow_web_server_uri: http://localhost:8080
-  host: 127.0.0.1
+  host: 0.0.0.0
   port: 8000
 ```
