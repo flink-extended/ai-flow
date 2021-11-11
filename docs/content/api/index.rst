@@ -25,4 +25,4 @@ API
    :caption: Contents
 
    python/index
-   java-api
+   java/index
