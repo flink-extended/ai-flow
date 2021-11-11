@@ -21,6 +21,8 @@ set -e
 
 coverage run -p --source="ai_flow" --omit="ai_flow/test/*" --branch -m unittest discover -v ai_flow/test
 coverage run -p --source="ai_flow_plugins" --omit="ai_flow_plugins/tests/*" --branch -m unittest discover -v ai_flow_plugins/tests
+coverage run -p --source="lib/notification_service" --omit="lib/notification_service/tests/*" --branch -m unittest discover -v lib/notification_service/tests
 
 coverage combine
+coverage report
 coverage xml

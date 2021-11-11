@@ -25,9 +25,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
-        pip install ./lib/notification_service
-        pip install ./lib/airflow
-        pip install .
+        pip install -e ./lib/notification_service
+        pip install -e ./lib/airflow
+        pip install -e .
     - name: Install java client
       run: |
         cd ./lib/notification_service/java

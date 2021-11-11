@@ -359,6 +359,7 @@ class DbStorageTest(unittest.TestCase, NotificationTest):
         cls.storage = DbEventStorage()
         cls.master = NotificationServer(NotificationService(cls.storage))
         cls.master.run()
+        cls.wait_for_master_started("localhost:50051")
 
     @classmethod
     def setUpClass(cls):
@@ -377,6 +378,17 @@ class DbStorageTest(unittest.TestCase, NotificationTest):
     def tearDown(self):
         self.client.stop_listen_events()
         self.client.stop_listen_event()
+
+    @classmethod
+    def wait_for_master_started(cls, server_uri="localhost:50051"):
+        last_exception = None
+        for i in range(60):
+            try:
+                return NotificationClient(server_uri=server_uri, enable_ha=True)
+            except Exception as e:
+                time.sleep(2)
+                last_exception = e
+        raise Exception("The server %s is unavailable." % server_uri) from last_exception
 
 
 class MemoryStorageTest(unittest.TestCase, NotificationTest):

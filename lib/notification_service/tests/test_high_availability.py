@@ -57,11 +57,11 @@ class HaServerTest(unittest.TestCase):
     @classmethod
     def wait_for_master_started(cls, server_uri="localhost:50051"):
         last_exception = None
-        for i in range(100):
+        for i in range(60):
             try:
                 return NotificationClient(server_uri=server_uri, enable_ha=True)
             except Exception as e:
-                time.sleep(10)
+                time.sleep(2)
                 last_exception = e
         raise Exception("The server %s is unavailable." % server_uri) from last_exception
 
