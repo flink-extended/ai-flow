@@ -91,7 +91,7 @@ predict:
 
 In the workflow yaml, we define the properties of each job. 
 
-For `train` job, its job type is `python`, which means the user defined logic in this job will be executed using `python`. Besides, we set the `periodic_config` to be `interval: '0,0,0,60'` which means the job will be executed every 60s. The `properties` option which represents the additional properties of the job config can also be configured. The `properties` in the job config can be obtained through **` execution_context.job_execution_info.properties`**  in the `process` method in the user-defined `PythonProcessor` implementation.
+For `train` job, its job type is `python`, which means the user defined logic in this job will be executed using `python`. Besides, we set the `periodic_config` to be `interval: '0,0,0,60'` which means the job will be executed every 60s. The `properties` option which represents the additional properties of the job config can also be configured. The `properties` in the job config can be obtained through **`af.current_workflow_config().job_configs['job_name'].properties`**  in the `process` method in the user-defined `PythonProcessor` implementation.
 
 For `validate` job, we only config its job type to be `python`.
 
