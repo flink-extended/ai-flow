@@ -1,5 +1,8 @@
 # AIFlow
 
+[![CI](https://github.com/flink-extended/ai-flow/actions/workflows/flink_ai_flow_ci.yml/badge.svg)](https://github.com/flink-extended/ai-flow/actions/workflows/flink_ai_flow_ci.yml)
+[![codecov](https://codecov.io/gh/flink-extended/ai-flow/branch/master/graph/badge.svg?token=ISWZNXUYO5)](https://codecov.io/gh/flink-extended/ai-flow)
+
 ## Introduction
 
 AIFlow is an open source framework that bridges big data and artificial intelligence. It manages the entire machine learning project lifecycle as a unified workflow, including feature engineering, model training, model evaluation, model service, model inference, monitoring, etc. Throughout the entire workflow, users can choose to use the computing engine like Python, Flink etc.
