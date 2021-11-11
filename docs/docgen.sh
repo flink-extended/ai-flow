@@ -33,7 +33,6 @@ mkdir "$tmpdir"
 sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow "$workdir"/../ai_flow/*test*
 cp -a "$tmpdir"/. "${generated_source}"
 rm "$tmpdir"/*
-sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow_plugins "$workdir"/../ai_flow_plugins/*test*
+sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../lib/notification_service/notification_service
 cp -a "$tmpdir"/. "${generated_source}"
 rm -r "$tmpdir"
-

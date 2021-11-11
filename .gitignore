@@ -240,3 +240,7 @@ lib/airflow/.bash_history
 lib/airflow/.kubeSchedulerServiceConfig
 lib/airflow/.inputrc
 lib/airflow/log.txt*
+
+# docs generated
+docs/_build
+*.rst
