@@ -27,7 +27,7 @@ A workflow can run regularly or be triggered by [events](#event).
 
 ## Job
 A Job is the basic unit of execution in workflow. Jobs are arranged into a workflow, 
-and they have relationships between them in order to express the conditions they should run.
+and they have relationships between them in order to express the conditions on which they should run.
 For example, a workflow contains feature engineering job, model training job, 
 model validation job, and model inference job.
 
