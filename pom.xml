@@ -84,6 +84,8 @@
                         <exclude>**/*.less</exclude>
                         <exclude>**/*.jsx</exclude>
                         <exclude>**/*.svg</exclude>
+                        <exclude>**/*.txt</exclude>
+                        <exclude>**/*.rst</exclude>
                         <exclude>**/*.babelrc</exclude>
                         <exclude>**/*.eslintignore</exclude>
                         <exclude>**/*.styl</exclude>
