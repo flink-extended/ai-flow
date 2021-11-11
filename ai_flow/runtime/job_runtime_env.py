@@ -59,7 +59,7 @@ class JobRuntimeEnv(object):
         """
         return: The directory of the workflow file.
         """
-        return os.path.join(self.working_dir, self.workflow_name)
+        return os.path.join(self.working_dir, 'workflows', self.workflow_name)
 
     @property
     def job_name(self) -> Text:

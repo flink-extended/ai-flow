@@ -45,8 +45,11 @@ def prepare_job_runtime_env(workflow_snapshot_id,
     if not os.path.exists(working_dir):
         os.makedirs(job_runtime_env.log_dir)
         job_runtime_env.save_job_execution_info()
-        os.symlink(project_context.get_workflow_path(workflow_name=workflow_name),
-                   os.path.join(working_dir, workflow_name))
+        if not os.path.exists(os.path.dirname(job_runtime_env.workflow_dir)):
+            os.makedirs(os.path.dirname(job_runtime_env.workflow_dir))
+        if not os.path.exists(job_runtime_env.workflow_dir):
+            os.symlink(project_context.get_workflow_path(workflow_name=workflow_name),
+                       job_runtime_env.workflow_dir)
         if os.path.exists(project_context.get_generated_path()):
             os.symlink(os.path.join(project_context.get_generated_path(),
                                     workflow_snapshot_id,
