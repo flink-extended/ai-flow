@@ -28,10 +28,10 @@ Before sending your pull requests, make sure you followed this list.
 - Wait for approval.
 - Once the pull request is approved and merged you can pull the changes from `upstream` to your local repo and delete your extra branches.
 
-## Development Notices for AIFlow
+## Development Notices for AI Flow
 
-Currently the AIFlow project is under the `flink-ai-flow` directory. 
-If you are contributing to AIFlow, it is recommended to change your working directory to `flink-ai-flow`.
+Currently the AI Flow project is under the `flink-ai-flow` directory. 
+If you are contributing to AI Flow, it is recommended to change your working directory to `flink-ai-flow`.
 The paths mentioned in following content are all relative paths based on `flink-ai-flow`.
 
 ### Prerequisites
@@ -51,7 +51,7 @@ Now you can configure it as the Project Interpreter if you are using PyCharm as 
 
 ### Run Tests
 
-You can run the shell script `run_tests.sh` to verify the modification of AIFlow. 
+You can run the shell script `run_tests.sh` to verify the modification of AI Flow. 
 
 If you modified the bundled Airflow, you need to add relevant test cases and run tests according to [Airflow contributing guidelines](flink-ai-flow/lib/airflow/CONTRIBUTING.rst).
 
@@ -59,7 +59,7 @@ If you modified the bundled Notification Services, you need to add relevant test
 
 ### Contact Us
 
-For more information, you can join the **Flink AIFlow Users Group** on [DingTalk](https://www.dingtalk.com) to contact us.
+For more information, you can join the **Flink AI Flow Users Group** on [DingTalk](https://www.dingtalk.com) to contact us.
 The number of the DingTalk group is `35876083`. 
 
 You can also join the group by scanning the QR code below:

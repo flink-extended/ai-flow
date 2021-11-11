@@ -1,14 +1,14 @@
 # Quickstart
 
-The Quickstart will show you how to start AIFlow and help you get started with an example in AIFlow.
+The Quickstart will show you how to start AI Flow and help you get started with an example in AI Flow.
 
 - [Prepare Database](#prepare-database)
   * [Install and Start MySQL Server](#install-and-start-mysql-server)
   * [Create User and Database](#create-user-and-database)
-- [Run AIFlow locally](#run-ai-flow-locally)
-  * [Install AIFlow](#install-ai-flow)
+- [Run AI Flow locally](#run-ai-flow-locally)
+  * [Install AI Flow](#install-ai-flow)
   * [Start Servers](#start-servers)
-- [Run AIFlow in Docker](#run-ai-flow-in-docker)
+- [Run AI Flow in Docker](#run-ai-flow-in-docker)
   * [Build Image](#build-image)
   * [Start Servers In Docker](#start-servers-in-docker)
 - [Run Example](#run-example)
@@ -44,15 +44,15 @@ GRANT ALL PRIVILEGES ON airflow.* TO 'aiflow';
 CREATE DATABASE aiflow CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 ```
 
-## Run AIFlow locally
+## Run AI Flow locally
 
-### Install AIFlow
+### Install AI Flow
 
 Please refer to [[Installation]] for the installation guide.
 
 ### Start Servers
 
-As described in [[Design]],  AIFlow contains three long running services, Notification service, AIFlow Server and Scheduler service(Apache Airflow by default), you could start all services with a single scripts `start-all-aiflow-services.sh` as below. The mysql database that you prepared during [Prepare Database](#prepare-database) should be passed as parameter to store metadata.
+As described in [[Design]],  AI Flow contains three long running services, Notification service, AI Flow Server and Scheduler service(Apache Airflow by default), you could start all services with a single scripts `start-all-aiflow-services.sh` as below. The mysql database that you prepared during [Prepare Database](#prepare-database) should be passed as parameter to store metadata.
 
 ```shell
 start-all-aiflow-services.sh mysql://aiflow:aiflow@127.0.0.1/aiflow
@@ -79,7 +79,7 @@ You may have noticed that some logs are related to Apache Airflow, that is becau
 
 ![Alt text](../images/ai_flow_webui.jpg)
 
-## Run AIFlow in Docker
+## Run AI Flow in Docker
 
 ### Start Servers In Docker
 
@@ -115,7 +115,7 @@ For more details about how to write your own workflow, please refer to [[Tutoria
 
 ## Stop Servers
 
-Run following command to stop notification server, Airflow Server and AIFlow Server:
+Run following command to stop notification server, Airflow Server and AI Flow Server:
 
 ```shell
 stop-all-aiflow-services.sh

@@ -65,4 +65,4 @@ You could run with `which start-all-aiflow-services.sh` to check if the scripts 
 
 ## Troubleshooting
 ### OSError: mysql_config not found
- If you are getting this error when installing AIFlow, you may have problems with mysqlclient installation. Please refer to mysqlclient's [document](https://github.com/PyMySQL/mysqlclient#install) to install mysqlclient properly.
+ If you are getting this error when installing AI Flow, you may have problems with mysqlclient installation. Please refer to mysqlclient's [document](https://github.com/PyMySQL/mysqlclient#install) to install mysqlclient properly.
