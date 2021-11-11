@@ -3,7 +3,7 @@
 ### Requirement
 1. Python3.7
 2. Sphinx (You can install it via `pip install -U sphinx sphinx_rtd_theme`)
-3. AIFlow
+3. AI Flow
 
 ### Build
 ```
