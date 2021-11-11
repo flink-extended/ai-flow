@@ -29,7 +29,9 @@ Welcome to AI Flow's Documentation!
    :caption: Contents
 
    content/get_started/index
-   content/user_guide/index
-   content/developer_guide/index
+   content/architecture/index
+   content/workflow_development/index
+   content/deployment/index
+   content/customize/index
    content/api/index
 
