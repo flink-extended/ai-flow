@@ -43,4 +43,4 @@ Vue.use(VueClipboard)
 Vue.use(PermissionHelper)
 Vue.use(VueCropper)
 
-process.env.NODE_ENV !== 'production' && console.warn('[Flink AI Flow] WARNING: Antd now use fulled imported.')
+process.env.NODE_ENV !== 'production' && console.warn('[AIFlow] WARNING: Antd now use fulled imported.')

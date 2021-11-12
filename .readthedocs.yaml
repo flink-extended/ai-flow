@@ -29,7 +29,7 @@ build:
 python:
   # For available versions, see:
   # https://docs.readthedocs.io/en/stable/config-file/v2.html#build-image
-  version: 3.7  # Flink AI Flow currently only support py3.7
+  version: 3.7  # AIFlow currently only support py3.7
   install:
     - method: pip
       path: lib/notification_service

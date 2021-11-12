@@ -23,7 +23,7 @@ limitations under the License. -->
           <div class="header">
             <a href="/">
               <img src="~@/assets/logo.svg" class="logo" alt="logo">
-              <span class="title">Flink AI Flow</span>
+              <span class="title">AIFlow</span>
             </a>
           </div>
           <div class="desc">
@@ -35,7 +35,7 @@ limitations under the License. -->
 
         <div class="footer">
           <div class="copyright">
-            Copyright &copy; 2021 Flink AI Flow
+            Copyright &copy; 2021 AIFlow
           </div>
         </div>
       </div>

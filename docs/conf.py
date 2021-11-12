@@ -32,7 +32,7 @@ sys.path.insert(0, os.path.abspath('../lib/notification_service/notification_ser
 
 # -- Project information -----------------------------------------------------
 
-project = 'AI Flow'
+project = 'AIFlow'
 author = 'flink-extended'
 
 # The full version, including alpha/beta/rc tags
