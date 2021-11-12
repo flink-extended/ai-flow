@@ -48,3 +48,4 @@ Only pip installation is currently officially supported.
 ```
 pip install ai-flow
 ```
+It will take a few minutes to install dependencies for the first time.

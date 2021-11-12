@@ -41,13 +41,10 @@ Once all servers started, you can visit the AIFlow Web [[http://127.0.0.1:8000](
 
 ![aiflow login ui](../images/ai_flow_webui.jpg)
 
-You can visit the Airflow Web [[http://127.0.0.1:8080](http://127.0.0.1:8080)] 
-with the default username(admin) and password(admin):
+Since Apache Airflow is the [Scheduler](../architecture/overview.md) by default, you can visit the Airflow Web [[http://127.0.0.1:8080](http://127.0.0.1:8080)] 
+with the default username(admin) and password(admin) to view the execution of workflows:
 
 ![airflow login ui](../images/airflow_login_ui.png)
-
-You may have noticed that some logs are related to Apache Airflow, that is because Apache Airflow is the default 
-[Scheduler](../architecture/overview.md). 
 
 ## Run Sklearn Example
 
