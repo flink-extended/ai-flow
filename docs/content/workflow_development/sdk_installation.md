@@ -4,7 +4,7 @@ This page describes the installation of the AIFlow SDK used for the workflow dep
 
 ## Prerequisites
 
-### Python 3.6 & 3.7
+### Python 3.6 or 3.7
 
 AIFlow SDK requires Python version 3.6 or 3.7, which version could be checked with the following command:
 
