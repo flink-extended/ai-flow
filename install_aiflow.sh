@@ -24,7 +24,7 @@ bin=$(dirname "${BASH_SOURCE[0]}")
 bin=$(cd "$bin"; pwd)
 workdir=$bin
 
-# In case of existed typing cause version conflict, uninstall it and then install AI Flow from source
+# In case of existed typing cause version conflict, uninstall it and then install AIFlow from source
 pip uninstall -y typing
 
 # Compile Web UI frontend of aiflow (yarn is required)

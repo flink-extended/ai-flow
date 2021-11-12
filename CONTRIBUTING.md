@@ -36,7 +36,7 @@ Follow these steps to install AIFlow from source code:
 
 ## Run Tests
 
-You can run the shell script `run_tests.sh` to verify the modification of AI Flow. 
+You can run the shell script `run_tests.sh` to verify the modification of AIFlow. 
 
 If you modified the bundled Airflow, you need to add relevant test cases and run tests according to [Airflow contributing guidelines](../../../lib/airflow/CONTRIBUTING.rst).
 
@@ -63,7 +63,7 @@ Before sending your pull requests, make sure you followed this list.
 
 ## Contact Us
 
-For more information, you can join the **AI Flow Users Group** on [DingTalk](https://www.dingtalk.com) to contact us.
+For more information, you can join the **AIFlow Users Group** on [DingTalk](https://www.dingtalk.com) to contact us.
 The number of the DingTalk group is `35876083`. 
 
 You can also join the group by scanning the QR code below:

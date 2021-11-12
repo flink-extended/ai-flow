@@ -1,21 +1,21 @@
 # Configuration
 
-This document aims at introducing different kinds of configuration in AI Flow.
+This document aims at introducing different kinds of configuration in AIFlow.
 
-   * [AI Flow Server Config](#ai-flow-server-config)
+   * [AIFlow Server Config](#ai-flow-server-config)
       * [Basic Server Config](#basic-server-config)
       * [Service Config](#service-config)
       * [Experimental Config](#experimental-config)
          * [High Availability](#high-availability)
       * [Scheduler Config](#scheduler-config)
          * [Airflow](#airflow)
-   * [AI Flow Project Config](#ai-flow-project-config)
+   * [AIFlow Project Config](#ai-flow-project-config)
       * [Basic Config](#basic-config)
       * [Blob Manager Config](#blob-manager-config)
          * [Local](#local)
          * [HDFS](#hdfs)
          * [OSS](#oss)
-   * [AI Flow Workflow Config](#ai-flow-workflow-config)
+   * [AIFlow Workflow Config](#ai-flow-workflow-config)
       * [Periodic Config](#periodic-config)
       * [User-defined Properties](#user-defined-properties)
       * [Job Config](#job-config)
@@ -26,7 +26,7 @@ This document aims at introducing different kinds of configuration in AI Flow.
 
 
 
-## AI Flow Server Config
+## AIFlow Server Config
 The configs of `AIFlowServer()` locate in the `aiflow_server.yaml` in $AIFLOW_HOME/airflow_deploy or `~/aiflow/` directory.
 If users want to modify default values of configs, they should update the `aiflow_server.yaml` file and restart the server.
 
@@ -47,7 +47,7 @@ As above codes suggest, users must make sure the ip and the port of the server a
 The AIFlow server also needs a database to work properly(e.g. managing workflows). We currently support SQL_LITE, MYSQL and MONGODB.
 
 ### Service Config
-An AIFlow server contains multiple services: notification service, meta_service, metric_service, scheduler_service. For those services, AI Flow provides default implementations and to control the start of them, users need to pay attention to following configs:
+An AIFlow server contains multiple services: notification service, meta_service, metric_service, scheduler_service. For those services, AIFlow provides default implementations and to control the start of them, users need to pay attention to following configs:
 ```yaml
 # whether to start the default notification service, default is True
 # start_default_notification: True
@@ -82,7 +82,7 @@ Users must set the `airflow_deploy_path` and must make sure the `notification_se
 
 ### Experimental Config
 #### High Availability
-HA is currently an experimental feature of AI Flow. To use this feature, users must set `enable_ha` to be true in `aiflow_server.yaml`.
+HA is currently an experimental feature of AIFlow. To use this feature, users must set `enable_ha` to be true in `aiflow_server.yaml`.
 ```yaml
 # High availability is disabled by default
 #enable_ha: false
@@ -101,8 +101,8 @@ scheduler:
     notification_server_uri: localhost:50051
 ```
 
-## AI Flow Project Config
-For an AI Flow project, we need to set some basic configs and besides, we must set `blob` config to tell AI Flow where the workflow should be executed.
+## AIFlow Project Config
+For an AIFlow project, we need to set some basic configs and besides, we must set `blob` config to tell AIFlow where the workflow should be executed.
 
 ### Basic Config
 ```yaml
@@ -143,7 +143,7 @@ blob:
     local_repository: 
 ```
 
-## AI Flow Workflow Config
+## AIFlow Workflow Config
 Workflow config consists of job configs, workflow-level periodic config, user define properties.
 
 ### Periodic Config
@@ -183,10 +183,10 @@ properties:
 ```
 
 ### Job Config
-AI Flow currently supports bash, python and flink jobs.
+AIFlow currently supports bash, python and flink jobs.
 
 #### General Config
-Any job in AI Flow contains following configs:
+Any job in AIFlow contains following configs:
 ```yaml
 job_name:
   job_type: python

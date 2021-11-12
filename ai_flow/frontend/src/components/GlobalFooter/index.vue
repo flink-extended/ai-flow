@@ -19,7 +19,7 @@ limitations under the License. -->
       <a href="https://github.com/alibaba" target="_blank">@alibaba</a>
     </template>
     <template v-slot:copyright>
-      <a href="https://github.com/alibaba/flink-ai-extended/flink-ai-flow" target="_blank">Flink AI Flow</a>
+      <a href="https://github.com/flink-extended/ai-flow" target="_blank">AIFlow</a>
     </template>
   </global-footer>
 </template>
