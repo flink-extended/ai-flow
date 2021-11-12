@@ -81,7 +81,6 @@ exclude_rst = [
     '**ai_flow.translator.rst',
     '**ai_flow.scheduler.rst',
     '**ai_flow.util.file_util.rst',
-    '**ai_flow.util.model_util.rst',
     '**ai_flow.util.rst',
     '**modules.rst',
     '**notification_service.config_templates.rst',
