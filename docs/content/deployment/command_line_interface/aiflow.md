@@ -1,4 +1,4 @@
-# AI Flow
+# AIFlow
 
 ## Command 1
 

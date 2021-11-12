@@ -65,7 +65,7 @@ class AIFlowServerRunner(object):
             self.server_config.set_server_port(str(_PORT))
         global GLOBAL_MASTER_CONFIG
         GLOBAL_MASTER_CONFIG = self.server_config
-        logging.info("AI Flow Master Config {}".format(GLOBAL_MASTER_CONFIG))
+        logging.info("AIFlow Master Config {}".format(GLOBAL_MASTER_CONFIG))
         self.server = AIFlowServer(
             store_uri=self.server_config.get_db_uri(),
             port=str(self.server_config.get_server_port()),
