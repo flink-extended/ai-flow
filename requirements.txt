@@ -50,7 +50,6 @@ flask-wtf>=0.14.2, <0.15
 Django~=3.2.7
 # Optional dependencies
 apache-flink==1.11.0
-tensorflow==1.15.0
 pymysql==0.9.3
 scikit-learn==0.21.2
 alembic>=1.0,<2.0
