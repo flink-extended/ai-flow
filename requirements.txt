@@ -48,6 +48,7 @@ flask-login>=0.3, <0.5
 flask-swagger==0.2.13
 flask-wtf>=0.14.2, <0.15
 Django~=3.2.7
+WTForms==2.3.3
 # Optional dependencies
 apache-flink==1.11.0
 tensorflow==1.15.0
