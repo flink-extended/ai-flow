@@ -2,120 +2,84 @@
 
 The Quickstart will show you how to start AIFlow and help you get started with an example in AIFlow.
 
-- [Prepare Database](#prepare-database)
-  * [Install and Start MySQL Server](#install-and-start-mysql-server)
-  * [Create User and Database](#create-user-and-database)
-- [Run AIFlow locally](#run-ai-flow-locally)
-  * [Install AIFlow](#install-ai-flow)
-  * [Start Servers](#start-servers)
-- [Run AIFlow in Docker](#run-ai-flow-in-docker)
-  * [Build Image](#build-image)
-  * [Start Servers In Docker](#start-servers-in-docker)
-- [Run Example](#run-example)
-- [Stop Servers](#stop-servers)
-- [Troubleshooting](#troubleshooting)
+## Start AIFlow
 
-## Prepare Database
+### Start AIFlow Locally
 
-Currently only MySQL is supported to be used as storage backend.
+Note: running AIFlow locally requires that you have [AIFlow installed](../deployment/installation.md) on your workstation.
 
-### Install and Start MySQL Server
-
-If you've got a started MySQL Server somewhere, please skip this section.
-
-#### Locally
-
-Please refer to [MySQL Installation](https://dev.mysql.com/doc/refman/8.0/en/installing.html)  to install MySQL locally.
-
-#### Docker
-
-```
-docker run --name aiflow-mysql -e MYSQL_ROOT_PASSWORD=root -d -p3306:3306 mysql:8
-```
-
-### Create User and Database
-
-```
-# create default user and password
-CREATE USER 'aiflow' IDENTIFIED BY 'aiflow';
-GRANT ALL PRIVILEGES ON airflow.* TO 'aiflow';
-
-# create database
-CREATE DATABASE aiflow CHARACTER SET utf8 COLLATE utf8_unicode_ci;
-```
-
-## Run AIFlow locally
-
-### Install AIFlow
-
-Please refer to [[Installation]] for the installation guide.
-
-### Start Servers
-
-As described in [[Design]],  AIFlow contains three long running services, Notification service, AIFlow Server and Scheduler service(Apache Airflow by default), you could start all services with a single scripts `start-all-aiflow-services.sh` as below. The mysql database that you prepared during [Prepare Database](#prepare-database) should be passed as parameter to store metadata.
+AIFlow contains three long-running servers, 
+AIFlow Server, Notification server and Scheduler(Apache Airflow by default).
+You can start all servers with a single script `start-all-aiflow-services.sh` as below:.
 
 ```shell
-start-all-aiflow-services.sh mysql://aiflow:aiflow@127.0.0.1/aiflow
+start-all-aiflow-services.sh
 ```
 
-It will take a few minutes the first time you start. Once finished you will get the output like:
+It will take a few minutes to start all servers for the first time. Once all servers have started, you will get the output like:
 
 ```text
-~/airflow/airflow.cfg does not exist creating one.
-DB: mysql://aiflow:***@127.0.0.1/aiflow
-Initialization done
-Try to create admin airflow user
-Admin user admin created
-Starting AIFlow Server
-AIFlow Server started
-Starting AIFlow Web
-AIFlow Web started
+Starting notification server
 ...
-Airflow deploy path: /root/aiflow/airflow_deploy
-Visit http://127.0.0.1:8080/ to access the airflow web server.
+...
+All services have been started!
 ```
 
-You may have noticed that some logs are related to Apache Airflow, that is because Apache Airflow is the default [[Scheduler Service|https://github.com/flink-extended/ai-flow/wiki/Design#scheduler-service]]. To check the scheduler started successfully, you can visit the AIFlow Web [[http://127.0.0.1:8000](http://127.0.0.1:8000)] and Airflow Web [[http://127.0.0.1:8080](http://127.0.0.1:8080)] with the default user name(admin) and password(admin).
+### Start AIFlow in Docker
 
-![Alt text](../images/ai_flow_webui.jpg)
+You can also start AIFlow in Docker if you don't want to install AIFlow locally. 
+Please run following commands to enter the docker container in interactive mode and start servers inner docker. 
 
-## Run AIFlow in Docker
-
-### Start Servers In Docker
-
-Now you have an image named ai-flow with tag v1. You can run image with following command.
-
-```shell
-docker run -it  -p 8080:8080 flinkaiflow/flink-ai-flow:0.2.0 /bin/bash
+```shell script
+docker run -it -p 8080:8080 -p 8000:8000 flinkaiflow/flink-ai-flow:latest /bin/bash
+start-all-aiflow-services.sh
 ```
 
-After that you can start servers within container same as [Start Servers Locally](#start-servers).
+## View Web Server
 
-## Run Example
+Once all servers started, you can visit the AIFlow Web [[http://127.0.0.1:8000](http://127.0.0.1:8000)] with the default username(admin) and password(admin):
 
-We have prepared some examples to get started, you can download from [release source](https://github.com/alibaba/flink-ai-extended/releases/download/ai-flow-release-0.1.0/ai-flow-examples.tar.gz). Once downloaded, you can run following commands to submit a simple workflow.
+![aiflow login ui](../images/ai_flow_webui.jpg)
+
+Since Apache Airflow is the [Scheduler](../architecture/overview.md) by default, you can visit the Airflow Web [[http://127.0.0.1:8080](http://127.0.0.1:8080)] 
+with the default username(admin) and password(admin) to view the execution of workflows:
+
+![airflow login ui](../images/airflow_login_ui.png)
+
+## Run Sklearn Example
+
+We have prepared some [examples](https://github.com/alibaba/flink-ai-extended/releases/download/ai-flow-release-0.2.2/ai-flow-examples.tar.gz) to get started. . 
+You can run following commands to download the examples and run the sklearn example.
 
 ```shell
-wget https://github.com/alibaba/flink-ai-extended/releases/download/ai-flow-release-0.1.0/ai-flow-examples.tar.gz -O /tmp/ai-flow-examples.tar.gz
+curl -Lf https://github.com/flink-extended/ai-flow/releases/download/ai-flow-release-0.2.2/examples.tar.gz -o /tmp/ai-flow-examples.tar.gz
 tar -zxvf /tmp/ai-flow-examples.tar.gz -C /tmp
-python /tmp/examples/demo/workflows/simple_workflow/simple_workflow.py
+python /tmp/examples/sklearn_examples/workflows/batch_train_stream_predict/batch_train_stream_predict.py
 ```
 
-You can view workflow definition in simple_workflow.py. There are 2 jobs in workflow, the first one runs `echo hello_1` once the workflow submitted and the second one runs `echo hello_2` after the first one finished.
+The example shows how to define an entire machine learning workflow through AIFlow. 
+You can view the workflow definition in batch_train_stream_predict.py. 
+The workflow contains four jobs, including sklearn model batch training, batch validation, model pushing and streaming prediction.
 
-You can see the metadata and the graph of the workflow on the AIFlow Web [[http://127.0.0.1:8000](http://127.0.0.1:8000)].
+You can see the workflow metadata, and the graph of the workflow on the AIFlow web frontend: [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
-![The metadata of the simple_workflow](../images/simple_workflow_metadata.jpg)
+![The metadata of the workflow](../images/sklearn_batch_train_stream_predict_meta.png)
 
-![The graph of the simple_workflow](../images/simple_workflow_graph.jpg)
+![The graph of the workflow](../images/sklearn_batch_train_stream_predict_graph.png)
 
-You can see your workflow and the outputs of each job on the Airflow Web [[http://127.0.0.1:8080](http://127.0.0.1:8080)].
+You can click task view to jump to the workflow execution page:
+![The execution of the workflow](../images/sklearn_batch_train_stream_predict_execution.png)
 
-For more details about how to write your own workflow, please refer to [[Tutorial|Tutorial]].
+In the above figure, you can see that the model batch training triggers the model validation with the `MODEL_GENERATED` 
+event after the sklearn model generated. After passing the model validation, 
+the model pushing is triggered by the `MODEL_VALIDATED` event. 
+The model streaming prediction is triggered by the `MODEL_DEPLOYED` event.
 
-## Stop Servers
+For more details about how to write your workflow, please refer to the [Tutorial](../workflow_development/tutorial.md) document.
 
-Run following command to stop notification server, Airflow Server and AIFlow Server:
+## Stop AIFlow
+
+Run following command to stop all services:
 
 ```shell
 stop-all-aiflow-services.sh
@@ -123,32 +87,14 @@ stop-all-aiflow-services.sh
 
 ## Troubleshooting
 
-### 1. Can't connect to MySQL server in docker
+### 1. pytz.exceptions.UnknownTimeZoneError: 'Can not find any timezone configuration'
 
-Detail message: `(2002, "Can't connect to MySQL server on '127.0.0.1' (115)")`
-
-If your MySQL server is started at your local machine, your need to replace `mysql://user:password@127.0.0.1/airflow` with `mysql://user:password@host.docker.internal/airflow`.
-
-### 2. caching_sha2_password could not be loaded
-
-Due to MySQL's [document](https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html), caching_sha2_password is the the default authentication plugin since MySQL 8.0. If you meet this problem 
-when launching docker, you can fix it by changing it back to naive version. To do that, in your MySQL server on host machine, type following command:
-
-```SQL
-ALTER USER 'username'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
-ALTER USER 'username'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
-FLUSH PRIVILEGES; 
-```
-Then restart MySQL service and the docker image.
-
-### 3. pytz.exceptions.UnknownTimeZoneError: 'Can not find any timezone configuration'
-
-It is a common problem in Ubantu, the solution is set the locale environment variable correctly, e.g.
+It is a common problem in Ubuntu, the solution is setting the locale environment variable correctly, e.g.
 ```
 export TZ=America/Indiana/Indianapolis
 ```
 
-### 4. ValueError: unknown locale: UTF-8
+### 2. ValueError: unknown locale: UTF-8
 
 You may meet this error with earlier version of Python, please set the environment variables like below.
 

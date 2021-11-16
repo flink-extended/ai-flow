@@ -20,7 +20,7 @@
 /* eslint-disable */
 export const printANSI = () => {
   console.clear()
-  console.log('[Flink AI Flow] created()')
+  console.log('[AIFlow] created()')
   // ASCII - ANSI Shadow
   let text = `
   _____ _ _       _         _    ___   _____ _               
@@ -31,5 +31,5 @@ export const printANSI = () => {
                                                              
 `
   console.log(`%c${text}`, 'color: #fc4d50; font-weight: bold')
-  console.log('%cThanks for using Flink AI Flow!', 'color: #fff; font-size: 14px; font-weight: 300; text-shadow:#000 1px 0 0,#000 0 1px 0,#000 -1px 0 0,#000 0 -1px 0;')
+  console.log('%cThanks for using AIFlow!', 'color: #fff; font-size: 14px; font-weight: 300; text-shadow:#000 1px 0 0,#000 0 1px 0,#000 -1px 0 0,#000 0 -1px 0;')
 }

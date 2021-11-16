@@ -142,7 +142,7 @@
                   {% endfor %}
                 </td>
                 {# Column 4: Dag Runs #}
-                <td style="padding:0; width:120px;">
+                <td style="padding:0; width:130px;">
                   {{ loading_dots(classes='js-loading-dag-stats text-muted') }}
                   <svg height="10" width="10" id="dag-run-{{ dag.safe_dag_id }}" style="display: block;"></svg>
                 </td>
@@ -393,7 +393,7 @@
     function drawDagStatsForDag(dag_id, stats) {
       g = d3.select('svg#dag-run-' + dag_id.replace(/\./g, '__dot__'))
         .attr('height', diameter + (stroke_width_hover * 2))
-        .attr('width', '110px')
+        .attr('width', '120px')
         .selectAll("g")
         .data(states)
         .enter()

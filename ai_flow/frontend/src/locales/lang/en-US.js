@@ -35,7 +35,7 @@ export default {
 
   'layouts.usermenu.dialog.title': 'Message',
   'layouts.usermenu.dialog.content': 'Are you sure you would like to logout?',
-  'layouts.userLayout.title': 'Flink AI Flow is an open source framework that bridges big data and AI.',
+  'layouts.userLayout.title': 'AIFlow is an open source framework that bridges big data and AI.',
   ...components,
   ...menu,
   ...setting,

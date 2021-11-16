@@ -63,7 +63,7 @@ export default {
   mounted () {
     setTimeout(() => {
       this.currentUser = {
-        name: 'AI Flow'
+        name: 'AIFlow'
       }
     }, 1500)
   }

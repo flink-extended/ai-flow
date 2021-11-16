@@ -21,9 +21,9 @@ import { isIE } from '@/utils/util'
 
 if (process.env.NODE_ENV !== 'production' || process.env.VUE_APP_PREVIEW === 'true') {
   if (isIE()) {
-    console.error('[Flink AI Flow] ERROR: `mockjs` NOT SUPPORT `IE` PLEASE DO NOT USE IN `production` ENV.')
+    console.error('[AIFlow] ERROR: `mockjs` NOT SUPPORT `IE` PLEASE DO NOT USE IN `production` ENV.')
   }
-  console.log('[Flink AI Flow] mock mounting')
+  console.log('[AIFlow] mock mounting')
   const Mock = require('mockjs2')
   require('./services/auth')
   require('./services/user')
@@ -32,5 +32,5 @@ if (process.env.NODE_ENV !== 'production' || process.env.VUE_APP_PREVIEW === 'tr
   Mock.setup({
     timeout: 800
   })
-  console.log('[Flink AI Flow] mock mounted')
+  console.log('[AIFlow] mock mounted')
 }
