@@ -69,8 +69,8 @@ We currently also provide other implementations of `BlobManager` like `OssBlobMa
 
 ```yaml
 project_name: tutorial_project
-server_uri: localhost:50051
-notification_server_uri: localhost:50052
+server_uri: [Remote AIFlow server uri]
+notification_server_uri: [Remote Notification server uri]
 blob:
   blob_manager_class: ai_flow_plugins.blob_manager_plugins.oss_blob_manager.OssBlobManager
   blob_manager_config:
@@ -86,8 +86,8 @@ blob:
 
 ```yaml
 project_name: tutorial_project
-server_uri: localhost:50051
-notification_server_uri: localhost:50052
+server_uri: [Remote AIFlow server uri]
+notification_server_uri: [Remote Notification server uri]
 blob:
   blob_manager_class: ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager.HDFSBlobManager
   blob_manager_config:
@@ -101,8 +101,8 @@ blob:
 
 ```yaml
 project_name: tutorial_project
-server_uri: localhost:50051
-notification_server_uri: localhost:50052
+server_uri: [Remote AIFlow server uri]
+notification_server_uri: [Remote Notification server uri]
 blob:
   blob_manager_class: ai_flow_plugins.blob_manager_plugins.s3_blob_manager.S3BlobManager
   blob_manager_config:
