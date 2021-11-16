@@ -17,8 +17,9 @@
 # under the License.
 #
 import os
-from typing import Dict, Text
+from typing import Dict, Text, Union
 from ai_flow.util.json_utils import Jsonable, loads
+from ai_flow.util.yaml_utils import dump_yaml_file
 from ai_flow.workflow.job_config import JobConfig
 from ai_flow.workflow.periodic_config import PeriodicConfig
 from ai_flow.util import yaml_utils
@@ -84,3 +85,25 @@ def load_workflow_config(config_path: Text) -> WorkflowConfig:
         return workflow_config
     else:
         return None
+
+
+def dump_workflow_config(workflow_config: WorkflowConfig, config_path: Text) -> Union[str, bytes]:
+    workflow_data = {}
+    if workflow_config.periodic_config:
+        workflow_data[PERIODIC_CONFIG] = PeriodicConfig.to_dict(workflow_config.periodic_config)
+    if workflow_config.properties and workflow_config.properties != {}:
+        workflow_data[WORKFLOW_PROPERTIES] = workflow_config.properties
+    if workflow_config.dependencies and workflow_config.dependencies != {}:
+        workflow_data[WORKFLOW_DEPENDENCIES] = workflow_config.dependencies
+    if workflow_config.job_configs:
+        for job_name, job_config in workflow_config.job_configs.items():
+            workflow_data[job_name] = {}
+            if job_config.job_type:
+                workflow_data[job_name]['job_type'] = job_config.job_type
+            if job_config.job_label_report_interval and job_config.job_label_report_interval != 5.0:
+                workflow_data[job_name]['job_label_report_interval'] = job_config.job_label_report_interval
+            if job_config.properties and job_config.properties != {}:
+                workflow_data[job_name]['properties'] = job_config.properties
+            if job_name in workflow_config.job_periodic_config_dict:
+                workflow_data[job_name][PERIODIC_CONFIG] = workflow_config.job_periodic_config_dict[job_name]
+    return dump_yaml_file(workflow_data, config_path)

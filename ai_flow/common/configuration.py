@@ -29,4 +29,4 @@ class AIFlowConfiguration(Dict[Text, Text]):
 
     def dump_to_file(self, file_path):
         with open(file_path, 'w') as f:
-            return yaml.dump(data=self, stream=f)
+            return yaml.dump(data=dict(self), stream=f)

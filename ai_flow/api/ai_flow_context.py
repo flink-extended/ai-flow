@@ -14,7 +14,10 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import inspect
 import os
+import sys
+import tempfile
 import traceback
 from typing import Text
 from ai_flow.context.project_context import init_project_context, current_project_config, set_current_project_config
@@ -23,6 +26,9 @@ from ai_flow.client.ai_flow_client import get_ai_flow_client
 
 __init_context_flag__ = False
 __init_client_flag__ = False
+
+from ai_flow.project.project_config import ProjectConfig
+from ai_flow.workflow.workflow_config import WorkflowConfig, dump_workflow_config
 
 
 def init_ai_flow_context():
@@ -34,7 +40,10 @@ def init_ai_flow_context():
     2. Init project configuration
     3. Init workflow configuration.
     """
-    if __init_client_flag__ is True:
+    global __init_context_flag__
+    if __init_context_flag__:
+        raise Exception('init_ai_flow_context and init_notebook_context cannot be called at the same time.')
+    if __init_client_flag__:
         raise Exception('init_ai_flow_client and init_ai_flow_context cannot be called at the same time.')
     stack = traceback.extract_stack()
     workflow_entry_file = os.path.abspath(stack[-2].filename)
@@ -47,7 +56,44 @@ def init_ai_flow_context():
     # workflow_name/workflow_name.yaml
     init_workflow_config(workflow_config_file
                          =os.path.join(workflows_path, workflow_name, '{}.yaml'.format(workflow_name)))
+    __init_context_flag__ = True
+
+
+def init_notebook_context(project_config: ProjectConfig, workflow_config: WorkflowConfig):
+    """
+    Initializes the notebook context for the project and workflow environment when user defines the workflow:
+    1. Generates project and workflow.
+    2. Initializes project context.
+    3. Initializes project configuration.
+    4. Initializes workflow configuration.
+    """
     global __init_context_flag__
+    if __init_context_flag__:
+        raise Exception('init_notebook_context and init_ai_flow_context cannot be called at the same time.')
+
+    def generate(workflow_code):
+        """
+        Generates the project and workflow automatically.
+
+        :param workflow_code: User-defined workflow code.
+        :return: Project path and workflow configuration path.
+        """
+        temp_path = tempfile.mkdtemp()
+        temp_project_path = '{}/{}'.format(temp_path, project_config.get_project_name())
+        workflow_name = workflow_config.workflow_name
+        temp_workflow_path = '{}/workflows/{}'.format(temp_project_path, workflow_name)
+        os.makedirs(temp_workflow_path)
+        project_config.dump_to_file('{}/project.yaml'.format(temp_project_path))
+        temp_workflow_config = '{}/{}.yaml'.format(temp_workflow_path, workflow_name)
+        dump_workflow_config(workflow_config, temp_workflow_config)
+        with open('{}/{}.py'.format(temp_workflow_path, workflow_name), 'w') as f:
+            f.write(workflow_code)
+        return temp_project_path, temp_workflow_config
+
+    project_path, workflow_config_path = generate(inspect.getsource(sys._getframe().f_back.f_back))
+    init_project_context(project_path)
+    ensure_project_registered()
+    init_workflow_config(workflow_config_path)
     __init_context_flag__ = True
 
 
