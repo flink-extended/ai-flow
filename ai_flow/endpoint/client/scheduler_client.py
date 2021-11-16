@@ -31,8 +31,8 @@ from ai_flow.endpoint.client.base_client import BaseClient
 class SchedulerClient(BaseClient):
     def __init__(self, server_uri):
         super(SchedulerClient, self).__init__(server_uri)
-        channel = grpc.insecure_channel(server_uri)
-        self.scheduling_stub = scheduling_service_pb2_grpc.SchedulingServiceStub(channel)
+        self.channel = grpc.insecure_channel(server_uri)
+        self.scheduling_stub = scheduling_service_pb2_grpc.SchedulingServiceStub(self.channel)
 
     def submit_workflow_to_scheduler(self,
                                      namespace: Text,

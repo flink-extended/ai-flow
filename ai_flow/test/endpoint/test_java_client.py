@@ -29,7 +29,7 @@ from ai_flow.test.util.notification_service_utils import start_notification_serv
 
 _SQLITE_DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'aiflow.db')
 _SQLITE_DB_URI = '%s%s' % ('sqlite:///', _SQLITE_DB_FILE)
-_CONFIG_FILE_PATH = '../../java/client/src/test/resources/test.properties'
+_CONFIG_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../java/client/src/test/resources/test.properties')
 
 
 class JavaAIFlowClientTest(unittest.TestCase):

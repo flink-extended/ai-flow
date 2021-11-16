@@ -17,6 +17,9 @@
 # under the License.
 #
 import unittest
+
+from typing import Tuple
+
 from ai_flow.meta.dataset_meta import DatasetMeta
 from ai_flow.ai_graph.ai_node import AINode, ReadDatasetNode, WriteDatasetNode
 from ai_flow.workflow.control_edge import JobSchedulingRule, MeetAnyEventCondition, JobAction
@@ -26,8 +29,11 @@ from ai_flow.context.workflow_config_loader import init_workflow_config
 from ai_flow.translator.translator import *
 
 
-def build_ai_graph(node_number, job_number) -> AIGraph:
+def build_ai_graph() -> Tuple[AIGraph, AINode]:
+    node_number = 9
+    job_number = 3
     graph = AIGraph()
+    target_node = None
     for i in range(node_number):
         j = i % job_number
         config = JobConfig(job_name='job_{}'.format(j), job_type='mock')
@@ -36,16 +42,18 @@ def build_ai_graph(node_number, job_number) -> AIGraph:
         elif 3 == i:
             ai_node = WriteDatasetNode(dataset=DatasetMeta(name='sink'))
         else:
-            ai_node = AINode()
+            ai_node = AINode(name=str(i))
+            if j == 0:
+                target_node = ai_node
         ai_node.config = config
         graph.nodes[ai_node.node_id] = ai_node
 
-    add_data_edge(graph=graph, to_='AINode_4', from_='ReadDatasetNode_0')
-    add_data_edge(graph=graph, to_='AINode_4', from_='WriteDatasetNode_1')
+    add_data_edge(graph=graph, to_=target_node.node_id, from_='ReadDatasetNode_0')
+    add_data_edge(graph=graph, to_=target_node.node_id, from_='WriteDatasetNode_1')
     add_control_edge(graph, 'job_2', 'job_0')
     add_control_edge(graph, 'job_2', 'job_1')
 
-    return graph
+    return graph, target_node
 
 
 def add_data_edge(graph, to_, from_):
@@ -73,15 +81,15 @@ class TestTranslator(unittest.TestCase):
         project_context.project_path = '/tmp'
         project_context.project_config = ProjectConfig()
         project_context.project_config.set_project_name('test_project')
-        graph: AIGraph = build_ai_graph(9, 3)
+        graph, target_node = build_ai_graph()
         splitter = GraphSplitter()
         split_graph = splitter.split(graph)
         self.assertEqual(3, len(split_graph.nodes))
         self.assertEqual(1, len(split_graph.edges))
         self.assertEqual(2, len(split_graph.edges.get('job_2')))
         sub_graph = split_graph.nodes.get('job_0')
-        self.assertTrue('AINode_4' in sub_graph.nodes)
-        self.assertTrue('AINode_4' in sub_graph.edges)
+        self.assertTrue(target_node.node_id in sub_graph.nodes)
+        self.assertTrue(target_node.node_id in sub_graph.edges)
         constructor = WorkflowConstructor()
         constructor.register_job_generator('mock', MockJobGenerator())
         workflow = constructor.build_workflow(split_graph, project_context)
