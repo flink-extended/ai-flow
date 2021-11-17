@@ -23,6 +23,7 @@ from tempfile import NamedTemporaryFile
 from typing import Dict, Text, List, Optional
 
 import cloudpickle
+from airflow.exceptions import DagNotFound
 
 from ai_flow_plugins.scheduler_plugins.airflow.dag_generator import DAGGenerator
 from ai_flow.context.project_context import ProjectContext
@@ -40,6 +41,7 @@ from airflow.utils.db import create_session
 from airflow.utils.state import State
 from airflow.contrib.jobs.scheduler_client import EventSchedulerClient, SCHEDULER_NAMESPACE, ExecutionContext
 from airflow.utils.dates import parse_execution_date
+from airflow.api.common.experimental import delete_dag
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +146,16 @@ class AirFlowSchedulerBase(Scheduler, ABC):
         deploy_path = self.config.get('airflow_deploy_path')
         if deploy_path is None:
             raise Exception("airflow_deploy_path config not set!")
+
+        self.pause_workflow_scheduling(project_name=project_name,
+                                       workflow_name=workflow_name)
+        self.stop_all_workflow_execution(project_name=project_name,
+                                         workflow_name=workflow_name)
+        try:
+            delete_dag.delete_dag(dag_id)
+        except DagNotFound:
+            raise Exception("DAG with id {} not found. Cannot delete".format(dag_id))
+
         airflow_file_path = os.path.join(deploy_path,
                                          dag_id + '.py')
         if os.path.exists(airflow_file_path):
