@@ -46,6 +46,7 @@ ALL_EVENTS_KEY = "_*"
 ENABLE_IDEMPOTENCE_CONFIG = 'enable.idempotence'
 CLIENT_ID = 'client.id'
 INITIAL_SEQUENCE_NUMBER = 'initial.sequence.number'
+GRPC_MAX_RECEIVE_MESSAGE_LENGTH = 'grpc.max_receive_message_length'
 
 
 class ThreadEventWatcherHandle(EventWatcherHandle):
@@ -98,6 +99,7 @@ class NotificationClient(BaseNotification):
                  properties: Dict[str, str] = None):
         """
         The constructor of the NotificationClient.
+        The maximum message length that the NotificationClient can receive is set to unlimited for now.
 
         :param server_uri: Target server uri/uris. If multiple uris separated by "," were provided,
                            the HA mode would be turned on, regardless of the parameter `enable_ha`.
@@ -117,8 +119,12 @@ class NotificationClient(BaseNotification):
         :param sender: The identifier of the client.
         :param properties: The properties of NotificationClient
         """
+        self.conf = {} if not properties else properties
+        max_receive_message_length = -1 if GRPC_MAX_RECEIVE_MESSAGE_LENGTH not in self.conf \
+            else int(self.conf.get(GRPC_MAX_RECEIVE_MESSAGE_LENGTH))
         self.server_uri = server_uri
-        channel = grpc.insecure_channel(self.server_uri)
+        channel = grpc.insecure_channel(target=self.server_uri,
+                                        options=[('grpc.max_receive_message_length', max_receive_message_length)])
         self._default_namespace = default_namespace
         self.notification_stub = notification_service_pb2_grpc.NotificationServiceStub(channel)
         self.threads = {}  # type: Dict[Any, List[threading.Thread]]
@@ -131,7 +137,6 @@ class NotificationClient(BaseNotification):
         self._enable_idempotence = True
         server_uri_list = self.server_uri.split(",")
 
-        self.conf = {} if not properties else properties
         if ENABLE_IDEMPOTENCE_CONFIG in self.conf \
                 and self.conf.get(ENABLE_IDEMPOTENCE_CONFIG).strip().lower() == 'false':
             self._enable_idempotence = False
@@ -525,20 +530,24 @@ class NotificationClient(BaseNotification):
             t = threading.current_thread()
             flag = True if v is None else False
             current_version = 0 if v is None else v
-            while getattr(t, '_flag', True):
-                if flag:
-                    notifications = list_events(client, s, NOTIFICATION_TIMEOUT_SECONDS)
-                    if len(notifications) > 0:
-                        w.process(notifications)
-                        current_version = notifications[len(notifications) - 1].version
-                        flag = False
-                else:
-                    notifications = list_events_from_version(client,
-                                                             current_version,
-                                                             NOTIFICATION_TIMEOUT_SECONDS)
-                    if len(notifications) > 0:
-                        w.process(notifications)
-                        current_version = notifications[len(notifications) - 1].version
+            try:
+                while getattr(t, '_flag', True):
+                    if flag:
+                        notifications = list_events(client, s, NOTIFICATION_TIMEOUT_SECONDS)
+                        if len(notifications) > 0:
+                            w.process(notifications)
+                            current_version = notifications[len(notifications) - 1].version
+                            flag = False
+                    else:
+                        notifications = list_events_from_version(client,
+                                                                 current_version,
+                                                                 NOTIFICATION_TIMEOUT_SECONDS)
+                        if len(notifications) > 0:
+                            w.process(notifications)
+                            current_version = notifications[len(notifications) - 1].version
+            except Exception as e:
+                logging.exception("Exception when listening events, %s", e)
+                raise e
 
         thread = threading.Thread(target=listen,
                                   args=(self, start_time, version, watcher),
