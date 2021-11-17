@@ -264,6 +264,34 @@ class NotificationTest(object):
             self.client.stop_listen_events()
         self.assertEqual(2, len(event_list))
 
+    def test_listen_large_events(self):
+        list1 = []
+        list2 = []
+
+        class TestWatcher(EventWatcher):
+            def __init__(self, event_list) -> None:
+                super().__init__()
+                self.event_list = event_list
+
+            def process(self, events: List[BaseEvent]):
+                self.event_list.extend(events)
+        try:
+            self.client.send_event(BaseEvent(key="key", value="value"))
+
+            properties1 = {'enable.idempotence': 'True', 'grpc.max_receive_message_length': '10'}
+            small_client = NotificationClient(server_uri="localhost:50051", properties=properties1)
+            small_client.start_listen_events(watcher=TestWatcher(list1), version=0)
+
+            properties2 = {'enable.idempotence': 'True'}
+            big_client = NotificationClient(server_uri="localhost:50051", properties=properties2)
+            big_client.start_listen_events(watcher=TestWatcher(list2), version=0)
+
+        finally:
+            small_client.stop_listen_events()
+            big_client.stop_listen_events()
+        self.assertEqual(0, len(list1))
+        self.assertEqual(1, len(list2))
+
     def test_get_latest_version(self):
         event = self.client.send_event(BaseEvent(key="key", value="value1"))
         event = self.client.send_event(BaseEvent(key="key", value="value2"))

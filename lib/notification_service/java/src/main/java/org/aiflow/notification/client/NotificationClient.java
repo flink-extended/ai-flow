@@ -43,6 +43,8 @@ import static org.aiflow.notification.conf.Configuration.CLIENT_ID_CONFIG_DEFAUL
 import static org.aiflow.notification.conf.Configuration.CLIENT_ID_CONFIG_KEY;
 import static org.aiflow.notification.conf.Configuration.CLIENT_INITIAL_SEQUENCE_NUMBER_CONFIG_DEFAULT_VALUE;
 import static org.aiflow.notification.conf.Configuration.CLIENT_INITIAL_SEQUENCE_NUMBER_CONFIG_KEY;
+import static org.aiflow.notification.conf.Configuration.GRPC_MAX_RECEIVE_MESSAGE_LENGTH_CONFIG_DEFAULT_VALUE;
+import static org.aiflow.notification.conf.Configuration.GRPC_MAX_RECEIVE_MESSAGE_LENGTH_CONFIG_KEY;
 
 public class NotificationClient {
 
@@ -262,6 +264,10 @@ public class NotificationClient {
 
     /** Initialize notification service stub. */
     protected void initNotificationServiceStub() {
+        int maxMessageSize =
+                this.conf.getInt(
+                        GRPC_MAX_RECEIVE_MESSAGE_LENGTH_CONFIG_KEY,
+                        GRPC_MAX_RECEIVE_MESSAGE_LENGTH_CONFIG_DEFAULT_VALUE);
         if (notificationServiceStub == null) {
             notificationServiceStub =
                     NotificationServiceGrpc.newBlockingStub(
@@ -269,6 +275,7 @@ public class NotificationClient {
                                             StringUtils.isEmpty(currentUri)
                                                     ? SERVER_URI
                                                     : currentUri)
+                                    .maxInboundMessageSize(maxMessageSize)
                                     .usePlaintext()
                                     .build());
         }
