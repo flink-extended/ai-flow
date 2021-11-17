@@ -66,6 +66,33 @@ class TestAirflowScheduler(unittest.TestCase):
         with open(dag_file_path, 'rt') as f:
             self.assertEqual(mock_generated_code, f.read())
 
+    def test_airflow_scheduler_delete_workflow(self):
+        workflow_name = 'test_workflow'
+        workflow = self._get_workflow(workflow_name)
+
+        project_name = 'test_project'
+        project_context = self._get_project_context(project_name)
+
+        mock_generated_code = 'mock generated code'
+        self.scheduler.dag_generator.generate.return_value = mock_generated_code
+
+        context_extractor = BroadcastAllContextExtractor()
+        self.scheduler.submit_workflow(workflow, context_extractor=context_extractor,
+                                       project_context=project_context)
+        dag_file_path = os.path.join(self.temp_deploy_path, '.'.join([project_name, workflow_name, 'py']))
+        self.assertTrue(os.path.exists(dag_file_path))
+
+        with patch('ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.'
+                   'AirFlowScheduler.pause_workflow_scheduling') as pause_func:
+            with patch('ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.'
+                       'AirFlowScheduler.stop_all_workflow_execution') as stop_func:
+                with patch('airflow.api.common.experimental.delete_dag.delete_dag') as delete_func:
+                    self.scheduler.delete_workflow(project_name, workflow_name)
+        pause_func.assert_called_with(project_name=project_name, workflow_name=workflow_name)
+        stop_func.assert_called_with(project_name=project_name, workflow_name=workflow_name)
+        delete_func.assert_called_with('{}.{}'.format(project_name, workflow_name))
+        self.assertFalse(os.path.exists(dag_file_path))
+
     def test_airflow_scheduler_submit_workflow_with_customized_context_extractor(self):
         script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'context_extractor_pickle_maker.py')
         os.system('python {}'.format(script_path))
