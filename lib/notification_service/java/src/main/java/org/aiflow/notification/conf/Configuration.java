@@ -32,6 +32,13 @@ public class Configuration {
 
     public static final int CLIENT_INITIAL_SEQUENCE_NUMBER_CONFIG_DEFAULT_VALUE = 0;
 
+    /** Maximum message length of bytes that the channel can receive. */
+    public static final String GRPC_MAX_RECEIVE_MESSAGE_LENGTH_CONFIG_KEY =
+            "grpc.max_receive_message_length";
+
+    public static final int GRPC_MAX_RECEIVE_MESSAGE_LENGTH_CONFIG_DEFAULT_VALUE =
+            Integer.MAX_VALUE;
+
     private final Properties properties;
 
     public Configuration(Properties properties) {

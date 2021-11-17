@@ -31,6 +31,7 @@ import java.util.Properties;
 import static org.aiflow.notification.conf.Configuration.CLIENT_ENABLE_IDEMPOTENCE_CONFIG_KEY;
 import static org.aiflow.notification.conf.Configuration.CLIENT_ID_CONFIG_KEY;
 import static org.aiflow.notification.conf.Configuration.CLIENT_INITIAL_SEQUENCE_NUMBER_CONFIG_KEY;
+import static org.aiflow.notification.conf.Configuration.GRPC_MAX_RECEIVE_MESSAGE_LENGTH_CONFIG_KEY;
 import static org.junit.Assert.assertEquals;
 
 public class NotificationClientTest {
@@ -111,6 +112,34 @@ public class NotificationClientTest {
         Thread.sleep(10000);
         assertEquals(3, ii[0].intValue());
         this.client.stopListenEvent("default", listenerKey, "type", "*");
+    }
+
+    @Test
+    public void listenLargeEvents() throws Exception {
+        Properties properties = new Properties();
+        properties.put(CLIENT_ENABLE_IDEMPOTENCE_CONFIG_KEY, "true");
+
+        NotificationClient bigClient =
+                new NotificationClient(
+                        "localhost:50051", "default", "test", false, 5, 10, 2000, properties);
+        properties.put(GRPC_MAX_RECEIVE_MESSAGE_LENGTH_CONFIG_KEY, "10");
+        NotificationClient smallClient =
+                new NotificationClient(
+                        "localhost:50051", "default", "test", false, 5, 10, 2000, properties);
+
+        EventMeta event = this.client.sendEvent("key", "value", "type", "");
+
+        final Integer[] small = {0};
+        final Integer[] big = {0};
+        smallClient.startListenEvent(
+                "default", "key", events -> small[0] += events.size(), 0, "type", 0, "test");
+        bigClient.startListenEvent(
+                "default", "key", events -> big[0] += events.size(), 0, "type", 0, "test");
+        Thread.sleep(10000);
+        assertEquals(0, small[0].intValue());
+        assertEquals(1, big[0].intValue());
+        smallClient.stopListenEvent("default", "key", "*", "test");
+        bigClient.stopListenEvent("default", "key", "*", "test");
     }
 
     @Test
