@@ -183,8 +183,8 @@ class EventBasedScheduler(LoggingMixin):
             elif isinstance(event, PeriodicEvent):
                 dag_runs = DagRun.find(dag_id=event.dag_id, execution_date=event.execution_date)
                 if len(dag_runs) < 1:
-                    self.log.warning("DagRun not found by dag_id:{}, run_id:{}".format(
-                        event.dag_id, event.dag_run_id))
+                    self.log.warning("DagRun not found by dag_id:{}, execution_date:{}".format(
+                        event.dag_id, event.execution_date))
                 else:
                     ti = dag_runs[0].get_task_instance(event.task_id)
                     self._send_scheduling_task_event(ti, SchedulingAction.RESTART)
