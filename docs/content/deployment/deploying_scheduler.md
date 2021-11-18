@@ -8,7 +8,7 @@ deployment of the Airflow scheduler is as follows:
 We use enhanced Airflow as an event-based scheduler and both
 [LocalExecutor](https://airflow.apache.org/docs/apache-airflow/stable/executor/local.html) and
 [CeleryExecutor](https://airflow.apache.org/docs/apache-airflow/stable/executor/celery.html) are supported. Follow below
-steps to initialize configuration and start the Airflow scheduler.
+steps to initialize environment and start the Airflow scheduler.
 
 ### LocalExecutor
 
@@ -19,10 +19,10 @@ steps to initialize configuration and start the Airflow scheduler.
    init-airflow-env.sh
    ```
 
-   The script will also create an admin airflow user whose username and password are both `admin`. Please refer
+   The script will also create an admin user whose username and password are both `admin`. Please refer
    to [Configuration](configuration) and
    [Airflow Configuration Reference](https://airflow.apache.org/docs/apache-airflow/2.0.0/configurations-ref.html) for
-   all the configuration you can change.
+   all configurations you can change.
 
 2. Start the Scheduler.
 
@@ -32,7 +32,7 @@ steps to initialize configuration and start the Airflow scheduler.
 
    You can check the log of the scheduler and Airflow webserver at `$AIRFLOW_HOME/logs` or `$HOME/airflow/logs`
    directory. `scheduler-*.log` is log of scheduler and `web-*.log` is log of Airflow web server. You can
-   visit http://127.0.0.1:8080 to see the Airflow web server UI.
+   visit http://127.0.0.1:8080 to see the Airflow web UI.
 
 ### CeleryExecutor
 
@@ -41,7 +41,7 @@ steps to initialize configuration and start the Airflow scheduler.
 1. Set up Celery broker and result backend. `CeleryExecutor` takes advantage of the [Celery](https://docs.celeryproject.org/en/stable/index.html) to
    scale out the number of workers. For this to work, you need to set up a broker and a result backend refer to the exhaustive [Celery documentation](https://docs.celeryproject.org/en/latest/getting-started/backends-and-brokers/index.html).
    
-2. Change the Airflow configuration. You need to change your airflow.cfg to point the `executor` parameter to `CeleryExecutor` and provide the neccess related Celery settings.
+2. Change the Airflow configuration. You need to change your airflow.cfg to point the `executor` parameter to `CeleryExecutor` and provide the necessary related Celery settings.
 
 3. Set up and kick off all Celery workers. Here are some imperative requirements for your workers:
    * Airflow needs to be installed, and the CLI needs to be in the path.
@@ -73,10 +73,12 @@ steps to initialize configuration and start the Airflow scheduler.
 
 You can follow this guide to quickly start AIFlow and Scheduler with `CeleryExecutor` within Docker.
 
-Note: the Docker Compose below may be not enough to run production-ready Docker Compose AIFlow installation using it.
+```{note}
+The Docker Compose below may be not enough to run production-ready Docker Compose AIFlow installation using it.
 This is truly quick-start docker-compose for you to get your hands dirty with AIFlow and `CeleryExecutor`.
+```
 
-##### Before you begin
+##### Prerequisites
 
 Make sure you have Docker and Docker Compose installed on your workstation,
 otherwise please follow these steps to install the tools.
