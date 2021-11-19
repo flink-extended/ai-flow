@@ -10,7 +10,8 @@ AIFlow requires python3.7, you can check your version with following command:
 ```shell script
 python --version
 ```
-Please make sure the version is 3.7.x. If not, we strongly recommend using [virtualenv](https://virtualenv.pypa.io/en/latest/index.html) or other similar tools for an isolated Python environment in case of dependencies conflict error, e.g.
+Please make sure the version is 3.7.x. 
+We strongly recommend using [virtualenv](https://virtualenv.pypa.io/en/latest/index.html) or other similar tools for an isolated Python environment.
 
 ```shell
 pip install virtualenv
@@ -43,7 +44,7 @@ Any problems please refer to [mysqlclient installation](https://github.com/PyMyS
 
 ## Install AIFlow
 
-Only pip installation is currently officially supported.
+Only pip installation is officially supported.
 
 ```
 pip install ai-flow
