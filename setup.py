@@ -108,7 +108,7 @@ try:
         description='An open source framework that bridges big data and AI.',
         author='',
         author_email='flink.aiflow@gmail.com',
-        url='https://github.com/alibaba/flink-ai-extended',
+        url='https://github.com/flink-extended/ai-flow',
         packages=find_packages(),
         install_requires=require_packages,
         python_requires='>=3.6, <3.8' if os.getenv('BUILD_MINI_AI_FLOW_PACKAGE') == 'true' else '>=3.7, <3.8',
