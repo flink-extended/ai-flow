@@ -18,6 +18,11 @@
 #
 import time
 import socket
+from importlib import import_module
+from itertools import tee, filterfalse
+
+from typing import Callable, Iterable
+
 from notification_service.base_notification import BaseEvent, Member, SenderEventCount
 from notification_service.proto import notification_service_pb2
 
@@ -129,3 +134,27 @@ def get_ip_addr() -> str:
     finally:
         s.close()
         return ip
+
+
+def import_string(dotted_path):
+    """
+    Import a dotted module path and return the attribute/class designated by the
+    last name in the path. Raise ImportError if the import failed.
+    """
+    try:
+        module_path, class_name = dotted_path.rsplit('.', 1)
+    except ValueError:
+        raise ImportError(f"{dotted_path} doesn't look like a module path")
+
+    module = import_module(module_path)
+
+    try:
+        return getattr(module, class_name)
+    except AttributeError:
+        raise ImportError(f'Module "{module_path}" does not define a "{class_name}" attribute/class')
+
+
+def partition(pred: Callable, iterable: Iterable):
+    """Use a predicate to partition entries into false entries and true entries"""
+    iter_1, iter_2 = tee(iterable)
+    return filterfalse(pred, iter_1), filter(pred, iter_2)
