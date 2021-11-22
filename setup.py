@@ -114,6 +114,11 @@ try:
         python_requires='>=3.6, <3.8' if os.getenv('BUILD_MINI_AI_FLOW_PACKAGE') == 'true' else '>=3.7, <3.8',
         include_package_data=True,
         scripts=get_script(),
+        entry_points={
+            'console_scripts': [
+                'aiflow = ai_flow.__main__:main'
+            ]
+        }
     )
 finally:
     if in_source:
