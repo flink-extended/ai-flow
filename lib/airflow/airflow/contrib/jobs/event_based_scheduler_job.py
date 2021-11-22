@@ -271,7 +271,8 @@ class EventBasedScheduler(LoggingMixin):
     def _remove_periodic_events(self, dag_id, execution_date, session=None):
         dagruns = DagRun.find(dag_id=dag_id, execution_date=execution_date)
         if not dagruns:
-            self.log.warning('got no dagruns to remove periodic events.')
+            self.log.warning(f'Gets no dagruns to remove periodic events with dag_id: {dag_id} '
+                             f'and execution_date: {execution_date}.')
         else:
             dag = self.dagbag.get_dag(dag_id=dagruns[0].dag_id, session=session)
             for task in dag.tasks:
