@@ -22,14 +22,10 @@ import unittest
 from notification_service.util.utils import import_string
 
 
-class ClassA:
-    pass
-
-
 class TestUtil(unittest.TestCase):
     def test_import_string(self):
-        a = import_string("test_util.ClassA")()
-        self.assertTrue(isinstance(a, ClassA))
+        a = import_string("unittest.TestCase")()
+        self.assertTrue(isinstance(a, unittest.TestCase))
 
         with self.assertRaises(ImportError):
             import_string("invalid")
