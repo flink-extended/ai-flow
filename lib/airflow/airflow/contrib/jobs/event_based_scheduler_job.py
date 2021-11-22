@@ -270,11 +270,14 @@ class EventBasedScheduler(LoggingMixin):
     @provide_session
     def _remove_periodic_events(self, dag_id, execution_date, session=None):
         dagruns = DagRun.find(dag_id=dag_id, execution_date=execution_date)
-        dag = self.dagbag.get_dag(dag_id=dagruns[0].dag_id, session=session)
-        for task in dag.tasks:
-            if task.executor_config is not None and 'periodic_config' in task.executor_config:
-                self.log.debug('remove periodic task {} {} {}'.format(dag_id, execution_date, task.task_id))
-                self.periodic_manager.remove_task(dag_id, execution_date, task.task_id)
+        if not dagruns:
+            self.log.warning('got no dagruns to remove periodic events.')
+        else:
+            dag = self.dagbag.get_dag(dag_id=dagruns[0].dag_id, session=session)
+            for task in dag.tasks:
+                if task.executor_config is not None and 'periodic_config' in task.executor_config:
+                    self.log.debug('remove periodic task {} {} {}'.format(dag_id, execution_date, task.task_id))
+                    self.periodic_manager.remove_task(dag_id, execution_date, task.task_id)
 
     def _create_dag_run(self, dag_id, session, run_type=DagRunType.SCHEDULED, context=None) -> DagRun:
         with prohibit_commit(session) as guard:

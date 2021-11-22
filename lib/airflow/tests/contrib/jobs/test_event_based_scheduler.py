@@ -690,3 +690,38 @@ class TestEventBasedScheduler(unittest.TestCase):
             res = scheduler._find_downstream_tasks('sleep_1000_secs', dr1, session)
             self.assertEqual(1, len(res))
             self.assertEqual('sleep', res[0].task_id)
+
+    def test__remove_periodic_events(self):
+        dag_file = os.path.join(TEST_DAG_FOLDER, 'test_event_based_executor.py')
+        scheduler = EventBasedSchedulerJob(
+            dag_directory=dag_file,
+            notification_server_uri="localhost:{}".format(self.port),
+            executor=LocalExecutor(3),
+            max_runs=-1,
+            refresh_dag_dir_interval=30
+        ).scheduler
+        dag = DagBag(dag_file).dags['test_event_based_dag']
+        dag.sync_to_db()
+        SerializedDagModel.write_dag(dag=dag)
+
+        dr1 = dag.create_dagrun(state=State.RUNNING,
+                                execution_date=timezone.datetime(2020, 1, 2),
+                                run_type=DagRunType.SCHEDULED,
+                                context='test_context')
+        ti1 = TaskInstance(task=dag.task_dict.get('sleep_1000_secs'), execution_date=dr1.execution_date,
+                           state=State.SUCCESS)
+        ti2 = TaskInstance(task=dag.task_dict.get('sleep'), execution_date=dr1.execution_date,
+                           state=State.NONE)
+
+        with self.assertLogs(scheduler.log, level='INFO') as cm:
+            scheduler._remove_periodic_events('no_dagrun_dag', dr1.execution_date)
+            scheduler._remove_periodic_events(dr1.dag_id, timezone.datetime(2222, 1, 2))
+        self.assertEqual(cm.output,
+                         ['WARNING:airflow.contrib.jobs.event_based_scheduler_job.EventBasedScheduler:'
+                          'got no dagruns to remove periodic events.',
+                          'WARNING:airflow.contrib.jobs.event_based_scheduler_job.EventBasedScheduler:'
+                          'got no dagruns to remove periodic events.',
+                          ])
+
+        self.assertIsNone(scheduler._remove_periodic_events(dr1.dag_id, dr1.execution_date))
+
