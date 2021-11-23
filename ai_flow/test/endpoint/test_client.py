@@ -63,6 +63,8 @@ class AIFlowClientTestCases(object):
         dataset_name = client.get_dataset_by_name('dataset')
         self.assertEqual('dataset', dataset.name)
         self.assertEqual('dataset', dataset_name.name)
+        self.assertTrue(isinstance(dataset_name.properties, Properties))
+        self.assertEqual(Properties({'a': 'b'}), dataset_name.properties)
 
     def test_save_dataset_with_catalog_by_id_and_name(self):
         client.register_dataset_with_catalog(name='dataset',
@@ -157,12 +159,16 @@ class AIFlowClientTestCases(object):
     """test project"""
 
     def test_save_project_get_project_by_id_and_name(self):
-        response = client.register_project(name='project', uri='www.code.com', )
+        response = client.register_project(name='project', uri='www.code.com',
+                                           properties=Properties({'a': 'b'}))
         project_id = client.get_project_by_id(response.uuid)
         project_name = client.get_project_by_name('project')
         self.assertEqual(project_id.name, 'project')
         self.assertEqual(project_name.name, 'project')
-        print(project_id)
+        self.assertTrue(isinstance(project_id.properties, Properties))
+        self.assertEqual(project_id.properties, Properties({'a': 'b'}))
+        self.assertTrue(isinstance(project_name.properties, Properties))
+        self.assertEqual(project_name.properties, Properties({'a': 'b'}))
 
     def test_double_register_project(self):
         client.register_project(name='project', uri='www.code.com')
@@ -469,11 +475,16 @@ class AIFlowClientTestCases(object):
         """test artifact"""
 
     def test_save_artifact_get_artifact_by_id_and_name(self):
-        artifact = client.register_artifact(name='artifact', artifact_type='json', uri='./artifact.json')
+        artifact = client.register_artifact(name='artifact', artifact_type='json', uri='./artifact.json',
+                                            properties=Properties({'a': 'b'}))
         artifact_id = client.get_artifact_by_id(artifact.uuid)
         artifact_name = client.get_artifact_by_name(artifact.name)
         self.assertEqual(artifact.artifact_type, artifact_id.artifact_type)
         self.assertEqual('artifact', artifact_name.name)
+        self.assertTrue(isinstance(artifact_id.properties, Properties))
+        self.assertEqual(Properties({'a': 'b'}), artifact_id.properties)
+        self.assertTrue(isinstance(artifact_name.properties, Properties))
+        self.assertEqual(Properties({'a': 'b'}), artifact_name.properties)
 
     def test_double_save_artifact(self):
         artifact_1 = client.register_artifact(name='artifact', artifact_type='json', uri='./artifact.json')
