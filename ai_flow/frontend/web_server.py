@@ -23,11 +23,10 @@ import logging
 from logging.config import dictConfig
 from typing import List, Dict
 
-from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
-
 from ai_flow.endpoint.server.server_config import AIFlowServerConfig
+from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
+from ai_flow.version import __version__
 
-from ai_flow.common.configuration import AIFlowConfiguration
 from django.core.paginator import Paginator
 from flask import Flask, request, render_template
 from flask_cors import CORS
@@ -61,6 +60,7 @@ def config_logging():
         }
     })
 
+
 app = Flask(__name__, static_folder='./dist', template_folder='./dist', static_url_path='')
 CORS(app=app)
 
@@ -68,6 +68,7 @@ store: AbstractStore = None
 scheduler: Scheduler = None
 airflow: str = None
 logger = logging.getLogger(__name__)
+
 
 def init(store_uri: str, scheduler_class: str, airflow_web_server_uri: str):
     global store
@@ -333,6 +334,11 @@ def metadata(meta):
 @app.route('/graph/<project_id>/<workflow_name>')
 def graph(project_id, workflow_name):
     return render_template('index.html')
+
+
+@app.route('/version')
+def version():
+    return __version__
 
 
 @app.route('/project')

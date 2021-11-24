@@ -27,7 +27,6 @@ if (process.env.NODE_ENV !== 'production' || process.env.VUE_APP_PREVIEW === 'tr
   const Mock = require('mockjs2')
   require('./services/auth')
   require('./services/user')
-  require('./services/other')
 
   Mock.setup({
     timeout: 800

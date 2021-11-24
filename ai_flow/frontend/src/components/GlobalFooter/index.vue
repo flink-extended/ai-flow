@@ -14,12 +14,12 @@ limitations under the License. -->
 <template>
   <global-footer class="footer custom-render">
     <template v-slot:links>
-      <a href="https://github.com/alibaba/flink-ai-extended/wiki" target="_blank">Flink AI Extended</a>
-      <a href="https://github.com/alibaba/flink-ai-extended" target="_blank">Github</a>
-      <a href="https://github.com/alibaba" target="_blank">@alibaba</a>
+      <a href="https://ai-flow.readthedocs.io" target="_blank">AIFlow</a>
+      <a href="https://github.com/flink-extended/ai-flow" target="_blank">Github</a>
+      <a href="https://github.com/flink-extended" target="_blank">@flink-extended</a>
     </template>
     <template v-slot:copyright>
-      <a href="https://github.com/flink-extended/ai-flow" target="_blank">AIFlow</a>
+      <div class="footer"><div class="copyright">&copy; AIFlow</div></div>
     </template>
   </global-footer>
 </template>

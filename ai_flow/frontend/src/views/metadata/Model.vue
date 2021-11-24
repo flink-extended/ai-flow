@@ -40,13 +40,16 @@ limitations under the License. -->
         showPagination="auto"
       />
     </a-card>
+    <a-card :bordered="false">
+      <span>Version: <a :href="'https://pypi.org/project/ai-flow/'+version" target="_blank">{{ version }}</a></span>
+    </a-card>
   </page-header-wrapper>
 </template>
 
 <script>
 import moment from 'moment'
 import { STable, Ellipsis } from '@/components'
-import { getModels, getRoleList } from '@/api/manage'
+import { getModels, getVersion } from '@/api/manage'
 
 const columns = [
   {
@@ -80,17 +83,24 @@ export default {
             console.log(res)
             return res
           })
-      }
+      },
+      version: ''
     }
   },
-  created () {
-    getRoleList({ t: new Date() })
+  mounted () {
+    this.getAIFlowVersion()
   },
   methods: {
     resetSearchForm () {
       this.queryParam = {
         date: moment(new Date())
       }
+    },
+    getAIFlowVersion () {
+      getVersion()
+        .then(res => {
+          this.version = res
+        })
     }
   }
 }
