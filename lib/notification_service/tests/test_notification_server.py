@@ -38,10 +38,12 @@ class TestNotificationServer(unittest.TestCase):
     def setUp(self) -> None:
         self._clean_db()
         config = NotificationServerConfig(config_file)
+        db.clear_engine_and_session()
         db.create_all_tables(config.db_uri)
 
     def tearDown(self) -> None:
         self._clean_db()
+        db.clear_engine_and_session()
 
     def test_run_notification_server(self):
         server = NotificationServerRunner(config_file=config_file)

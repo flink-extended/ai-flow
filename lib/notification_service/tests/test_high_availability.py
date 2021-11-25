@@ -78,6 +78,7 @@ class HaServerTest(unittest.TestCase):
         os.remove(_SQLITE_DB_FILE)
 
     def setUp(self):
+        db.prepare_db()
         self.storage.clean_up()
         self.master1 = self.start_master("localhost", "50051")
         self.client = self.wait_for_master_started("localhost:50051")
@@ -92,8 +93,7 @@ class HaServerTest(unittest.TestCase):
             self.master2.stop()
         if self.master3 is not None:
             self.master3.stop()
-        db_engine = sqlalchemy.create_engine(_SQLITE_DB_URI, pool_pre_ping=True)
-        declarative_base().metadata.drop_all(db_engine)
+        db.clear_engine_and_session()
 
     def wait_for_new_members_detected(self, new_member_uri):
         for i in range(100):

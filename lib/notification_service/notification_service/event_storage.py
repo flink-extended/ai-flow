@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import logging
 import time
 from abc import ABC, abstractmethod
 from collections import Iterable
@@ -264,5 +265,8 @@ class DbEventStorage(BaseEventStorage):
         return EventModel.get_event_by_uuid(uuid)
 
     def clean_up(self):
-        EventModel.cleanup()
-        ClientModel.cleanup()
+        tables = set(db.engine.table_names())
+        for tbl in reversed(db.Base.metadata.sorted_tables):
+            if tbl.name in tables:
+                logging.info('Delete all data from table: {}', tbl.name)
+                db.engine.execute(tbl.delete())
