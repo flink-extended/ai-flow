@@ -16,6 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from ai_flow.common.properties import Properties
+
 from ai_flow.meta.artifact_meta import ArtifactMeta
 from ai_flow.meta.dataset_meta import DatasetMeta, List, DataType, Schema
 from ai_flow.meta.job_meta import State
@@ -33,9 +35,11 @@ class ProtoToMeta:
 
     @staticmethod
     def proto_to_dataset_meta(dataset_proto: DatasetProto) -> DatasetMeta:
-        properties = dataset_proto.properties
-        if properties == {}:
-            properties = None
+        properties = None
+        if dataset_proto.properties != {}:
+            properties = Properties()
+            for key, val in dataset_proto.properties.items():
+                properties.update({key: val})
         name_list = dataset_proto.schema.name_list
         if not name_list:
             name_list = None
@@ -82,9 +86,11 @@ class ProtoToMeta:
 
     @staticmethod
     def proto_to_project_meta(project_proto: ProjectProto) -> ProjectMeta:
-        properties = project_proto.properties
-        if properties == {}:
-            properties = None
+        properties = None
+        if project_proto.properties != {}:
+            properties = Properties()
+            for key, val in project_proto.properties.items():
+                properties.update({key: val})
         return ProjectMeta(
             uuid=project_proto.uuid,
             name=project_proto.name,
@@ -100,9 +106,11 @@ class ProtoToMeta:
 
     @staticmethod
     def proto_to_workflow_meta(workflow_proto: WorkflowMetaProto) -> WorkflowMeta:
-        properties = workflow_proto.properties
-        if properties == {}:
-            properties = None
+        properties = None
+        if workflow_proto.properties != {}:
+            properties = Properties()
+            for key, val in workflow_proto.properties.items():
+                properties.update({key: val})
         project_id = workflow_proto.project_id.value if workflow_proto.HasField('project_id') else None
         create_time = workflow_proto.create_time.value if workflow_proto.HasField('create_time') else None
         update_time = workflow_proto.update_time.value if workflow_proto.HasField('update_time') else None
@@ -142,9 +150,11 @@ class ProtoToMeta:
 
     @staticmethod
     def proto_to_artifact_meta(artifact_proto: ArtifactProto) -> ArtifactMeta:
-        properties = artifact_proto.properties
-        if properties == {}:
-            properties = None
+        properties = None
+        if artifact_proto.properties != {}:
+            properties = Properties()
+            for key, val in artifact_proto.properties.items():
+                properties.update({key: val})
         return ArtifactMeta(
             uuid=artifact_proto.uuid,
             name=artifact_proto.name,

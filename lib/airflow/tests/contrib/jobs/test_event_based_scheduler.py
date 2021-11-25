@@ -90,14 +90,14 @@ class TestEventBasedScheduler(unittest.TestCase):
                 ti_sleep_1000_secs = self._get_task_instance(EVENT_BASED_SCHEDULER_DAG, 'sleep_1000_secs', session)
                 ti_python_sleep = self._get_task_instance(EVENT_BASED_SCHEDULER_DAG, 'python_sleep', session)
                 if ti_sleep_1000_secs and ti_sleep_1000_secs.state == State.SCHEDULED and \
-                   ti_python_sleep and ti_python_sleep.state == State.SCHEDULED:
+                    ti_python_sleep and ti_python_sleep.state == State.SCHEDULED:
                     self.client.send_event(BaseEvent(key='start', value='', event_type='', namespace='test_namespace'))
 
                     while not stopped:
                         ti_sleep_1000_secs.refresh_from_db()
                         ti_python_sleep.refresh_from_db()
                         if ti_sleep_1000_secs and ti_sleep_1000_secs.state == State.RUNNING and \
-                           ti_python_sleep and ti_python_sleep.state == State.RUNNING:
+                            ti_python_sleep and ti_python_sleep.state == State.RUNNING:
                             time.sleep(10)
                             break
                         else:
@@ -110,7 +110,7 @@ class TestEventBasedScheduler(unittest.TestCase):
                         ti_sleep_1000_secs.refresh_from_db()
                         ti_python_sleep.refresh_from_db()
                         if ti_sleep_1000_secs and ti_sleep_1000_secs.state == State.KILLED and \
-                           ti_python_sleep and ti_python_sleep.state == State.RUNNING:
+                            ti_python_sleep and ti_python_sleep.state == State.RUNNING:
                             stopped = True
                         else:
                             time.sleep(1)
@@ -163,7 +163,7 @@ class TestEventBasedScheduler(unittest.TestCase):
     def get_latest_job_id(self, session):
         return session.query(BaseJob).order_by(sqlalchemy.desc(BaseJob.id)).first().id
 
-    def start_scheduler(self, file_path, event_start_time=int(time.time()*1000)):
+    def start_scheduler(self, file_path, event_start_time=int(time.time() * 1000)):
         self.scheduler = EventBasedSchedulerJob(
             dag_directory=file_path,
             notification_server_uri="localhost:{}".format(self.port),
@@ -554,7 +554,7 @@ class TestEventBasedScheduler(unittest.TestCase):
         t = threading.Thread(target=self.run_interval_periodic_task_function, args=())
         t.setDaemon(True)
         t.start()
-        self.start_scheduler(dag_file, int(time.time()*1000))
+        self.start_scheduler(dag_file, int(time.time() * 1000))
         tes: List[TaskExecution] = self.get_task_execution("single", "task_1")
         first_task_num = len(tes)
         self.assertGreater(first_task_num, 1)
@@ -563,7 +563,7 @@ class TestEventBasedScheduler(unittest.TestCase):
         t.setDaemon(True)
         t.start()
         # db.clear_db_event_progress()
-        self.start_scheduler(dag_file, int(time.time()*1000))
+        self.start_scheduler(dag_file, int(time.time() * 1000))
         tes: List[TaskExecution] = self.get_task_execution("single", "task_1")
         twice_task_num = len(tes)
         self.assertGreater(twice_task_num, first_task_num)
@@ -717,11 +717,12 @@ class TestEventBasedScheduler(unittest.TestCase):
             scheduler._remove_periodic_events('no_dagrun_dag', dr1.execution_date)
             scheduler._remove_periodic_events(dr1.dag_id, timezone.datetime(2222, 1, 2))
         self.assertEqual(cm.output,
-                         ['WARNING:airflow.contrib.jobs.event_based_scheduler_job.EventBasedScheduler:'
-                          'got no dagruns to remove periodic events.',
-                          'WARNING:airflow.contrib.jobs.event_based_scheduler_job.EventBasedScheduler:'
-                          'got no dagruns to remove periodic events.',
+                         ['WARNING:airflow.contrib.jobs.event_based_scheduler_job.EventBasedScheduler:Gets '
+                          'no dagruns to remove periodic events with dag_id: no_dagrun_dag and '
+                          'execution_date: 2020-01-02 00:00:00+00:00.',
+                          'WARNING:airflow.contrib.jobs.event_based_scheduler_job.EventBasedScheduler:Gets '
+                          'no dagruns to remove periodic events with dag_id: test_event_based_dag and '
+                          'execution_date: 2222-01-02 00:00:00+00:00.'
                           ])
 
         self.assertIsNone(scheduler._remove_periodic_events(dr1.dag_id, dr1.execution_date))
-
