@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import yaml
+import os
 
 
 class NotificationServerConfig(object):
@@ -80,3 +81,14 @@ class NotificationServerConfig(object):
     @advertised_uri.setter
     def advertised_uri(self, advertised_uri):
         self._advertised_uri = advertised_uri
+
+
+def get_configuration():
+    if 'NOTIFICATION_HOME' in os.environ:
+        home = os.getenv('NOTIFICATION_HOME')
+    else:
+        home = os.getenv('HOME') + '/notification_service'
+    config_file = home + '/notification_server.yaml'
+    if not os.path.exists(config_file):
+        raise FileNotFoundError('Do not find config file {}'.format(config_file))
+    return NotificationServerConfig(config_file=config_file)

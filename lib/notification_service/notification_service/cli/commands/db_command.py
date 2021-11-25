@@ -15,36 +15,39 @@
 # specific language governing permissions and limitations
 # under the License.
 """DB command"""
+import logging
 from notification_service.util import db
-from notification_service.cli.configuration import get_configuration
+from notification_service.server_config import get_configuration
+
+_logger = logging.getLogger(__name__)
 
 
 def init(args):
     """Init the metadata database"""
     config = get_configuration()
-    print("DB: " + config.db_uri)
+    _logger.info('Initialize the database, db uri: {}'.format(config.db_uri))
     db.upgrade(url=config.db_uri)
 
 
 def reset(args):
     """Reset the metadata database"""
     config = get_configuration()
-    print("DB: " + config.db_uri)
+    _logger.info('Reset the database, db uri: {}'.format(config.db_uri))
     if args.yes or input("This will drop existing tables if they exist. Proceed? (y/n)").upper() == "Y":
         db.reset_db(url=config.db_uri)
     else:
-        print("Cancelled")
+        _logger.info('Cancel reset the database, db uri: {}'.format(config.db_uri))
 
 
 def upgrade(args):
     """Upgrade the metadata database"""
     config = get_configuration()
-    print("DB: " + config.db_uri)
+    _logger.info('Upgrade the database, db uri: {}'.format(config.db_uri))
     db.upgrade(url=config.db_uri, version=args.version)
 
 
 def downgrade(args):
     """Downgrade the metadata database"""
     config = get_configuration()
-    print("DB: " + config.db_uri)
+    _logger.info('Downgrade the database, db uri: {}'.format(config.db_uri))
     db.downgrade(url=config.db_uri, version=args.version)

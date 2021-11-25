@@ -100,7 +100,7 @@ def upgrade(url, version=None):
     # alembic adds significant import time, so we import it lazily
     from alembic import command
 
-    _logger.info("Creating tables")
+    _logger.info('Upgrade the database, db uri: {}'.format(url))
     config = _get_alembic_config(url)
     if version is None:
         version = 'heads'
@@ -109,7 +109,7 @@ def upgrade(url, version=None):
 
 
 def clear_db(url):
-    _logger.info("Clear database.")
+    _logger.info('Clear the database, db uri: {}'.format(url))
     engine = sqlalchemy.create_engine(url)
     connection = engine.connect()
     Base.metadata.drop_all(connection)
@@ -123,7 +123,7 @@ def clear_db(url):
 
 
 def reset_db(url):
-    _logger.info("Reset database.")
+    _logger.info('Reset the database, db uri: {}'.format(url))
     clear_db(url)
     upgrade(url)
 
@@ -133,7 +133,7 @@ def downgrade(url, version):
     # alembic adds significant import time, so we import it lazily
     from alembic import command
 
-    _logger.info("Downgrade database.")
+    _logger.info('Downgrade the database, db uri: {}'.format(url))
     config = _get_alembic_config(url)
     command.history(config)
     command.downgrade(config, version)

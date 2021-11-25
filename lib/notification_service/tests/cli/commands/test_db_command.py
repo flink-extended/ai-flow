@@ -22,7 +22,7 @@ from sqlalchemy import create_engine
 
 from notification_service.cli import cli_parser
 from notification_service.cli.commands import db_command
-from notification_service.cli.configuration import get_configuration
+from notification_service.server_config import get_configuration
 from notification_service.util import db
 
 

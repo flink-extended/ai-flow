@@ -17,7 +17,7 @@
 #
 import os
 import unittest
-from notification_service.server_config import NotificationServerConfig
+from notification_service.server_config import NotificationServerConfig, get_configuration
 
 
 class TestNotificationServerConfig(unittest.TestCase):
@@ -25,6 +25,15 @@ class TestNotificationServerConfig(unittest.TestCase):
     def test_load_notification_server_config(self):
         config_file = os.path.join(os.path.dirname(__file__), 'notification_server.yaml')
         ns_config = NotificationServerConfig(config_file)
+        self.assertEqual(50052, ns_config.port)
+        self.assertEqual('127.0.0.1:50052', ns_config.advertised_uri)
+        self.assertEqual('sqlite:///ns.db', ns_config.db_uri)
+        self.assertFalse(ns_config.enable_ha)
+        self.assertEqual(10000, ns_config.ha_ttl_ms)
+
+    def test_get_configuration(self):
+        os.environ['NOTIFICATION_HOME'] = os.path.dirname(__file__)
+        ns_config = get_configuration()
         self.assertEqual(50052, ns_config.port)
         self.assertEqual('127.0.0.1:50052', ns_config.advertised_uri)
         self.assertEqual('sqlite:///ns.db', ns_config.db_uri)

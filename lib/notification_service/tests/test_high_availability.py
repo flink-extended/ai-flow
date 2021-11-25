@@ -78,6 +78,7 @@ class HaServerTest(unittest.TestCase):
         os.remove(_SQLITE_DB_FILE)
 
     def setUp(self):
+        db.prepare_db()
         self.storage.clean_up()
         self.master1 = self.start_master("localhost", "50051")
         self.client = self.wait_for_master_started("localhost:50051")
