@@ -45,8 +45,8 @@ class TestS3TaskHandler(unittest.TestCase):
     def setUp(self):
         super().setUp()
         self.remote_log_base = 's3://bucket/remote/log/location'
-        self.remote_log_location = 's3://bucket/remote/log/location/1.log'
-        self.remote_log_key = 'remote/log/location/1.log'
+        self.remote_log_location = 's3://bucket/remote/log/location/1_1.log'
+        self.remote_log_key = 'remote/log/location/1_1.log'
         self.local_log_location = 'local/log/location'
         self.filename_template = '{try_number}.log'
         self.s3_task_handler = S3TaskHandler(
@@ -60,6 +60,7 @@ class TestS3TaskHandler(unittest.TestCase):
         task = DummyOperator(task_id='task_for_testing_file_log_handler', dag=self.dag)
         self.ti = TaskInstance(task=task, execution_date=date)
         self.ti.try_number = 1
+        self.ti.seq_num = 1
         self.ti.state = State.RUNNING
         self.addCleanup(self.dag.clear)
 
@@ -126,15 +127,16 @@ class TestS3TaskHandler(unittest.TestCase):
             self.s3_task_handler.set_context(self.ti)
 
         self.assertTrue(self.s3_task_handler.upload_on_close)
-        mock_open.assert_called_once_with(os.path.abspath('local/log/location/1.log'), 'w')
+        mock_open.assert_called_once_with(os.path.abspath('local/log/location/1_1.log'), 'w')
         mock_open().write.assert_not_called()
 
     def test_read(self):
         self.conn.put_object(Bucket='bucket', Key=self.remote_log_key, Body=b'Log line\n')
-        log, metadata = self.s3_task_handler.read(self.ti)
+        number = f'{self.ti.seq_num}_{self.ti.try_number}'
+        log, metadata = self.s3_task_handler.read(self.ti, number)
         self.assertEqual(
             log[0][0][-1],
-            '*** Reading remote log from s3://bucket/remote/log/location/1.log.\nLog line\n\n',
+            '*** Reading remote log from s3://bucket/remote/log/location/1_1.log.\nLog line\n\n',
         )
         self.assertEqual(metadata, [{'end_of_log': True}])
 
