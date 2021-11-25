@@ -163,19 +163,20 @@ class StackdriverTaskHandler(logging.Handler):
         :return: a tuple of list of logs and list of metadata
         :rtype: Tuple[List[str], List[Dict]]
         """
-        if try_number is not None and try_number < 1:
-            logs = [f"Error fetching the logs. Try number {try_number} is invalid."]
-            return logs, [{"end_of_log": "true"}]
+        if isinstance(try_number, int):
+            if try_number is not None and try_number < 1:
+                logs = [f"Error fetching the logs. Try number {try_number} is invalid."]
+                return logs, [{"end_of_log": "true"}]
 
         if not metadata:
             metadata = {}
 
         ti_labels = self._task_instance_to_labels(task_instance)
 
-        if try_number is not None:
-            ti_labels[self.LABEL_TRY_NUMBER] = str(try_number)
-        else:
+        if try_number is None:
             del ti_labels[self.LABEL_TRY_NUMBER]
+        else:
+            ti_labels[self.LABEL_TRY_NUMBER] = str(try_number)
 
         log_filter = self._prepare_log_filter(ti_labels)
         next_page_token = metadata.get("next_page_token", None)
@@ -283,11 +284,15 @@ class StackdriverTaskHandler(logging.Handler):
 
     @classmethod
     def _task_instance_to_labels(cls, ti: TaskInstance) -> Dict[str, str]:
+        if hasattr(ti, 'seq_num') and ti.seq_num > 0:
+            number = '{}_{}'.format(ti.seq_num, ti.try_number)
+        else:
+            number = ti.try_number
         return {
             cls.LABEL_TASK_ID: ti.task_id,
             cls.LABEL_DAG_ID: ti.dag_id,
             cls.LABEL_EXECUTION_DATE: str(ti.execution_date.isoformat()),
-            cls.LABEL_TRY_NUMBER: str(ti.try_number),
+            cls.LABEL_TRY_NUMBER: str(number),
         }
 
     @property
@@ -318,7 +323,7 @@ class StackdriverTaskHandler(logging.Handler):
         project_id = self._client.project
 
         ti_labels = self._task_instance_to_labels(task_instance)
-        ti_labels[self.LABEL_TRY_NUMBER] = str(try_number)
+        # ti_labels[self.LABEL_TRY_NUMBER] = str(try_number)
 
         log_filter = self._prepare_log_filter(ti_labels)
 

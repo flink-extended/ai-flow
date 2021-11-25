@@ -62,11 +62,13 @@ class TestStackdriverLoggingHandlerTask(unittest.TestCase):
         self.stackdriver_task_handler = StackdriverTaskHandler(transport=self.transport_mock)
         self.logger = logging.getLogger("logger")
 
-        date = datetime(2016, 1, 1)
+        from dateutil.tz import tzoffset
+        date = datetime(2016, 1, 1, 8, 0, 0).astimezone(tz=tzoffset("UTC+0", 0))
         self.dag = DAG('dag_for_testing_file_task_handler', start_date=date)
         task = DummyOperator(task_id='task_for_testing_file_log_handler', dag=self.dag)
         self.ti = TaskInstance(task=task, execution_date=date)
         self.ti.try_number = 1
+        self.ti.seq_num = 1
         self.ti.state = State.RUNNING
         self.addCleanup(self.dag.clear)
 
@@ -85,7 +87,7 @@ class TestStackdriverLoggingHandlerTask(unittest.TestCase):
             'task_id': 'task_for_testing_file_log_handler',
             'dag_id': 'dag_for_testing_file_task_handler',
             'execution_date': '2016-01-01T00:00:00+00:00',
-            'try_number': '1',
+            'try_number': '1_1',
         }
         resource = Resource(type='global', labels={})
         self.transport_mock.return_value.send.assert_called_once_with(
@@ -109,7 +111,7 @@ class TestStackdriverLoggingHandlerTask(unittest.TestCase):
             'task_id': 'task_for_testing_file_log_handler',
             'dag_id': 'dag_for_testing_file_task_handler',
             'execution_date': '2016-01-01T00:00:00+00:00',
-            'try_number': '1',
+            'try_number': '1_1',
             'product.googleapis.com/task_id': 'test-value',
         }
         resource = Resource(type='global', labels={})
@@ -168,14 +170,14 @@ class TestStackdriverLoggingHandlerTask(unittest.TestCase):
         mock_client.return_value.list_entries.return_value = _create_list_response(["MSG1", "MSG2"], None)
         mock_get_creds_and_project_id.return_value = ('creds', 'project_id')
 
-        logs, metadata = self.stackdriver_task_handler.read(self.ti, 3)
+        logs, metadata = self.stackdriver_task_handler.read(self.ti, '1_3')
         mock_client.return_value.list_entries.assert_called_once_with(
             filter_='resource.type="global"\n'
             'logName="projects/asf-project/logs/airflow"\n'
             'labels.task_id="task_for_testing_file_log_handler"\n'
             'labels.dag_id="dag_for_testing_file_task_handler"\n'
             'labels.execution_date="2016-01-01T00:00:00+00:00"\n'
-            'labels.try_number="3"',
+            'labels.try_number="1_3"',
             page_token=None,
         )
         self.assertEqual(['MSG1\nMSG2'], logs)
@@ -304,6 +306,6 @@ class TestStackdriverLoggingHandlerTask(unittest.TestCase):
             f'labels.task_id="{self.ti.task_id}"',
             f'labels.dag_id="{self.dag.dag_id}"',
             f'labels.execution_date="{self.ti.execution_date.isoformat()}"',
-            f'labels.try_number="{self.ti.try_number}"',
+            f'labels.try_number="{self.ti.seq_num}_{self.ti.try_number}"',
         ]
         self.assertCountEqual(expected_filter, filter_params)

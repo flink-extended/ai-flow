@@ -61,10 +61,11 @@ class TestCloudwatchTaskHandler(unittest.TestCase):
         task = DummyOperator(task_id=task_id, dag=self.dag)
         self.ti = TaskInstance(task=task, execution_date=date)
         self.ti.try_number = 1
+        self.ti.seq_num = 1
         self.ti.state = State.RUNNING
 
         self.remote_log_stream = '{}/{}/{}/{}.log'.format(
-            dag_id, task_id, date.isoformat(), self.ti.try_number
+            dag_id, task_id, date.isoformat(), f'{self.ti.seq_num}_{self.ti.try_number}'
         ).replace(':', '_')
 
         moto.core.moto_api_backend.reset()
@@ -129,8 +130,9 @@ class TestCloudwatchTaskHandler(unittest.TestCase):
         expected = (
             '*** Reading remote log from Cloudwatch log_group: {} log_stream: {}.\nFirst\nSecond\nThird\n'
         )
+        number = f'{self.ti.seq_num}_{self.ti.try_number}'
         self.assertEqual(
-            self.cloudwatch_task_handler.read(self.ti),
+            self.cloudwatch_task_handler.read(self.ti, number),
             (
                 [[('', expected.format(self.remote_log_group, self.remote_log_stream))]],
                 [{'end_of_log': True}],
@@ -153,8 +155,9 @@ class TestCloudwatchTaskHandler(unittest.TestCase):
         error_msg = 'Could not read remote logs from log_group: {} log_stream: {}.'.format(
             self.remote_log_group, self.remote_log_stream
         )
+        number = f'{self.ti.seq_num}_{self.ti.try_number}'
         self.assertEqual(
-            self.cloudwatch_task_handler.read(self.ti),
+            self.cloudwatch_task_handler.read(self.ti, number),
             (
                 [[('', msg_template.format(self.remote_log_group, self.remote_log_stream, error_msg))]],
                 [{'end_of_log': True}],
@@ -177,8 +180,10 @@ class TestCloudwatchTaskHandler(unittest.TestCase):
         error_msg = 'Could not read remote logs from log_group: {} log_stream: {}.'.format(
             self.remote_log_group, self.remote_log_stream
         )
+
+        number = f'{self.ti.seq_num}_{self.ti.try_number}'
         self.assertEqual(
-            self.cloudwatch_task_handler.read(self.ti),
+            self.cloudwatch_task_handler.read(self.ti, number),
             (
                 [[('', msg_template.format(self.remote_log_group, self.remote_log_stream, error_msg))]],
                 [{'end_of_log': True}],

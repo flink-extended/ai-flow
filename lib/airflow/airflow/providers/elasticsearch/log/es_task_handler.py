@@ -243,7 +243,10 @@ class ElasticsearchTaskHandler(FileTaskHandler, LoggingMixin):
         :param ti: task instance object
         """
         self.mark_end_on_close = not ti.raw
-
+        if hasattr(ti, 'seq_num') and ti.seq_num > 0:
+            number = '{}_{}'.format(ti.seq_num, ti.try_number)
+        else:
+            number = ti.try_number
         if self.json_format:
             self.formatter = JSONFormatter(
                 json_fields=self.json_fields,
@@ -252,7 +255,7 @@ class ElasticsearchTaskHandler(FileTaskHandler, LoggingMixin):
                     'task_id': str(ti.task_id),
                     'execution_date': self._clean_execution_date(ti.execution_date),
                     'try_number': str(ti.try_number),
-                    'log_id': self._render_log_id(ti, ti.try_number),
+                    'log_id': self._render_log_id(ti, number),
                     'offset': int(time() * (10 ** 9)),
                 },
             )
