@@ -19,7 +19,10 @@
 import contextlib
 import re
 import time
+import logging
+import os
 import urllib.parse
+import sqlalchemy
 from collections import Iterable
 from enum import Enum
 from functools import wraps
@@ -40,6 +43,9 @@ SQL_ALCHEMY_DB_FILE = 'notification_service.db'
 SQL_ALCHEMY_CONN = "sqlite:///" + SQL_ALCHEMY_DB_FILE
 engine = None
 Session = None
+
+_logger = logging.getLogger(__name__)
+
 
 """
 List of SQLAlchemy database engines for notification backend storage.
@@ -75,6 +81,71 @@ class DBType(str, Enum):
             return DBType.MONGODB
         else:
             raise NotImplementedError
+
+
+def _get_alembic_config(url):
+    from alembic.config import Config
+
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    package_dir = os.path.normpath(os.path.join(current_dir, '..'))
+    directory = os.path.join(package_dir, 'migrations')
+    config = Config(os.path.join(package_dir, 'alembic.ini'))
+    config.set_main_option('script_location', directory.replace('%', '%%'))
+    config.set_main_option('sqlalchemy.url', url.replace('%', '%%'))
+    return config
+
+
+def upgrade(url, version=None):
+    """Upgrade the database."""
+    # alembic adds significant import time, so we import it lazily
+    from alembic import command
+
+    _logger.info('Upgrade the database, db uri: {}'.format(url))
+    config = _get_alembic_config(url)
+    if version is None:
+        version = 'heads'
+    command.history(config)
+    command.upgrade(config, version)
+
+
+def clear_db(url):
+    _logger.info('Clear the database, db uri: {}'.format(url))
+    engine = sqlalchemy.create_engine(url)
+    connection = engine.connect()
+    Base.metadata.drop_all(connection)
+    # alembic adds significant import time, so we import it lazily
+    from alembic.migration import MigrationContext  # noqa
+
+    migration_ctx = MigrationContext.configure(connection)
+    version = migration_ctx._version  # noqa pylint: disable=protected-access
+    if version.exists(connection):
+        version.drop(connection)
+
+
+def reset_db(url):
+    _logger.info('Reset the database, db uri: {}'.format(url))
+    clear_db(url)
+    upgrade(url)
+
+
+def downgrade(url, version):
+    """Upgrade the database."""
+    # alembic adds significant import time, so we import it lazily
+    from alembic import command
+
+    _logger.info('Downgrade the database, db uri: {}'.format(url))
+    config = _get_alembic_config(url)
+    command.history(config)
+    command.downgrade(config, version)
+
+
+def tables_exists(url):
+    """Returns whether tables are created"""
+    engine_ = create_engine(url)
+    if len(engine_.table_names()) > 0:
+        return True
+    else:
+        return False
 
 
 def extract_db_engine_from_uri(db_uri):
@@ -135,6 +206,13 @@ def prepare_db(user_engine=None, user_session=None, print_sql=False):
                          autoflush=False,
                          bind=engine,
                          expire_on_commit=False))
+
+
+def clear_engine_and_session():
+    global engine
+    global Session
+    engine = None
+    Session = None
 
 
 @contextlib.contextmanager
@@ -487,16 +565,16 @@ class MemberModel(Base):
 
 
 def create_all_tables(db_conn=None):
+    global SQL_ALCHEMY_CONN
     if db_conn is not None:
-        global SQL_ALCHEMY_CONN
         SQL_ALCHEMY_CONN = db_conn
+    if not tables_exists(SQL_ALCHEMY_CONN):
+        upgrade(url=SQL_ALCHEMY_CONN)
     prepare_db()
-    Base.metadata.create_all(engine)
 
 
 def drop_all_tables(db_conn=None):
+    global SQL_ALCHEMY_CONN
     if db_conn is not None:
-        global SQL_ALCHEMY_CONN
         SQL_ALCHEMY_CONN = db_conn
-    prepare_db()
-    Base.metadata.drop_all(engine)
+    clear_db(url=SQL_ALCHEMY_CONN)

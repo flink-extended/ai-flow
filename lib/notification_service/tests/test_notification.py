@@ -396,16 +396,43 @@ class DbStorageTest(unittest.TestCase, NotificationTest):
     @classmethod
     def tearDownClass(cls):
         cls.master.stop()
-        cls.storage.clean_up()
         os.remove(SQL_ALCHEMY_DB_FILE)
 
     def setUp(self):
+        db.prepare_db()
         self.storage.clean_up()
         self.client = NotificationClient(server_uri="localhost:50051", properties=properties)
 
     def tearDown(self):
         self.client.stop_listen_events()
         self.client.stop_listen_event()
+        db.clear_engine_and_session()
+
+    def test_db_clean_up(self):
+        db.clear_engine_and_session()
+        global_db_uri = db.SQL_ALCHEMY_CONN
+        db_file = 'test_ns.db'
+        db_uri = 'sqlite:///{}'.format(db_file)
+        store = DbEventStorage(db_uri)
+        db.upgrade(db_uri, '87cb292bcc31')
+        db.prepare_db()
+        with db.create_session() as session:
+            client = db.ClientModel()
+            client.namespace = 'a'
+            client.sender = 'a'
+            client.create_time = 1
+            session.add(client)
+            session.commit()
+            client_res = session.query(db.ClientModel).all()
+            self.assertEqual(1, len(client_res))
+        store.clean_up()
+        client_res = session.query(db.ClientModel).all()
+        self.assertEqual(0, len(client_res))
+        self.assertTrue(db.tables_exists(db_uri))
+        db.SQL_ALCHEMY_CONN = global_db_uri
+        db.clear_engine_and_session()
+        if os.path.exists(db_file):
+            os.remove(db_file)
 
     @classmethod
     def wait_for_master_started(cls, server_uri="localhost:50051"):
@@ -471,10 +498,10 @@ class HaDbStorageTest(unittest.TestCase, NotificationTest):
         cls.master1.stop()
         cls.master2.stop()
         cls.master3.stop()
-        cls.storage.clean_up()
         os.remove(SQL_ALCHEMY_DB_FILE)
 
     def setUp(self):
+        db.prepare_db()
         self.storage.clean_up()
         self.client = NotificationClient(server_uri="localhost:50052", enable_ha=True,
                                          list_member_interval_ms=1000,
@@ -485,6 +512,7 @@ class HaDbStorageTest(unittest.TestCase, NotificationTest):
         self.client.stop_listen_events()
         self.client.stop_listen_event()
         self.client.disable_high_availability()
+        db.clear_engine_and_session()
 
 
 class HaClientWithNonHaServerTest(unittest.TestCase, NotificationTest):
@@ -514,13 +542,14 @@ class HaClientWithNonHaServerTest(unittest.TestCase, NotificationTest):
     @classmethod
     def tearDownClass(cls):
         cls.master.stop()
-        cls.storage.clean_up()
         os.remove(SQL_ALCHEMY_DB_FILE)
 
     def setUp(self):
+        db.prepare_db()
         self.storage.clean_up()
         self.client = self.wait_for_master_started(server_uri="localhost:50051")
 
     def tearDown(self):
         self.client.stop_listen_events()
         self.client.stop_listen_event()
+        db.clear_engine_and_session()

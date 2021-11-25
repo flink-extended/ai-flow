@@ -52,14 +52,6 @@ def create_server_config(root_dir_path, param: Dict[str, str]):
     return server_config_target_path
 
 
-def create_all_tables(db_uri):
-    db.create_all_tables(db_uri)
-
-
-def drop_all_tables(db_uri):
-    db.drop_all_tables(db_uri)
-
-
 def _prepare_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--generate-config-only', default=None, action='store_true',
@@ -88,7 +80,7 @@ if __name__ == '__main__':
         exit(0)
 
     config = NotificationServerConfig(config_file)
-    create_all_tables(db_uri=config.db_uri)
+    db.create_all_tables(config.db_uri)
     ns = NotificationServerRunner(config_file=config_file)
     logging.info('notification server start(port:{}).'.format(ns.config.port))
     ns.start(is_block=True)
