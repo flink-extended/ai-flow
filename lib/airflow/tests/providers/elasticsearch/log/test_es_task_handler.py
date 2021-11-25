@@ -42,7 +42,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
     DAG_ID = 'dag_for_testing_file_task_handler'
     TASK_ID = 'task_for_testing_file_log_handler'
     EXECUTION_DATE = datetime(2016, 1, 1)
-    LOG_ID = f'{DAG_ID}-{TASK_ID}-2016-01-01T00:00:00+00:00-1'
+    LOG_ID = f'{DAG_ID}-{TASK_ID}-2016-01-01T00:00:00+08:00-1_1'
 
     @elasticmock
     def setUp(self):
@@ -78,6 +78,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
         task = DummyOperator(task_id=self.TASK_ID, dag=self.dag)
         self.ti = TaskInstance(task=task, execution_date=self.EXECUTION_DATE)
         self.ti.try_number = 1
+        self.ti.seq_num = 1
         self.ti.state = State.RUNNING
         self.addCleanup(self.dag.clear)
 
@@ -108,8 +109,9 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
 
     def test_read(self):
         ts = pendulum.now()
+
         logs, metadatas = self.es_task_handler.read(
-            self.ti, 1, {'offset': 0, 'last_log_timestamp': str(ts), 'end_of_log': False}
+            self.ti, '1_1', {'offset': 0, 'last_log_timestamp': str(ts), 'end_of_log': False}
         )
 
         self.assertEqual(1, len(logs))
@@ -121,7 +123,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
         self.assertTrue(timezone.parse(metadatas[0]['last_log_timestamp']) > ts)
 
     def test_read_with_match_phrase_query(self):
-        similar_log_id = '{task_id}-{dag_id}-2016-01-01T00:00:00+00:00-1'.format(
+        similar_log_id = '{task_id}-{dag_id}-2016-01-01T00:00:00+00:00-1_1'.format(
             dag_id=TestElasticsearchTaskHandler.DAG_ID, task_id=TestElasticsearchTaskHandler.TASK_ID
         )
         another_test_message = 'another message'
@@ -131,7 +133,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
 
         ts = pendulum.now()
         logs, metadatas = self.es_task_handler.read(
-            self.ti, 1, {'offset': 0, 'last_log_timestamp': str(ts), 'end_of_log': False}
+            self.ti, '1_1', {'offset': 0, 'last_log_timestamp': str(ts), 'end_of_log': False}
         )
         self.assertEqual(1, len(logs))
         self.assertEqual(len(logs), len(metadatas))
@@ -143,7 +145,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
         self.assertTrue(timezone.parse(metadatas[0]['last_log_timestamp']) > ts)
 
     def test_read_with_none_metadata(self):
-        logs, metadatas = self.es_task_handler.read(self.ti, 1)
+        logs, metadatas = self.es_task_handler.read(self.ti, '1_1')
         self.assertEqual(1, len(logs))
         self.assertEqual(len(logs), len(metadatas))
         self.assertEqual(self.test_message, logs[0][0][-1])
@@ -158,7 +160,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
         # of making a new TaskInstance to query.
         self.es.delete(index=self.index_name, doc_type=self.doc_type, id=1)
         logs, metadatas = self.es_task_handler.read(
-            self.ti, 1, {'offset': 0, 'last_log_timestamp': str(ts), 'end_of_log': False}
+            self.ti, '1_1', {'offset': 0, 'last_log_timestamp': str(ts), 'end_of_log': False}
         )
         self.assertEqual(1, len(logs))
         self.assertEqual(len(logs), len(metadatas))
@@ -170,7 +172,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
 
     def test_read_with_empty_metadata(self):
         ts = pendulum.now()
-        logs, metadatas = self.es_task_handler.read(self.ti, 1, {})
+        logs, metadatas = self.es_task_handler.read(self.ti, '1_1', {})
         self.assertEqual(1, len(logs))
         self.assertEqual(len(logs), len(metadatas))
         self.assertEqual(self.test_message, logs[0][0][-1])
@@ -199,7 +201,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
 
         self.es.delete(index=self.index_name, doc_type=self.doc_type, id=1)
         logs, metadatas = self.es_task_handler.read(
-            self.ti, 1, {'offset': 0, 'last_log_timestamp': str(ts), 'end_of_log': False}
+            self.ti, '1_1', {'offset': 0, 'last_log_timestamp': str(ts), 'end_of_log': False}
         )
         self.assertEqual(1, len(logs))
         self.assertEqual(len(logs), len(metadatas))
@@ -213,7 +215,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
         ts = pendulum.now()
         logs, metadatas = self.es_task_handler.read(
             self.ti,
-            1,
+            '1_1',
             {'offset': 0, 'last_log_timestamp': str(ts), 'download_logs': True, 'end_of_log': False},
         )
         self.assertEqual(1, len(logs))
@@ -229,7 +231,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
         with mock.patch.object(self.es_task_handler.log, 'exception') as mock_exception:
             with mock.patch("elasticsearch_dsl.Search.execute") as mock_execute:
                 mock_execute.side_effect = Exception('Failed to read')
-                logs, metadatas = self.es_task_handler.read(self.ti, 1)
+                logs, metadatas = self.es_task_handler.read(self.ti, '1_1')
             assert mock_exception.call_count == 1
             args, kwargs = mock_exception.call_args
             self.assertIn("Could not read log with log_id:", args[0])
@@ -258,7 +260,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
         self.es_task_handler.set_context(self.ti)
         self.es_task_handler.close()
         with open(
-            os.path.join(self.local_log_location, self.filename_template.format(try_number=1))
+            os.path.join(self.local_log_location, self.filename_template.format(try_number='1_1'))
         ) as log_file:
             # end_of_log_mark may contain characters like '\n' which is needed to
             # have the log uploaded but will not be stored in elasticsearch.
@@ -272,7 +274,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
         self.es_task_handler.set_context(self.ti)
         self.es_task_handler.close()
         with open(
-            os.path.join(self.local_log_location, self.filename_template.format(try_number=1))
+            os.path.join(self.local_log_location, self.filename_template.format(try_number='1_1'))
         ) as log_file:
             self.assertNotIn(self.end_of_log_mark, log_file.read())
         self.assertTrue(self.es_task_handler.closed)
@@ -282,7 +284,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
         self.es_task_handler.set_context(self.ti)
         self.es_task_handler.close()
         with open(
-            os.path.join(self.local_log_location, self.filename_template.format(try_number=1))
+            os.path.join(self.local_log_location, self.filename_template.format(try_number='1_1'))
         ) as log_file:
             self.assertEqual(0, len(log_file.read()))
 
@@ -291,7 +293,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
         self.es_task_handler.handler = None
         self.es_task_handler.close()
         with open(
-            os.path.join(self.local_log_location, self.filename_template.format(try_number=1))
+            os.path.join(self.local_log_location, self.filename_template.format(try_number='1_1'))
         ) as log_file:
             self.assertEqual(0, len(log_file.read()))
         self.assertTrue(self.es_task_handler.closed)
@@ -301,7 +303,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
         self.es_task_handler.handler.stream = None
         self.es_task_handler.close()
         with open(
-            os.path.join(self.local_log_location, self.filename_template.format(try_number=1))
+            os.path.join(self.local_log_location, self.filename_template.format(try_number='1_1'))
         ) as log_file:
             self.assertIn(self.end_of_log_mark, log_file.read())
         self.assertTrue(self.es_task_handler.closed)
@@ -310,7 +312,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
         self.es_task_handler.handler.stream.close()
         self.es_task_handler.close()
         with open(
-            os.path.join(self.local_log_location, self.filename_template.format(try_number=1))
+            os.path.join(self.local_log_location, self.filename_template.format(try_number='1_1'))
         ) as log_file:
             self.assertIn(self.end_of_log_mark, log_file.read())
         self.assertTrue(self.es_task_handler.closed)
@@ -318,9 +320,9 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
     def test_render_log_id(self):
         expected_log_id = (
             'dag_for_testing_file_task_handler-'
-            'task_for_testing_file_log_handler-2016-01-01T00:00:00+00:00-1'
+            'task_for_testing_file_log_handler-2016-01-01T00:00:00+08:00-1_1'
         )
-        log_id = self.es_task_handler._render_log_id(self.ti, 1)
+        log_id = self.es_task_handler._render_log_id(self.ti, '1_1')
         self.assertEqual(expected_log_id, log_id)
 
         # Switch to use jinja template.
@@ -333,7 +335,7 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
             self.json_format,
             self.json_fields,
         )
-        log_id = self.es_task_handler._render_log_id(self.ti, 1)
+        log_id = self.es_task_handler._render_log_id(self.ti, '1_1')
         self.assertEqual(expected_log_id, log_id)
 
     def test_clean_execution_date(self):
@@ -359,5 +361,5 @@ class TestElasticsearchTaskHandler(unittest.TestCase):
             self.json_fields,
             frontend=es_frontend,
         )
-        url = es_task_handler.get_external_log_url(self.ti, self.ti.try_number)
+        url = es_task_handler.get_external_log_url(self.ti, f'{self.ti.seq_num}_{self.ti.try_number}')
         self.assertEqual(expected_url, url)

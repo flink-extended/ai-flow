@@ -70,9 +70,13 @@ class CloudwatchTaskHandler(FileTaskHandler, LoggingMixin):
 
     def set_context(self, ti):
         super().set_context(ti)
+        if hasattr(ti, 'seq_num') and ti.seq_num > 0:
+            number = '{}_{}'.format(ti.seq_num, ti.try_number)
+        else:
+            number = ti.try_number
         self.handler = watchtower.CloudWatchLogHandler(
             log_group=self.log_group,
-            stream_name=self._render_filename(ti, ti.try_number),
+            stream_name=self._render_filename(ti, number),
             boto3_session=self.hook.get_session(self.region_name),
         )
 
