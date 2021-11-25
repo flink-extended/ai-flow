@@ -34,7 +34,7 @@ class TestWasbTaskHandler(unittest.TestCase):
     def setUp(self):
         super().setUp()
         self.wasb_log_folder = 'wasb://container/remote/log/location'
-        self.remote_log_location = 'remote/log/location/1.log'
+        self.remote_log_location = 'remote/log/location/1_1.log'
         self.local_log_location = 'local/log/location'
         self.container_name = "wasb-container"
         self.filename_template = '{try_number}.log'
@@ -51,6 +51,7 @@ class TestWasbTaskHandler(unittest.TestCase):
         task = DummyOperator(task_id='task_for_testing_file_log_handler', dag=self.dag)
         self.ti = TaskInstance(task=task, execution_date=date)
         self.ti.try_number = 1
+        self.ti.seq_num = 1
         self.ti.state = State.RUNNING
         self.addCleanup(self.dag.clear)
 
@@ -122,7 +123,7 @@ class TestWasbTaskHandler(unittest.TestCase):
                     [
                         (
                             '',
-                            '*** Reading remote log from wasb://container/remote/log/location/1.log.\n'
+                            '*** Reading remote log from wasb://container/remote/log/location/1_1.log.\n'
                             'Log line\n',
                         )
                     ]
@@ -142,7 +143,7 @@ class TestWasbTaskHandler(unittest.TestCase):
                 handler.wasb_read(self.remote_log_location, return_error=True)
 
             mock_error.assert_called_once_with(
-                'Could not read logs from remote/log/location/1.log', exc_info=True
+                'Could not read logs from remote/log/location/1_1.log', exc_info=True
             )
 
     @mock.patch("airflow.providers.microsoft.azure.hooks.wasb.WasbHook")
@@ -185,5 +186,5 @@ class TestWasbTaskHandler(unittest.TestCase):
                 handler.wasb_write('text', self.remote_log_location, append=False)
 
             mock_error.assert_called_once_with(
-                'Could not write logs to %s', 'remote/log/location/1.log', exc_info=True
+                'Could not write logs to %s', 'remote/log/location/1_1.log', exc_info=True
             )

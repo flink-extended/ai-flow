@@ -39,9 +39,10 @@ class TestGCSTaskHandler(unittest.TestCase):
         task = DummyOperator(task_id="task_for_testing_gcs_task_handler")
         self.ti = TaskInstance(task=task, execution_date=date)
         self.ti.try_number = 1
+        self.ti.seq_num = 1
         self.ti.state = State.RUNNING
         self.remote_log_base = "gs://bucket/remote/log/location"
-        self.remote_log_location = "gs://my-bucket/path/to/1.log"
+        self.remote_log_location = "gs://my-bucket/path/to/1_1.log"
         self.local_log_location = tempfile.mkdtemp()
         self.filename_template = "{try_number}.log"
         self.addCleanup(self.dag.clear)
@@ -76,14 +77,14 @@ class TestGCSTaskHandler(unittest.TestCase):
     @mock.patch("google.cloud.storage.Blob")
     def test_should_read_logs_from_remote(self, mock_blob, mock_client, mock_creds):
         mock_blob.from_string.return_value.download_as_string.return_value = "CONTENT"
-
-        logs, metadata = self.gcs_task_handler._read(self.ti, self.ti.try_number)
+        number = f'{self.ti.seq_num}_{self.ti.try_number}'
+        logs, metadata = self.gcs_task_handler._read(self.ti, number)
         mock_blob.from_string.assert_called_once_with(
-            "gs://bucket/remote/log/location/1.log", mock_client.return_value
+            "gs://bucket/remote/log/location/1_1.log", mock_client.return_value
         )
 
         self.assertEqual(
-            "*** Reading remote log from gs://bucket/remote/log/location/1.log.\nCONTENT\n", logs
+            "*** Reading remote log from gs://bucket/remote/log/location/1_1.log.\nCONTENT\n", logs
         )
         self.assertEqual({"end_of_log": True}, metadata)
 
@@ -97,16 +98,17 @@ class TestGCSTaskHandler(unittest.TestCase):
         mock_blob.from_string.return_value.download_as_string.side_effect = Exception("Failed to connect")
 
         self.gcs_task_handler.set_context(self.ti)
-        log, metadata = self.gcs_task_handler._read(self.ti, self.ti.try_number)
+        number = f'{self.ti.seq_num}_{self.ti.try_number}'
+        log, metadata = self.gcs_task_handler._read(self.ti, number)
 
         self.assertEqual(
             log,
-            "*** Unable to read remote log from gs://bucket/remote/log/location/1.log\n*** "
-            f"Failed to connect\n\n*** Reading local file: {self.local_log_location}/1.log\n",
+            "*** Unable to read remote log from gs://bucket/remote/log/location/1_1.log\n*** "
+            f"Failed to connect\n\n*** Reading local file: {self.local_log_location}/1_1.log\n",
         )
         self.assertDictEqual(metadata, {"end_of_log": True})
         mock_blob.from_string.assert_called_once_with(
-            "gs://bucket/remote/log/location/1.log", mock_client.return_value
+            "gs://bucket/remote/log/location/1_1.log", mock_client.return_value
         )
 
     @mock.patch(
@@ -134,9 +136,9 @@ class TestGCSTaskHandler(unittest.TestCase):
 
         mock_blob.assert_has_calls(
             [
-                mock.call.from_string("gs://bucket/remote/log/location/1.log", mock_client.return_value),
+                mock.call.from_string("gs://bucket/remote/log/location/1_1.log", mock_client.return_value),
                 mock.call.from_string().download_as_string(),
-                mock.call.from_string("gs://bucket/remote/log/location/1.log", mock_client.return_value),
+                mock.call.from_string("gs://bucket/remote/log/location/1_1.log", mock_client.return_value),
                 mock.call.from_string().upload_from_string("CONTENT\nMESSAGE\n", content_type="text/plain"),
             ],
             any_order=False,
@@ -164,14 +166,14 @@ class TestGCSTaskHandler(unittest.TestCase):
                 'INFO:airflow.providers.google.cloud.log.gcs_task_handler.GCSTaskHandler:Previous '
                 'log discarded: sequence item 0: expected str instance, bytes found',
                 'ERROR:airflow.providers.google.cloud.log.gcs_task_handler.GCSTaskHandler:Could '
-                'not write logs to gs://bucket/remote/log/location/1.log: Failed to connect',
+                'not write logs to gs://bucket/remote/log/location/1_1.log: Failed to connect',
             ],
         )
         mock_blob.assert_has_calls(
             [
-                mock.call.from_string("gs://bucket/remote/log/location/1.log", mock_client.return_value),
+                mock.call.from_string("gs://bucket/remote/log/location/1_1.log", mock_client.return_value),
                 mock.call.from_string().download_as_string(),
-                mock.call.from_string("gs://bucket/remote/log/location/1.log", mock_client.return_value),
+                mock.call.from_string("gs://bucket/remote/log/location/1_1.log", mock_client.return_value),
                 mock.call.from_string().upload_from_string(
                     "*** Previous log discarded: sequence item 0: expected str instance, bytes found\n\n",
                     content_type="text/plain",
@@ -205,9 +207,9 @@ class TestGCSTaskHandler(unittest.TestCase):
 
         mock_blob.assert_has_calls(
             [
-                mock.call.from_string("gs://bucket/remote/log/location/1.log", mock_client.return_value),
+                mock.call.from_string("gs://bucket/remote/log/location/1_1.log", mock_client.return_value),
                 mock.call.from_string().download_as_string(),
-                mock.call.from_string("gs://bucket/remote/log/location/1.log", mock_client.return_value),
+                mock.call.from_string("gs://bucket/remote/log/location/1_1.log", mock_client.return_value),
                 mock.call.from_string().upload_from_string(
                     "*** Previous log discarded: Fail to download\n\nMESSAGE\n", content_type="text/plain"
                 ),
