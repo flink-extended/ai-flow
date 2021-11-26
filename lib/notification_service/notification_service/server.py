@@ -34,12 +34,14 @@ from grpc._server import _serialize_response, _status, _abort, _Context, _unary_
 from notification_service.event_storage import DbEventStorage
 from notification_service.high_availability import DbHighAvailabilityStorage, SimpleNotificationServerHaManager
 from notification_service.proto import notification_service_pb2_grpc
-from notification_service.service import NotificationService, HighAvailableNotificationService
 from notification_service.server_config import NotificationServerConfig
+from notification_service.service import NotificationService, HighAvailableNotificationService
 from notification_service.util.utils import get_ip_addr
 
 _PORT = 50051
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
+
+logger = logging.getLogger(__name__)
 
 
 class NotificationServer(object):
@@ -113,6 +115,7 @@ class NotificationServerRunner(object):
                                              port=int(self.config.port))
 
     def start(self, is_block=False):
+        logger.info("Starting notification server with config: {}".format(self.config))
         self._init_server()
         self.server.run(is_block)
         if not is_block:

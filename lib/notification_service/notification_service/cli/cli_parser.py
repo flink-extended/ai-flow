@@ -262,6 +262,7 @@ notification_commands: List[CLICommand] = [
         help='Manage events',
         subcommands=EVENT_COMMANDS,
     ),
+    SERVER_COMMAND,
     GroupCommand(
         name='db',
         help="Database operations",
