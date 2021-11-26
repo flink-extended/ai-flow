@@ -15,3 +15,5 @@ omit =
     ai_flow_plugins/tests/*
     lib/notification_service/tests/*
     lib/notification_service/notification_service/proto/*
+
+parallel = True
