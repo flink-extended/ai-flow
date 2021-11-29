@@ -16,7 +16,6 @@
 # under the License.
 
 import io
-import os
 import time
 import unittest
 from contextlib import redirect_stdout
@@ -25,11 +24,10 @@ from datetime import datetime
 from notification_service.cli import cli_parser
 from notification_service.cli.commands import event_command
 from notification_service.client import NotificationClient
-from notification_service.event_storage import DbEventStorage, MemoryEventStorage
+from notification_service.event_storage import MemoryEventStorage
 from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 from notification_service.util import db
-from notification_service.util.db import SQL_ALCHEMY_DB_FILE
 
 SERVER_URI = "localhost:50051"
 
@@ -49,7 +47,6 @@ class TestCliEvent(unittest.TestCase):
     def tearDownClass(cls):
         cls.master.stop()
         cls.storage.clean_up()
-        #os.remove(SQL_ALCHEMY_DB_FILE)
 
     def setUp(self):
         self.storage.clean_up()
@@ -167,8 +164,8 @@ class TestCliEvent(unittest.TestCase):
     def test_cli_count_events(self):
         with redirect_stdout(io.StringIO()) as stdout:
             self.send_an_event('key1')
-            current_time = datetime.now().isoformat()
             time.sleep(1)
+            current_time = datetime.now().isoformat()
             self.send_an_event('key1')
             self.send_an_event('key2')
             event_command.count_events(
