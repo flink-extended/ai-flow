@@ -25,7 +25,7 @@ from datetime import datetime
 from notification_service.cli import cli_parser
 from notification_service.cli.commands import event_command
 from notification_service.client import NotificationClient
-from notification_service.event_storage import DbEventStorage
+from notification_service.event_storage import DbEventStorage, MemoryEventStorage
 from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 from notification_service.util import db
@@ -40,7 +40,7 @@ class TestCliEvent(unittest.TestCase):
     def setUpClass(cls):
         cls.parser = cli_parser.get_parser()
         db.create_all_tables()
-        cls.storage = DbEventStorage()
+        cls.storage = MemoryEventStorage()
         cls.master = NotificationServer(NotificationService(cls.storage))
         cls.master.run()
         cls.wait_for_master_started(server_uri=SERVER_URI)
@@ -49,7 +49,7 @@ class TestCliEvent(unittest.TestCase):
     def tearDownClass(cls):
         cls.master.stop()
         cls.storage.clean_up()
-        os.remove(SQL_ALCHEMY_DB_FILE)
+        #os.remove(SQL_ALCHEMY_DB_FILE)
 
     def setUp(self):
         self.storage.clean_up()
