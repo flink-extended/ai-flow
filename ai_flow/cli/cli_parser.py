@@ -93,7 +93,7 @@ ARG_YES = Arg(
 ARG_DB_VERSION = Arg(
     ("-v", "--version"),
     help=(
-        'The version corresponding to the database.'
+        'The version corresponding to the database'
     ),
     default='heads',
 )
