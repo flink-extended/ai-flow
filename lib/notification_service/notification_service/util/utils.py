@@ -20,6 +20,7 @@ import time
 import socket
 from importlib import import_module
 from itertools import tee, filterfalse
+import dateutil.parser
 
 from typing import Callable, Iterable
 
@@ -158,3 +159,14 @@ def partition(pred: Callable, iterable: Iterable):
     """Use a predicate to partition entries into false entries and true entries"""
     iter_1, iter_2 = tee(iterable)
     return filterfalse(pred, iter_1), filter(pred, iter_2)
+
+
+def parse_date(dt: str):
+    """
+    Parse a datetime in ISO 8601 to milliseconds since epoch.
+
+    :param dt: datetime string
+    """
+    parsed_time = dateutil.parser.parse(dt)
+    return int(parsed_time.timestamp() * 1000)
+
