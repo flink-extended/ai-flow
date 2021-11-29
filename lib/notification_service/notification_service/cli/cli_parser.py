@@ -180,7 +180,7 @@ ARG_LISTEN_BEGIN_TIME = Arg(
 
 ARG_SENDER = Arg(
     ("--sender",),
-    help="Sender time of the event",
+    help="Sender of the event",
     default=None,
 )
 
