@@ -25,6 +25,7 @@ from ai_flow.endpoint.server.server_runner import AIFlowServerRunner
 from ai_flow.plugin_interface.scheduler_interface import Scheduler, JobExecutionInfo, WorkflowExecutionInfo, \
     WorkflowInfo
 from ai_flow.workflow.workflow import Workflow
+from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
 
 
 class MockScheduler(Scheduler):
@@ -77,9 +78,14 @@ class MockScheduler(Scheduler):
 
 
 class TestServerRunner(unittest.TestCase):
+    def setUp(self) -> None:
+        self.ns_server = start_notification_server()
+
+    def tearDown(self) -> None:
+        stop_notification_server(self.ns_server)
 
     def test_server_start_stop(self):
-        server_runner = AIFlowServerRunner(config_file=os.path.dirname(__file__) + '/master_config.yaml')
+        server_runner = AIFlowServerRunner(config_file=os.path.dirname(__file__) + '/aiflow_server.yaml')
         server_runner.start(is_block=False)
         server_runner.stop()
 

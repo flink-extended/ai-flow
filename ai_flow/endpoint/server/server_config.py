@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import os
 from ai_flow.common.configuration import AIFlowConfiguration
 from enum import Enum
 from typing import Text
@@ -125,3 +126,16 @@ class AIFlowServerConfig(AIFlowConfiguration):
 
     def get_web_server_config(self):
         return self.get('web_server')
+
+
+def get_configuration():
+    if 'AIFLOW_HOME' in os.environ:
+        home = os.getenv('AIFLOW_HOME')
+    else:
+        home = os.getenv('HOME') + '/aiflow'
+    config_file = home + '/aiflow_server.yaml'
+    if not os.path.exists(config_file):
+        raise FileNotFoundError('Config file {} not found.'.format(config_file))
+    config = AIFlowServerConfig()
+    config.load_from_file(config_file)
+    return config

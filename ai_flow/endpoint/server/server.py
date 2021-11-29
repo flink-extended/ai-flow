@@ -45,6 +45,9 @@ from ai_flow.store.db.base_model import base
 from ai_flow.store.db.db_util import extract_db_engine_from_uri, create_db_store
 from ai_flow.store.mongo_store import MongoStoreConnManager
 from ai_flow.store.sqlalchemy_store import SqlAlchemyStore
+from ai_flow.util import sqlalchemy_db
+from notification_service.proto import notification_service_pb2_grpc
+from notification_service.service import NotificationService
 
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../../..")))
 
@@ -151,8 +154,7 @@ class AIFlowServer(object):
         self.executor.shutdown()
 
         if self.db_type == DBType.SQLITE and clear_sql_lite_db_file:
-            store = SqlAlchemyStore(self.store_uri)
-            base.metadata.drop_all(store.db_engine)
+            sqlalchemy_db.clear_db(self.store_uri, base.metadata)
             os.remove(self.store_uri[10:])
         elif self.db_type == DBType.MONGODB:
             MongoStoreConnManager().disconnect_all()
@@ -162,10 +164,7 @@ class AIFlowServer(object):
 
     def _clear_db(self):
         if self.db_type == DBType.SQLITE:
-            store = SqlAlchemyStore(self.store_uri)
-            base.metadata.drop_all(store.db_engine)
-            time.sleep(1)
-            base.metadata.create_all(store.db_engine)
+            sqlalchemy_db.reset_db(self.store_uri, base.metadata)
         elif self.db_type == DBType.MONGODB:
             MongoStoreConnManager().drop_all()
 

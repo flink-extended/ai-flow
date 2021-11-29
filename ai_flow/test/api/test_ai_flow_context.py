@@ -20,6 +20,7 @@ import os
 from ai_flow.store.db.base_model import base
 from ai_flow.test.store.test_sqlalchemy_store import _get_store
 from ai_flow.endpoint.server.server import AIFlowServer
+from ai_flow.util import sqlalchemy_db
 import ai_flow as af
 from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server, _NS_URI
 
@@ -48,8 +49,7 @@ class TestAIFlowContext(unittest.TestCase):
         _get_store(_SQLITE_DB_URI)
 
     def tearDown(self) -> None:
-        store = _get_store(_SQLITE_DB_URI)
-        base.metadata.drop_all(store.db_engine)
+        sqlalchemy_db.clear_db(_SQLITE_DB_URI, base.metadata)
 
     def test_init_ai_client(self):
         af.init_ai_flow_client(server_uri='localhost:50051', project_name='test', notification_server_uri=_NS_URI)

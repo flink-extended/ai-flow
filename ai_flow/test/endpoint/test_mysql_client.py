@@ -29,6 +29,7 @@ from ai_flow.test.store.test_sqlalchemy_store import _get_store
 from ai_flow.test.test_util import get_mysql_server_url
 from notification_service.server import NotificationServerRunner
 
+from ai_flow.util import sqlalchemy_db
 
 _PORT = '50051'
 _NS_PORT = '50052'
@@ -77,8 +78,7 @@ class TestAIFlowClientMySQL(test_client.TestAIFlowClientSqlite):
         _get_store(self.store_uri)
 
     def tearDown(self) -> None:
-        store = _get_store(self.store_uri)
-        base.metadata.drop_all(store.db_engine)
+        sqlalchemy_db.clear_db(self.store_uri, base.metadata)
 
 
 if __name__ == '__main__':
