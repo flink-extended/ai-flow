@@ -135,7 +135,7 @@ def get_configuration():
         home = os.getenv('HOME') + '/aiflow'
     config_file = home + '/aiflow_server.yaml'
     if not os.path.exists(config_file):
-        raise FileNotFoundError('Do not find config file {}'.format(config_file))
+        raise FileNotFoundError('Config file {} not found.'.format(config_file))
     config = AIFlowServerConfig()
     config.load_from_file(config_file)
     return config
