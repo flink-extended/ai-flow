@@ -2,7 +2,9 @@
 
 branch = True
 
-concurrency = multiprocessing
+concurrency =
+    thread
+    multiprocessing
 
 source =
     ai_flow
