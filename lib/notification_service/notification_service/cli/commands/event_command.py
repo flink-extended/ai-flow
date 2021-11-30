@@ -29,7 +29,7 @@ from notification_service.cli.simple_table import NotificationConsole
 T = TypeVar("T", bound=Callable)  # pylint: disable=invalid-name
 
 
-def action_logging(f: T) -> T:
+def check_arguments(f: T) -> T:
 
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
@@ -37,21 +37,18 @@ def action_logging(f: T) -> T:
             raise ValueError("Args should be set")
         if not isinstance(args[0], Namespace):
             raise ValueError(
-                "1st positional argument should be argparse. Namespace instance," f"but is {type(args[0])}"
+                "1st positional argument should be argparse.Namespace instance," f"but is {type(args[0])}."
             )
 
         if not args[0].server_uri:
-            print("Argument --server-uri not set. See `notification event {} -h`".format(args[0].subcommand))
-            return
-        if not args[0].key:
-            print("Argument --key not set. See `notification event {} -h`".format(args[0].subcommand))
+            print("Argument --server-uri is not set. See `notification event {} -h`".format(args[0].subcommand))
             return
         return f(*args, **kwargs)
 
     return cast(T, wrapper)
 
 
-@action_logging
+@check_arguments
 def list_events(args):
     """List events at the command line"""
     client = NotificationClient(server_uri=args.server_uri)
@@ -77,7 +74,7 @@ def list_events(args):
     )
 
 
-@action_logging
+@check_arguments
 def count_events(args):
     """Count events at the command line"""
     client = NotificationClient(server_uri=args.server_uri)
@@ -90,7 +87,7 @@ def count_events(args):
     print(res[0])
 
 
-@action_logging
+@check_arguments
 def listen_events(args):
     """Listen events at the command line"""
     class CliWatcher(EventWatcher):
@@ -117,14 +114,12 @@ def listen_events(args):
         pass
 
 
-@action_logging
+@check_arguments
 def send_event(args):
     """Send an event at the command line"""
     client = NotificationClient(server_uri=args.server_uri,
                                 default_namespace=args.namespace,
                                 sender=args.sender)
-    if not args.value:
-        print("Arguments --value not set. See `notification event send {} -h`")
     event = BaseEvent(
         key=args.key,
         value=args.value,

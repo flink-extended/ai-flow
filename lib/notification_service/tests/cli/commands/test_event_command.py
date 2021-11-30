@@ -71,12 +71,12 @@ class TestCliEvent(unittest.TestCase):
                 ['event',
                  'send',
                  '-s', SERVER_URI,
-                 '-k', key,
                  '-n', 'namespace1',
-                 '-v', 'value1',
                  '--event-type', 'event-type1',
                  '--sender', 'sender1',
-                 '--context', 'context1']
+                 '--context', 'context1',
+                 key, 'value1',
+                 ]
             )
         )
 
@@ -86,38 +86,36 @@ class TestCliEvent(unittest.TestCase):
                 self.parser.parse_args(
                     ['event',
                      'send',
-                     '-k', 'key']
+                     'key',
+                     'value']
                 )
             )
-        self.assertIn('Argument --server-uri not set', stdout.getvalue())
-        with redirect_stdout(io.StringIO()) as stdout:
+        self.assertIn('Argument --server-uri is not set', stdout.getvalue())
+        with self.assertRaises(SystemExit):
             event_command.send_event(
                 self.parser.parse_args(
                     ['event',
                      'send',
-                     '-s', 'uri']
+                     '-s', 'server uri']
                 )
             )
-        self.assertIn('Argument --key not set', stdout.getvalue())
 
     def test_cli_send_events(self):
         with redirect_stdout(io.StringIO()) as stdout:
-            event_command.send_event(
-                self.parser.parse_args(
-                    ['event',
-                     'send',
-                     '-s', SERVER_URI,
-                     '-k', 'key',
-                     ]
+            with self.assertRaises(SystemExit):
+                event_command.send_event(
+                    self.parser.parse_args(
+                        ['event',
+                         'send',
+                         '-s', SERVER_URI,
+                         'key',
+                         ]
+                    )
                 )
-            )
             self.send_an_event()
-        self.assertIn('Arguments --value not set.', stdout.getvalue())
-        self.assertIn('value1', stdout.getvalue())
-        self.assertIn('event-type1', stdout.getvalue())
-        self.assertIn('namespace1', stdout.getvalue())
-        self.assertIn('context1', stdout.getvalue())
-        self.assertIn('sender1', stdout.getvalue())
+        print(stdout.getvalue())
+        self.assertIn('Successfully send event: key:key, value:value1, type:event-type1, version:1', stdout.getvalue())
+        self.assertIn('context: context1, namespace: namespace1, sender: sender1', stdout.getvalue())
 
     def test_cli_list_events(self):
         self.send_an_event('key1')
@@ -128,7 +126,7 @@ class TestCliEvent(unittest.TestCase):
                     ['event',
                      'list',
                      '-s', SERVER_URI,
-                     '-k', 'key1'
+                     'key1'
                      ]
                 )
             )
@@ -143,8 +141,8 @@ class TestCliEvent(unittest.TestCase):
                     ['event',
                      'list',
                      '-s', SERVER_URI,
-                     '-k', 'key1',
-                     '-n', 'invalid'
+                     '-n', 'invalid',
+                     'key1'
                      ]
                 )
             )
@@ -162,7 +160,7 @@ class TestCliEvent(unittest.TestCase):
                     ['event',
                      'count',
                      '-s', SERVER_URI,
-                     '-k', 'key1'
+                     'key1'
                      ]
                 )
             )
@@ -174,8 +172,8 @@ class TestCliEvent(unittest.TestCase):
                     ['event',
                      'count',
                      '-s', SERVER_URI,
-                     '-k', 'key1',
-                     '--begin-version', '1'
+                     '--begin-version', '1',
+                     'key1'
                      ]
                 )
             )
@@ -187,8 +185,8 @@ class TestCliEvent(unittest.TestCase):
                     ['event',
                      'count',
                      '-s', SERVER_URI,
-                     '-k', 'key1',
-                     '--begin-time', current_time
+                     '--begin-time', current_time,
+                     'key1',
                      ]
                 )
             )
@@ -200,8 +198,8 @@ class TestCliEvent(unittest.TestCase):
                     ['event',
                      'count',
                      '-s', SERVER_URI,
-                     '-k', 'key1',
-                     '--namespace', 'invalid'
+                     '--namespace', 'invalid',
+                     'key1',
                      ]
                 )
             )
