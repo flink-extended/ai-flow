@@ -40,6 +40,15 @@ except IOError:
     sys.exit(-1)
 VERSION = __version__ # noqa
 
+require_file = '{}/{}'.format(os.path.dirname(os.path.abspath(__file__)), "requirements.txt")
+with open(require_file) as f:
+    context = f.read()
+    require_file_lines = context.strip().split('\n')
+
+require_packages = []
+for line in require_file_lines:
+    if not len(line.strip()) == 0 and not line.startswith("#"):
+        require_packages.append(line)
 
 setup(
     name='notification_service',
@@ -47,12 +56,12 @@ setup(
     description='A Python package which provides stable notification service.',
     author='',
     author_email='flink.aiflow@gmail.com',
-    url='https://github.com/alibaba/flink-ai-extended',
+    url='https://github.com/flink-extended/ai-flow',
     packages=find_packages(exclude=['tests*']),
     scripts=get_script(),
     package_data={'notification_service': ['alembic.ini']},
     include_package_data=True,
-    install_requires=["protobuf==3.15.6", "grpcio==1.34.0", "sqlalchemy>=1.3.18, <2", "pyyaml>=5.1, <5.4", "alembic>=1.2, <2.0"],
+    install_requires=require_packages,
     entry_points={
         'console_scripts': [
             'notification = notification_service.__main__:main'
