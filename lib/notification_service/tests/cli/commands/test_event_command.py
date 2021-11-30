@@ -112,17 +112,6 @@ class TestCliEvent(unittest.TestCase):
                 )
             )
             self.send_an_event()
-            event_command.list_events(
-                self.parser.parse_args(
-                    ['event',
-                     'list',
-                     '-s', SERVER_URI,
-                     '-k', 'key',
-                     '-o', 'json']
-                )
-            )
-        print('\n')
-        print(stdout.getvalue())
         self.assertIn('Arguments --value not set.', stdout.getvalue())
         self.assertIn('value1', stdout.getvalue())
         self.assertIn('event-type1', stdout.getvalue())
@@ -131,9 +120,9 @@ class TestCliEvent(unittest.TestCase):
         self.assertIn('sender1', stdout.getvalue())
 
     def test_cli_list_events(self):
+        self.send_an_event('key1')
+        self.send_an_event('key2')
         with redirect_stdout(io.StringIO()) as stdout:
-            self.send_an_event('key1')
-            self.send_an_event('key2')
             event_command.list_events(
                 self.parser.parse_args(
                     ['event',
@@ -146,9 +135,9 @@ class TestCliEvent(unittest.TestCase):
         self.assertIn('key1', stdout.getvalue())
         self.assertNotIn('key2', stdout.getvalue())
 
+        self.send_an_event('key1')
+        self.send_an_event('key2')
         with redirect_stdout(io.StringIO()) as stdout:
-            self.send_an_event('key1')
-            self.send_an_event('key2')
             event_command.list_events(
                 self.parser.parse_args(
                     ['event',
@@ -162,12 +151,12 @@ class TestCliEvent(unittest.TestCase):
         self.assertNotIn('key1', stdout.getvalue())
 
     def test_cli_count_events(self):
+        self.send_an_event('key1')
+        time.sleep(1)
+        current_time = datetime.now().isoformat()
+        self.send_an_event('key1')
+        self.send_an_event('key2')
         with redirect_stdout(io.StringIO()) as stdout:
-            self.send_an_event('key1')
-            time.sleep(1)
-            current_time = datetime.now().isoformat()
-            self.send_an_event('key1')
-            self.send_an_event('key2')
             event_command.count_events(
                 self.parser.parse_args(
                     ['event',

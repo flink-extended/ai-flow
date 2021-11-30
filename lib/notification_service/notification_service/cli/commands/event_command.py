@@ -17,6 +17,7 @@
 """Event commands"""
 import functools
 from argparse import Namespace
+from datetime import datetime as dt
 from queue import Queue
 from typing import Callable, TypeVar, cast, List
 
@@ -69,7 +70,7 @@ def list_events(args):
             "value": event.value,
             "event_type": event.event_type,
             "sender": event.sender,
-            "create_time": event.create_time,
+            "create_time": dt.fromtimestamp(event.create_time/1000).isoformat(),
             "context": event.context,
             "version": event.version,
         },
@@ -129,4 +130,5 @@ def send_event(args):
         value=args.value,
         event_type=args.event_type,
         context=args.context)
-    client.send_event(event)
+    event: BaseEvent = client.send_event(event)
+    print("Successfully send event: {}.".format(event))

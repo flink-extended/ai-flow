@@ -47,8 +47,6 @@ with open(require_file) as f:
 
 require_packages = []
 for line in require_file_lines:
-    if line.startswith("# Optional"):
-        break
     if not len(line.strip()) == 0 and not line.startswith("#"):
         require_packages.append(line)
 

@@ -125,31 +125,26 @@ CLICommand = Union[ActionCommand, GroupCommand]
 ARG_SERVER_URI = Arg(
     ("-s", "--server-uri"),
     help="The uri of notification server",
-    default=None,
 )
 
 ARG_NAMESPACE = Arg(
     ("-n", "--namespace"),
     help="Namespace of the event. If not set, all namespaces would be handled",
-    default=None,
 )
 
 ARG_KEY = Arg(
     ("-k", "--key"),
-    help="Key of the event. If not set, all keys would be handled",
-    default=None,
+    help="Key of the event",
 )
 
 ARG_VALUE = Arg(
     ("-v", "--value"),
     help="Value of the event",
-    default=None,
 )
 
 ARG_CONTEXT = Arg(
     ("--context",),
     help="Context of the event",
-    default=None,
 )
 
 ARG_BEGIN_VERSION = Arg(
@@ -162,7 +157,6 @@ ARG_BEGIN_VERSION = Arg(
 ARG_EVENT_TYPE = Arg(
     ("--event-type",),
     help="Type of the event. If not set, all types would be handled",
-    default=None
 )
 
 ARG_BEGIN_TIME = Arg(
@@ -181,7 +175,6 @@ ARG_LISTEN_BEGIN_TIME = Arg(
 ARG_SENDER = Arg(
     ("--sender",),
     help="Sender of the event",
-    default=None,
 )
 
 ARG_OUTPUT = Arg(
