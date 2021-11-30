@@ -250,19 +250,21 @@ DB_COMMANDS = (
 )
 
 notification_commands: List[CLICommand] = [
-    ActionCommand(
-        "version",
-        "Shows the version of Notification",
-        lazy_load_command("notification_service.cli.commands.version_command.version"),
-        [],
-        "Shows the version of Notification."
-    ),
+    ActionCommand("version",
+                  "Shows the version of Notification",
+                  lazy_load_command("notification_service.cli.commands.version_command.version"),
+                  [],
+                  "Shows the version of Notification"),
+    ActionCommand("server",
+                  "Start the notification server in foreground",
+                  lazy_load_command("notification_service.cli.commands.server_command.server"),
+                  [],
+                  "Start the notification server in foreground"),
     GroupCommand(
         name='event',
         help='Manage events',
         subcommands=EVENT_COMMANDS,
     ),
-    SERVER_COMMAND,
     GroupCommand(
         name='db',
         help="Database operations",
