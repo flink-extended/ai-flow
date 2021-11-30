@@ -19,29 +19,8 @@ import logging.config
 import signal
 
 from notification_service.server import NotificationServerRunner
-from notification_service.server_config import get_configuration_file_path
 
-# We hard code the logging config before we start the server, we should make it configurable in the future.
-logging.config.dictConfig({
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'default': {
-            'format': '[%(asctime)s - %(pathname)s:%(lineno)d [%(threadName)s] - %(levelname)s: %(message)s',
-        }
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://sys.stderr',
-            'formatter': 'default'
-        }
-    },
-    'root': {
-        'level': 'INFO',
-        'handlers': ['console']
-    }
-})
+from notification_service.settings import get_configuration_file_path
 
 
 def sigterm_handler(signum, frame):

@@ -99,19 +99,3 @@ class NotificationServerConfig(object):
 port: {self.port}
 db_uri: {self.db_uri}
         """
-
-
-def get_configuration_file_path():
-    if 'NOTIFICATION_HOME' in os.environ:
-        home = os.getenv('NOTIFICATION_HOME')
-    else:
-        home = os.getenv('HOME') + '/notification_service'
-    config_file_path = home + '/notification_server.yaml'
-    if not os.path.exists(config_file_path):
-        raise FileNotFoundError('Do not find config file {}'.format(config_file_path))
-    return config_file_path
-
-
-def get_configuration():
-    config_file_path = get_configuration_file_path()
-    return NotificationServerConfig(config_file=config_file_path)
