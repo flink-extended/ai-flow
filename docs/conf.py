@@ -36,7 +36,16 @@ project = 'AIFlow'
 author = 'flink-extended'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0'
+BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+version_file = os.path.join(BASE_DIR, 'ai_flow/version.py')
+try:
+    exec(open(version_file).read())
+except IOError:
+    print("Failed to load ai_flow version file for packaging. " +
+          "'%s' not found!" % version_file,
+          file=sys.stderr)
+    sys.exit(-1)
+release = __version__ # noqa
 
 # -- General configuration ---------------------------------------------------
 
