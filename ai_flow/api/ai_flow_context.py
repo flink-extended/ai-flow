@@ -69,7 +69,6 @@ def init_notebook_context(project_config: ProjectConfig, workflow_config: Workfl
     3. Initializes project configuration.
     4. Initializes workflow configuration.
     """
-    global __init_context_flag__
     if __init_context_flag__:
         raise Exception('init_notebook_context and init_ai_flow_context cannot be called at the same time.')
 
