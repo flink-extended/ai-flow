@@ -20,11 +20,13 @@ import sys
 import tempfile
 import traceback
 from typing import Text
+
+from ai_flow.client.ai_flow_client import get_ai_flow_client
 from ai_flow.context.project_context import init_project_context, current_project_config, set_current_project_config
 from ai_flow.context.workflow_config_loader import init_workflow_config
-from ai_flow.client.ai_flow_client import get_ai_flow_client
 
 __init_context_flag__ = False
+__init_notebook_context_flag__ = False
 __init_client_flag__ = False
 
 from ai_flow.project.project_config import ProjectConfig
@@ -40,8 +42,7 @@ def init_ai_flow_context():
     2. Init project configuration
     3. Init workflow configuration.
     """
-    global __init_context_flag__
-    if __init_context_flag__:
+    if __init_notebook_context_flag__:
         raise Exception('init_ai_flow_context and init_notebook_context cannot be called at the same time.')
     if __init_client_flag__:
         raise Exception('init_ai_flow_client and init_ai_flow_context cannot be called at the same time.')
@@ -56,6 +57,7 @@ def init_ai_flow_context():
     # workflow_name/workflow_name.yaml
     init_workflow_config(workflow_config_file
                          =os.path.join(workflows_path, workflow_name, '{}.yaml'.format(workflow_name)))
+    global __init_context_flag__
     __init_context_flag__ = True
 
 
@@ -67,7 +69,6 @@ def init_notebook_context(project_config: ProjectConfig, workflow_config: Workfl
     3. Initializes project configuration.
     4. Initializes workflow configuration.
     """
-    global __init_context_flag__
     if __init_context_flag__:
         raise Exception('init_notebook_context and init_ai_flow_context cannot be called at the same time.')
 
@@ -94,7 +95,8 @@ def init_notebook_context(project_config: ProjectConfig, workflow_config: Workfl
     init_project_context(project_path)
     ensure_project_registered()
     init_workflow_config(workflow_config_path)
-    __init_context_flag__ = True
+    global __init_notebook_context_flag__
+    __init_notebook_context_flag__ = True
 
 
 def ensure_project_registered():
