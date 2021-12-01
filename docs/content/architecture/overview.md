@@ -34,8 +34,7 @@ The figure below shows how AIFlow works:
 
 1. Generates an AI Graph by the AIFlow API.
 2. Translates an AI Graph to a Workflow.
-3. Submits the Workflow to Scheduling Service.
+3. Submits the Workflow to Scheduling Service and register metadata to Meta Service.
 4. Scheduling Service calls scheduler to execute workflow.   
-5. Optionally the client can register metadata.
-6. When the Scheduler runs the workflow, it will publish and subscribe events to Notification Server.
-7. AIFlow server sends events to Notification Server, such as model version generation events, etc.
+5. When the Scheduler runs the workflow, it will publish and subscribe events to Notification Server.
+6. AIFlow server sends events to Notification Server, such as model version generation events, etc.
