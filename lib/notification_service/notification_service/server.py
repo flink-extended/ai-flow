@@ -125,7 +125,7 @@ class NotificationServerRunner(object):
         """
         Wait for server to be started and available.
 
-        :param timeout: Int value. Seconds to wait for server available.
+        :param timeout: Float value. Seconds to wait for server available.
                         If None, wait forever until server started.
         """
         server_uri = 'localhost:{}'.format(self.config.port)

@@ -55,12 +55,12 @@ class TestNotificationServer(unittest.TestCase):
         server.stop()
 
     def test__wait_for_server_available(self):
-        server = NotificationServerRunner(config_file=config_file)
         from grpc import FutureTimeoutError
+        server = NotificationServerRunner(config_file=config_file)
         with self.assertRaises(FutureTimeoutError):
-            server._wait_for_server_available(timeout=1)
+            server._wait_for_server_available(timeout=0.1)
         server.start()
-        server._wait_for_server_available(timeout=1)
+        server._wait_for_server_available(timeout=0.1)
         server._wait_for_server_available(timeout=None)
         server.stop()
 
