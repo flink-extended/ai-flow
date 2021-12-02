@@ -20,7 +20,7 @@
 import request from '@/utils/request'
 
 const api = {
-  role: '/role',
+  version: '/version',
   project: '/project',
   workflow: '/workflow',
   dataView: '/workflow/data-view',
@@ -35,11 +35,10 @@ const api = {
 
 export default api
 
-export function getRoleList (parameter) {
+export function getVersion () {
   return request({
-    url: api.role,
-    method: 'get',
-    params: parameter
+    url: api.version,
+    method: 'get'
   })
 }
 

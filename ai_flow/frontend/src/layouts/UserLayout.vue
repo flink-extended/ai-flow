@@ -35,7 +35,7 @@ limitations under the License. -->
 
         <div class="footer">
           <div class="copyright">
-            Copyright &copy; 2021 AIFlow
+            &copy; AIFlow
           </div>
         </div>
       </div>

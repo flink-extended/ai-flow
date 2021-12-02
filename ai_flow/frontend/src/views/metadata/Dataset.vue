@@ -55,13 +55,16 @@ limitations under the License. -->
         </span>
       </s-table>
     </a-card>
+    <a-card :bordered="false">
+      <span>Version: <a :href="'https://pypi.org/project/ai-flow/'+version" target="_blank">{{ version }}</a></span>
+    </a-card>
   </page-header-wrapper>
 </template>
 
 <script>
 import moment from 'moment'
 import { STable, Ellipsis } from '@/components'
-import { getDatasets, getRoleList } from '@/api/manage'
+import { getDatasets, getVersion } from '@/api/manage'
 
 function formateDate (date, fmt) {
   if (/(Y+)/.test(fmt)) {
@@ -154,14 +157,20 @@ export default {
       }
     }
   },
-  created () {
-    getRoleList({ t: new Date() })
+  mounted () {
+    this.getAIFlowVersion()
   },
   methods: {
     resetSearchForm () {
       this.queryParam = {
         date: moment(new Date())
       }
+    },
+    getAIFlowVersion () {
+      getVersion()
+        .then(res => {
+          this.version = res
+        })
     }
   }
 }

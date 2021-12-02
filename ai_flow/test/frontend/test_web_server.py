@@ -24,12 +24,16 @@ from unittest import mock
 from cloudpickle import cloudpickle
 
 from ai_flow import WorkflowMeta
-from ai_flow.frontend.web_server import generate_graph, AIFlowWebServerConfig
+from ai_flow.frontend.web_server import generate_graph, AIFlowWebServerConfig, version
 from ai_flow.test.scheduler_service.service.test_workflow_event_processor import MyContextExtractor
+from ai_flow.version import __version__
 from ai_flow.workflow.control_edge import WorkflowSchedulingRule, WorkflowAction, MeetAllEventCondition
 
 
 class TestWebServer(unittest.TestCase):
+
+    def test_version(self):
+        self.assertEqual(version(), __version__)
 
     def test_generate_acyclic_graph(self):
         context_extractor = MyContextExtractor()
