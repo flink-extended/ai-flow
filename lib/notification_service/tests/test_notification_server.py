@@ -54,6 +54,16 @@ class TestNotificationServer(unittest.TestCase):
         self.assertEqual('a', client.list_events(key='a')[0].value)
         server.stop()
 
+    def test__wait_for_server_available(self):
+        server = NotificationServerRunner(config_file=config_file)
+        from grpc import FutureTimeoutError
+        with self.assertRaises(FutureTimeoutError):
+            server._wait_for_server_available(timeout=1)
+        server.start()
+        server._wait_for_server_available(timeout=1)
+        server._wait_for_server_available(timeout=None)
+        server.stop()
+
     def test_run_ha_notification_server(self):
         server1 = NotificationServerRunner(config_file=config_file)
         server1.config.port = 50053
