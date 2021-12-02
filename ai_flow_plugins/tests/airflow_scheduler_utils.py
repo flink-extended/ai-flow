@@ -30,7 +30,7 @@ from typing import Callable
 from notification_service.client import NotificationClient
 
 
-def start_scheduler(file_path, port=50051, executor=None):
+def start_scheduler(file_path, port=50052, executor=None):
     if executor is None:
         executor = LocalExecutor(15)
 
@@ -45,7 +45,7 @@ def start_scheduler(file_path, port=50051, executor=None):
     scheduler.run()
 
 
-def start_airflow_scheduler_server(file_path, port=50051) -> mp.Process:
+def start_airflow_scheduler_server(file_path, port=50052) -> mp.Process:
     mp.set_start_method('spawn')
     process = mp.Process(target=start_scheduler, args=(file_path, port))
     process.start()
@@ -74,7 +74,7 @@ def start_airflow_web_server() -> Popen:
     return sub_process
 
 
-def run_ai_flow_workflow(dag_id, test_function: Callable[[NotificationClient], None], port=50051, executor=None):
+def run_ai_flow_workflow(dag_id, test_function: Callable[[NotificationClient], None], port=50052, executor=None):
     def run_test_fun():
         time.sleep(5)
         client = NotificationClient(server_uri="localhost:{}".format(port),

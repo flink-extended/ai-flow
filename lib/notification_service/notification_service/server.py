@@ -115,9 +115,27 @@ class NotificationServerRunner(object):
     def start(self, is_block=False):
         self._init_server()
         self.server.run(is_block)
+        if not is_block:
+            self._wait_for_server_available(timeout=self.config.wait_for_server_started_timeout)
 
     def stop(self):
         self.server.stop()
+
+    def _wait_for_server_available(self, timeout):
+        """
+        Wait for server to be started and available.
+
+        :param timeout: Float value. Seconds to wait for server available.
+                        If None, wait forever until server started.
+        """
+        server_uri = 'localhost:{}'.format(self.config.port)
+        try:
+            channel = grpc.insecure_channel(server_uri)
+            grpc.channel_ready_future(channel).result(timeout=timeout)
+            logging.info("Notification Server started successfully.")
+        except grpc.FutureTimeoutError as e:
+            logging.error('Notification Server is not available after waiting for {} seconds.'.format(timeout))
+            raise e
 
 
 def _loop(loop: asyncio.AbstractEventLoop):

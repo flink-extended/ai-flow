@@ -26,6 +26,7 @@ class NotificationServerConfig(object):
         self._enable_ha = False
         self._ha_ttl_ms = None
         self._advertised_uri = None
+        self._wait_for_server_started_timeout = None
         self._parse_config()
 
     def _parse_config(self):
@@ -41,6 +42,8 @@ class NotificationServerConfig(object):
                 self._ha_ttl_ms = yaml_config['ha_ttl_ms']
             if 'advertised_uri' in yaml_config:
                 self._advertised_uri = yaml_config['advertised_uri']
+            if 'wait_for_server_started_timeout' in yaml_config:
+                self._wait_for_server_started_timeout = yaml_config['wait_for_server_started_timeout']
 
     @property
     def port(self):
@@ -81,6 +84,14 @@ class NotificationServerConfig(object):
     @advertised_uri.setter
     def advertised_uri(self, advertised_uri):
         self._advertised_uri = advertised_uri
+
+    @property
+    def wait_for_server_started_timeout(self):
+        return self._wait_for_server_started_timeout
+
+    @wait_for_server_started_timeout.setter
+    def wait_for_server_started_timeout(self, wait_for_server_started_timeout):
+        self._wait_for_server_started_timeout = wait_for_server_started_timeout
 
 
 def get_configuration():
