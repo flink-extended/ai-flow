@@ -127,6 +127,12 @@ class AIFlowServerConfig(AIFlowConfiguration):
     def get_web_server_config(self):
         return self.get('web_server')
 
+    def set_wait_for_server_started_timeout(self, wait_for_server_started_timeout):
+        self['wait_for_server_started_timeout'] = wait_for_server_started_timeout
+
+    def get_wait_for_server_started_timeout(self):
+        return self.get('wait_for_server_started_timeout')
+
 
 def get_configuration():
     if 'AIFLOW_HOME' in os.environ:

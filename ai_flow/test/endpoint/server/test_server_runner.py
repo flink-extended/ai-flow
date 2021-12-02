@@ -89,6 +89,20 @@ class TestServerRunner(unittest.TestCase):
         server_runner.start(is_block=False)
         server_runner.stop()
 
+    def test__wait_for_server_available(self):
+        from grpc import FutureTimeoutError
+        server_runner = AIFlowServerRunner(config_file=os.path.dirname(__file__) + '/aiflow_server.yaml')
+
+        server_runner.server_config.set_wait_for_server_started_timeout(0)
+        with self.assertRaises(FutureTimeoutError):
+            server_runner.start()
+        server_runner.stop()
+
+        server_runner.server_config.set_wait_for_server_started_timeout(5)
+        server_runner.start()
+        server_runner._wait_for_server_available(timeout=0.1)
+        server_runner.stop()
+
 
 if __name__ == '__main__':
     unittest.main()

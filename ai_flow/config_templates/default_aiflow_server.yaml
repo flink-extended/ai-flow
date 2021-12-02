@@ -39,6 +39,10 @@ notification_server_uri: 127.0.0.1:50052
 # whether to start the scheduler service, default is True
 #start_scheduler_service: True
 
+# a float value represents seconds for AIFlow server to be available after started,
+# If not set, it will wait forever until server started
+# wait_for_server_started_timeout: 5.0
+
 # scheduler config
 scheduler_service:
   scheduler:
