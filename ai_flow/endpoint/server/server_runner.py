@@ -17,6 +17,7 @@
 # under the License.
 #
 import argparse
+import grpc
 
 from typing import Text
 from ai_flow.endpoint.server.server import AIFlowServer
@@ -79,6 +80,8 @@ class AIFlowServerRunner(object):
             ha_server_uri=get_ip_addr() + ":" + str(self.server_config.get_server_port()),
             ttl_ms=self.server_config.get_ha_ttl_ms())
         self.server.run(is_block=is_block)
+        if not is_block:
+            self._wait_for_server_available(timeout=self.server_config.get_wait_for_server_started_timeout())
 
     def stop(self, clear_sql_lite_db_file=True) -> None:
         """
@@ -90,6 +93,22 @@ class AIFlowServerRunner(object):
 
     def _clear_db(self):
         self.server._clear_db()
+
+    def _wait_for_server_available(self, timeout):
+        """
+        Wait for server to be started and available.
+
+        :param timeout: Float value. Seconds to wait for server available.
+                        If None, wait forever until server started.
+        """
+        server_uri = 'localhost:{}'.format(self.server_config.get_server_port())
+        try:
+            channel = grpc.insecure_channel(server_uri)
+            grpc.channel_ready_future(channel).result(timeout=timeout)
+            logging.info("AIFlow Server started successfully.")
+        except grpc.FutureTimeoutError as e:
+            logging.error('AIFlow Server is not available after waiting for {} seconds.'.format(timeout))
+            raise e
 
 
 def set_master_config():
