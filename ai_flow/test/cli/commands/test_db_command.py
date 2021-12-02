@@ -23,7 +23,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from ai_flow.cli import cli_parser
 from ai_flow.cli.commands import db_command
-from ai_flow.endpoint.server.server_config import get_configuration
+from ai_flow.settings import get_configuration
 from ai_flow.store.db.db_model import SqlProject
 
 

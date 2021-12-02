@@ -17,25 +17,30 @@
 # under the License.
 #
 import os
-import unittest
 
-from ai_flow.endpoint.server.server_config import AIFlowServerConfig, DBType
-
-
-class TestConfiguration(unittest.TestCase):
-
-    def test_dump_load_configuration(self):
-        config = AIFlowServerConfig()
-        config.set_db_uri(db_type=DBType.SQLITE, uri="sqlite:///sql.db")
-        self.assertEqual('sql.db', config.get_sql_lite_db_file())
-
-    def test_load_master_configuration(self):
-        config = AIFlowServerConfig()
-        config.load_from_file(os.path.dirname(__file__) + '/aiflow_server.yaml')
-        self.assertEqual('sql_lite', config.get_db_type())
-        self.assertEqual('/tmp/repo', config.get_scheduler_service_config()['repository'])
-        self.assertEqual(True, config.start_scheduler_service())
+from ai_flow.endpoint.server.server_config import AIFlowServerConfig
 
 
-if __name__ == '__main__':
-    unittest.main()
+def get_aiflow_home():
+    if 'AIFLOW_HOME' in os.environ:
+        home = os.getenv('AIFLOW_HOME')
+    else:
+        home = os.getenv('HOME') + '/aiflow'
+    return home
+
+
+AIFLOW_HOME = get_aiflow_home()
+
+
+def get_configuration_file_path():
+    config_file_path = AIFLOW_HOME + '/aiflow_server.yaml'
+    if not os.path.exists(config_file_path):
+        raise FileNotFoundError('Config file {} not found.'.format(config_file_path))
+    return config_file_path
+
+
+def get_configuration():
+    config_file_path = get_configuration_file_path()
+    config = AIFlowServerConfig()
+    config.load_from_file(config_file_path)
+    return config
