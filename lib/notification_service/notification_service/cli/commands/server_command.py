@@ -40,7 +40,7 @@ def make_log_dir_if_not_exist():
     if os.path.exists(log_dir):
         return
 
-    os.mkdir(log_dir)
+    os.makedirs(log_dir, exist_ok=True)
 
 
 def server_start(args):
@@ -48,12 +48,14 @@ def server_start(args):
         make_log_dir_if_not_exist()
         log_path = os.path.join(notification_service.settings.NOTIFICATION_HOME, "logs",
                                 'notification_server-{}.log'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
-        logger.info("Starting notification server in daemon pid: {}".format(os.getpid()))
         pid_file_path = os.path.join(notification_service.settings.NOTIFICATION_HOME, 'notification_server.pid')
+
+        logging.info(f"\nStarting Notification Server in daemon mode\n"
+                     f"Notification server log: {log_path}\n"
+                     f"Notification server pid: {pid_file_path}")
 
         log = open(log_path, 'w+')
         ctx = _get_daemon_context(log, pid_file_path)
-
         with ctx:
             config_file_path = get_configuration_file_path()
             server_runner = NotificationServerRunner(config_file_path)

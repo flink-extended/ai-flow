@@ -29,7 +29,7 @@ kill_with_pid_file() {
     echo "Stopping $1"
     for ((i=1;i<=3;i++))
     do
-      kill $(cat "$2") >/dev/null 2>&1 && sleep 1
+      kill $(cat "$2" > /dev/null 2>&1) >/dev/null 2>&1 && sleep 1
     done
 
     rm "$2" 2>/dev/null
