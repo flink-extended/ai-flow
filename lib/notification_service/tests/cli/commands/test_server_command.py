@@ -20,7 +20,9 @@ import os
 import signal
 import time
 import unittest
+from unittest import mock
 
+import notification_service.settings
 from notification_service.cli import cli_parser
 from notification_service.cli.commands import server_command, db_command
 from notification_service.client import NotificationClient
@@ -34,10 +36,11 @@ class TestCliServer(unittest.TestCase):
         cls.parser = cli_parser.get_parser()
 
     def test_cli_server_start(self):
-        os.environ["NOTIFICATION_HOME"] = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_service.settings.NOTIFICATION_HOME = os.path.join(os.path.dirname(__file__), "..", "..")
+
         db_command.upgrade(self.parser.parse_args(['db', 'upgrade']))
-        server_process = multiprocessing.Process(target=server_command.server,
-                                                 args=(self.parser.parse_args(['server']),), )
+        server_process = multiprocessing.Process(target=server_command.server_start,
+                                                 args=(self.parser.parse_args(['server', 'start']),), )
         server_process.start()
         time.sleep(1)
 
@@ -49,3 +52,19 @@ class TestCliServer(unittest.TestCase):
         server_process.join(None)
 
         os.remove("./ns.db")
+
+    def test_cli_server_start_daemon(self):
+        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_service.settings.NOTIFICATION_HOME = notification_home
+        with mock.patch.object(server_command, "_get_daemon_context") as get_daemon_context, \
+                mock.patch.object(server_command, "NotificationServerRunner") as NotificationServerRunnerClass:
+            get_daemon_context.return_value = mock.MagicMock()
+
+            mock_server_runner = mock.MagicMock()
+            NotificationServerRunnerClass.side_effect = [mock_server_runner]
+
+            server_command.server_start(self.parser.parse_args(['server', 'start', '-d']))
+
+            get_daemon_context.assert_called_once_with(mock.ANY, os.path.join(notification_home,
+                                                                              "notification_server.pid"))
+            mock_server_runner.start.assert_called_once_with(True)

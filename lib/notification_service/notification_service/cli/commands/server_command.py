@@ -15,12 +15,19 @@
 # specific language governing permissions and limitations
 # under the License.
 """Server command"""
-import logging.config
+import datetime
+import logging
+import os
 import signal
 
-from notification_service.server import NotificationServerRunner
+import daemon
+from daemon.pidfile import TimeoutPIDLockFile
 
+import notification_service.settings
+from notification_service.server import NotificationServerRunner
 from notification_service.settings import get_configuration_file_path
+
+logger = logging.getLogger(__name__)
 
 
 def sigterm_handler(signum, frame):
@@ -28,9 +35,42 @@ def sigterm_handler(signum, frame):
     raise KeyboardInterrupt()
 
 
-def server(args):
-    """Start the notification server"""
-    signal.signal(signal.SIGTERM, sigterm_handler)
-    config_file_path = get_configuration_file_path()
-    server_runner = NotificationServerRunner(config_file_path)
-    server_runner.start(True)
+def make_log_dir_if_not_exist():
+    log_dir = os.path.join(notification_service.settings.NOTIFICATION_HOME, "logs")
+    if os.path.exists(log_dir):
+        return
+
+    os.mkdir(log_dir)
+
+
+def server_start(args):
+    if args.daemon:
+        make_log_dir_if_not_exist()
+        log_path = os.path.join(notification_service.settings.NOTIFICATION_HOME, "logs",
+                                'notification_server-{}.log'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+        logger.info("Starting notification server in daemon pid: {}".format(os.getpid()))
+        pid_file_path = os.path.join(notification_service.settings.NOTIFICATION_HOME, 'notification_server.pid')
+
+        log = open(log_path, 'w+')
+        ctx = _get_daemon_context(log, pid_file_path)
+
+        with ctx:
+            config_file_path = get_configuration_file_path()
+            server_runner = NotificationServerRunner(config_file_path)
+            server_runner.start(True)
+
+        log.close()
+    else:
+        """Start the notification server"""
+        signal.signal(signal.SIGTERM, sigterm_handler)
+        config_file_path = get_configuration_file_path()
+        server_runner = NotificationServerRunner(config_file_path)
+        server_runner.start(True)
+
+
+def _get_daemon_context(log, pid_file_path: str) -> daemon.DaemonContext:
+    return daemon.DaemonContext(
+        pidfile=TimeoutPIDLockFile(pid_file_path, -1),
+        stdout=log,
+        stderr=log,
+    )

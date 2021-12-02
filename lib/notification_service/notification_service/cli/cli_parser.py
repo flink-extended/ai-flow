@@ -119,6 +119,11 @@ ARG_DB_VERSION = Arg(
     default='heads',
 )
 
+ARG_SERVER_DAEMON = Arg(
+    ("-d", "--daemon"),
+    help="Daemonize instead of running in the foreground",
+    action="store_true"
+)
 
 CLICommand = Union[ActionCommand, GroupCommand]
 
@@ -249,17 +254,25 @@ DB_COMMANDS = (
     )
 )
 
+SERVER_COMMANDS = (
+    ActionCommand("start",
+                  "Start the notification server",
+                  lazy_load_command("notification_service.cli.commands.server_command.server_start"),
+                  [ARG_SERVER_DAEMON],
+                  "Start the notification server"),
+)
+
 notification_commands: List[CLICommand] = [
     ActionCommand("version",
                   "Shows the version of Notification",
                   lazy_load_command("notification_service.cli.commands.version_command.version"),
                   [],
                   "Shows the version of Notification"),
-    ActionCommand("server",
-                  "Start the notification server in foreground",
-                  lazy_load_command("notification_service.cli.commands.server_command.server"),
-                  [],
-                  "Start the notification server in foreground"),
+    GroupCommand(
+        name='server',
+        help='Notification server operations',
+        subcommands=SERVER_COMMANDS
+    ),
     GroupCommand(
         name='event',
         help='Manage events',

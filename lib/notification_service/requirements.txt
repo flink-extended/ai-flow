@@ -24,3 +24,4 @@ pyyaml>=5.1, <5.4
 rich==9.2.0
 python-dateutil==2.8.0
 alembic>=1.2, <2.0
+python-daemon>=2.1.1, <2.2

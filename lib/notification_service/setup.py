@@ -38,7 +38,7 @@ except IOError:
           "'%s' not found!" % version_file,
           file=sys.stderr)
     sys.exit(-1)
-VERSION = __version__ # noqa
+VERSION = __version__  # noqa
 
 require_file = '{}/{}'.format(os.path.dirname(os.path.abspath(__file__)), "requirements.txt")
 with open(require_file) as f:

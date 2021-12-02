@@ -42,12 +42,21 @@ logging.config.dictConfig({
 })
 
 
-def get_configuration_file_path():
+def get_notification_home():
     if 'NOTIFICATION_HOME' in os.environ:
         home = os.getenv('NOTIFICATION_HOME')
     else:
         home = os.getenv('HOME') + '/notification_service'
-    config_file_path = home + '/notification_server.yaml'
+    return home
+
+
+NOTIFICATION_HOME = get_notification_home()
+
+
+def get_configuration_file_path(notification_home=None):
+    if not notification_home:
+        notification_home = NOTIFICATION_HOME
+    config_file_path = notification_home + '/notification_server.yaml'
     if not os.path.exists(config_file_path):
         raise FileNotFoundError('Do not find config file {}'.format(config_file_path))
     return config_file_path
