@@ -15,17 +15,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import io
 import os
 import unittest
-from contextlib import redirect_stdout
 
 from ai_flow.ai_graph.ai_graph import current_graph
 from ai_flow.ai_graph.ai_node import AINode
 from ai_flow.api.ai_flow_context import init_ai_flow_context
 from ai_flow.cli import cli_parser
-from ai_flow.cli.commands.job_command import job_list_executions, job_restart_execution, job_show_execution, \
-    job_start_execution, job_stop_execution
 from ai_flow.context.workflow_config_loader import current_workflow_config
 from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
@@ -38,10 +34,11 @@ _PORT = '50051'
 _SERVER_URI = 'localhost:{}'.format(_PORT)
 _SCHEDULER_CLASS = 'ai_flow.test.api.mock_plugins.MockScheduler'
 _WORKFLOW_NAME = 'test_workflow_operation'
-_PROJECT_PATH = get_parent_dir(get_parent_dir(get_file_dir(__file__)))
+
+PROJECT_PATH = get_parent_dir(get_parent_dir(get_file_dir(__file__)))
 
 
-class TestCliJob(unittest.TestCase):
+class TestCommand(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -84,36 +81,3 @@ class TestCliJob(unittest.TestCase):
             node = AINode(name=job_config.job_name)
             node.config = job_config
             graph.add_node(node)
-
-    def test_cli_job_list_executions(self):
-        with redirect_stdout(io.StringIO()) as stdout:
-            job_list_executions(
-                self.parser.parse_args(['job', 'list-executions', _PROJECT_PATH, '1']))
-        self.assertEquals(11, len(str.splitlines(stdout.getvalue())))
-
-    def test_cli_job_restart_execution(self):
-        with redirect_stdout(io.StringIO()) as stdout:
-            job_restart_execution(
-                self.parser.parse_args(['job', 'restart-execution', _PROJECT_PATH, 'task_1', '1']))
-        self.assertEquals('Job: {}, workflow execution: {}, restarted: {}.'.format('task_1', '1', True),
-                          str.splitlines(stdout.getvalue())[0])
-
-    def test_cli_job_show_execution(self):
-        with redirect_stdout(io.StringIO()) as stdout:
-            job_show_execution(
-                self.parser.parse_args(['job', 'show-execution', _PROJECT_PATH, 'task_1', '1']))
-        self.assertEquals(8, len(str.splitlines(stdout.getvalue())))
-
-    def test_cli_job_start_execution(self):
-        with redirect_stdout(io.StringIO()) as stdout:
-            job_start_execution(
-                self.parser.parse_args(['job', 'start-execution', _PROJECT_PATH, 'task_1', '1']))
-        self.assertEquals('Job: {}, workflow execution: {}, started: {}.'.format('task_1', '1', True),
-                          str.splitlines(stdout.getvalue())[0])
-
-    def test_cli_job_stop_execution(self):
-        with redirect_stdout(io.StringIO()) as stdout:
-            job_stop_execution(
-                self.parser.parse_args(['job', 'stop-execution', _PROJECT_PATH, 'task_1', '1']))
-        self.assertEquals('Job: {}, workflow execution: {}, stopped: {}.'.format('task_1', '1', True),
-                          str.splitlines(stdout.getvalue())[0])

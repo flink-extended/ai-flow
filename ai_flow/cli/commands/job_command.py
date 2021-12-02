@@ -20,11 +20,13 @@
 from ai_flow.api.workflow_operation import list_job_executions, restart_job_execution, get_job_execution, \
     start_job_execution, stop_job_execution
 from ai_flow.cli.simple_table import AIFlowConsole
+from ai_flow.util.cli_utils import init_config
 from ai_flow.util.time_utils import parse_date
 
 
+@init_config
 def job_list_executions(args):
-    """Lists the job executions given a workflow execution id."""
+    """Lists all job executions of the workflow execution given a workflow execution id."""
     job_executions = list_job_executions(args.workflow_execution_id)
     AIFlowConsole().print_as(
         data=sorted(job_executions, key=lambda j: j.job_execution_id),
@@ -42,6 +44,7 @@ def job_list_executions(args):
     )
 
 
+@init_config
 def job_restart_execution(args):
     """Restarts the job execution given a job name and workflow execution id."""
     job_execution = restart_job_execution(args.job_name, args.workflow_execution_id)
@@ -49,6 +52,7 @@ def job_restart_execution(args):
                                                                    job_execution is not None))
 
 
+@init_config
 def job_show_execution(args):
     """Shows the job execution given a job name and workflow execution id."""
     job_execution = get_job_execution(args.job_name, args.workflow_execution_id)
@@ -68,6 +72,7 @@ def job_show_execution(args):
     )
 
 
+@init_config
 def job_start_execution(args):
     """Starts the job execution given a job name and workflow execution id."""
     job_execution = start_job_execution(args.job_name, args.workflow_execution_id)
@@ -75,6 +80,7 @@ def job_start_execution(args):
                                                                  job_execution is not None))
 
 
+@init_config
 def job_stop_execution(args):
     """Stops the job execution given a job name and workflow execution id."""
     job_execution = stop_job_execution(args.job_name, args.workflow_execution_id)

@@ -181,7 +181,7 @@ WORKFLOW_COMMANDS = (
     ),
     ActionCommand(
         name='list-executions',
-        help='Lists the workflow executions given a workflow name.',
+        help='Lists all workflow executions of the workflow given a workflow name.',
         func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_list_executions'),
         args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME, ARG_OUTPUT),
     ),
@@ -238,7 +238,7 @@ WORKFLOW_COMMANDS = (
 JOB_COMMANDS = (
     ActionCommand(
         name='list-executions',
-        help='Lists the job executions given a workflow execution id.',
+        help='Lists all job executions of the workflow execution given a workflow execution id.',
         func=lazy_load_command('ai_flow.cli.commands.job_command.job_list_executions'),
         args=(ARG_PROJECT_PATH, ARG_WORKFLOW_EXECUTION_ID, ARG_OUTPUT),
     ),

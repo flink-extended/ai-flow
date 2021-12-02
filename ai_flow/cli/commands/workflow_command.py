@@ -22,9 +22,11 @@ from ai_flow.api.workflow_operation import delete_workflow, get_workflow, get_wo
     list_workflow_executions, pause_workflow_scheduling, resume_workflow_scheduling, start_new_workflow_execution, \
     stop_all_workflow_executions, stop_workflow_execution, submit_workflow
 from ai_flow.cli.simple_table import AIFlowConsole
+from ai_flow.util.cli_utils import init_config
 from ai_flow.util.time_utils import parse_date
 
 
+@init_config
 def workflow_delete(args):
     """Deletes all DB records related to the specified workflow."""
     if (
@@ -38,6 +40,7 @@ def workflow_delete(args):
         print('Cancelled')
 
 
+@init_config
 def workflow_list(args):
     """Lists all the workflows."""
     workflows = list_workflows(sys.maxsize, 0)
@@ -53,8 +56,9 @@ def workflow_list(args):
     )
 
 
+@init_config
 def workflow_list_executions(args):
-    """Lists the workflow executions given a workflow name."""
+    """Lists all workflow executions of the workflow given a workflow name."""
     workflow_executions = list_workflow_executions(args.workflow_name)
     AIFlowConsole().print_as(
         data=sorted(workflow_executions, key=lambda w: w.workflow_execution_id),
@@ -71,18 +75,21 @@ def workflow_list_executions(args):
     )
 
 
+@init_config
 def workflow_pause_scheduling(args):
     """Pauses a workflow scheduling."""
     workflow = pause_workflow_scheduling(args.workflow_name)
     print("Workflow: {}, paused: {}.".format(args.workflow_name, workflow is not None))
 
 
+@init_config
 def workflow_resume_scheduling(args):
     """Resumes a paused workflow scheduling."""
     workflow = resume_workflow_scheduling(args.workflow_name)
     print("Workflow: {}, resumed: {}.".format(args.workflow_name, workflow is not None))
 
 
+@init_config
 def workflow_show(args):
     """Shows the workflow given a workflow name."""
     workflow = get_workflow(args.workflow_name)
@@ -98,6 +105,7 @@ def workflow_show(args):
     )
 
 
+@init_config
 def workflow_show_execution(args):
     """SShows the workflow execution given a workflow execution id."""
     workflow_execution = get_workflow_execution(args.workflow_execution_id)
@@ -116,24 +124,28 @@ def workflow_show_execution(args):
     )
 
 
+@init_config
 def workflow_start_execution(args):
     """Starts a new workflow execution given a workflow name."""
     workflow_execution = start_new_workflow_execution(args.workflow_name, args.context)
     print("Workflow: {}, started: {}.".format(args.workflow_name, workflow_execution is not None))
 
 
+@init_config
 def workflow_stop_execution(args):
     """Stops the workflow execution given a workflow execution id."""
     workflow_execution = stop_workflow_execution(args.workflow_execution_id)
     print("Workflow Execution: {}, stopped: {}.".format(args.workflow_execution_id, workflow_execution is not None))
 
 
+@init_config
 def workflow_stop_executions(args):
     """Stops the workflow executions given a workflow name."""
     workflow_executions = stop_all_workflow_executions(args.workflow_name)
     print("Workflow: {}, stopped: {}.".format(args.workflow_name, str(len(workflow_executions) > 0)))
 
 
+@init_config
 def workflow_submit(args):
     """Submits the workflow given a workflow name."""
     workflow = submit_workflow(args.workflow_name)
