@@ -50,9 +50,9 @@ def server_start(args):
                                 'notification_server-{}.log'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
         pid_file_path = os.path.join(notification_service.settings.NOTIFICATION_HOME, 'notification_server.pid')
 
-        logging.info(f"\nStarting Notification Server in daemon mode\n"
-                     f"Notification server log: {log_path}\n"
-                     f"Notification server pid: {pid_file_path}")
+        logger.info(f"\nStarting Notification Server in daemon mode\n"
+                    f"Notification server log: {log_path}\n"
+                    f"Notification server pid file: {pid_file_path}")
 
         log = open(log_path, 'w+')
         ctx = _get_daemon_context(log, pid_file_path)
