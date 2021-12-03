@@ -54,6 +54,7 @@ def get_aiflow_home():
 
 AIFLOW_HOME = get_aiflow_home()
 AIFLOW_PID_FILENAME = 'aiflow_server.pid'
+AIFLOW_WEBSERVER_PID_FILENAME = "aiflow_web_server.pid"
 
 
 def get_configuration_file_path():

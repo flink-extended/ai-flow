@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,27 +15,16 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
+import unittest
+from unittest import mock
 
-import psutil
-from typing import List
-
-
-def get_all_children_pids(current_pid=None) -> List:
-    result = []
-    if not psutil.pid_exists(current_pid):
-        return result
-    p = psutil.Process(current_pid)
-    for pp in p.children():
-        result.append(pp.pid)
-        result.extend(get_all_children_pids(pp.pid))
-    return result
+from ai_flow.util.process_utils import check_pid_exist
 
 
-def check_pid_exist(_pid):
-    try:
-        os.kill(_pid, 0)
-    except OSError:
-        return False
-    else:
-        return True
+class TestProcessUtils(unittest.TestCase):
+
+    def test_check_pid_exist(self):
+        with mock.patch("os.kill") as mock_kill:
+            mock_kill.side_effect = [OSError, True]
+            self.assertFalse(check_pid_exist(0))
+            self.assertTrue(check_pid_exist(0))

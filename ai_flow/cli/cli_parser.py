@@ -22,10 +22,9 @@ import argparse
 from argparse import Action, RawTextHelpFormatter
 from functools import lru_cache
 
-from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
-
 from ai_flow.common.module_load import import_string
 from ai_flow.util.helpers import partition
+from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
 
 
 def lazy_load_command(import_path: str) -> Callable:
@@ -288,6 +287,19 @@ SERVER_COMMANDS = (
                   "Stops the AIFlow server"),
 )
 
+WEBSERVER_COMMANDS = (
+    ActionCommand("start",
+                  "Starts the AIFlow Webserver",
+                  lazy_load_command("ai_flow.cli.commands.webserver_command.webserver_start"),
+                  [ARG_SERVER_DAEMON],
+                  "Starts the AIFlow Webserver"),
+    ActionCommand("stop",
+                  "Stops the AIFlow Webserver",
+                  lazy_load_command("ai_flow.cli.commands.webserver_command.webserver_stop"),
+                  [],
+                  "Stops the AIFlow Webserver"),
+)
+
 ai_flow_commands: List[CLICommand] = [
     ActionCommand(
         name='version',
@@ -304,6 +316,11 @@ ai_flow_commands: List[CLICommand] = [
         name='server',
         help='AIFlow server operations',
         subcommands=SERVER_COMMANDS
+    ),
+    GroupCommand(
+        name='webserver',
+        help='AIFlow Webserver operations',
+        subcommands=WEBSERVER_COMMANDS
     ),
     GroupCommand(
         name='workflow',
