@@ -90,6 +90,7 @@ class NotificationServerRunner(object):
     def __init__(self, config_file):
         if not os.path.exists(config_file):
             raise IOError('Config file {} not exist!'.format(config_file))
+        logger.info("Loading Notification server config from path: {}".format(config_file))
         self.config = NotificationServerConfig(config_file=config_file)
 
     def _init_server(self):
