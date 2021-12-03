@@ -58,7 +58,7 @@ def workflow_list(args):
 
 @init_config
 def workflow_list_executions(args):
-    """Lists all workflow executions of the workflow given a workflow name."""
+    """Lists all workflow executions of the workflow by workflow name."""
     workflow_executions = list_workflow_executions(args.workflow_name)
     AIFlowConsole().print_as(
         data=sorted(workflow_executions, key=lambda w: w.workflow_execution_id),
@@ -91,7 +91,7 @@ def workflow_resume_scheduling(args):
 
 @init_config
 def workflow_show(args):
-    """Shows the workflow given a workflow name."""
+    """Shows the workflow by workflow name."""
     workflow = get_workflow(args.workflow_name)
     AIFlowConsole().print_as(
         data=[workflow],
@@ -107,7 +107,7 @@ def workflow_show(args):
 
 @init_config
 def workflow_show_execution(args):
-    """SShows the workflow execution given a workflow execution id."""
+    """Shows the workflow execution by workflow execution id."""
     workflow_execution = get_workflow_execution(args.workflow_execution_id)
     AIFlowConsole().print_as(
         data=[workflow_execution],
@@ -126,27 +126,27 @@ def workflow_show_execution(args):
 
 @init_config
 def workflow_start_execution(args):
-    """Starts a new workflow execution given a workflow name."""
+    """Starts a new workflow execution by workflow name."""
     workflow_execution = start_new_workflow_execution(args.workflow_name, args.context)
     print("Workflow: {}, started: {}.".format(args.workflow_name, workflow_execution is not None))
 
 
 @init_config
 def workflow_stop_execution(args):
-    """Stops the workflow execution given a workflow execution id."""
+    """Stops the workflow execution by workflow execution id."""
     workflow_execution = stop_workflow_execution(args.workflow_execution_id)
     print("Workflow Execution: {}, stopped: {}.".format(args.workflow_execution_id, workflow_execution is not None))
 
 
 @init_config
 def workflow_stop_executions(args):
-    """Stops the workflow executions given a workflow name."""
+    """Stops all workflow executions by workflow name."""
     workflow_executions = stop_all_workflow_executions(args.workflow_name)
     print("Workflow: {}, stopped: {}.".format(args.workflow_name, str(len(workflow_executions) > 0)))
 
 
 @init_config
 def workflow_submit(args):
-    """Submits the workflow given a workflow name."""
+    """Submits the workflow by workflow name."""
     workflow = submit_workflow(args.workflow_name)
     print("Workflow: {}, submitted: {}.".format(args.workflow_name, workflow is not None))

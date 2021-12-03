@@ -181,7 +181,7 @@ WORKFLOW_COMMANDS = (
     ),
     ActionCommand(
         name='list-executions',
-        help='Lists all workflow executions of the workflow given a workflow name.',
+        help='Lists all workflow executions of the workflow by workflow name.',
         func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_list_executions'),
         args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME, ARG_OUTPUT),
     ),
@@ -199,37 +199,37 @@ WORKFLOW_COMMANDS = (
     ),
     ActionCommand(
         name='show',
-        help='Shows the workflow given a workflow name.',
+        help='Shows the workflow by workflow name.',
         func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_show'),
         args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME, ARG_OUTPUT),
     ),
     ActionCommand(
         name='show-execution',
-        help='Shows the workflow execution given a workflow execution id.',
+        help='Shows the workflow execution by workflow execution id.',
         func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_show_execution'),
         args=(ARG_PROJECT_PATH, ARG_WORKFLOW_EXECUTION_ID, ARG_OUTPUT),
     ),
     ActionCommand(
         name='start-execution',
-        help='Starts a new workflow execution given a workflow name.',
+        help='Starts a new workflow execution by workflow name.',
         func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_start_execution'),
         args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME, ARG_CONTEXT),
     ),
     ActionCommand(
         name='stop-execution',
-        help='Stops the workflow execution given a workflow execution id.',
+        help='Stops the workflow execution by workflow execution id.',
         func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_stop_execution'),
         args=(ARG_PROJECT_PATH, ARG_WORKFLOW_EXECUTION_ID),
     ),
     ActionCommand(
         name='stop-executions',
-        help='Stops the workflow executions given a workflow name.',
+        help='Stops all workflow executions by workflow name.',
         func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_stop_executions'),
         args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME),
     ),
     ActionCommand(
         name='submit',
-        help='Submits the workflow given a workflow name.',
+        help='Submits the workflow by workflow name.',
         func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_submit'),
         args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME),
     )
@@ -238,31 +238,31 @@ WORKFLOW_COMMANDS = (
 JOB_COMMANDS = (
     ActionCommand(
         name='list-executions',
-        help='Lists all job executions of the workflow execution given a workflow execution id.',
+        help='Lists all job executions of the workflow execution by workflow execution id.',
         func=lazy_load_command('ai_flow.cli.commands.job_command.job_list_executions'),
         args=(ARG_PROJECT_PATH, ARG_WORKFLOW_EXECUTION_ID, ARG_OUTPUT),
     ),
     ActionCommand(
         name='restart-execution',
-        help='Restarts the job execution given a job name and workflow execution id.',
+        help='Restarts the job execution by job name and workflow execution id.',
         func=lazy_load_command('ai_flow.cli.commands.job_command.job_restart_execution'),
         args=(ARG_PROJECT_PATH, ARG_JOB_NAME, ARG_WORKFLOW_EXECUTION_ID),
     ),
     ActionCommand(
         name='show-execution',
-        help='Shows the job execution given a job name and workflow execution id.',
+        help='Shows the job execution by job name and workflow execution id.',
         func=lazy_load_command('ai_flow.cli.commands.job_command.job_show_execution'),
         args=(ARG_PROJECT_PATH, ARG_JOB_NAME, ARG_WORKFLOW_EXECUTION_ID, ARG_OUTPUT),
     ),
     ActionCommand(
         name='start-execution',
-        help='Starts the job execution given a job name and workflow execution id.',
+        help='Starts the job execution by job name and workflow execution id.',
         func=lazy_load_command('ai_flow.cli.commands.job_command.job_start_execution'),
         args=(ARG_PROJECT_PATH, ARG_JOB_NAME, ARG_WORKFLOW_EXECUTION_ID),
     ),
     ActionCommand(
         name='stop-execution',
-        help='Stops the job execution given a job name and workflow execution id.',
+        help='Stops the job execution by job name and workflow execution id.',
         func=lazy_load_command('ai_flow.cli.commands.job_command.job_stop_execution'),
         args=(ARG_PROJECT_PATH, ARG_JOB_NAME, ARG_WORKFLOW_EXECUTION_ID),
     )

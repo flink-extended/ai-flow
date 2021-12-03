@@ -26,7 +26,7 @@ from ai_flow.util.time_utils import parse_date
 
 @init_config
 def job_list_executions(args):
-    """Lists all job executions of the workflow execution given a workflow execution id."""
+    """Lists all job executions of the workflow execution by workflow execution id."""
     job_executions = list_job_executions(args.workflow_execution_id)
     AIFlowConsole().print_as(
         data=sorted(job_executions, key=lambda j: j.job_execution_id),
@@ -46,7 +46,7 @@ def job_list_executions(args):
 
 @init_config
 def job_restart_execution(args):
-    """Restarts the job execution given a job name and workflow execution id."""
+    """Restarts the job execution by job name and workflow execution id."""
     job_execution = restart_job_execution(args.job_name, args.workflow_execution_id)
     print("Job: {}, workflow execution: {}, restarted: {}.".format(args.job_name, args.workflow_execution_id,
                                                                    job_execution is not None))
@@ -54,7 +54,7 @@ def job_restart_execution(args):
 
 @init_config
 def job_show_execution(args):
-    """Shows the job execution given a job name and workflow execution id."""
+    """Shows the job execution by job name and workflow execution id."""
     job_execution = get_job_execution(args.job_name, args.workflow_execution_id)
     AIFlowConsole().print_as(
         data=[job_execution],
@@ -74,7 +74,7 @@ def job_show_execution(args):
 
 @init_config
 def job_start_execution(args):
-    """Starts the job execution given a job name and workflow execution id."""
+    """Starts the job execution by job name and workflow execution id."""
     job_execution = start_job_execution(args.job_name, args.workflow_execution_id)
     print("Job: {}, workflow execution: {}, started: {}.".format(args.job_name, args.workflow_execution_id,
                                                                  job_execution is not None))
@@ -82,7 +82,7 @@ def job_start_execution(args):
 
 @init_config
 def job_stop_execution(args):
-    """Stops the job execution given a job name and workflow execution id."""
+    """Stops the job execution by job name and workflow execution id."""
     job_execution = stop_job_execution(args.job_name, args.workflow_execution_id)
     print("Job: {}, workflow execution: {}, stopped: {}.".format(args.job_name, args.workflow_execution_id,
                                                                  job_execution is not None))
