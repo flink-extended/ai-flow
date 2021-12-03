@@ -16,9 +16,32 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import logging.config
 import os
 
 from ai_flow.endpoint.server.server_config import AIFlowServerConfig
+
+# We hard code the logging config, we should make it configurable in the future.
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'default': {
+            'format': '[%(asctime)s - %(filename)s:%(lineno)d [%(threadName)s] - %(levelname)s: %(message)s',
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stderr',
+            'formatter': 'default'
+        }
+    },
+    'root': {
+        'level': 'INFO',
+        'handlers': ['console']
+    }
+})
 
 
 def get_aiflow_home():

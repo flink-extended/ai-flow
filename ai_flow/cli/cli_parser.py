@@ -21,6 +21,7 @@
 import argparse
 from argparse import Action, RawTextHelpFormatter
 from functools import lru_cache
+
 from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
 
 from ai_flow.common.module_load import import_string
@@ -113,6 +114,12 @@ ARG_OUTPUT = Arg(
     metavar='(table, json, yaml)',
     choices=('table', 'json', 'yaml'),
     default='table',
+)
+
+ARG_SERVER_DAEMON = Arg(
+    ("-d", "--daemon"),
+    help="Daemonize instead of running in the foreground",
+    action="store_true"
 )
 
 
@@ -268,6 +275,14 @@ JOB_COMMANDS = (
     )
 )
 
+SERVER_COMMANDS = (
+    ActionCommand("start",
+                  "Start the AIFlow server",
+                  lazy_load_command("ai_flow.cli.commands.server_command.server_start"),
+                  [ARG_SERVER_DAEMON],
+                  "Start the AIFlow server"),
+)
+
 ai_flow_commands: List[CLICommand] = [
     ActionCommand(
         name='version',
@@ -279,6 +294,11 @@ ai_flow_commands: List[CLICommand] = [
         name='db',
         help="Database operations",
         subcommands=DB_COMMANDS,
+    ),
+    GroupCommand(
+        name='server',
+        help='AIFlow server operations',
+        subcommands=SERVER_COMMANDS
     ),
     GroupCommand(
         name='workflow',
