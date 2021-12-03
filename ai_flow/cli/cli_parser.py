@@ -282,12 +282,12 @@ ai_flow_commands: List[CLICommand] = [
     ),
     GroupCommand(
         name='workflow',
-        help='Manage workflows',
+        help='Manage workflows of the given project',
         subcommands=WORKFLOW_COMMANDS,
     ),
     GroupCommand(
         name='job',
-        help='Manage jobs',
+        help='Manage jobs of the given project',
         subcommands=JOB_COMMANDS,
     ),
 ]

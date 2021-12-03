@@ -24,8 +24,11 @@ from ai_flow.api.ai_flow_context import init_ai_flow_context
 from ai_flow.cli import cli_parser
 from ai_flow.context.workflow_config_loader import current_workflow_config
 from ai_flow.endpoint.server.server import AIFlowServer
+from ai_flow.plugin_interface import job_plugin_interface, register_job_plugin_factory
 from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
+from ai_flow.test.api.mock_plugins import MockJobFactory
 from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
+from ai_flow.test.util.server_util import wait_for_server_started
 from ai_flow.util.path_util import get_file_dir, get_parent_dir
 
 _SQLITE_DB_FILE = 'aiflow.db'
@@ -52,6 +55,7 @@ class TestCommand(unittest.TestCase):
             }
         }
         config = SchedulerServiceConfig(raw_config)
+        register_job_plugin_factory(MockJobFactory())
         cls.aiflow_server = AIFlowServer(store_uri=_SQLITE_DB_URI, port=_PORT,
                                          start_meta_service=True,
                                          start_metric_service=False,
@@ -59,6 +63,7 @@ class TestCommand(unittest.TestCase):
                                          start_scheduler_service=True,
                                          scheduler_service_config=config)
         cls.aiflow_server.run()
+        wait_for_server_started(_SERVER_URI)
         init_ai_flow_context()
 
     @classmethod
@@ -67,6 +72,7 @@ class TestCommand(unittest.TestCase):
         if os.path.exists(_SQLITE_DB_FILE):
             os.remove(_SQLITE_DB_FILE)
         stop_notification_server(cls.notification_server)
+        job_plugin_interface.__job_controller_manager__.object_dict.pop('mock')
 
     def setUp(self):
         self.build_ai_graph()
