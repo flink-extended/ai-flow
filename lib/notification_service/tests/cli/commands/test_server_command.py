@@ -16,6 +16,7 @@
 # under the License.
 import logging
 import os
+import signal
 import unittest
 from unittest import mock
 
@@ -38,9 +39,13 @@ class TestCliServer(unittest.TestCase):
             mock_server_runner = mock.MagicMock()
             NotificationServerRunnerClass.side_effect = [mock_server_runner]
 
-            server_command.server_start(self.parser.parse_args(['server', 'start']))
+            with self.assertLogs("notification_service.cli.commands.server_command", "INFO") as log:
+                server_command.server_start(self.parser.parse_args(['server', 'start']))
+                log_output = "\n".join(log.output)
+
             NotificationServerRunnerClass.assert_called_once_with(
                 os.path.join(notification_home, "notification_server.yaml"))
+            self.assertIn("Starting notification server at pid", log_output)
 
             mock_server_runner.start.assert_called_once_with(True)
 
@@ -64,3 +69,55 @@ class TestCliServer(unittest.TestCase):
             self.assertIn("Notification server log:", log_output)
             self.assertIn("Notification server pid file:", log_output)
             mock_server_runner.start.assert_called_once_with(True)
+
+    def test_cli_server_stop_without_pid_file(self):
+        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_service.settings.NOTIFICATION_HOME = notification_home
+
+        with self.assertLogs("notification_service.cli.commands.server_command", "INFO") as log:
+            server_command.server_stop(self.parser.parse_args(['server', 'stop']))
+            log_output = "\n".join(log.output)
+            self.assertIn("PID file of Notification server does not exist at", log_output)
+
+    def test_cli_server_stop_SIGTERM_fail(self):
+        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_service.settings.NOTIFICATION_HOME = notification_home
+        pid_file = os.path.join(notification_home, "notification_server.pid")
+        self._prepare_pid_file(pid_file)
+
+        with mock.patch.object(os, "kill") as mock_kill:
+            mock_kill.side_effect = [RuntimeError("Boom"), None]
+            with self.assertLogs("notification_service.cli.commands.server_command", "INFO") as log:
+                server_command.server_stop(self.parser.parse_args(['server', 'stop']))
+                log_output = "\n".join(log.output)
+                self.assertIn("Failed to stop Notification server", log_output)
+                self.assertIn("stopped", log_output)
+
+    def test_cli_server_stop_SIGTERM_SIGKILL_fail(self):
+        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_service.settings.NOTIFICATION_HOME = notification_home
+        pid_file = os.path.join(notification_home, "notification_server.pid")
+        self._prepare_pid_file(pid_file)
+
+        with mock.patch.object(os, "kill") as mock_kill:
+            mock_kill.side_effect = [RuntimeError("Boom"), RuntimeError("Boom")]
+            with self.assertLogs("notification_service.cli.commands.server_command", "INFO") as log:
+                with self.assertRaises(RuntimeError):
+                    server_command.server_stop(self.parser.parse_args(['server', 'stop']))
+                log_output = "\n".join(log.output)
+                self.assertIn("Failed to stop Notification server", log_output)
+
+    def test_cli_server_stop(self):
+        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_service.settings.NOTIFICATION_HOME = notification_home
+        pid_file = os.path.join(notification_home, "notification_server.pid")
+        self._prepare_pid_file(pid_file)
+        with mock.patch.object(os, "kill") as mock_kill:
+            server_command.server_stop(self.parser.parse_args(['server', 'stop']))
+            mock_kill.assert_called_once_with(15213, signal.SIGTERM)
+            self.assertFalse(os.path.exists(pid_file))
+
+    @staticmethod
+    def _prepare_pid_file(pid_file_path, pid: int = 15213):
+        with open(pid_file_path, 'w') as f:
+            f.write(str(pid))

@@ -116,7 +116,6 @@ class NotificationServerRunner(object):
 
     def start(self, is_block=False):
         logger.info("Starting notification server with config: {}".format(self.config))
-        logger.info("Starting notification server at pid: {}".format(os.getpid()))
         self._init_server()
         self.server.run(is_block)
         if not is_block:

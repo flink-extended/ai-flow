@@ -260,6 +260,12 @@ SERVER_COMMANDS = (
                   lazy_load_command("notification_service.cli.commands.server_command.server_start"),
                   [ARG_SERVER_DAEMON],
                   "Start the notification server"),
+
+    ActionCommand("stop",
+                  "Stop the notification server",
+                  lazy_load_command("notification_service.cli.commands.server_command.server_stop"),
+                  [],
+                  "Stop the notification server")
 )
 
 notification_commands: List[CLICommand] = [

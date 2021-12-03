@@ -44,11 +44,12 @@ def make_log_dir_if_not_exist():
 
 
 def server_start(args):
+    pid_file_path = os.path.join(notification_service.settings.NOTIFICATION_HOME,
+                                 notification_service.settings.NOTIFICATION_PID_FILENAME)
     if args.daemon:
         make_log_dir_if_not_exist()
         log_path = os.path.join(notification_service.settings.NOTIFICATION_HOME, "logs",
                                 'notification_server-{}.log'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
-        pid_file_path = os.path.join(notification_service.settings.NOTIFICATION_HOME, 'notification_server.pid')
 
         logger.info(f"\nStarting Notification Server in daemon mode\n"
                     f"Notification server log: {log_path}\n"
@@ -66,8 +67,40 @@ def server_start(args):
         """Start the notification server"""
         signal.signal(signal.SIGTERM, sigterm_handler)
         config_file_path = get_configuration_file_path()
+
+        pid = os.getpid()
+        logger.info("Starting notification server at pid: {}".format(pid))
+        with open(pid_file_path, 'w') as f:
+            f.write(str(pid))
         server_runner = NotificationServerRunner(config_file_path)
         server_runner.start(True)
+
+
+def server_stop(args):
+    pid_file_path = os.path.join(notification_service.settings.NOTIFICATION_HOME,
+                                 notification_service.settings.NOTIFICATION_PID_FILENAME)
+    if not os.path.exists(pid_file_path):
+        logger.info(
+            "PID file of Notification server does not exist at {}. The Notification server is not running.".format(
+                pid_file_path))
+        return
+
+    with open(pid_file_path, 'r') as f:
+        pid = int(f.read())
+
+    try:
+        os.kill(pid, signal.SIGTERM)
+        logger.info("Notification server pid: {} stopped".format(pid))
+    except Exception:
+        logger.error("Failed to stop Notification server (pid: {}) with SIGTERM. Try to send SIGKILL".format(pid))
+        try:
+            os.kill(pid, signal.SIGKILL)
+            logger.info("Notification server pid: {} stopped".format(pid))
+        except Exception as e:
+            raise RuntimeError("Failed to kill Notification server (pid: {}) with SIGKILL.".format(pid)) from e
+
+    if os.path.exists(pid_file_path):
+        os.remove(pid_file_path)
 
 
 def _get_daemon_context(log, pid_file_path: str) -> daemon.DaemonContext:

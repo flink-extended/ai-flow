@@ -20,22 +20,5 @@
 set -e
 
 NOTIFICATION_HOME=${NOTIFICATION_HOME:-~/notification_service}
-NOTIFICATION_PID_FILE="${NOTIFICATION_HOME}/notification_server.pid"
 
-kill_with_pid_file() {
-  if [ ! -e "$2" ]; then
-    echo "No $1 running"
-  else
-    echo "Stopping $1"
-    for ((i=1;i<=3;i++))
-    do
-      kill $(cat "$2" > /dev/null 2>&1) >/dev/null 2>&1 && sleep 1
-    done
-
-    rm "$2" 2>/dev/null
-    echo "$1 stopped"
-  fi
-}
-
-set +e
-kill_with_pid_file "notification server" "${NOTIFICATION_PID_FILE}"
+notification server stop

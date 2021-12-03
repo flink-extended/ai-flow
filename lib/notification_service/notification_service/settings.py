@@ -25,7 +25,7 @@ logging.config.dictConfig({
     'disable_existing_loggers': False,
     'formatters': {
         'default': {
-            'format': '[%(asctime)s - %(pathname)s:%(lineno)d [%(threadName)s] - %(levelname)s: %(message)s',
+            'format': '[%(asctime)s - %(filename)s:%(lineno)d [%(threadName)s] - %(levelname)s: %(message)s',
         }
     },
     'handlers': {
@@ -51,6 +51,7 @@ def get_notification_home():
 
 
 NOTIFICATION_HOME = get_notification_home()
+NOTIFICATION_PID_FILENAME = 'notification_server.pid'
 
 
 def get_configuration_file_path(notification_home=None):
