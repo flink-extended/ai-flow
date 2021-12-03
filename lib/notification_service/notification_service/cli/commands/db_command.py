@@ -16,8 +16,9 @@
 # under the License.
 """DB command"""
 import logging
+
+from notification_service.settings import get_configuration
 from notification_service.util import db
-from notification_service.server_config import get_configuration
 
 _logger = logging.getLogger(__name__)
 

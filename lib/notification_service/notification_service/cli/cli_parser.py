@@ -119,6 +119,11 @@ ARG_DB_VERSION = Arg(
     default='heads',
 )
 
+ARG_SERVER_DAEMON = Arg(
+    ("-d", "--daemon"),
+    help="Daemonize instead of running in the foreground",
+    action="store_true"
+)
 
 CLICommand = Union[ActionCommand, GroupCommand]
 
@@ -195,28 +200,28 @@ ARG_TIMEOUT = Arg(
 EVENT_COMMANDS = (
     ActionCommand(
         name='list',
-        help="List events",
+        help="Lists events",
         func=lazy_load_command('notification_service.cli.commands.event_command.list_events'),
         args=(ARG_KEY, ARG_SERVER_URI, ARG_NAMESPACE, ARG_BEGIN_VERSION, ARG_EVENT_TYPE,
               ARG_BEGIN_TIME, ARG_SENDER, ARG_OUTPUT),
     ),
     ActionCommand(
         name='count',
-        help='Count events',
+        help='Counts events',
         func=lazy_load_command('notification_service.cli.commands.event_command.count_events'),
         args=(ARG_KEY, ARG_SERVER_URI, ARG_NAMESPACE, ARG_BEGIN_VERSION, ARG_EVENT_TYPE,
               ARG_BEGIN_TIME, ARG_SENDER),
     ),
     ActionCommand(
         name='listen',
-        help='Listen events',
+        help='Listens events',
         func=lazy_load_command('notification_service.cli.commands.event_command.listen_events'),
         args=(ARG_KEY, ARG_SERVER_URI, ARG_NAMESPACE, ARG_BEGIN_VERSION, ARG_EVENT_TYPE,
               ARG_LISTEN_BEGIN_TIME, ARG_SENDER)
     ),
     ActionCommand(
         name='send',
-        help='Send an event',
+        help='Sends an event',
         func=lazy_load_command('notification_service.cli.commands.event_command.send_event'),
         args=(ARG_KEY, ARG_VALUE, ARG_SERVER_URI, ARG_NAMESPACE, ARG_EVENT_TYPE, ARG_CONTEXT, ARG_SENDER)
     )
@@ -225,37 +230,54 @@ EVENT_COMMANDS = (
 DB_COMMANDS = (
     ActionCommand(
         name='init',
-        help="Initialize the metadata database",
+        help="Initializes the metadata database",
         func=lazy_load_command('notification_service.cli.commands.db_command.init'),
         args=(),
     ),
     ActionCommand(
         name='reset',
-        help="Burn down and rebuild the metadata database",
+        help="Burns down and rebuild the metadata database",
         func=lazy_load_command('notification_service.cli.commands.db_command.reset'),
         args=(ARG_YES,),
     ),
     ActionCommand(
         name='upgrade',
-        help="Upgrade the metadata database to the version",
+        help="Upgrades the metadata database to the version",
         func=lazy_load_command('notification_service.cli.commands.db_command.upgrade'),
         args=(ARG_DB_VERSION,),
     ),
     ActionCommand(
         name='downgrade',
-        help="Downgrade the metadata database to the version",
+        help="Downgrades the metadata database to the version",
         func=lazy_load_command('notification_service.cli.commands.db_command.downgrade'),
         args=(ARG_DB_VERSION,),
     )
 )
 
+SERVER_COMMANDS = (
+    ActionCommand("start",
+                  "Starts the notification server",
+                  lazy_load_command("notification_service.cli.commands.server_command.server_start"),
+                  [ARG_SERVER_DAEMON],
+                  "Start the notification server"),
+
+    ActionCommand("stop",
+                  "Stops the notification server",
+                  lazy_load_command("notification_service.cli.commands.server_command.server_stop"),
+                  [],
+                  "Stop the notification server")
+)
+
 notification_commands: List[CLICommand] = [
-    ActionCommand(
-        "version",
-        "Shows the version of Notification",
-        lazy_load_command("notification_service.cli.commands.version_command.version"),
-        [],
-        "Shows the version of Notification."
+    ActionCommand("version",
+                  "Shows the version of Notification",
+                  lazy_load_command("notification_service.cli.commands.version_command.version"),
+                  [],
+                  "Shows the version of Notification"),
+    GroupCommand(
+        name='server',
+        help='Notification server operations',
+        subcommands=SERVER_COMMANDS
     ),
     GroupCommand(
         name='event',

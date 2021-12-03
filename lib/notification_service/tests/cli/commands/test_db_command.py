@@ -17,12 +17,13 @@
 #
 import os
 import unittest
+import notification_service.settings
 
 from sqlalchemy import create_engine
 
 from notification_service.cli import cli_parser
 from notification_service.cli.commands import db_command
-from notification_service.server_config import get_configuration
+from notification_service.settings import get_configuration
 from notification_service.util import db
 
 
@@ -30,7 +31,7 @@ class TestCliDb(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.parser = cli_parser.get_parser()
-        os.environ['NOTIFICATION_HOME'] = os.path.join(os.path.dirname(__file__), '../../')
+        notification_service.settings.NOTIFICATION_HOME = os.path.join(os.path.dirname(__file__), '../../')
         cls.config = get_configuration()
 
     def _remove_db_file(self):

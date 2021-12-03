@@ -30,9 +30,4 @@ fi
 
 echo "Starting notification server"
 LOG_FILE_NAME=notification_server-$(date "+%Y%m%d-%H%M%S").log
-"$BIN"/start_notification_server.py > "${NOTIFICATION_LOG_DIR}"/"${LOG_FILE_NAME}" 2>&1 &
-echo $! > "${NOTIFICATION_PID_FILE}"
-
-echo "notification server started"
-echo "Notification server log: ${NOTIFICATION_LOG_DIR}/${LOG_FILE_NAME}"
-echo "Notification server pid: $(cat "${NOTIFICATION_PID_FILE}")"
+notification server start -d

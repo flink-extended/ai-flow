@@ -1,0 +1,21 @@
+[run]
+
+branch = True
+
+concurrency =
+    thread
+    multiprocessing
+
+source =
+    ai_flow
+    ai_flow_plugins
+    lib/notification_service
+
+omit =
+    ai_flow/test/*
+    ai_flow/protobuf/*
+    ai_flow_plugins/tests/*
+    lib/notification_service/tests/*
+    lib/notification_service/notification_service/proto/*
+
+parallel = True
