@@ -19,6 +19,7 @@ import os
 import unittest
 
 import ai_flow as af
+from ai_flow.api import ai_flow_context
 from ai_flow.api.ai_flow_context import init_ai_flow_context, init_notebook_context
 from ai_flow.context.project_context import current_project_config, current_project_context
 from ai_flow.context.workflow_config_loader import current_workflow_config
@@ -27,6 +28,7 @@ from ai_flow.project.project_config import ProjectConfig
 from ai_flow.store.db.base_model import base
 from ai_flow.test.store.test_sqlalchemy_store import _get_store
 from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server, _NS_URI
+from ai_flow.test.util.server_util import wait_for_server_started
 from ai_flow.util import sqlalchemy_db
 from ai_flow.workflow.job_config import JobConfig
 from ai_flow.workflow.workflow_config import WorkflowConfig
@@ -45,6 +47,7 @@ class TestAIFlowContext(unittest.TestCase):
             os.remove(_SQLITE_DB_FILE)
         cls.server = AIFlowServer(store_uri=_SQLITE_DB_URI, port=_PORT, start_scheduler_service=False)
         cls.server.run()
+        wait_for_server_started('localhost:{}'.format(_PORT))
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -57,6 +60,9 @@ class TestAIFlowContext(unittest.TestCase):
 
     def tearDown(self) -> None:
         sqlalchemy_db.clear_db(_SQLITE_DB_URI, base.metadata)
+        ai_flow_context.__init_context_flag__ = False
+        ai_flow_context.__init_notebook_context_flag__ = False
+        ai_flow_context.__init_client_flag__ = False
 
     def test_init_notebook_context(self):
         project_config: ProjectConfig = ProjectConfig()

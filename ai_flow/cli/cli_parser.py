@@ -22,6 +22,7 @@ import argparse
 from argparse import Action, RawTextHelpFormatter
 from functools import lru_cache
 from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
+
 from ai_flow.common.module_load import import_string
 from ai_flow.util.helpers import partition
 
@@ -57,24 +58,24 @@ class Arg:
 
     # pylint: disable=redefined-builtin,unused-argument,too-many-arguments
     def __init__(
-        self,
-        flags=_UNSET,
-        help=_UNSET,
-        action=_UNSET,
-        default=_UNSET,
-        nargs=_UNSET,
-        type=_UNSET,
-        choices=_UNSET,
-        required=_UNSET,
-        metavar=_UNSET,
-        dest=_UNSET,
+            self,
+            flags=_UNSET,
+            help=_UNSET,
+            action=_UNSET,
+            default=_UNSET,
+            nargs=_UNSET,
+            type=_UNSET,
+            choices=_UNSET,
+            required=_UNSET,
+            metavar=_UNSET,
+            dest=_UNSET,
     ):
         self.flags = flags
         self.kwargs = {}
         for k, v in locals().items():
             if v is _UNSET:
                 continue
-            if k in ("self", "flags"):
+            if k in ('self', 'flags'):
                 continue
 
             self.kwargs[k] = v
@@ -86,9 +87,11 @@ class Arg:
         parser.add_argument(*self.flags, **self.kwargs)
 
 
-ARG_YES = Arg(
-    ("-y", "--yes"), help="Do not prompt to confirm reset. Use with care!", action="store_true", default=False
-)
+# Shared
+ARG_PROJECT_PATH = Arg(('project_path',), help='The path of the project')
+ARG_WORKFLOW_NAME = Arg(('workflow_name',), help='The name of the workflow')
+ARG_WORKFLOW_EXECUTION_ID = Arg(('workflow_execution_id',), help='The id of the workflow execution')
+ARG_JOB_NAME = Arg(('job_name',), help='The name of the job')
 
 ARG_DB_VERSION = Arg(
     ("-v", "--version"),
@@ -96,6 +99,20 @@ ARG_DB_VERSION = Arg(
         'The version corresponding to the database'
     ),
     default='heads',
+)
+ARG_CONTEXT = Arg(('-c', '--context'), help='The context of the workflow execution to start')
+ARG_YES = Arg(
+    ('-y', '--yes'), help='Do not prompt to confirm reset. Use with care!', action='store_true', default=False
+)
+ARG_OUTPUT = Arg(
+    (
+        '-o',
+        '--output',
+    ),
+    help=('Output format. Allowed values: json, yaml, table (default: table)'),
+    metavar='(table, json, yaml)',
+    choices=('table', 'json', 'yaml'),
+    default='table',
 )
 
 
@@ -149,10 +166,112 @@ DB_COMMANDS = (
     )
 )
 
+WORKFLOW_COMMANDS = (
+    ActionCommand(
+        name='delete',
+        help='Deletes all DB records related to the specified workflow.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_delete'),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME, ARG_YES),
+    ),
+    ActionCommand(
+        name='list',
+        help='Lists all the workflows.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_list'),
+        args=(ARG_PROJECT_PATH, ARG_OUTPUT),
+    ),
+    ActionCommand(
+        name='list-executions',
+        help='Lists all workflow executions of the workflow by workflow name.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_list_executions'),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME, ARG_OUTPUT),
+    ),
+    ActionCommand(
+        name='pause-scheduling',
+        help='Pauses a workflow scheduling.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.worfklow_pause_scheduling'),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME, ARG_OUTPUT),
+    ),
+    ActionCommand(
+        name='resume-scheduling',
+        help='Resumes a paused workflow scheduling.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.worfklow_resume_scheduling'),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME, ARG_OUTPUT),
+    ),
+    ActionCommand(
+        name='show',
+        help='Shows the workflow by workflow name.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_show'),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME, ARG_OUTPUT),
+    ),
+    ActionCommand(
+        name='show-execution',
+        help='Shows the workflow execution by workflow execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_show_execution'),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_EXECUTION_ID, ARG_OUTPUT),
+    ),
+    ActionCommand(
+        name='start-execution',
+        help='Starts a new workflow execution by workflow name.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_start_execution'),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME, ARG_CONTEXT),
+    ),
+    ActionCommand(
+        name='stop-execution',
+        help='Stops the workflow execution by workflow execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_stop_execution'),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_EXECUTION_ID),
+    ),
+    ActionCommand(
+        name='stop-executions',
+        help='Stops all workflow executions by workflow name.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_stop_executions'),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME),
+    ),
+    ActionCommand(
+        name='submit',
+        help='Submits the workflow by workflow name.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_submit'),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME),
+    )
+)
+
+JOB_COMMANDS = (
+    ActionCommand(
+        name='list-executions',
+        help='Lists all job executions of the workflow execution by workflow execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.job_command.job_list_executions'),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_EXECUTION_ID, ARG_OUTPUT),
+    ),
+    ActionCommand(
+        name='restart-execution',
+        help='Restarts the job execution by job name and workflow execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.job_command.job_restart_execution'),
+        args=(ARG_PROJECT_PATH, ARG_JOB_NAME, ARG_WORKFLOW_EXECUTION_ID),
+    ),
+    ActionCommand(
+        name='show-execution',
+        help='Shows the job execution by job name and workflow execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.job_command.job_show_execution'),
+        args=(ARG_PROJECT_PATH, ARG_JOB_NAME, ARG_WORKFLOW_EXECUTION_ID, ARG_OUTPUT),
+    ),
+    ActionCommand(
+        name='start-execution',
+        help='Starts the job execution by job name and workflow execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.job_command.job_start_execution'),
+        args=(ARG_PROJECT_PATH, ARG_JOB_NAME, ARG_WORKFLOW_EXECUTION_ID),
+    ),
+    ActionCommand(
+        name='stop-execution',
+        help='Stops the job execution by job name and workflow execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.job_command.job_stop_execution'),
+        args=(ARG_PROJECT_PATH, ARG_JOB_NAME, ARG_WORKFLOW_EXECUTION_ID),
+    )
+)
+
 ai_flow_commands: List[CLICommand] = [
     ActionCommand(
         name='version',
-        help="Show the version",
+        help='Show the version.',
         func=lazy_load_command('ai_flow.cli.commands.version_command.version'),
         args=(),
     ),
@@ -160,6 +279,16 @@ ai_flow_commands: List[CLICommand] = [
         name='db',
         help="Database operations",
         subcommands=DB_COMMANDS,
+    ),
+    GroupCommand(
+        name='workflow',
+        help='Manage workflows of the given project',
+        subcommands=WORKFLOW_COMMANDS,
+    ),
+    GroupCommand(
+        name='job',
+        help='Manage jobs of the given project',
+        subcommands=JOB_COMMANDS,
     ),
 ]
 ALL_COMMANDS_DICT: Dict[str, CLICommand] = {sp.name: sp for sp in ai_flow_commands}
@@ -185,15 +314,15 @@ class AIFlowHelpFormatter(argparse.HelpFormatter):
             action_subcommands, group_subcommands = partition(
                 lambda d: isinstance(ALL_COMMANDS_DICT[d.dest], GroupCommand), subactions
             )
-            parts.append("\n")
-            parts.append('%*s%s:\n' % (self._current_indent, '', "Groups"))
+            parts.append('\n')
+            parts.append('%*s%s:\n' % (self._current_indent, '', 'Groups'))
             self._indent()
             for subaction in group_subcommands:
                 parts.append(self._format_action(subaction))
             self._dedent()
 
-            parts.append("\n")
-            parts.append('%*s%s:\n' % (self._current_indent, '', "Commands"))
+            parts.append('\n')
+            parts.append('%*s%s:\n' % (self._current_indent, '', 'Commands'))
             self._indent()
 
             for subaction in action_subcommands:
@@ -210,8 +339,8 @@ class AIFlowHelpFormatter(argparse.HelpFormatter):
 @lru_cache(maxsize=None)
 def get_parser() -> argparse.ArgumentParser:
     """Creates and returns command line argument parser"""
-    parser = DefaultHelpParser(prog="aiflow", formatter_class=AIFlowHelpFormatter)
-    subparsers = parser.add_subparsers(dest='subcommand', metavar="GROUP_OR_COMMAND")
+    parser = DefaultHelpParser(prog='aiflow', formatter_class=AIFlowHelpFormatter)
+    subparsers = parser.add_subparsers(dest='subcommand', metavar='GROUP_OR_COMMAND')
     subparsers.required = True
 
     sub_name: str
@@ -228,13 +357,13 @@ def _sort_args(args: Iterable[Arg]) -> Iterable[Arg]:
         """Get long option from Arg.flags"""
         return arg.flags[0] if len(arg.flags) == 1 else arg.flags[1]
 
-    positional, optional = partition(lambda x: x.flags[0].startswith("-"), args)
+    positional, optional = partition(lambda x: x.flags[0].startswith('-'), args)
     yield from positional
     yield from sorted(optional, key=lambda x: get_long_option(x).lower())
 
 
 def _add_command(
-    subparsers: argparse._SubParsersAction, sub: CLICommand  # pylint: disable=protected-access
+        subparsers: argparse._SubParsersAction, sub: CLICommand  # pylint: disable=protected-access
 ) -> None:
     sub_proc = subparsers.add_parser(
         sub.name, help=sub.help, description=sub.description or sub.help, epilog=sub.epilog
@@ -246,7 +375,7 @@ def _add_command(
     elif isinstance(sub, ActionCommand):
         _add_action_command(sub, sub_proc)
     else:
-        raise Exception("Invalid command definition.")
+        raise Exception('Invalid command definition.')
 
 
 def _add_action_command(sub: ActionCommand, sub_proc: argparse.ArgumentParser) -> None:
@@ -257,7 +386,7 @@ def _add_action_command(sub: ActionCommand, sub_proc: argparse.ArgumentParser) -
 
 def _add_group_command(sub: GroupCommand, sub_proc: argparse.ArgumentParser) -> None:
     subcommands = sub.subcommands
-    sub_subparsers = sub_proc.add_subparsers(dest="subcommand", metavar="COMMAND")
+    sub_subparsers = sub_proc.add_subparsers(dest='subcommand', metavar='COMMAND')
     sub_subparsers.required = True
 
     for command in sorted(subcommands, key=lambda x: x.name):

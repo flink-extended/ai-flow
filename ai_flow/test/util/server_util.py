@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,21 +14,9 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-import time
-import datetime
+import grpc
 
 
-def generate_time_str():
-    return time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime())
-
-
-def datetime_to_int64(d: datetime.datetime):
-    if d is None:
-        return 0
-    else:
-        return int(d.timestamp()*1000)
-
-
-def parse_date(timestamp):
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestamp) / 1000))
+def wait_for_server_started(server_uri):
+    channel = grpc.insecure_channel(server_uri)
+    grpc.channel_ready_future(channel).result()
