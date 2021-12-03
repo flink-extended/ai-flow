@@ -149,25 +149,25 @@ CLICommand = Union[ActionCommand, GroupCommand]
 DB_COMMANDS = (
     ActionCommand(
         name='init',
-        help="Initialize the metadata database",
+        help="Initializes the metadata database",
         func=lazy_load_command('ai_flow.cli.commands.db_command.init'),
         args=(),
     ),
     ActionCommand(
         name='reset',
-        help="Burn down and rebuild the metadata database",
+        help="Burns down and rebuild the metadata database",
         func=lazy_load_command('ai_flow.cli.commands.db_command.reset'),
         args=(ARG_YES,),
     ),
     ActionCommand(
         name='upgrade',
-        help="Upgrade the metadata database to the version",
+        help="Upgrades the metadata database to the version",
         func=lazy_load_command('ai_flow.cli.commands.db_command.upgrade'),
         args=(ARG_DB_VERSION,),
     ),
     ActionCommand(
         name='downgrade',
-        help="Downgrade the metadata database to the version",
+        help="Downgrades the metadata database to the version",
         func=lazy_load_command('ai_flow.cli.commands.db_command.downgrade'),
         args=(ARG_DB_VERSION,),
     )
@@ -277,16 +277,21 @@ JOB_COMMANDS = (
 
 SERVER_COMMANDS = (
     ActionCommand("start",
-                  "Start the AIFlow server",
+                  "Starts the AIFlow server",
                   lazy_load_command("ai_flow.cli.commands.server_command.server_start"),
                   [ARG_SERVER_DAEMON],
-                  "Start the AIFlow server"),
+                  "Starts the AIFlow server"),
+    ActionCommand("stop",
+                  "Stops the AIFlow server",
+                  lazy_load_command("ai_flow.cli.commands.server_command.server_stop"),
+                  [],
+                  "Stops the AIFlow server"),
 )
 
 ai_flow_commands: List[CLICommand] = [
     ActionCommand(
         name='version',
-        help='Show the version.',
+        help="Shows the version",
         func=lazy_load_command('ai_flow.cli.commands.version_command.version'),
         args=(),
     ),

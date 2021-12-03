@@ -16,7 +16,9 @@
 # under the License.
 import logging
 import os
+import signal
 import unittest
+import daemon
 from unittest import mock
 
 import ai_flow.settings
@@ -43,13 +45,14 @@ class TestCliServer(unittest.TestCase):
                 os.path.join(aiflow_home, "aiflow_server.yaml"))
 
             mock_server_runner.start.assert_called_once_with(True)
+            self.assertFalse(os.path.exists(os.path.join(aiflow_home, ai_flow.settings.AIFLOW_PID_FILENAME)))
 
     def test_cli_server_start_daemon(self):
         aiflow_home = os.path.join(os.path.dirname(__file__), "..")
         ai_flow.settings.AIFLOW_HOME = aiflow_home
-        with mock.patch.object(server_command, "_get_daemon_context") as get_daemon_context, \
+        with mock.patch.object(daemon, "DaemonContext") as DaemonContext, \
                 mock.patch.object(server_command, "AIFlowServerRunner") as AIFlowServerRunnerClass:
-            get_daemon_context.return_value = mock.MagicMock()
+            DaemonContext.side_effect = mock.MagicMock()
 
             mock_server_runner = mock.MagicMock()
             AIFlowServerRunnerClass.side_effect = [mock_server_runner]
@@ -57,10 +60,74 @@ class TestCliServer(unittest.TestCase):
             with self.assertLogs("ai_flow.cli.commands.server_command", "INFO") as log:
                 server_command.server_start(self.parser.parse_args(['server', 'start', '-d']))
 
-            get_daemon_context.assert_called_once_with(mock.ANY, os.path.join(aiflow_home,
-                                                                              "aiflow_server.pid"))
+            DaemonContext.assert_called_once()
             log_output = "\n".join(log.output)
             self.assertIn("Starting AIFlow Server in daemon mode", log_output)
             self.assertIn("AIFlow server log:", log_output)
             self.assertIn("AIFlow server pid file:", log_output)
             mock_server_runner.start.assert_called_once_with(True)
+
+    def test_cli_server_stop_without_pid_file(self):
+        aiflow_home = os.path.join(os.path.dirname(__file__), "..")
+        ai_flow.settings.AIFLOW_HOME = aiflow_home
+
+        with self.assertLogs("ai_flow.cli.commands.server_command", "INFO") as log:
+            server_command.server_stop(self.parser.parse_args(['server', 'stop']))
+            log_output = "\n".join(log.output)
+            self.assertIn("PID file of AIFlow server does not exist at", log_output)
+
+    def test_cli_server_stop_SIGTERM_fail(self):
+        aiflow_home = os.path.join(os.path.dirname(__file__), "..")
+        ai_flow.settings.AIFLOW_HOME = aiflow_home
+        pid_file = os.path.join(aiflow_home, ai_flow.settings.AIFLOW_PID_FILENAME)
+        self._prepare_pid_file(pid_file)
+
+        with mock.patch.object(os, "kill") as mock_kill, TmpPidFile(pid_file):
+            mock_kill.side_effect = [RuntimeError("Boom"), None]
+            with self.assertLogs("ai_flow.cli.commands.server_command", "INFO") as log:
+                server_command.server_stop(self.parser.parse_args(['server', 'stop']))
+                log_output = "\n".join(log.output)
+                self.assertIn("Failed to stop AIFlow server", log_output)
+                self.assertIn("stopped", log_output)
+
+    def test_cli_server_stop_SIGTERM_SIGKILL_fail(self):
+        aiflow_home = os.path.join(os.path.dirname(__file__), "..")
+        ai_flow.settings.AIFLOW_HOME = aiflow_home
+        pid_file = os.path.join(aiflow_home, ai_flow.settings.AIFLOW_PID_FILENAME)
+        self._prepare_pid_file(pid_file)
+
+        with mock.patch.object(os, "kill") as mock_kill, TmpPidFile(pid_file):
+            mock_kill.side_effect = [RuntimeError("Boom"), RuntimeError("Boom")]
+            with self.assertLogs("ai_flow.cli.commands.server_command", "INFO") as log:
+                with self.assertRaises(RuntimeError):
+                    server_command.server_stop(self.parser.parse_args(['server', 'stop']))
+                log_output = "\n".join(log.output)
+                self.assertIn("Failed to stop AIFlow server", log_output)
+
+    def test_cli_server_stop(self):
+        aiflow_home = os.path.join(os.path.dirname(__file__), "..")
+        ai_flow.settings.AIFLOW_HOME = aiflow_home
+        pid_file = os.path.join(aiflow_home, ai_flow.settings.AIFLOW_PID_FILENAME)
+        self._prepare_pid_file(pid_file)
+        with mock.patch.object(os, "kill") as mock_kill, TmpPidFile(pid_file):
+            server_command.server_stop(self.parser.parse_args(['server', 'stop']))
+            mock_kill.assert_called_once_with(15213, signal.SIGTERM)
+
+    @staticmethod
+    def _prepare_pid_file(pid_file_path, pid: int = 15213):
+        with open(pid_file_path, 'w') as f:
+            f.write(str(pid))
+
+
+class TmpPidFile:
+    def __init__(self, pid_file_path, pid: int = 15213):
+        self.pid_file_path = pid_file_path
+        self.pid = pid
+
+    def __enter__(self):
+        with open(self.pid_file_path, 'w') as f:
+            f.write(str(self.pid))
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if os.path.exists(self.pid_file_path):
+            os.remove(self.pid_file_path)

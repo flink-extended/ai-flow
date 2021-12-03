@@ -24,8 +24,8 @@ import daemon
 from daemon.pidfile import TimeoutPIDLockFile
 
 import ai_flow.settings
-from ai_flow.settings import get_configuration_file_path
 from ai_flow import AIFlowServerRunner
+from ai_flow.settings import get_configuration_file_path
 
 logger = logging.getLogger(__name__)
 
@@ -44,18 +44,24 @@ def make_log_dir_if_not_exist():
 
 
 def server_start(args):
+    pid_file_path = os.path.join(ai_flow.settings.AIFLOW_HOME, ai_flow.settings.AIFLOW_PID_FILENAME)
     if args.daemon:
         make_log_dir_if_not_exist()
         log_path = os.path.join(ai_flow.settings.AIFLOW_HOME, "logs",
                                 'aiflow_server-{}.log'.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
-        pid_file_path = os.path.join(ai_flow.settings.AIFLOW_HOME, 'aiflow_server.pid')
-
         logger.info(f"\nStarting AIFlow Server in daemon mode\n"
                     f"AIFlow server log: {log_path}\n"
                     f"AIFlow server pid file: {pid_file_path}")
 
         log = open(log_path, 'w+')
-        ctx = _get_daemon_context(log, pid_file_path)
+        ctx = daemon.DaemonContext(
+            pidfile=TimeoutPIDLockFile(pid_file_path, -1),
+            stdout=log,
+            stderr=log,
+            signal_map={
+                signal.SIGTERM: sigterm_handler
+            }
+        )
         with ctx:
             config_file_path = get_configuration_file_path()
             server_runner = AIFlowServerRunner(config_file_path)
@@ -66,13 +72,38 @@ def server_start(args):
         """Start the AIFlow server"""
         signal.signal(signal.SIGTERM, sigterm_handler)
         config_file_path = get_configuration_file_path()
-        server_runner = AIFlowServerRunner(config_file_path)
-        server_runner.start(True)
+
+        pid = os.getpid()
+        logger.info("Starting notification server at pid: {}".format(pid))
+        with open(pid_file_path, 'w') as f:
+            f.write(str(pid))
+        try:
+            server_runner = AIFlowServerRunner(config_file_path)
+            server_runner.start(True)
+        finally:
+            if os.path.exists(pid_file_path):
+                os.remove(pid_file_path)
 
 
-def _get_daemon_context(log, pid_file_path: str) -> daemon.DaemonContext:
-    return daemon.DaemonContext(
-        pidfile=TimeoutPIDLockFile(pid_file_path, -1),
-        stdout=log,
-        stderr=log,
-    )
+def server_stop(args):
+    pid_file_path = os.path.join(ai_flow.settings.AIFLOW_HOME,
+                                 ai_flow.settings.AIFLOW_PID_FILENAME)
+    if not os.path.exists(pid_file_path):
+        logger.info(
+            "PID file of AIFlow server does not exist at {}. The AIFlow server is not running.".format(
+                pid_file_path))
+        return
+
+    with open(pid_file_path, 'r') as f:
+        pid = int(f.read())
+
+    try:
+        os.kill(pid, signal.SIGTERM)
+        logger.info("AIFlow server pid: {} stopped".format(pid))
+    except Exception:
+        logger.error("Failed to stop AIFlow server (pid: {}) with SIGTERM. Try to send SIGKILL".format(pid))
+        try:
+            os.kill(pid, signal.SIGKILL)
+            logger.info("Notification server pid: {} stopped".format(pid))
+        except Exception as e:
+            raise RuntimeError("Failed to kill AIFlow server (pid: {}) with SIGKILL.".format(pid)) from e
