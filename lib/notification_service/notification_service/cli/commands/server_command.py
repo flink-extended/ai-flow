@@ -104,7 +104,6 @@ def server_stop(args):
 
     logger.info("Notification server pid: {} stopped".format(pid))
 
-
     if os.path.exists(pid_file_path):
         os.remove(pid_file_path)
 
@@ -114,4 +113,7 @@ def _get_daemon_context(log, pid_file_path: str) -> daemon.DaemonContext:
         pidfile=TimeoutPIDLockFile(pid_file_path, -1),
         stdout=log,
         stderr=log,
+        signal_map={
+            signal.SIGTERM: sigterm_handler
+        }
     )
