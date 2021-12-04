@@ -74,8 +74,13 @@ def server_start(args):
         logger.info("Starting notification server at pid: {}".format(pid))
         with open(pid_file_path, 'w') as f:
             f.write(str(pid))
-        server_runner = NotificationServerRunner(config_file_path)
-        server_runner.start(True)
+
+        try:
+            server_runner = NotificationServerRunner(config_file_path)
+            server_runner.start(True)
+        finally:
+            if os.path.exists(pid_file_path):
+                os.remove(pid_file_path)
 
 
 def server_stop(args):
@@ -103,9 +108,6 @@ def server_stop(args):
         time.sleep(0.5)
 
     logger.info("Notification server pid: {} stopped".format(pid))
-
-    if os.path.exists(pid_file_path):
-        os.remove(pid_file_path)
 
 
 def _get_daemon_context(log, pid_file_path: str) -> daemon.DaemonContext:
