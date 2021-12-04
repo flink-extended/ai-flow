@@ -17,6 +17,7 @@
 #
 import os
 import unittest
+import ai_flow.settings
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -28,11 +29,18 @@ from ai_flow.store.db.db_model import SqlProject
 
 
 class TestCliDb(unittest.TestCase):
+    prev_aiflow_home = None
+
     @classmethod
     def setUpClass(cls):
         cls.parser = cli_parser.get_parser()
-        os.environ['AIFLOW_HOME'] = os.path.join(os.path.dirname(__file__), '../')
+        cls.prev_aiflow_home = ai_flow.settings.AIFLOW_HOME
+        ai_flow.settings.AIFLOW_HOME = os.path.join(os.path.dirname(__file__), '../')
         cls.config = get_configuration()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        ai_flow.settings.AIFLOW_HOME = cls.prev_aiflow_home
 
     def _remove_db_file(self):
         if os.path.exists('aiflow.db'):
