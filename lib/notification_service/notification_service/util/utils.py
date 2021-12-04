@@ -16,12 +16,13 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import time
+import os
 import socket
+import time
 from importlib import import_module
 from itertools import tee, filterfalse
-import dateutil.parser
 
+import dateutil.parser
 from typing import Callable, Iterable
 
 from notification_service.base_notification import BaseEvent, Member, SenderEventCount
@@ -170,3 +171,11 @@ def parse_date(dt: str):
     parsed_time = dateutil.parser.parse(dt)
     return int(parsed_time.timestamp() * 1000)
 
+
+def check_pid_exist(_pid):
+    try:
+        os.kill(_pid, 0)
+    except OSError:
+        return False
+    else:
+        return True

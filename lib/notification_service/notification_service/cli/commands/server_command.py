@@ -19,6 +19,7 @@ import datetime
 import logging
 import os
 import signal
+import time
 
 import daemon
 from daemon.pidfile import TimeoutPIDLockFile
@@ -26,6 +27,7 @@ from daemon.pidfile import TimeoutPIDLockFile
 import notification_service.settings
 from notification_service.server import NotificationServerRunner
 from notification_service.settings import get_configuration_file_path
+from notification_service.util.utils import check_pid_exist
 
 logger = logging.getLogger(__name__)
 
@@ -90,14 +92,18 @@ def server_stop(args):
 
     try:
         os.kill(pid, signal.SIGTERM)
-        logger.info("Notification server pid: {} stopped".format(pid))
     except Exception:
         logger.error("Failed to stop Notification server (pid: {}) with SIGTERM. Try to send SIGKILL".format(pid))
         try:
             os.kill(pid, signal.SIGKILL)
-            logger.info("Notification server pid: {} stopped".format(pid))
         except Exception as e:
             raise RuntimeError("Failed to kill Notification server (pid: {}) with SIGKILL.".format(pid)) from e
+
+    while check_pid_exist(pid):
+        time.sleep(0.5)
+
+    logger.info("Notification server pid: {} stopped".format(pid))
+
 
     if os.path.exists(pid_file_path):
         os.remove(pid_file_path)

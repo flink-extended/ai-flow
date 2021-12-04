@@ -85,8 +85,10 @@ class TestCliServer(unittest.TestCase):
         pid_file = os.path.join(notification_home, "notification_server.pid")
         self._prepare_pid_file(pid_file)
 
-        with mock.patch.object(os, "kill") as mock_kill:
+        with mock.patch.object(os, "kill") as mock_kill, \
+                mock.patch.object(server_command, "check_pid_exist") as mock_pid_check:
             mock_kill.side_effect = [RuntimeError("Boom"), None]
+            mock_pid_check.side_effect = [False]
             with self.assertLogs("notification_service.cli.commands.server_command", "INFO") as log:
                 server_command.server_stop(self.parser.parse_args(['server', 'stop']))
                 log_output = "\n".join(log.output)
@@ -112,7 +114,9 @@ class TestCliServer(unittest.TestCase):
         notification_service.settings.NOTIFICATION_HOME = notification_home
         pid_file = os.path.join(notification_home, "notification_server.pid")
         self._prepare_pid_file(pid_file)
-        with mock.patch.object(os, "kill") as mock_kill:
+        with mock.patch.object(os, "kill") as mock_kill, \
+                mock.patch.object(server_command, "check_pid_exist") as mock_pid_check:
+            mock_pid_check.side_effect = [True, False]
             server_command.server_stop(self.parser.parse_args(['server', 'stop']))
             mock_kill.assert_called_once_with(15213, signal.SIGTERM)
             self.assertFalse(os.path.exists(pid_file))
