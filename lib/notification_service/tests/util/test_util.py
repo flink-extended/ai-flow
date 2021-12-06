@@ -18,8 +18,9 @@
 #
 
 import unittest
+from unittest import mock
 
-from notification_service.util.utils import import_string
+from notification_service.util.utils import import_string, check_pid_exist
 
 
 class TestUtil(unittest.TestCase):
@@ -32,3 +33,10 @@ class TestUtil(unittest.TestCase):
 
         with self.assertRaises(ImportError):
             import_string("test_util.ClassB")
+
+    def test_check_pid_exist(self):
+        with mock.patch("os.kill") as mock_kill:
+            mock_kill.side_effect = [OSError, True]
+            self.assertFalse(check_pid_exist(0))
+            self.assertTrue(check_pid_exist(0))
+
