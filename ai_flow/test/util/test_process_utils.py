@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,26 +15,16 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
 import unittest
+from unittest import mock
 
-from ai_flow.endpoint.server.server_config import AIFlowServerConfig, DBType
-
-
-class TestConfiguration(unittest.TestCase):
-
-    def test_dump_load_configuration(self):
-        config = AIFlowServerConfig()
-        config.set_db_uri(db_type=DBType.SQLITE, uri="sqlite:///sql.db")
-        self.assertEqual('sql.db', config.get_sql_lite_db_file())
-
-    def test_load_master_configuration(self):
-        config = AIFlowServerConfig()
-        config.load_from_file(os.path.dirname(__file__) + '/aiflow_server.yaml')
-        self.assertEqual('sql_lite', config.get_db_type())
-        self.assertEqual('/tmp/repo', config.get_scheduler_service_config()['repository'])
-        self.assertEqual(True, config.start_scheduler_service())
+from ai_flow.util.process_utils import check_pid_exist
 
 
-if __name__ == '__main__':
-    unittest.main()
+class TestProcessUtils(unittest.TestCase):
+
+    def test_check_pid_exist(self):
+        with mock.patch("os.kill") as mock_kill:
+            mock_kill.side_effect = [OSError, True]
+            self.assertFalse(check_pid_exist(0))
+            self.assertTrue(check_pid_exist(0))

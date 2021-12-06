@@ -18,29 +18,27 @@
 #
 import getopt
 import json
-import sys
 import logging
+import sys
 from logging.config import dictConfig
-from typing import List, Dict
-
-from ai_flow.endpoint.server.server_config import AIFlowServerConfig
-from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
-from ai_flow.version import __version__
-
-from django.core.paginator import Paginator
-from flask import Flask, request, render_template
-from flask_cors import CORS
-from werkzeug.local import LocalProxy
 
 from ai_flow.ai_graph.ai_graph import AIGraph
 from ai_flow.ai_graph.ai_node import AINode, ReadDatasetNode, WriteDatasetNode
 from ai_flow.ai_graph.data_edge import DataEdge
+from ai_flow.endpoint.server.server_config import AIFlowServerConfig
 from ai_flow.meta.workflow_meta import WorkflowMeta
-from ai_flow.plugin_interface.scheduler_interface import Scheduler, SchedulerFactory, SchedulerConfig
+from ai_flow.plugin_interface.scheduler_interface import Scheduler, SchedulerFactory
+from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
 from ai_flow.store.abstract_store import Filters, AbstractStore, Orders
 from ai_flow.store.db.db_util import create_db_store
 from ai_flow.util.json_utils import loads, Jsonable, dumps
+from ai_flow.version import __version__
 from ai_flow.workflow.control_edge import ControlEdge
+from django.core.paginator import Paginator
+from flask import Flask, request, render_template
+from flask_cors import CORS
+from typing import List, Dict
+from werkzeug.local import LocalProxy
 
 
 def config_logging():
@@ -503,8 +501,12 @@ def main(argv):
         print(usage_message)
         sys.exit(2)
 
+    start_web_server_by_config_file_path(config_file)
+
+
+def start_web_server_by_config_file_path(config_file_path):
     config = AIFlowServerConfig()
-    config.load_from_file(config_file)
+    config.load_from_file(config_file_path)
     store_uri = config.get_db_uri()
     scheduler_service_config = SchedulerServiceConfig(config.get_scheduler_service_config())
     scheduler_class = scheduler_service_config.scheduler().scheduler_class()

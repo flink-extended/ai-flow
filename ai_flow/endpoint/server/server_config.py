@@ -16,7 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
 from ai_flow.common.configuration import AIFlowConfiguration
 from enum import Enum
 from typing import Text
@@ -132,16 +131,3 @@ class AIFlowServerConfig(AIFlowConfiguration):
 
     def get_wait_for_server_started_timeout(self):
         return self.get('wait_for_server_started_timeout')
-
-
-def get_configuration():
-    if 'AIFLOW_HOME' in os.environ:
-        home = os.getenv('AIFLOW_HOME')
-    else:
-        home = os.getenv('HOME') + '/aiflow'
-    config_file = home + '/aiflow_server.yaml'
-    if not os.path.exists(config_file):
-        raise FileNotFoundError('Config file {} not found.'.format(config_file))
-    config = AIFlowServerConfig()
-    config.load_from_file(config_file)
-    return config

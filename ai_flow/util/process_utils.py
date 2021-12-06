@@ -16,6 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import os
+
 import psutil
 from typing import List
 
@@ -31,3 +33,10 @@ def get_all_children_pids(current_pid=None) -> List:
     return result
 
 
+def check_pid_exist(_pid):
+    try:
+        os.kill(_pid, 0)
+    except OSError:
+        return False
+    else:
+        return True

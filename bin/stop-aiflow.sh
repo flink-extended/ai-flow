@@ -22,21 +22,6 @@ set -e
 AIFLOW_HOME=${AIFLOW_HOME:-~/aiflow}
 AIFLOW_PID_DIR=${AIFLOW_PID_DIR:-${AIFLOW_HOME}}
 
-kill_with_pid_file() {
-  if [ ! -e "$2" ]; then
-    echo "No $1 running"
-  else
-    echo "Stopping $1"
-    for ((i=1;i<=3;i++))
-    do
-      kill $(cat "$2") >/dev/null 2>&1 && sleep 1
-    done
-
-    rm "$2" 2>/dev/null
-    echo "$1 stopped"
-  fi
-}
-
 set +e
-kill_with_pid_file "AIFlow Server" "${AIFLOW_PID_DIR}"/aiflow_server.pid
-kill_with_pid_file "AIFlow Web Server" "${AIFLOW_PID_DIR}"/aiflow_web_server.pid
+aiflow server stop
+aiflow webserver stop

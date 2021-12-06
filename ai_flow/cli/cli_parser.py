@@ -21,10 +21,10 @@
 import argparse
 from argparse import Action, RawTextHelpFormatter
 from functools import lru_cache
-from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
 
 from ai_flow.common.module_load import import_string
 from ai_flow.util.helpers import partition
+from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
 
 
 def lazy_load_command(import_path: str) -> Callable:
@@ -115,6 +115,12 @@ ARG_OUTPUT = Arg(
     default='table',
 )
 
+ARG_SERVER_DAEMON = Arg(
+    ("-d", "--daemon"),
+    help="Daemonizes instead of running in the foreground",
+    action="store_true"
+)
+
 
 class ActionCommand(NamedTuple):
     """Single CLI command"""
@@ -142,25 +148,25 @@ CLICommand = Union[ActionCommand, GroupCommand]
 DB_COMMANDS = (
     ActionCommand(
         name='init',
-        help="Initialize the metadata database",
+        help="Initializes the metadata database",
         func=lazy_load_command('ai_flow.cli.commands.db_command.init'),
         args=(),
     ),
     ActionCommand(
         name='reset',
-        help="Burn down and rebuild the metadata database",
+        help="Burns down and rebuild the metadata database",
         func=lazy_load_command('ai_flow.cli.commands.db_command.reset'),
         args=(ARG_YES,),
     ),
     ActionCommand(
         name='upgrade',
-        help="Upgrade the metadata database to the version",
+        help="Upgrades the metadata database to the version",
         func=lazy_load_command('ai_flow.cli.commands.db_command.upgrade'),
         args=(ARG_DB_VERSION,),
     ),
     ActionCommand(
         name='downgrade',
-        help="Downgrade the metadata database to the version",
+        help="Downgrades the metadata database to the version",
         func=lazy_load_command('ai_flow.cli.commands.db_command.downgrade'),
         args=(ARG_DB_VERSION,),
     )
@@ -268,10 +274,36 @@ JOB_COMMANDS = (
     )
 )
 
+SERVER_COMMANDS = (
+    ActionCommand("start",
+                  "Starts the AIFlow server",
+                  lazy_load_command("ai_flow.cli.commands.server_command.server_start"),
+                  [ARG_SERVER_DAEMON],
+                  "Starts the AIFlow server"),
+    ActionCommand("stop",
+                  "Stops the AIFlow server",
+                  lazy_load_command("ai_flow.cli.commands.server_command.server_stop"),
+                  [],
+                  "Stops the AIFlow server"),
+)
+
+WEBSERVER_COMMANDS = (
+    ActionCommand("start",
+                  "Starts the AIFlow Webserver",
+                  lazy_load_command("ai_flow.cli.commands.webserver_command.webserver_start"),
+                  [ARG_SERVER_DAEMON],
+                  "Starts the AIFlow Webserver"),
+    ActionCommand("stop",
+                  "Stops the AIFlow Webserver",
+                  lazy_load_command("ai_flow.cli.commands.webserver_command.webserver_stop"),
+                  [],
+                  "Stops the AIFlow Webserver"),
+)
+
 ai_flow_commands: List[CLICommand] = [
     ActionCommand(
         name='version',
-        help='Show the version.',
+        help="Shows the version",
         func=lazy_load_command('ai_flow.cli.commands.version_command.version'),
         args=(),
     ),
@@ -279,6 +311,16 @@ ai_flow_commands: List[CLICommand] = [
         name='db',
         help="Database operations",
         subcommands=DB_COMMANDS,
+    ),
+    GroupCommand(
+        name='server',
+        help='AIFlow server operations',
+        subcommands=SERVER_COMMANDS
+    ),
+    GroupCommand(
+        name='webserver',
+        help='AIFlow Webserver operations',
+        subcommands=WEBSERVER_COMMANDS
     ),
     GroupCommand(
         name='workflow',

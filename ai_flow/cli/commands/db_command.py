@@ -18,7 +18,7 @@
 import logging
 from ai_flow.util import sqlalchemy_db
 from ai_flow.store.db.base_model import base
-from ai_flow.endpoint.server.server_config import get_configuration
+from ai_flow.settings import get_configuration
 
 _logger = logging.getLogger(__name__)
 

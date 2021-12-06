@@ -29,18 +29,9 @@ if [ -e "${AIFLOW_PID_DIR}"/aiflow_server.pid ]; then
 fi
 
 echo "Starting AIFlow Server"
-LOG_FILE_NAME=aiflow-server-$(date "+%Y%m%d-%H%M%S").log
-"${BIN}"/start_aiflow.py > "${AIFLOW_LOG_DIR}"/"${LOG_FILE_NAME}" 2>&1 &
-echo $! > "${AIFLOW_PID_DIR}"/aiflow_server.pid
+aiflow server start -d
 echo "AIFlow Server started"
 
 echo "Starting AIFlow Web"
-WEB_LOG_FILE_NAME=aiflow-webserver-$(date "+%Y%m%d-%H%M%S").log
-"${BIN}"/start_aiflow_web.py > "${AIFLOW_LOG_DIR}"/"${WEB_LOG_FILE_NAME}" 2>&1 &
-echo $! > "${AIFLOW_PID_DIR}"/aiflow_web_server.pid
+aiflow webserver start -d
 echo "AIFlow Web started"
-
-echo "AIFlow Server log: ${AIFLOW_LOG_DIR}/${LOG_FILE_NAME}"
-echo "AIFlow Server pid: $(cat "${AIFLOW_PID_DIR}"/aiflow_server.pid)"
-echo "AIFlow Web log: ${AIFLOW_LOG_DIR}/${WEB_LOG_FILE_NAME}"
-echo "AIFlow Web pid: $(cat "${AIFLOW_PID_DIR}"/aiflow_web_server.pid)"
