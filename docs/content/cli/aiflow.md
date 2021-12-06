@@ -2,7 +2,7 @@
 
 ## Command Line Interface
 
-AIFlow has a very rich command line interface that allows for many types of operation on a Workflow, starting services, and supporting development and testing.
+AIFlow has a very rich command-line interface that supports many types of operations on a Workflow, starting services and testing.
 
 **Content**
 
