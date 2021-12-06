@@ -17,43 +17,11 @@
 # under the License.
 #
 """Utilities module for cli"""
-
-import functools
 import os
 import sys
-from typing import Callable, TypeVar, cast
 
 from pygments.formatters.terminal import TerminalFormatter
 from pygments.formatters.terminal256 import Terminal256Formatter
-
-from ai_flow.context.project_context import init_project_context
-
-T = TypeVar("T", bound=Callable)  # pylint: disable=invalid-name
-
-
-def init_config(f: T) -> T:
-    """
-    Decorates function to execute function at the same time submitting init_config
-    but in CLI context.
-
-    :param f: function instance
-    :return: wrapped function
-    """
-
-    @functools.wraps(f)
-    def wrapper(*args, **kwargs):
-        """
-        An wrapper for cli functions. It assumes to have Namespace instance
-        at 1st positional argument
-
-        :param args: Positional argument. It assumes to have Namespace instance
-            at 1st positional argument
-        :param kwargs: A passthrough keyword argument
-        """
-        init_project_context(args[0].project_path)
-        return f(*args, **kwargs)
-
-    return cast(T, wrapper)
 
 
 def get_terminal_formatter(**opts):
