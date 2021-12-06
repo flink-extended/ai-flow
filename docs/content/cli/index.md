@@ -1,4 +1,4 @@
-# Java
+# CLI
 
 ```{toctree}
 :maxdepth: 2

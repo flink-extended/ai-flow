@@ -22,7 +22,6 @@ API
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents
 
    python/index
    java/index

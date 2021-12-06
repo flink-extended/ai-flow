@@ -34,4 +34,5 @@ Welcome to AIFlow's Documentation!
    content/deployment/index
    content/customize/index
    content/api/index
+   content/cli/index
 
