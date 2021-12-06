@@ -2,7 +2,7 @@
 
 ## Command Line Interface
 
-Notification has a very rich command line interface that allows for many types of operation on a Events, starting services, and supporting development and testing.
+Notification has a very rich command-line interface that supports many types of operations on Events, starting services and testing.
 
 **Content**
 
@@ -261,7 +261,7 @@ Sender of the event.
 
 #### config
 
-Manage configuration.
+Manages configuration.
 
 ```
 notification config [-h] COMMAND ... 
@@ -299,7 +299,7 @@ notification config init [-h]
 
 ##### list
 
-List all options of the configuration.
+Lists all options of the configuration.
 
 ```
 notification config list [-h] [--color {auto,off,on}]

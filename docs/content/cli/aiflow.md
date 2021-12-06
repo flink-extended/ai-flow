@@ -472,7 +472,7 @@ The id of the workflow execution.
 
 #### config
 
-Manage configuration.
+Manages configuration.
 
 ```
 aiflow config [-h] COMMAND ... 
@@ -510,7 +510,7 @@ aiflow config init [-h]
 
 ##### list
 
-List all options of the configuration.
+Lists all options of the configuration.
 
 ```
 aiflow config list [-h] [--color {auto,off,on}]
