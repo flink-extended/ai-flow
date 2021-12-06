@@ -90,13 +90,18 @@ def webserver_stop(args):
     try:
         os.kill(pid, signal.SIGTERM)
     except Exception:
-        logger.error("Failed to stop AIFlow Webserver (pid: {}) with SIGTERM. Try to send SIGKILL".format(pid))
+        logger.warning("Failed to stop AIFlow Webserver (pid: {}) with SIGTERM. Try to send SIGKILL".format(pid))
         try:
             os.kill(pid, signal.SIGKILL)
         except Exception as e:
             raise RuntimeError("Failed to kill AIFlow Webserver (pid: {}) with SIGKILL.".format(pid)) from e
 
+    stop_timeout = 60
+    start_time = time.monotonic()
     while check_pid_exist(pid):
+        if time.monotonic() - start_time > stop_timeout:
+            raise RuntimeError(
+                "AIFlow Webserver (pid: {}) does not exit after {} seconds.".format(pid, stop_timeout))
         time.sleep(0.5)
 
     logger.info("AIFlow Webserver pid: {} stopped".format(pid))

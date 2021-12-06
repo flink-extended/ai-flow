@@ -17,11 +17,13 @@
 import logging
 import os
 import signal
+import time
 import unittest
 from unittest import mock
 
-import ai_flow.settings
 import daemon
+
+import ai_flow.settings
 from ai_flow.cli import cli_parser
 from ai_flow.cli.commands import server_command
 
@@ -103,6 +105,19 @@ class TestCliServer(unittest.TestCase):
                     server_command.server_stop(self.parser.parse_args(['server', 'stop']))
                 log_output = "\n".join(log.output)
                 self.assertIn("Failed to stop AIFlow server", log_output)
+
+    def test_cli_server_stop_wait_process_exit_timeout(self):
+        aiflow_home = os.path.join(os.path.dirname(__file__), "..")
+        ai_flow.settings.AIFLOW_HOME = aiflow_home
+        pid_file = os.path.join(aiflow_home, ai_flow.settings.AIFLOW_PID_FILENAME)
+
+        with mock.patch.object(os, "kill") as mock_kill, \
+                TmpPidFile(pid_file), mock.patch.object(time, 'monotonic') as mock_monotonic:
+            mock_kill.return_value = True
+            mock_monotonic.side_effect = [0.0, 30.0, 70.0]
+            with self.assertRaises(RuntimeError):
+                server_command.server_stop(self.parser.parse_args(['server', 'stop']))
+            self.assertEqual(3, mock_monotonic.call_count)
 
     def test_cli_server_stop(self):
         aiflow_home = os.path.join(os.path.dirname(__file__), "..")
