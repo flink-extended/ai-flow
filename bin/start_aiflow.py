@@ -23,28 +23,7 @@ import os
 import signal
 
 import ai_flow
-
-
-def create_default_sever_config(root_dir_path):
-    """
-    Generate default server config which use Apache Airflow as scheduler.
-    """
-    import ai_flow.config_templates
-    if not os.path.exists(root_dir_path):
-        logging.info("{} does not exist, creating the directory".format(root_dir_path))
-        os.makedirs(root_dir_path, exist_ok=False)
-    aiflow_server_config_path = os.path.join(
-        os.path.dirname(ai_flow.config_templates.__file__), "default_aiflow_server.yaml"
-    )
-    if not os.path.exists(aiflow_server_config_path):
-        raise Exception("default aiflow server config is not found at {}.".format(aiflow_server_config_path))
-
-    aiflow_server_config_target_path = os.path.join(root_dir_path, "aiflow_server.yaml")
-    with open(aiflow_server_config_path, encoding='utf-8') as config_file:
-        default_config = config_file.read().format(**{'AIFLOW_HOME': root_dir_path})
-    with open(aiflow_server_config_target_path, mode='w', encoding='utf-8') as f:
-        f.write(default_config)
-    return aiflow_server_config_target_path
+from ai_flow.util.config_utils import create_default_server_config
 
 
 def start_master(config_file):
@@ -76,9 +55,10 @@ if __name__ == '__main__':
     aiflow_server_config = os.environ["AIFLOW_HOME"] + "/aiflow_server.yaml"
 
     args = _prepare_args()
+
     if not os.path.exists(aiflow_server_config):
-        logging.info("{} does not exist, creating the default aiflow server config".format(aiflow_server_config))
-        aiflow_server_config = create_default_sever_config(os.environ["AIFLOW_HOME"])
+        create_default_server_config(os.environ.get("AIFLOW_HOME"))
+        logging.info('AIFlow server config generated at {}.'.format(aiflow_server_config))
     else:
         logging.info("AIFlow server config exists at {}".format(aiflow_server_config))
 

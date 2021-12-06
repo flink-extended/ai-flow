@@ -22,9 +22,9 @@ import argparse
 from argparse import Action, RawTextHelpFormatter
 from datetime import datetime
 from functools import lru_cache
-
 from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
 
+from notification_service.util.cli import ColorMode
 from notification_service.util.utils import import_string, partition, parse_date
 
 
@@ -182,12 +182,25 @@ ARG_SENDER = Arg(
     help="Sender of the event",
 )
 
+# config
+ARG_OPTION = Arg(
+    ("option",),
+    help="The option name of the configuration",
+)
+
 ARG_OUTPUT = Arg(
     ("-o", "--output"),
     help="Output format. Allowed values: json, yaml, table (default: table)",
     metavar="(table, json, yaml)",
     choices=("table", "json", "yaml"),
     default="table",
+)
+
+ARG_COLOR = Arg(
+    ('--color',),
+    help="Does emit colored config output (default: auto)",
+    choices={ColorMode.ON, ColorMode.OFF, ColorMode.AUTO},
+    default=ColorMode.AUTO,
 )
 
 ARG_TIMEOUT = Arg(
@@ -268,6 +281,27 @@ SERVER_COMMANDS = (
                   "Stop the notification server")
 )
 
+CONFIG_COMMANDS = (
+    ActionCommand(
+        name='get-value',
+        help='Gets the option value of the configuration.',
+        func=lazy_load_command('notification_service.cli.commands.config_command.config_get_value'),
+        args=(ARG_OPTION,),
+    ),
+    ActionCommand(
+        name='init',
+        help='Initializes the default configuration.',
+        func=lazy_load_command('notification_service.cli.commands.config_command.config_init'),
+        args=(),
+    ),
+    ActionCommand(
+        name='list',
+        help='List all options of the configuration.',
+        func=lazy_load_command('notification_service.cli.commands.config_command.config_list'),
+        args=(ARG_COLOR,),
+    ),
+)
+
 notification_commands: List[CLICommand] = [
     ActionCommand("version",
                   "Shows the version of Notification",
@@ -288,6 +322,11 @@ notification_commands: List[CLICommand] = [
         name='db',
         help="Database operations",
         subcommands=DB_COMMANDS,
+    ),
+    GroupCommand(
+        name="config",
+        help='Manage configuration',
+        subcommands=CONFIG_COMMANDS
     ),
 ]
 ALL_COMMANDS_DICT: Dict[str, CLICommand] = {sp.name: sp for sp in notification_commands}

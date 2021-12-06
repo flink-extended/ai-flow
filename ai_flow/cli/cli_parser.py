@@ -21,10 +21,11 @@
 import argparse
 from argparse import Action, RawTextHelpFormatter
 from functools import lru_cache
+from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
 
 from ai_flow.common.module_load import import_string
+from ai_flow.util.cli_utils import ColorMode
 from ai_flow.util.helpers import partition
-from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
 
 
 def lazy_load_command(import_path: str) -> Callable:
@@ -92,6 +93,7 @@ ARG_PROJECT_PATH = Arg(('project_path',), help='The path of the project')
 ARG_WORKFLOW_NAME = Arg(('workflow_name',), help='The name of the workflow')
 ARG_WORKFLOW_EXECUTION_ID = Arg(('workflow_execution_id',), help='The id of the workflow execution')
 ARG_JOB_NAME = Arg(('job_name',), help='The name of the job')
+ARG_OPTION = Arg(('option',), help='The option name of the configuration', )
 
 ARG_DB_VERSION = Arg(
     ("-v", "--version"),
@@ -101,6 +103,7 @@ ARG_DB_VERSION = Arg(
     default='heads',
 )
 ARG_CONTEXT = Arg(('-c', '--context'), help='The context of the workflow execution to start')
+
 ARG_YES = Arg(
     ('-y', '--yes'), help='Do not prompt to confirm reset. Use with care!', action='store_true', default=False
 )
@@ -109,10 +112,16 @@ ARG_OUTPUT = Arg(
         '-o',
         '--output',
     ),
-    help=('Output format. Allowed values: json, yaml, table (default: table)'),
+    help='Output format. Allowed values: json, yaml, table (default: table)',
     metavar='(table, json, yaml)',
     choices=('table', 'json', 'yaml'),
     default='table',
+)
+ARG_COLOR = Arg(
+    ('--color',),
+    help="Does emit colored config output (default: auto)",
+    choices={ColorMode.ON, ColorMode.OFF, ColorMode.AUTO},
+    default=ColorMode.AUTO,
 )
 
 ARG_SERVER_DAEMON = Arg(
@@ -300,6 +309,27 @@ WEBSERVER_COMMANDS = (
                   "Stops the AIFlow Webserver"),
 )
 
+CONFIG_COMMANDS = (
+    ActionCommand(
+        name='get-value',
+        help='Gets the option value of the configuration.',
+        func=lazy_load_command('ai_flow.cli.commands.config_command.config_get_value'),
+        args=(ARG_OPTION,),
+    ),
+    ActionCommand(
+        name='init',
+        help='Initializes the default configuration.',
+        func=lazy_load_command('ai_flow.cli.commands.config_command.config_init'),
+        args=(),
+    ),
+    ActionCommand(
+        name='list',
+        help='List all options of the configuration.',
+        func=lazy_load_command('ai_flow.cli.commands.config_command.config_list'),
+        args=(ARG_COLOR,),
+    ),
+)
+
 ai_flow_commands: List[CLICommand] = [
     ActionCommand(
         name='version',
@@ -331,6 +361,11 @@ ai_flow_commands: List[CLICommand] = [
         name='job',
         help='Manage jobs of the given project',
         subcommands=JOB_COMMANDS,
+    ),
+    GroupCommand(
+        name="config",
+        help='Manage configuration',
+        subcommands=CONFIG_COMMANDS
     ),
 ]
 ALL_COMMANDS_DICT: Dict[str, CLICommand] = {sp.name: sp for sp in ai_flow_commands}
