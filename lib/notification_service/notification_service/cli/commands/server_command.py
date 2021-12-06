@@ -98,13 +98,18 @@ def server_stop(args):
     try:
         os.kill(pid, signal.SIGTERM)
     except Exception:
-        logger.error("Failed to stop Notification server (pid: {}) with SIGTERM. Try to send SIGKILL".format(pid))
+        logger.warning("Failed to stop Notification server (pid: {}) with SIGTERM. Try to send SIGKILL".format(pid))
         try:
             os.kill(pid, signal.SIGKILL)
         except Exception as e:
             raise RuntimeError("Failed to kill Notification server (pid: {}) with SIGKILL.".format(pid)) from e
 
+    stop_timeout = 60
+    start_time = time.monotonic()
     while check_pid_exist(pid):
+        if time.monotonic() - start_time > stop_timeout:
+            raise RuntimeError(
+                "Notification server (pid: {}) does not exit after {} seconds.".format(pid, stop_timeout))
         time.sleep(0.5)
 
     logger.info("Notification server pid: {} stopped".format(pid))
