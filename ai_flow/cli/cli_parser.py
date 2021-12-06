@@ -117,7 +117,7 @@ ARG_OUTPUT = Arg(
 
 ARG_SERVER_DAEMON = Arg(
     ("-d", "--daemon"),
-    help="Daemonize instead of running in the foreground",
+    help="Daemonizes instead of running in the foreground",
     action="store_true"
 )
 
