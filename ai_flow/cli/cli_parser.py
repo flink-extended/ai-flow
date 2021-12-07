@@ -204,13 +204,13 @@ WORKFLOW_COMMANDS = (
         name='pause-scheduling',
         help='Pauses a workflow scheduling.',
         func=lazy_load_command('ai_flow.cli.commands.workflow_command.worfklow_pause_scheduling'),
-        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME, ARG_OUTPUT),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME),
     ),
     ActionCommand(
         name='resume-scheduling',
         help='Resumes a paused workflow scheduling.',
         func=lazy_load_command('ai_flow.cli.commands.workflow_command.worfklow_resume_scheduling'),
-        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME, ARG_OUTPUT),
+        args=(ARG_PROJECT_PATH, ARG_WORKFLOW_NAME),
     ),
     ActionCommand(
         name='show',
@@ -354,12 +354,12 @@ ai_flow_commands: List[CLICommand] = [
     ),
     GroupCommand(
         name='workflow',
-        help='Manage workflows of the given project',
+        help='Manages workflows of the given project',
         subcommands=WORKFLOW_COMMANDS,
     ),
     GroupCommand(
         name='job',
-        help='Manage jobs of the given project',
+        help='Manages jobs of the given project',
         subcommands=JOB_COMMANDS,
     ),
     GroupCommand(
