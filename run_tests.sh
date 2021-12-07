@@ -25,6 +25,10 @@ coverage run -m unittest discover -v ai_flow_plugins/tests
 
 coverage run -m unittest discover -v lib/notification_service/tests
 
+airflow db reset -y
+export PYTHONPATH="./lib/airflow/"
+coverage run -m unittest discover -v lib/airflow/tests/contrib/jobs
+
 coverage combine
 coverage report
 coverage xml
