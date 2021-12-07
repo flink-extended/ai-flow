@@ -36,6 +36,11 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual('/tmp/repo', config.get_scheduler_service_config()['repository'])
         self.assertEqual(True, config.start_scheduler_service())
 
+    def test_get_wait_for_server_started_timeout(self):
+        config = AIFlowServerConfig()
+        config.load_from_file(os.path.dirname(__file__) + '/aiflow_server.yaml')
+        self.assertEqual(5.0, config.get_wait_for_server_started_timeout())
+
 
 if __name__ == '__main__':
     unittest.main()
