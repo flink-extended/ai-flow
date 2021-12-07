@@ -21,6 +21,5 @@ server_port: 50052
 # uri of database backend for notification server
 db_uri: sqlite:///{NOTIFICATION_HOME}/ns.db
 
-# timeout for notification server to be available after started in seconds,
-# If not set, it will wait forever until server started
+# timeout for notification server to be available after started in seconds, defaults to 5.0
 # wait_for_server_started_timeout: 5.0

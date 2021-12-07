@@ -27,7 +27,7 @@ class NotificationServerConfig(object):
         self._enable_ha = False
         self._ha_ttl_ms = None
         self._advertised_uri = None
-        self._wait_for_server_started_timeout = None
+        self._wait_for_server_started_timeout = 5.0
         self._parse_config()
 
     def _parse_config(self):
