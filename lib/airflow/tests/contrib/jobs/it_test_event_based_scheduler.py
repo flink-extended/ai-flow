@@ -129,7 +129,7 @@ class TestEventBasedScheduler(unittest.TestCase):
         self.client.send_event(StopSchedulerEvent(job_id=0).to_event())
 
     def test_event_based_scheduler(self):
-        dag_file = os.path.join(TEST_DAG_FOLDER, 'it_test_event_based_scheduler.py')
+        dag_file = os.path.join(TEST_DAG_FOLDER, 'test_event_based_scheduler.py')
         t = threading.Thread(target=self.schedule_task_function)
         t.setDaemon(True)
         t.start()
@@ -493,7 +493,7 @@ class TestEventBasedScheduler(unittest.TestCase):
         self.client.send_event(StopSchedulerEvent(job_id=0).to_event())
 
     def test_stop_dag(self):
-        dag_file = os.path.join(TEST_DAG_FOLDER, 'it_test_event_based_scheduler.py')
+        dag_file = os.path.join(TEST_DAG_FOLDER, 'test_event_based_scheduler.py')
         t = threading.Thread(target=self.stop_dag_function)
         t.setDaemon(True)
         t.start()
