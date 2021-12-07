@@ -31,3 +31,7 @@ class TestSchedulerFactory(unittest.TestCase):
         conf.set('core', 'scheduler', SchedulerFactory.EVENT_BASED_SCHEDULER)
         scheduler_class = SchedulerFactory.get_default_scheduler()
         self.assertEqual(scheduler_class, EventBasedSchedulerJob)
+
+
+if __name__ == '__main__':
+    unittest.main()

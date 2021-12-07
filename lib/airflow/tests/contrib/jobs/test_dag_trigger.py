@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import multiprocessing
+import os
 import time
 import unittest
 
@@ -34,6 +35,9 @@ from airflow.utils.session import create_session
 from airflow.events.scheduler_events import SchedulerInnerEventUtil, SchedulerInnerEventType, SCHEDULER_NAMESPACE
 from tests.test_utils import db
 from tests.test_utils.config import conf_vars
+
+DAG_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'dags')
+TEST_DAG_FILE = os.path.join(DAG_FOLDER, 'test_scheduler_dags.py')
 
 
 class TestDagTrigger(unittest.TestCase):
@@ -65,7 +69,7 @@ class TestDagTrigger(unittest.TestCase):
 
     def test_dag_trigger_parse_dag(self):
         mailbox = Mailbox()
-        dag_trigger = DagTrigger("../../dags/test_scheduler_dags.py", -1, [], False, mailbox)
+        dag_trigger = DagTrigger(TEST_DAG_FILE, -1, [], False, mailbox)
         dag_trigger.start()
 
         message = mailbox.get_message()
@@ -86,14 +90,14 @@ class TestDagTrigger(unittest.TestCase):
         server = NotificationServer(NotificationService(storage), port)
         server.run()
         mailbox = Mailbox()
-        dag_trigger = DagTrigger("../../dags/test_scheduler_dags.py", -1, [], False, mailbox, 5, notification_server_uri)
+        dag_trigger = DagTrigger(TEST_DAG_FILE, -1, [], False, mailbox, 5, notification_server_uri)
         dag_trigger.start()
         message = mailbox.get_message()
         message = SchedulerInnerEventUtil.to_inner_event(message)
         # only one dag is executable
         assert "test_task_start_date_scheduling" == message.dag_id
         sc = EventSchedulerClient(notification_server_uri=notification_server_uri, namespace='a')
-        sc.trigger_parse_dag()
+        sc.trigger_parse_dag(TEST_DAG_FILE)
         dag_trigger.end()
         server.stop()
 
@@ -105,31 +109,16 @@ class TestDagTrigger(unittest.TestCase):
         dag_file_processor_manager_process.kill()
         dag_file_processor_manager_process.join(1)
         assert not dag_file_processor_manager_process.is_alive()
-        time.sleep(5)
-        dag_file_processor_manager_process = dag_trigger._dag_file_processor_agent._process
+        cnt = 0
+        while cnt < 100 and not dag_file_processor_manager_process.is_alive():
+            dag_file_processor_manager_process = dag_trigger._dag_file_processor_agent._process
+            if not dag_file_processor_manager_process.is_alive():
+                time.sleep(0.1)
+                cnt = cnt + 1
+                continue
+            else:
+                break
         assert dag_file_processor_manager_process.is_alive()
-        dag_trigger.end()
-
-    @conf_vars({('core', 'load_examples'): 'False'})
-    def test_trigger_parse_dag(self):
-        import os
-        port = 50102
-        notification_server_uri = "localhost:{}".format(port)
-        storage = MemoryEventStorage()
-        server = NotificationServer(NotificationService(storage), port)
-        server.run()
-        dag_folder = os.path.abspath(os.path.dirname(__file__)) + "/../../dags"
-        mailbox = Mailbox()
-        dag_trigger = DagTrigger(dag_folder, -1, [], False, mailbox, notification_server_uri=notification_server_uri)
-        dag_trigger.start()
-
-        to_be_triggered = [dag_folder + "/test_event_based_scheduler.py",
-                           dag_folder + "/test_event_task_dag.py",
-                           dag_folder + "/test_event_based_executor.py",
-                           dag_folder + "/test_scheduler_dags.py",
-                           ]
-        for file in to_be_triggered:
-            self._send_request_and_receive_response(notification_server_uri, file)
         dag_trigger.end()
 
     def _send_request_and_receive_response(self, notification_server_uri, file_path):
@@ -139,14 +128,15 @@ class TestDagTrigger(unittest.TestCase):
         event = BaseEvent(key=key,
                           event_type=SchedulerInnerEventType.PARSE_DAG_REQUEST.value,
                           value=file_path)
-        client.send_event(event)
         watcher: ResponseWatcher = ResponseWatcher()
         client.start_listen_event(key=key,
                                   event_type=SchedulerInnerEventType.PARSE_DAG_RESPONSE.value,
                                   watcher=watcher)
+        client.send_event(event)
         res: BaseEvent = watcher.get_result()
         self.assertEquals(event.key, res.key)
         self.assertEquals(event.value, file_path)
+        client.stop_listen_events()
 
     @staticmethod
     def _add_dag_needing_dagrun():
@@ -157,3 +147,7 @@ class TestDagTrigger(unittest.TestCase):
             orm_dag.next_dagrun_create_after = pendulum.now()
             session.merge(orm_dag)
             session.commit()
+
+
+if __name__ == '__main__':
+    unittest.main()

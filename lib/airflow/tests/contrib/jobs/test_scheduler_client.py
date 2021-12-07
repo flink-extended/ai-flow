@@ -57,7 +57,7 @@ class TestSchedulerClient(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        cls.master.stop()
+        cls.server.stop()
 
     def setUp(self) -> None:
         self.client = EventSchedulerClient(ns_client=NotificationClient(server_uri="localhost:{}".format(PORT),

@@ -70,12 +70,21 @@ class TestEventBasedScheduler(unittest.TestCase):
         self.storage = MemoryEventStorage()
         self.server = NotificationServer(NotificationService(self.storage), self.port)
         self.server.run()
+        self._wait_for_notification_server_started()
         self.client = NotificationClient(server_uri="localhost:{}".format(self.port),
                                          default_namespace="test_namespace")
-        time.sleep(1)
 
     def tearDown(self):
         self.server.stop()
+
+    def _wait_for_notification_server_started(self):
+        while True:
+            try:
+                NotificationClient(server_uri="localhost:{}".format(self.port))
+            except Exception:
+                time.sleep(0.1)
+                continue
+            return
 
     def _get_task_instance(self, dag_id, task_id, session):
         return session.query(TaskInstance).filter(
@@ -85,13 +94,14 @@ class TestEventBasedScheduler(unittest.TestCase):
 
     def schedule_task_function(self):
         stopped = False
+        time.sleep(10)
+        self.client.send_event(BaseEvent(key='start', value='', event_type='', namespace='test_namespace'))
         while not stopped:
             with create_session() as session:
                 ti_sleep_1000_secs = self._get_task_instance(EVENT_BASED_SCHEDULER_DAG, 'sleep_1000_secs', session)
                 ti_python_sleep = self._get_task_instance(EVENT_BASED_SCHEDULER_DAG, 'python_sleep', session)
                 if ti_sleep_1000_secs and ti_sleep_1000_secs.state == State.SCHEDULED and \
                     ti_python_sleep and ti_python_sleep.state == State.SCHEDULED:
-                    self.client.send_event(BaseEvent(key='start', value='', event_type='', namespace='test_namespace'))
 
                     while not stopped:
                         ti_sleep_1000_secs.refresh_from_db()
@@ -119,7 +129,7 @@ class TestEventBasedScheduler(unittest.TestCase):
         self.client.send_event(StopSchedulerEvent(job_id=0).to_event())
 
     def test_event_based_scheduler(self):
-        dag_file = os.path.join(TEST_DAG_FOLDER, 'test_event_based_scheduler.py')
+        dag_file = os.path.join(TEST_DAG_FOLDER, 'it_test_event_based_scheduler.py')
         t = threading.Thread(target=self.schedule_task_function)
         t.setDaemon(True)
         t.start()
@@ -483,7 +493,7 @@ class TestEventBasedScheduler(unittest.TestCase):
         self.client.send_event(StopSchedulerEvent(job_id=0).to_event())
 
     def test_stop_dag(self):
-        dag_file = os.path.join(TEST_DAG_FOLDER, 'test_event_based_scheduler.py')
+        dag_file = os.path.join(TEST_DAG_FOLDER, 'it_test_event_based_scheduler.py')
         t = threading.Thread(target=self.stop_dag_function)
         t.setDaemon(True)
         t.start()

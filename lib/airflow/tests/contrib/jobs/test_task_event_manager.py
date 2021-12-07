@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import datetime
+import os
 import time
 import unittest
 from typing import Tuple
@@ -34,13 +35,16 @@ from airflow.utils.state import State
 from airflow.utils.types import DagRunType
 from tests.test_utils import db
 
+DAG_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'dags')
+TEST_DAG_FILE = os.path.join(DAG_FOLDER, 'test_task_event_handler_dag.py')
+
 
 class EventHandlerTestBase(unittest.TestCase):
     def setUp(self) -> None:
         db.clear_db_runs()
         db.clear_db_task_state()
         db.clear_db_serialized_dags()
-        self._serialized_dag, self._dag_run = self.init_dag_and_dag_run('../../dags/test_task_event_handler_dag.py',
+        self._serialized_dag, self._dag_run = self.init_dag_and_dag_run(TEST_DAG_FILE,
                                                                         'test_event_handler',
                                                                         timezone.datetime(2017, 1, 1))
 
@@ -107,7 +111,7 @@ class TestDagRunEventManager(EventHandlerTestBase):
 
     def test_dag_run_event_manager_multiple_dag_runs(self):
         dag_run1 = self._dag_run
-        _, dag_run2 = self.init_dag_and_dag_run('../../dags/test_task_event_handler_dag.py',
+        _, dag_run2 = self.init_dag_and_dag_run(TEST_DAG_FILE,
                                                 'test_event_handler', timezone.datetime(2017, 1, 2))
         self.create_task_state(dag_run1, 'operator_toggle_handler')
         self.create_task_state(dag_run2, 'operator_toggle_handler')
@@ -134,7 +138,7 @@ class TestDagRunEventManager(EventHandlerTestBase):
 
     def test_dag_run_event_manager_release_runner(self):
         dag_run1 = self._dag_run
-        _, dag_run2 = self.init_dag_and_dag_run('../../dags/test_task_event_handler_dag.py',
+        _, dag_run2 = self.init_dag_and_dag_run(TEST_DAG_FILE,
                                                 'test_event_handler', timezone.datetime(2017, 1, 2))
         self.create_task_state(dag_run1, 'operator_toggle_handler')
         self.create_task_state(dag_run2, 'operator_toggle_handler')
@@ -215,3 +219,7 @@ class TestTaskEventExecutor(EventHandlerTestBase):
         assert TaskState.get_task_state(dag_id="test_event_handler",
                                         task_id="operator_toggle_handler",
                                         executor_date=self._dag_run.execution_date).task_state is False
+
+
+if __name__ == '__main__':
+    unittest.main()
