@@ -21,9 +21,10 @@ from ai_flow.ai_graph.ai_node import AINode
 from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.api.ai_flow_context import init_ai_flow_context
 from ai_flow.context.workflow_config_loader import current_workflow_config
-from ai_flow.api import workflow_operation
+from ai_flow.api import workflow_operation, ai_flow_context
 from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
 from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
+from ai_flow.test.util.server_util import wait_for_server_started
 
 _SQLITE_DB_FILE = 'aiflow.db'
 _SQLITE_DB_URI = '%s%s' % ('sqlite:///', _SQLITE_DB_FILE)
@@ -52,6 +53,7 @@ class TestWorkflowOperation(unittest.TestCase):
                                   start_scheduler_service=True,
                                   scheduler_service_config=config)
         cls.server.run()
+        wait_for_server_started('localhost:{}'.format(_PORT))
 
     @classmethod
     def tearDownClass(cls):

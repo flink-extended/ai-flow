@@ -25,6 +25,7 @@ from ai_flow.context.job_context import job_config
 from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.meta.dataset_meta import DatasetMeta
 from ai_flow.meta.model_meta import ModelMeta
+from ai_flow.test.util.server_util import wait_for_server_started
 from ai_flow.workflow.control_edge import ControlEdge, JobAction, AIFlowInternalEventType
 from ai_flow.workflow.periodic_config import PeriodicConfig
 from ai_flow.workflow.status import Status
@@ -48,6 +49,7 @@ class TestOps(unittest.TestCase):
                                   start_model_center_service=False,
                                   start_scheduler_service=False)
         cls.server.run()
+        wait_for_server_started('localhost:{}'.format(_PORT))
         init_ai_flow_context()
 
     @classmethod
@@ -59,6 +61,7 @@ class TestOps(unittest.TestCase):
 
     def setUp(self):
         init_ai_flow_context()
+        current_graph().clear_graph()
 
     def tearDown(self):
         current_graph().clear_graph()

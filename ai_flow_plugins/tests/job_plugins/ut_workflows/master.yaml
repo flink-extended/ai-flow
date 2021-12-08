@@ -24,3 +24,4 @@ start_scheduler_service: True
 scheduler_service:
   scheduler:
     scheduler_class: ai_flow_plugins.tests.job_plugins.single_job_scheduler.SingleJobScheduler
+wait_for_server_started_timeout: 60

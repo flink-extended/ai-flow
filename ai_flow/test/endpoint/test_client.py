@@ -40,6 +40,7 @@ from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.store.db.base_model import base
 from ai_flow.test.store.test_sqlalchemy_store import _get_store
 from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server, _NS_URI
+from ai_flow.test.util.server_util import wait_for_server_started
 from ai_flow.util import sqlalchemy_db
 
 _SQLITE_DB_FILE = 'aiflow.db'
@@ -1129,6 +1130,7 @@ class TestAIFlowClientSqlite(AIFlowClientTestCases, unittest.TestCase):
             os.remove(_SQLITE_DB_FILE)
         cls.server = AIFlowServer(store_uri=_SQLITE_DB_URI, port=_PORT, start_scheduler_service=False)
         cls.server.run()
+        wait_for_server_started('localhost:{}'.format(_PORT))
         client = AIFlowClient(server_uri='localhost:' + _PORT, notification_server_uri=_NS_URI)
         client1 = AIFlowClient(server_uri='localhost:' + _PORT, notification_server_uri=_NS_URI)
         client2 = AIFlowClient(server_uri='localhost:' + _PORT, notification_server_uri=_NS_URI)
@@ -1166,6 +1168,7 @@ class TestAIFlowClientSqliteWithSingleHighAvailableServer(
         cls.server = AIFlowServer(store_uri=_SQLITE_DB_URI, port=_PORT, enabled_ha=True, start_scheduler_service=False,
                                   ha_server_uri='localhost:' + _PORT)
         cls.server.run()
+        wait_for_server_started('localhost:{}'.format(_PORT))
         config = ProjectConfig()
         config.set_server_uri('localhost:50051')
         config.set_project_name('test_project')

@@ -15,6 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 import os
+import time
+
+from notification_service.client import NotificationClient
 from notification_service.server import NotificationServerRunner
 from notification_service.util import db
 
@@ -31,9 +34,26 @@ def start_notification_server():
     ns_server = NotificationServerRunner(config_file=config_file)
     db.create_all_tables(ns_server.config.db_uri)
     ns_server.start()
+    wait_for_notification_server_started(_NS_URI)
     return ns_server
 
 
 def stop_notification_server(ns_server):
     ns_server.stop()
     os.remove(_NS_DB_FILE)
+
+
+def wait_for_notification_server_started(server_uri, timeout=60):
+    start_time = time.monotonic()
+    succeed = False
+    while time.monotonic() < start_time + timeout:
+        try:
+            NotificationClient(server_uri)
+            succeed = True
+            break
+        except Exception as e:
+            print(e)
+            time.sleep(0.1)
+            continue
+    if not succeed:
+        raise Exception("Timeout to wait for notification server started.")

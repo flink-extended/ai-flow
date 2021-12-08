@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import time
 import unittest
 from typing import List
 
@@ -96,6 +97,7 @@ class TestSchedulerClient(unittest.TestCase):
                                               namespace='scheduler'))
 
         self.scheduler.start(watcher=W())
+        time.sleep(5)
         result = self.client.schedule_dag(dag_id='1', context='')
         self.assertEqual('1', result.dagrun_id)
 

@@ -21,7 +21,8 @@ from typing import Text
 
 from ai_flow.ai_graph.ai_graph import AISubGraph
 from ai_flow.plugin_interface.job_plugin_interface import JobPluginFactory, \
-    register_job_plugin_factory, get_registered_job_plugin_factory_list, JobHandle, JobRuntimeEnv, JobController
+    register_job_plugin_factory, get_registered_job_plugin_factory_list, JobHandle, JobRuntimeEnv, JobController, \
+    JobControllerManager
 from ai_flow.translator.translator import JobGenerator
 from ai_flow.workflow.job import Job
 from ai_flow.workflow.status import Status
@@ -90,6 +91,8 @@ class MockJobPluginFactory2(JobPluginFactory, JobGenerator, JobController):
 class TestJobPlugin(unittest.TestCase):
 
     def test_register_job_plugin(self):
+        from ai_flow.plugin_interface import job_plugin_interface
+        job_plugin_interface.__job_controller_manager__ = JobControllerManager()
         register_job_plugin_factory(MockJobPluginFactory1())
         register_job_plugin_factory(MockJobPluginFactory2())
         self.assertEqual(2, len(get_registered_job_plugin_factory_list()))

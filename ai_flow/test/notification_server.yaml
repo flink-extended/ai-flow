@@ -25,3 +25,6 @@ enable_ha: false
 ha_ttl_ms: 10000
 # Hostname and port the server will advertise to clients when HA enabled. If not set, it will use the local ip and configured port.
 advertised_uri: 127.0.0.1:50052
+
+# timeout for notification server to be available after started in seconds, defaults to 5.0
+wait_for_server_started_timeout: 60

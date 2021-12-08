@@ -14,9 +14,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+
 import grpc
 
 
 def wait_for_server_started(server_uri):
     channel = grpc.insecure_channel(server_uri)
     grpc.channel_ready_future(channel).result()
+
