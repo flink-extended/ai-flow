@@ -98,6 +98,7 @@ class TestFlink(unittest.TestCase):
         init_ai_flow_context()
 
     def tearDown(self):
+        af.current_graph().clear_graph()
         self.master._clear_db()
 
     def test_local_flink_task(self):

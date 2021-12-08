@@ -63,6 +63,7 @@ class TestPeriodicJob(unittest.TestCase):
 
     def tearDown(self):
         self.master._clear_db()
+        af.current_graph().clear_graph()
         generated = '{}/generated'.format(project_path)
         if os.path.exists(generated):
             shutil.rmtree(generated)

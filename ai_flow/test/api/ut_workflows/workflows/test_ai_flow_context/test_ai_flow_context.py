@@ -18,11 +18,15 @@
 import os
 import unittest
 
+import grpc
+
+from ai_flow.api import ai_flow_context
 from ai_flow.api.ai_flow_context import init_ai_flow_context, init_notebook_context
 from ai_flow.context.project_context import current_project_context, current_project_config
 from ai_flow.context.workflow_config_loader import current_workflow_config
 from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
+from ai_flow.test.util.server_util import wait_for_server_started
 
 _SQLITE_DB_FILE = 'aiflow.db'
 _SQLITE_DB_URI = '%s%s' % ('sqlite:///', _SQLITE_DB_FILE)
@@ -40,12 +44,16 @@ class TestAIFlowContext(unittest.TestCase):
                                    start_model_center_service=False,
                                    start_scheduler_service=False)
         self.server.run()
+        wait_for_server_started('localhost:{}'.format(_PORT))
 
     def tearDown(self):
         self.server.stop()
         if os.path.exists(_SQLITE_DB_FILE):
             os.remove(_SQLITE_DB_FILE)
         stop_notification_server(self.ns_server)
+        ai_flow_context.__init_notebook_context_flag__ = False
+        ai_flow_context.__init_client_flag__ = False
+        ai_flow_context.__init_context_flag__ = False
 
     def test_init_ai_flow_context(self):
         init_ai_flow_context()

@@ -26,12 +26,12 @@ from ai_flow.plugin_interface.blob_manager_interface import BlobManagerFactory
 from ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager import HDFSBlobManager
 
 
-class TestOSSBlobManager(unittest.TestCase):
+class TestHDFSBlobManager(unittest.TestCase):
 
     @unittest.skipUnless((os.environ.get('blob_server.hdfs_url') is not None
                           and os.environ.get('blob_server.hdfs_user') is not None
                           and os.environ.get('blob_server.repo_name') is not None), 'need set hdfs')
-    def test_project_upload_download_oss(self):
+    def test_project_upload_download_hdfs(self):
         project_path = get_file_dir(__file__)
         config = {
             'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager.HDFSBlobManager',
