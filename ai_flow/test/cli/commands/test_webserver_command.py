@@ -60,6 +60,19 @@ class TestCliServer(unittest.TestCase):
             self.assertIn("AIFlow Webserver pid file:", log_output)
             start_web_server.assert_called_once_with(os.path.join(aiflow_home, "aiflow_server.yaml"))
 
+    def test_cli_server_start_twice(self):
+        aiflow_home = os.path.join(os.path.dirname(__file__), "..")
+        ai_flow.settings.AIFLOW_HOME = aiflow_home
+        pid_file_path = os.path.join(aiflow_home,
+                                     ai_flow.settings.AIFLOW_WEBSERVER_PID_FILENAME)
+        try:
+            open(pid_file_path, 'a').close()
+            with self.assertLogs("ai_flow.cli.commands.webserver_command", "INFO") as log:
+                webserver_command.webserver_start(self.parser.parse_args(['webserver', 'start']))
+            self.assertIn('Web Server is running', str(log.output))
+        finally:
+            os.remove(pid_file_path)
+
     def test_cli_webserver_stop_without_pid_file(self):
         aiflow_home = os.path.join(os.path.dirname(__file__), "..")
         ai_flow.settings.AIFLOW_HOME = aiflow_home

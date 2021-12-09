@@ -19,19 +19,10 @@
 ##
 set -e
 
-BIN=$(dirname "${BASH_SOURCE-$0}")
-BIN=$(cd "$BIN"; pwd)
-. "${BIN}"/init-aiflow-env.sh
+echo "This script will be deprecated, please use 'aiflow' command-line interface."
 
-if [ -e "${AIFLOW_PID_DIR}"/aiflow_server.pid ]; then
-  echo "AiFlow server is running, stopping first"
-  "${BIN}"/stop-aiflow.sh
-fi
+aiflow config init
 
-echo "Starting AIFlow Server"
 aiflow server start -d
-echo "AIFlow Server started"
 
-echo "Starting AIFlow Web"
 aiflow webserver start -d
-echo "AIFlow Web started"
