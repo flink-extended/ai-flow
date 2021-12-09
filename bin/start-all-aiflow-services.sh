@@ -18,19 +18,24 @@
 ## under the License.
 ##
 set -e
+
 BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)
 
 # start notification service
-"${BIN}"/start-notification.sh
-echo "start notification server."
+notification config init
+notification db init
+notification server start -d
 sleep 3
+echo "Waiting for Notification Server started..."
 
 # start airflow scheduler and web server
 "${BIN}"/start-airflow.sh
-echo "airflow dag dir: ${AIRFLOW_DAG_DIR}"
 
 # start AIFlow
-"${BIN}"/start-aiflow.sh
+aiflow config init
+aiflow db init
+aiflow server start -d
+aiflow webserver start -d
 
 echo "All services have been started!"

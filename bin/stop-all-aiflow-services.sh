@@ -22,9 +22,10 @@ set -e
 BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)
 
-"${BIN}"/stop-aiflow.sh
+aiflow server stop
+
+aiflow webserver stop
 
 "${BIN}"/stop-airflow.sh
 
-"${BIN}"/stop-notification.sh
-
+notification server stop
