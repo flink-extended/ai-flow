@@ -19,8 +19,10 @@
 ##
 set -e
 
-echo "This script will be deprecated, please use command-line interface."
+echo "[WARNING] This script will be deprecated, please use 'notification' command-line interface."
 
 notification config init
+
+notification db init
 
 notification server start -d

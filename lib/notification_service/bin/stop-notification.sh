@@ -19,6 +19,6 @@
 ##
 set -e
 
-echo "This script will be deprecated, please use 'notification server stop'."
+echo "[WARNING] This script will be deprecated, please use 'notification' command-line interface."
 
 notification server stop
