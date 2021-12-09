@@ -19,15 +19,8 @@
 ##
 set -e
 
-BIN=$(dirname "${BASH_SOURCE-$0}")
-BIN=$(cd "$BIN"; pwd)
-. "${BIN}"/init-notification-env.sh
+echo "This script will be deprecated, please use command-line interface."
 
-if [ -e "${NOTIFICATION_PID_FILE}" ]; then
-  echo "Notification server is running, stop it first."
-  "${BIN}"/stop-notification.sh
-fi
+notification config init
 
-echo "Starting notification server"
-LOG_FILE_NAME=notification_server-$(date "+%Y%m%d-%H%M%S").log
 notification server start -d

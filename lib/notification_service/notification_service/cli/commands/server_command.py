@@ -48,6 +48,9 @@ def make_log_dir_if_not_exist():
 def server_start(args):
     pid_file_path = os.path.join(notification_service.settings.NOTIFICATION_HOME,
                                  notification_service.settings.NOTIFICATION_PID_FILENAME)
+    if os.path.exists(pid_file_path):
+        logger.info("Notification Server is running, stop it first with 'notification server stop'.")
+        return
     if args.daemon:
         make_log_dir_if_not_exist()
         log_path = os.path.join(notification_service.settings.NOTIFICATION_HOME, "logs",

@@ -74,6 +74,19 @@ class TestCliServer(unittest.TestCase):
             self.assertIn("Notification server pid file:", log_output)
             mock_server_runner.start.assert_called_once_with(True)
 
+    def test_cli_server_start_twice(self):
+        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_service.settings.NOTIFICATION_HOME = notification_home
+        pid_file_path = os.path.join(notification_home,
+                                     notification_service.settings.NOTIFICATION_PID_FILENAME)
+        try:
+            open(pid_file_path, 'a').close()
+            with self.assertLogs("notification_service.cli.commands.server_command", "INFO") as log:
+                server_command.server_start(self.parser.parse_args(['server', 'start']))
+            self.assertIn('Notification Server is running', str(log.output))
+        finally:
+            os.remove(pid_file_path)
+
     def test_cli_server_stop_without_pid_file(self):
         notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
         notification_service.settings.NOTIFICATION_HOME = notification_home

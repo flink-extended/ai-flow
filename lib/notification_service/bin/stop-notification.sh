@@ -19,6 +19,6 @@
 ##
 set -e
 
-NOTIFICATION_HOME=${NOTIFICATION_HOME:-~/notification_service}
+echo "This script will be deprecated, please use 'notification server stop'."
 
 notification server stop

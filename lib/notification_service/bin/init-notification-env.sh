@@ -18,22 +18,7 @@
 ## under the License.
 ##
 set -e
-export NOTIFICATION_HOME=${NOTIFICATION_HOME:-~/notification_service}
-export NOTIFICATION_PID_FILE="${NOTIFICATION_HOME}/notification_server.pid"
-export NOTIFICATION_LOG_DIR="${NOTIFICATION_HOME}/logs"
-export NOTIFICATION_CONFIG_FILE="${NOTIFICATION_HOME}/notification_server.yaml"
 
-function create_notification_dirs() {
-  [ -d "${NOTIFICATION_HOME}" ] || mkdir "${NOTIFICATION_HOME}"
-  [ -d "${NOTIFICATION_LOG_DIR}" ] || mkdir "${NOTIFICATION_LOG_DIR}"
-}
-create_notification_dirs
+echo "This script will be deprecated, please use 'notification config init'."
 
-if [ ! -e ${NOTIFICATION_CONFIG_FILE} ]; then
-  echo "Notification server config doesn't exist generating at ${NOTIFICATION_CONFIG_FILE}"
-  BIN=$(dirname "${BASH_SOURCE-$0}")
-  BIN=$(cd "$BIN"; pwd)
-  "$BIN"/start_notification_server.py --generate-config-only > /dev/null 2>&1
-else
-  echo "Notification server config already exist at ${NOTIFICATION_CONFIG_FILE}"
-fi
+notification config init
