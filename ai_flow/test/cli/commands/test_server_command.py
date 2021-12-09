@@ -16,8 +16,6 @@
 # under the License.
 import logging
 import os
-import signal
-import time
 import unittest
 from unittest import mock
 
@@ -73,62 +71,34 @@ class TestCliServer(unittest.TestCase):
         aiflow_home = os.path.join(os.path.dirname(__file__), "..")
         ai_flow.settings.AIFLOW_HOME = aiflow_home
 
-        with self.assertLogs("ai_flow.cli.commands.server_command", "INFO") as log:
+        with self.assertLogs("ai_flow", "INFO") as log:
             server_command.server_stop(self.parser.parse_args(['server', 'stop']))
             log_output = "\n".join(log.output)
             self.assertIn("PID file of AIFlow server does not exist at", log_output)
 
-    def test_cli_server_stop_SIGTERM_fail(self):
+    def test_cli_server_stop_with_staled_pid_file(self):
         aiflow_home = os.path.join(os.path.dirname(__file__), "..")
         ai_flow.settings.AIFLOW_HOME = aiflow_home
         pid_file = os.path.join(aiflow_home, ai_flow.settings.AIFLOW_PID_FILENAME)
 
-        with mock.patch.object(os, "kill") as mock_kill, TmpPidFile(pid_file), \
-                mock.patch.object(server_command, "check_pid_exist") as mock_pid_check:
-            mock_kill.side_effect = [RuntimeError("Boom"), None]
-            with self.assertLogs("ai_flow.cli.commands.server_command", "INFO") as log:
-                mock_pid_check.side_effect = [False]
-                server_command.server_stop(self.parser.parse_args(['server', 'stop']))
-                log_output = "\n".join(log.output)
-                self.assertIn("Failed to stop AIFlow server", log_output)
-                self.assertIn("stopped", log_output)
-
-    def test_cli_server_stop_SIGTERM_SIGKILL_fail(self):
-        aiflow_home = os.path.join(os.path.dirname(__file__), "..")
-        ai_flow.settings.AIFLOW_HOME = aiflow_home
-        pid_file = os.path.join(aiflow_home, ai_flow.settings.AIFLOW_PID_FILENAME)
-
-        with mock.patch.object(os, "kill") as mock_kill, TmpPidFile(pid_file):
-            mock_kill.side_effect = [RuntimeError("Boom"), RuntimeError("Boom")]
-            with self.assertLogs("ai_flow.cli.commands.server_command", "INFO") as log:
-                with self.assertRaises(RuntimeError):
-                    server_command.server_stop(self.parser.parse_args(['server', 'stop']))
-                log_output = "\n".join(log.output)
-                self.assertIn("Failed to stop AIFlow server", log_output)
-
-    def test_cli_server_stop_wait_process_exit_timeout(self):
-        aiflow_home = os.path.join(os.path.dirname(__file__), "..")
-        ai_flow.settings.AIFLOW_HOME = aiflow_home
-        pid_file = os.path.join(aiflow_home, ai_flow.settings.AIFLOW_PID_FILENAME)
-
-        with mock.patch.object(os, "kill") as mock_kill, \
-                TmpPidFile(pid_file), mock.patch.object(time, 'monotonic') as mock_monotonic:
-            mock_kill.return_value = True
-            mock_monotonic.side_effect = [0.0, 30.0, 70.0]
-            with self.assertRaises(RuntimeError):
-                server_command.server_stop(self.parser.parse_args(['server', 'stop']))
-            self.assertEqual(3, mock_monotonic.call_count)
+        with self.assertLogs("ai_flow", "INFO") as log, TmpPidFile(pid_file), \
+                mock.patch.object(server_command, "check_pid_exist") as mock_check_pid_exist:
+            mock_check_pid_exist.return_value = False
+            server_command.server_stop(self.parser.parse_args(['server', 'stop']))
+            log_output = "\n".join(log.output)
+            self.assertIn("This means a staled PID file.", log_output)
+            self.assertFalse(os.path.exists(pid_file))
 
     def test_cli_server_stop(self):
         aiflow_home = os.path.join(os.path.dirname(__file__), "..")
         ai_flow.settings.AIFLOW_HOME = aiflow_home
         pid_file = os.path.join(aiflow_home, ai_flow.settings.AIFLOW_PID_FILENAME)
-        with mock.patch.object(os, "kill") as mock_kill, TmpPidFile(pid_file), \
-                mock.patch.object(server_command, "check_pid_exist") as mock_pid_check:
-            mock_pid_check.side_effect = [True, False]
+        with TmpPidFile(pid_file), \
+                mock.patch.object(server_command, "stop_process") as mock_stop_process, \
+                mock.patch.object(server_command, "check_pid_exist") as mock_check_pid_exist:
+            mock_check_pid_exist.return_value = True
             server_command.server_stop(self.parser.parse_args(['server', 'stop']))
-            mock_kill.assert_called_once_with(15213, signal.SIGTERM)
-            self.assertEqual(2, mock_pid_check.call_count)
+            mock_stop_process.assert_called_with(15213, "AIFlow server")
 
 
 class TmpPidFile:
