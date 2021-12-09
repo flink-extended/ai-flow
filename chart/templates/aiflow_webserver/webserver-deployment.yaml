@@ -93,6 +93,26 @@ spec:
       imagePullSecrets:
         - name: {{ template "registry_secret" . }}
       {{- end }}
+      initContainers:
+        - name: aiflow-db-upgrade
+          image: {{ template "airflow_image" . }}
+          imagePullPolicy: {{ .Values.images.airflow.pullPolicy }}
+          args:
+            - "aiflow"
+            - "db"
+            - "init"
+          volumeMounts:
+{{- if .Values.aiflowWebserver.extraVolumeMounts }}
+{{ toYaml .Values.aiflowWebserver.extraVolumeMounts | indent 12 }}
+{{- end }}
+            - name: config
+              mountPath: {{ template "airflow_config_path" . }}
+              subPath: airflow.cfg
+              readOnly: true
+            - name: aiflow-config
+              mountPath: /usr/local/aiflow/aiflow_server.yaml
+              subPath: aiflow_server.yaml
+              readOnly: true
       containers:
         - name: aiflow-webserver
           image: {{ template "airflow_image" . }}
@@ -105,10 +125,6 @@ spec:
           {{- end }}
           resources:
 {{ toYaml .Values.aiflowWebserver.resources | indent 12 }}
-          volumeMounts:
-{{- if .Values.aiflowWebserver.extraVolumeMounts }}
-{{ toYaml .Values.aiflowWebserver.extraVolumeMounts | indent 12 }}
-{{- end }}
           ports:
             - name: aiflow-ui
               containerPort: {{ .Values.ports.aiflowUI }}
@@ -120,6 +136,9 @@ spec:
             failureThreshold: {{ .Values.aiflowWebserver.readinessProbe.failureThreshold | default 20 }}
             periodSeconds: {{ .Values.aiflowWebserver.readinessProbe.periodSeconds | default 5 }}
           volumeMounts:
+{{- if .Values.aiflowWebserver.extraVolumeMounts }}
+{{ toYaml .Values.aiflowWebserver.extraVolumeMounts | indent 12 }}
+{{- end }}
             - name: config
               mountPath: {{ template "airflow_config_path" . }}
               subPath: airflow.cfg

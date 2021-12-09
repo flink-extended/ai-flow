@@ -67,6 +67,28 @@ spec:
       imagePullSecrets:
         - name: {{ template "registry_secret" . }}
       {{- end }}
+      initContainers:
+        - name: notification-db-upgrade
+          image: {{ template "notification_image" . }}
+          args:
+            - "notification"
+            - "db"
+            - "init"
+          imagePullPolicy: {{ .Values.images.notification.pullPolicy }}
+          resources:
+{{ toYaml .Values.notification.resources | indent 12 }}
+          env:
+            - name: PYTHONUNBUFFERED
+              value: '1'
+            - name: PYTHONIOENCODING
+              value: 'UTF-8'
+            - name: NOTIFICATION_HOME
+              value: /opt/notification_service
+          volumeMounts:
+            - name: notification-config
+              mountPath: /opt/notification_service/notification_server.yaml
+              subPath: notification_server.yaml
+              readOnly: true
       containers:
         - name: ai-flow-notification
           livenessProbe:
@@ -81,7 +103,9 @@ spec:
             periodSeconds: {{ .Values.notification.livenessProbe.periodSeconds | default 5 }}
           image: {{ template "notification_image" . }}
           args:
-            - "start_notification_server.py"
+            - "notification"
+            - "server"
+            - "start"
           imagePullPolicy: {{ .Values.images.notification.pullPolicy }}
           ports:
             - containerPort: 50052

@@ -264,6 +264,8 @@ extraEnvFrom: ~
 data:
   # If secret names are provided, use those secrets
   metadataSecretName: ~
+  aiflowDbSecretName: ~
+  notificationDbSecretName: ~
   resultBackendSecretName: ~
   brokerUrlSecretName: ~
 
@@ -274,8 +276,27 @@ data:
     protocol: mysql
     host: ~
     port: 3306
+    db: airflow
+    sslmode: disable
+
+  aiflowDbConnection:
+    user: root
+    pass: root
+    protocol: mysql
+    host: ~
+    port: 3306
     db: aiflow
     sslmode: disable
+
+  notificationDbConnection:
+    user: root
+    pass: root
+    protocol: mysql
+    host: ~
+    port: 3306
+    db: notification
+    sslmode: disable
+
   # resultBackendConnection defaults to the same database as metadataConnection
   resultBackendConnection: ~
   # or, you can use a different database
@@ -505,7 +526,7 @@ scheduler:
   # Command to use when running the Airflow scheduler (templated).
   command: ~
   # Args to use when running the Airflow scheduler (templated).
-  args: ["bash", "-c", "start-aiflow.sh && python -c 'from airflow.utils.serve_logs import serve_logs;serve_logs()' > /var/log/serve_log.log 2>&1 & exec airflow event_scheduler --subdir={{ .Values.ai_flow.airflow_deploy_path }} --notification-server-uri={{ .Release.Name }}-notification:50052"]
+  args: ["bash", "-c", "aiflow db init && aiflow server start -d && python -c 'from airflow.utils.serve_logs import serve_logs;serve_logs()' > /var/log/serve_log.log 2>&1 & exec airflow event_scheduler"]
 
   # Update Strategy when scheduler is deployed as a StatefulSet
   # (when using LocalExecutor and workers.persistence)
@@ -1106,7 +1127,7 @@ mysql:
 # yamllint disable rule:line-length
 config:
   core:
-    dags_folder: '{{ include "airflow_dags" . }}'
+    dags_folder: '{{ .Values.ai_flow.airflow_deploy_path }}'
     # This is ignored when used with the official Docker image
     load_examples: 'False'
     executor: '{{ .Values.executor }}'
@@ -1132,6 +1153,7 @@ config:
     statsd_host: '{{ printf "%s-statsd" .Release.Name }}'
   webserver:
     enable_proxy_fix: 'True'
+    notification_sql_alchemy_conn: '{{- include "notification-db-connection" . }}'
     # For Airflow 1.10
     rbac: 'True'
   celery:
@@ -1352,7 +1374,7 @@ aiflowWebserver:
   # Command to use when running the Airflow webserver (templated).
   command: ~
   # Args to use when running the Airflow webserver (templated).
-  args: ["bash", "-c", "start_aiflow_web.py"]
+  args: ["aiflow", "webserver", "start"]
 
   # Create ServiceAccount
   serviceAccount:

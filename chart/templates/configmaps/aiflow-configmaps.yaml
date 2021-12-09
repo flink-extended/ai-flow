@@ -18,12 +18,6 @@
 ################################
 ## Aiflow ConfigMap
 #################################
-{{- $metadataHost := .Values.data.metadataConnection.host | default (printf "%s-%s.%s" .Release.Name "mysql" .Release.Namespace) }}
-{{- $pgbouncerHost := (printf "%s-%s.%s" .Release.Name "pgbouncer" .Release.Namespace) }}
-{{- $host := ternary $pgbouncerHost $metadataHost .Values.pgbouncer.enabled }}
-{{- $port := ((ternary .Values.ports.pgbouncer .Values.data.metadataConnection.port .Values.pgbouncer.enabled) | toString) }}
-{{- $database := (ternary (printf "%s-%s" .Release.Name "metadata") .Values.data.metadataConnection.db .Values.pgbouncer.enabled) }}
-{{- $query := ternary (printf "sslmode=%s" .Values.data.metadataConnection.sslmode) "" (eq .Values.data.metadataConnection.protocol "postgresql") }}
 
 apiVersion: v1
 kind: ConfigMap
@@ -52,9 +46,7 @@ data:
     server_ip: 0.0.0.0
     server_port: 50051
     # uri of database backend in master
-    {{- with .Values.data.metadataConnection }}
-    db_uri: {{ urlJoin (dict "scheme" .protocol "userinfo" (printf "%s:%s" (.user | urlquery) (.pass | urlquery) ) "host" (printf "%s:%s" $host $port) "path" (printf "/%s" $database) "query" $query) | quote }}
-    {{- end }}
+    db_uri: {{ include "aiflow-db-connection" . }}
     # type of database backend in master
     db_type: mysql
     # the default notification service is no need to started
@@ -83,9 +75,7 @@ data:
     # port of notification server
     server_port: 50052
     # uri of database backend for notification server
-    {{- with .Values.data.metadataConnection }}
-    db_uri: {{ urlJoin (dict "scheme" .protocol "userinfo" (printf "%s:%s" (.user | urlquery) (.pass | urlquery) ) "host" (printf "%s:%s" $host $port) "path" (printf "/%s" $database) "query" $query) | quote }}
-    {{- end }}
+    db_uri: {{ include "notification-db-connection" . }}
     # High availability is disabled by default
     enable_ha: false
     # TTL of the heartbeat of a server, i.e., if the server hasn't send heartbeat for the TTL time, it is down.
