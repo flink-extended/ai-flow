@@ -18,19 +18,19 @@ limitations under the License. -->
         <a-form layout="inline">
           <a-row :gutter="48">
             <a-col :md="8" :sm="24">
-              <a-form-item label="ID">
+              <a-form-item :label="$t('project.label.id')">
                 <a-input v-model="queryParam.uuid" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item label="Name">
+              <a-form-item :label="$t('project.label.name')">
                 <a-input v-model="queryParam.name" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="!advanced && 8 || 24" :sm="24">
               <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
-                <a-button type="primary" @click="$refs.table.refresh(true)">Query</a-button>
-                <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">Reset</a-button>
+                <a-button type="primary" @click="$refs.table.refresh(true)">{{$t('project.button.query')}}</a-button>
+                <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">{{$t('project.button.reset')}}</a-button>
               </span>
             </a-col>
           </a-row>
@@ -60,27 +60,28 @@ limitations under the License. -->
 
 <script>
 import moment from 'moment'
+import { i18nRender } from '@/locales'
 import { STable, Ellipsis } from '@/components'
 import { getProjects, getVersion } from '@/api/manage'
 
 const columns = [
   {
-    title: 'ID',
+    title: i18nRender('project.columns.id'),
     dataIndex: 'uuid',
     sorter: true
   },
   {
-    title: 'Name',
+    title: i18nRender('project.columns.name'),
     dataIndex: 'name',
     sorter: true
   },
   {
-    title: 'Properties',
+    title: i18nRender('project.columns.properties'),
     dataIndex: 'properties',
     scopedSlots: { customRender: 'properties' }
   },
   {
-    title: 'Uri',
+    title: i18nRender('project.columns.uri'),
     dataIndex: 'uri',
     scopedSlots: { customRender: 'uri' }
   }

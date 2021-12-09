@@ -18,14 +18,14 @@ limitations under the License. -->
         <a-form layout="inline">
           <a-row :gutter="48">
             <a-col :md="8" :sm="24">
-              <a-form-item label="Workflow Execution ID">
+              <a-form-item :label="$t('job.label.workflow_execution_id')">
                 <a-input v-model="queryParam.workflow_execution_id" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="!advanced && 8 || 24" :sm="24">
               <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
-                <a-button type="primary" @click="$refs.table.refresh(true)">Query</a-button>
-                <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">Reset</a-button>
+                <a-button type="primary" @click="$refs.table.refresh(true)">{{$t('job.button.query')}}</a-button>
+                <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">{{$t('job.button.reset')}}</a-button>
               </span>
             </a-col>
           </a-row>
@@ -55,6 +55,7 @@ limitations under the License. -->
 
 <script>
 import moment from 'moment'
+import { i18nRender } from '@/locales'
 import { STable, Ellipsis } from '@/components'
 import { getJobExecutions, getVersion } from '@/api/manage'
 
@@ -84,34 +85,34 @@ function padLeftZero (str) {
 
 const columns = [
   {
-    title: 'Job Execution ID',
+    title: i18nRender('job.columns.job_execution_id'),
     dataIndex: '_job_execution_id'
   },
   {
-    title: 'Job Name',
+    title: i18nRender('job.columns.job_name'),
     dataIndex: '_job_name'
   },
   {
-    title: 'Status',
+    title: i18nRender('job.columns.status'),
     dataIndex: '_status'
   },
   {
-    title: 'Properties',
+    title: i18nRender('job.columns.properties'),
     dataIndex: '_properties',
     scopedSlots: { customRender: '_properties' }
   },
   {
-    title: 'Execution Label',
+    title: i18nRender('job.columns.execution_label'),
     dataIndex: '_execution_label',
     scopedSlots: { customRender: '_execution_label' }
   },
   {
-    title: 'Start Date',
+    title: i18nRender('job.columns.start_date'),
     dataIndex: '_start_date',
     customRender: (t) => formateDate(new Date(parseInt(t)), 'YYYY-MM-dd hh:mm')
   },
   {
-    title: 'End Date',
+    title: i18nRender('job.columns.end_date'),
     dataIndex: '_end_date',
     customRender: (t) => formateDate(new Date(parseInt(t)), 'YYYY-MM-dd hh:mm')
   }

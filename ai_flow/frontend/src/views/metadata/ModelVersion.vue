@@ -18,19 +18,19 @@ limitations under the License. -->
         <a-form layout="inline">
           <a-row :gutter="48">
             <a-col :md="8" :sm="24">
-              <a-form-item label="Model Name">
+              <a-form-item :label="$t('model.label.model_name')">
                 <a-input v-model="queryParam.model_name" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item label="Model Version">
+              <a-form-item :label="$t('model.label.model_version')">
                 <a-input v-model="queryParam.model_version" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="!advanced && 8 || 24" :sm="24">
               <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
-                <a-button type="primary" @click="$refs.table.refresh(true)">Query</a-button>
-                <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">Reset</a-button>
+                <a-button type="primary" @click="$refs.table.refresh(true)">{{$t('model.button.query')}}</a-button>
+                <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">{{$t('model.button.reset')}}</a-button>
               </span>
             </a-col>
           </a-row>
@@ -60,36 +60,37 @@ limitations under the License. -->
 
 <script>
 import moment from 'moment'
+import { i18nRender } from '@/locales'
 import { STable, Ellipsis } from '@/components'
 import { getModelVersions, getVersion } from '@/api/manage'
 
 const columns = [
   {
-    title: 'Model Name',
+    title: i18nRender('model.columns.model_name'),
     dataIndex: '_model_name',
     sorter: true
   },
   {
-    title: 'Model Version',
+    title: i18nRender('model.columns.model_version'),
     dataIndex: '_model_version',
     sorter: true
   },
   {
-    title: 'Model Path',
+    title: i18nRender('model.columns.model_path'),
     dataIndex: '_model_path',
     scopedSlots: { customRender: '_model_path' }
   },
   {
-    title: 'Version Desc',
+    title: i18nRender('model.columns.version_desc'),
     dataIndex: '_version_desc',
     scopedSlots: { customRender: '_version_desc' }
   },
   {
-    title: 'Version Status',
+    title: i18nRender('model.columns.version_status'),
     dataIndex: '_version_status'
   },
   {
-    title: 'Current Stage',
+    title: i18nRender('model.columns.current_stage'),
     dataIndex: '_current_stage'
   }
 ]

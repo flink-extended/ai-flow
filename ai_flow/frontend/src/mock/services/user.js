@@ -131,7 +131,7 @@ const userNav = options => {
       id: 10010,
       meta: {
         icon: 'table',
-        title: 'Metadata',
+        title: 'menu.metadata',
         show: true
       },
       redirect: '/metadata/project',
@@ -143,7 +143,7 @@ const userNav = options => {
       id: 10011,
       path: '/metadata/project/:pageNo([1-9]\\d*)?',
       meta: {
-        title: 'Project',
+        title: 'menu.metadata.project',
         show: true
       },
       component: 'Project'
@@ -154,7 +154,7 @@ const userNav = options => {
       id: 10012,
       path: '/metadata/workflow/:pageNo([1-9]\\d*)?',
       meta: {
-        title: 'Workflow',
+        title: 'menu.metadata.workflow',
         show: true
       },
       component: 'Workflow'
@@ -165,7 +165,7 @@ const userNav = options => {
       id: 10013,
       path: '/metadata/workflow-execution/:pageNo([1-9]\\d*)?',
       meta: {
-        title: 'WorkflowExecution',
+        title: 'menu.metadata.workflow-execution',
         show: true
       },
       component: 'WorkflowExecution'
@@ -176,7 +176,7 @@ const userNav = options => {
       id: 10014,
       path: '/metadata/job-execution/:pageNo([1-9]\\d*)?',
       meta: {
-        title: 'JobExecution',
+        title: 'menu.metadata.job-execution',
         show: true
       },
       component: 'JobExecution'
@@ -187,7 +187,7 @@ const userNav = options => {
       id: 10015,
       path: '/metadata/dataset/:pageNo([1-9]\\d*)?',
       meta: {
-        title: 'Dataset',
+        title: 'menu.metadata.dataset',
         show: true
       },
       component: 'Dataset'
@@ -198,7 +198,7 @@ const userNav = options => {
       id: 10016,
       path: '/metadata/model/:pageNo([1-9]\\d*)?',
       meta: {
-        title: 'Model',
+        title: 'menu.metadata.model',
         show: true
       },
       component: 'Model'
@@ -209,7 +209,7 @@ const userNav = options => {
       id: 10017,
       path: '/metadata/model-version/:pageNo([1-9]\\d*)?',
       meta: {
-        title: 'ModelVersion',
+        title: 'menu.metadata.model-version',
         show: true
       },
       component: 'ModelVersion'
@@ -220,7 +220,7 @@ const userNav = options => {
       id: 10018,
       path: '/metadata/artifact/:pageNo([1-9]\\d*)?',
       meta: {
-        title: 'Artifact',
+        title: 'menu.metadata.artifact',
         show: true
       },
       component: 'Artifact'

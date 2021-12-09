@@ -18,12 +18,12 @@ limitations under the License. -->
         <a-form layout="inline">
           <a-row :gutter="48">
             <a-col :md="8" :sm="24">
-              <a-form-item label="Project Name">
+              <a-form-item :label="$t('workflow.label.project_name')">
                 <a-input v-model="queryParam.project_name" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item label="Workflow Name">
+              <a-form-item :label="$t('workflow.label.workflow_name')">
                 <a-input v-model="queryParam.workflow_name" placeholder=""/>
               </a-form-item>
             </a-col>
@@ -60,6 +60,7 @@ limitations under the License. -->
 
 <script>
 import moment from 'moment'
+import { i18nRender } from '@/locales'
 import { STable, Ellipsis } from '@/components'
 import { getWorkflowExecutions, getVersion } from '@/api/manage'
 
@@ -89,30 +90,30 @@ function padLeftZero (str) {
 
 const columns = [
   {
-    title: 'Workflow Execution ID',
+    title: i18nRender('workflow.columns.workflow_execution_id'),
     dataIndex: '_workflow_execution_id'
   },
   {
-    title: 'Status',
+    title: i18nRender('workflow.columns.status'),
     dataIndex: '_status'
   },
   {
-    title: 'Properties',
+    title: i18nRender('workflow.columns.properties'),
     dataIndex: '_properties',
     scopedSlots: { customRender: '_properties' }
   },
   {
-    title: 'Context',
+    title: i18nRender('workflow.columns.context'),
     dataIndex: '_context',
     scopedSlots: { customRender: '_context' }
   },
   {
-    title: 'Start Date',
+    title: i18nRender('workflow.columns.start_date'),
     dataIndex: '_start_date',
     customRender: (t) => formateDate(new Date(parseInt(t)), 'YYYY-MM-dd hh:mm')
   },
   {
-    title: 'End Date',
+    title: i18nRender('workflow.columns.end_date'),
     dataIndex: '_end_date',
     customRender: (t) => formateDate(new Date(parseInt(t)), 'YYYY-MM-dd hh:mm')
   }

@@ -4,13 +4,15 @@ import { Icon, Menu, Dropdown } from 'ant-design-vue'
 import { i18nRender } from '@/locales'
 import i18nMixin from '@/store/i18n-mixin'
 
-const locales = ['en-US']
+const locales = ['en-US', 'zh-CN']
 const languageLabels = {
-  'en-US': 'English'
+  'en-US': 'English',
+  'zh-CN': '中文(简体)'
 }
 // eslint-disable-next-line
 const languageIcons = {
-  'en-US': '🇺🇸'
+  'en-US': 'us',
+  'zh-CN': 'cn'
 }
 
 const SelectLang = {

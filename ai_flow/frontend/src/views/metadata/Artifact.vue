@@ -18,19 +18,19 @@ limitations under the License. -->
         <a-form layout="inline">
           <a-row :gutter="48">
             <a-col :md="8" :sm="24">
-              <a-form-item label="ID">
+              <a-form-item :label="$t('artifact.label.id')">
                 <a-input v-model="queryParam.uuid" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item label="Name">
+              <a-form-item :label="$t('artifact.label.name')">
                 <a-input v-model="queryParam.name" placeholder=""/>
               </a-form-item>
             </a-col>
             <a-col :md="!advanced && 8 || 24" :sm="24">
               <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
-                <a-button type="primary" @click="$refs.table.refresh(true)">Query</a-button>
-                <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">Reset</a-button>
+                <a-button type="primary" @click="$refs.table.refresh(true)">{{$t('artifact.button.query')}}</a-button>
+                <a-button style="margin-left: 8px" @click="() => this.queryParam = {}">{{$t('artifact.button.reset')}}</a-button>
               </span>
             </a-col>
           </a-row>
@@ -63,6 +63,7 @@ limitations under the License. -->
 
 <script>
 import moment from 'moment'
+import { i18nRender } from '@/locales'
 import { STable, Ellipsis } from '@/components'
 import { getArtifacts, getVersion } from '@/api/manage'
 
@@ -92,43 +93,43 @@ function padLeftZero (str) {
 
 const columns = [
   {
-    title: 'ID',
+    title: i18nRender('artifact.columns.id'),
     dataIndex: 'uuid',
     sorter: true
   },
   {
-    title: 'Name',
+    title: i18nRender('artifact.columns.name'),
     dataIndex: 'name',
     sorter: true
   },
   {
-    title: 'Artifact Type',
+    title: i18nRender('artifact.columns.artifact_type'),
     dataIndex: 'artifact_type',
     sorter: true
   },
   {
-    title: 'Description',
+    title: i18nRender('artifact.columns.description'),
     dataIndex: 'description',
     scopedSlots: { customRender: 'description' }
   },
   {
-    title: 'Uri',
+    title: i18nRender('artifact.columns.uri'),
     dataIndex: 'uri',
     scopedSlots: { customRender: 'uri' }
   },
   {
-    title: 'Properties',
+    title: i18nRender('artifact.columns.properties'),
     dataIndex: 'properties',
     scopedSlots: { customRender: 'properties' }
   },
   {
-    title: 'Create Time',
+    title: i18nRender('artifact.columns.create_time'),
     dataIndex: 'create_time',
     sorter: true,
     customRender: (t) => formateDate(new Date(t), 'YYYY-MM-dd hh:mm')
   },
   {
-    title: 'Update Time',
+    title: i18nRender('artifact.columns.update_time'),
     dataIndex: 'update_time',
     sorter: true,
     customRender: (t) => formateDate(new Date(t), 'YYYY-MM-dd hh:mm')

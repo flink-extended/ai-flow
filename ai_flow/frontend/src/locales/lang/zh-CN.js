@@ -1,7 +1,7 @@
-import antdEnUS from 'ant-design-vue/es/locale-provider/en_US'
-import momentEU from 'moment/locale/eu'
+import antdZhCN from 'ant-design-vue/es/locale-provider/zh_CN'
+import momentZH from 'moment/locale/zh-cn'
 
-import menu from './en-US/menu'
+import menu from './zh-CN/menu'
 /*!
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,27 +21,27 @@ import menu from './en-US/menu'
  * under the License.
  */
 
-import setting from './en-US/setting'
-import user from './en-US/user'
-import project from './en-US/project'
-import workflow from './en-US/workflow'
-import job from './en-US/job'
-import dataset from './en-US/dataset'
-import model from './en-US/model'
-import artifact from './en-US/artifact'
+import setting from './zh-CN/setting'
+import user from './zh-CN/user'
+import project from './zh-CN/project'
+import workflow from './zh-CN/workflow'
+import job from './zh-CN/job'
+import dataset from './zh-CN/dataset'
+import model from './zh-CN/model'
+import artifact from './zh-CN/artifact'
 
 const components = {
-  antLocale: antdEnUS,
-  momentName: 'eu',
-  momentLocale: momentEU
+  antLocale: antdZhCN,
+  momentName: 'zh-cn',
+  momentLocale: momentZH
 }
 
 export default {
   message: '-',
 
-  'layouts.usermenu.dialog.title': 'Message',
-  'layouts.usermenu.dialog.content': 'Are you sure you would like to logout?',
-  'layouts.userLayout.title': 'AIFlow is an open source framework that bridges big data and AI.',
+  'layouts.usermenu.dialog.title': '信息',
+  'layouts.usermenu.dialog.content': '您确定要退出吗?',
+  'layouts.userLayout.title': 'AIFlow是一个开源框架，将大数据和人工智能联系起来.',
   ...components,
   ...menu,
   ...setting,
