@@ -104,7 +104,6 @@ def upgrade(url, version=None):
     config = _get_alembic_config(url)
     if version is None:
         version = 'heads'
-    command.history(config)
     command.upgrade(config, version)
 
 
@@ -135,7 +134,6 @@ def downgrade(url, version):
 
     _logger.info('Downgrade the database, db uri: {}'.format(url))
     config = _get_alembic_config(url)
-    command.history(config)
     command.downgrade(config, version)
 
 
