@@ -16,10 +16,15 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import logging
 import os
+import signal
+import time
 
 import psutil
 from typing import List
+
+logger = logging.getLogger(__name__)
 
 
 def get_all_children_pids(current_pid=None) -> List:
@@ -40,3 +45,30 @@ def check_pid_exist(_pid):
         return False
     else:
         return True
+
+
+def stop_process(pid, process_name, timeout_sec: int = 60):
+    """
+    Try hard to kill the process with the given pid. It sends
+    :param pid: The process pid to stop
+    :param process_name: The process name to log
+    :param timeout_sec: timeout before sending SIGKILL to kill the process
+    """
+
+    timeout_sec = 60
+    try:
+        start_time = time.monotonic()
+        while check_pid_exist(pid):
+            if time.monotonic() - start_time > timeout_sec:
+                raise RuntimeError(
+                    "{} pid: {} does not exit after {} seconds.".format(process_name, pid, timeout_sec))
+            os.kill(pid, signal.SIGTERM)
+            time.sleep(1)
+    except Exception:
+        logger.warning("Failed to stop {} pid: {} with SIGTERM. Try to send SIGKILL".format(process_name, pid))
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except Exception as e:
+            raise RuntimeError("Failed to kill {} pid: {} with SIGKILL.".format(process_name, pid)) from e
+
+    logger.info("{} pid: {} stopped".format(process_name, pid))

@@ -15,10 +15,14 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import os
+import signal
+import time
 import unittest
 from unittest import mock
 
-from ai_flow.util.process_utils import check_pid_exist
+import ai_flow.util.process_utils
+from ai_flow.util.process_utils import check_pid_exist, stop_process
 
 
 class TestProcessUtils(unittest.TestCase):
@@ -28,3 +32,35 @@ class TestProcessUtils(unittest.TestCase):
             mock_kill.side_effect = [OSError, True]
             self.assertFalse(check_pid_exist(0))
             self.assertTrue(check_pid_exist(0))
+
+    def test_cli_server_stop_SIGTERM_fail(self):
+        with mock.patch.object(os, "kill") as mock_kill, \
+                mock.patch.object(ai_flow.util.process_utils, "check_pid_exist") as mock_pid_check:
+            mock_kill.side_effect = [RuntimeError("Boom"), None]
+            with self.assertLogs("ai_flow", "INFO") as log:
+                mock_pid_check.side_effect = [True, False]
+                stop_process(15213, "Dummy process")
+                log_output = "\n".join(log.output)
+                self.assertIn("Failed to stop Dummy process", log_output)
+                self.assertIn("stopped", log_output)
+
+    def test_cli_server_stop_SIGTERM_SIGKILL_fail(self):
+        with mock.patch.object(os, "kill") as mock_kill:
+            mock_kill.side_effect = [RuntimeError("Boom"), RuntimeError("Boom")]
+            with self.assertLogs("ai_flow", "INFO") as log:
+                with self.assertRaises(RuntimeError):
+                    stop_process(15213, "Dummy process")
+                log_output = "\n".join(log.output)
+                self.assertIn("Failed to stop Dummy process", log_output)
+
+    def test_cli_server_stop_wait_process_exit_timeout(self):
+        with mock.patch.object(os, "kill") as mock_kill, \
+                mock.patch.object(time, 'monotonic') as mock_monotonic:
+            mock_kill.return_value = True
+            mock_monotonic.side_effect = [0.0, 30.0, 70.0]
+            with self.assertLogs("ai_flow", "INFO") as log:
+                stop_process(15213, "Dummy process")
+                log_output = "\n".join(log.output)
+                self.assertIn("Failed to stop Dummy process", log_output)
+            self.assertEqual(3, mock_monotonic.call_count)
+            mock_kill.assert_any_call(15213, signal.SIGKILL)
