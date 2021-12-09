@@ -17,11 +17,11 @@
 ## specific language governing permissions and limitations
 ## under the License.
 ##
-set -e
-
-AIFLOW_HOME=${AIFLOW_HOME:-~/aiflow}
-AIFLOW_PID_DIR=${AIFLOW_PID_DIR:-${AIFLOW_HOME}}
 
 set +e
+
+echo "This script will be deprecated, please use 'aiflow' command-line interface."
+
 aiflow server stop
+
 aiflow webserver stop

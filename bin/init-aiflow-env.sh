@@ -17,21 +17,7 @@
 ## specific language governing permissions and limitations
 ## under the License.
 ##
-export AIFLOW_HOME=${AIFLOW_HOME:-~/aiflow}
-export AIFLOW_PID_DIR=${AIFLOW_PID_DIR:-${AIFLOW_HOME}}
-export AIFLOW_LOG_DIR="${AIFLOW_HOME}/logs"
-AIFLOW_CONFIG_FILE=${AIFLOW_HOME}/aiflow_server.yaml
 
-# create directory if not exist
-[ -d "${AIFLOW_HOME}" ] || mkdir "${AIFLOW_HOME}"
-[ -d "${AIFLOW_PID_DIR}" ] || mkdir "${AIFLOW_PID_DIR}"
-[ -d "${AIFLOW_LOG_DIR}" ] || mkdir "${AIFLOW_LOG_DIR}"
+echo "This script will be deprecated, please use 'aiflow config init'."
 
-if [ ! -e ${AIFLOW_CONFIG_FILE} ]; then
-  echo "AIFlow server config doesn't exist generating at ${AIFLOW_CONFIG_FILE}"
-  BIN=$(dirname "${BASH_SOURCE-$0}")
-  BIN=$(cd "$BIN"; pwd)
-  "$BIN"/start_aiflow.py --generate-config-only  > /dev/null 2>&1
-else
-  echo "AIFlow server config already exist at ${AIFLOW_CONFIG_FILE}"
-fi
+aiflow config init

@@ -40,6 +40,9 @@ def make_log_dir_if_not_exist():
 
 def webserver_start(args):
     pid_file_path = os.path.join(ai_flow.settings.AIFLOW_HOME, ai_flow.settings.AIFLOW_WEBSERVER_PID_FILENAME)
+    if os.path.exists(pid_file_path):
+        logger.info("Web Server is running, stop it first with 'aiflow webserver stop'.")
+        return
     if args.daemon:
         make_log_dir_if_not_exist()
         log_path = os.path.join(ai_flow.settings.AIFLOW_HOME, "logs",

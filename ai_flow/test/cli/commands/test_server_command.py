@@ -67,6 +67,19 @@ class TestCliServer(unittest.TestCase):
             self.assertIn("AIFlow server pid file:", log_output)
             mock_server_runner.start.assert_called_once_with(True)
 
+    def test_cli_server_start_twice(self):
+        aiflow_home = os.path.join(os.path.dirname(__file__), "..")
+        ai_flow.settings.AIFLOW_HOME = aiflow_home
+        pid_file_path = os.path.join(aiflow_home,
+                                     ai_flow.settings.AIFLOW_PID_FILENAME)
+        try:
+            open(pid_file_path, 'a').close()
+            with self.assertLogs("ai_flow.cli.commands.server_command", "INFO") as log:
+                server_command.server_start(self.parser.parse_args(['server', 'start']))
+            self.assertIn('AIFlow Server is running', str(log.output))
+        finally:
+            os.remove(pid_file_path)
+
     def test_cli_server_stop_without_pid_file(self):
         aiflow_home = os.path.join(os.path.dirname(__file__), "..")
         ai_flow.settings.AIFLOW_HOME = aiflow_home
