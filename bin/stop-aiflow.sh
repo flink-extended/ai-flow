@@ -20,7 +20,7 @@
 
 set +e
 
-echo "This script will be deprecated, please use 'aiflow' command-line interface."
+echo "[WARNING] This script will be deprecated, please use 'aiflow' command-line interface."
 
 aiflow server stop
 

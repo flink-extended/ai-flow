@@ -18,6 +18,10 @@
 ## under the License.
 ##
 
-echo "This script will be deprecated, please use 'aiflow config init'."
+set -e
+
+echo "[WARNING] This script will be deprecated, please use 'aiflow' command-line interface."
 
 aiflow config init
+
+aiflow db init
