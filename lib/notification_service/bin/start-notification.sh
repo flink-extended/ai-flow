@@ -21,6 +21,14 @@ set -e
 
 echo "[WARNING] This script will be deprecated, please use 'notification' command-line interface."
 
+# start notification service
+
+export NOTIFICATION_HOME=${NOTIFICATION_HOME:-~/notification_service}
+if [ -e "${NOTIFICATION_HOME}"/notification_server.pid ]; then
+  echo "Notification server is running, stop it first."
+  notification server stop
+fi
+
 notification config init
 
 notification db init
