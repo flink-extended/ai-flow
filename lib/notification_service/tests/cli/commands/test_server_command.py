@@ -79,13 +79,29 @@ class TestCliServer(unittest.TestCase):
         notification_service.settings.NOTIFICATION_HOME = notification_home
         pid_file_path = os.path.join(notification_home,
                                      notification_service.settings.NOTIFICATION_PID_FILENAME)
-        try:
-            open(pid_file_path, 'a').close()
-            with self.assertLogs("notification_service.cli.commands.server_command", "INFO") as log:
+        with self.assertLogs("notification_service", "INFO") as log, TmpPidFile(pid_file_path), \
+                mock.patch.object(server_command, "_get_daemon_context") as get_daemon_context, \
+                mock.patch.object(server_command, "NotificationServerRunner") as NotificationServerRunnerClass:
+
+            get_daemon_context.return_value = mock.MagicMock()
+            mock_server_runner = mock.MagicMock()
+            NotificationServerRunnerClass.side_effect = [mock_server_runner]
+
+            with mock.patch.object(server_command, "check_pid_exist") as mock_check_pid_exist:
+                mock_check_pid_exist.return_value = False
+                server_command.server_start(self.parser.parse_args(['server', 'start']))
+            self.assertIn('This means a staled PID file', str(log.output))
+
+        with self.assertLogs("notification_service", "INFO") as log, TmpPidFile(pid_file_path), \
+               mock.patch.object(server_command, "_get_daemon_context") as get_daemon_context, \
+                mock.patch.object(server_command, "NotificationServerRunner") as NotificationServerRunnerClass:
+            get_daemon_context.return_value = mock.MagicMock()
+            mock_server_runner = mock.MagicMock()
+            NotificationServerRunnerClass.side_effect = [mock_server_runner]
+            with mock.patch.object(server_command, "check_pid_exist") as mock_check_pid_exist2:
+                mock_check_pid_exist2.return_value = True
                 server_command.server_start(self.parser.parse_args(['server', 'start']))
             self.assertIn('Notification Server is running', str(log.output))
-        finally:
-            os.remove(pid_file_path)
 
     def test_cli_server_stop_without_pid_file(self):
         notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
