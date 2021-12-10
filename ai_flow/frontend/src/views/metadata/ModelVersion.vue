@@ -66,31 +66,31 @@ import { getModelVersions, getVersion } from '@/api/manage'
 const columns = [
   {
     title: 'Model Name',
-    dataIndex: '_model_name',
+    dataIndex: 'model_name',
     sorter: true
   },
   {
     title: 'Model Version',
-    dataIndex: '_model_version',
+    dataIndex: 'model_version',
     sorter: true
   },
   {
     title: 'Model Path',
-    dataIndex: '_model_path',
+    dataIndex: 'model_path',
     scopedSlots: { customRender: '_model_path' }
   },
   {
     title: 'Version Desc',
-    dataIndex: '_version_desc',
+    dataIndex: 'version_desc',
     scopedSlots: { customRender: '_version_desc' }
   },
   {
     title: 'Version Status',
-    dataIndex: '_version_status'
+    dataIndex: 'version_status'
   },
   {
     title: 'Current Stage',
-    dataIndex: '_current_stage'
+    dataIndex: 'current_stage'
   }
 ]
 

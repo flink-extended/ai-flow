@@ -16,11 +16,11 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from ai_flow.endpoint.server import stringValue
 from ai_flow.model_center.entity.model_version import ModelVersion
 from ai_flow.model_center.entity.model_version_stage import ModelVersionStage
 from ai_flow.model_center.entity.model_version_status import ModelVersionStatus
 from ai_flow.protobuf.message_pb2 import ModelVersionMeta
-from ai_flow.endpoint.server import stringValue
 
 
 class ModelVersionDetail(ModelVersion):
@@ -36,36 +36,11 @@ class ModelVersionDetail(ModelVersion):
         # Constructor is called only from within the system by various backend stores.
         super(ModelVersionDetail, self).__init__(model_name=model_name,
                                                  model_version=model_version)
-        self._model_path = model_path
-        self._model_type = model_type
-        self._version_desc = version_desc
-        self._version_status = version_status
-        self._current_stage = current_stage
-
-    @property
-    def model_path(self):
-        """String. Model source path for the model."""
-        return self._model_path
-
-    @property
-    def model_type(self):
-        """String. Model type of the model."""
-        return self._model_type
-
-    @property
-    def version_desc(self):
-        """String. Description of the model version."""
-        return self._version_desc
-
-    @property
-    def version_status(self):
-        """String. Current Model Registry status for this model."""
-        return self._version_status
-
-    @property
-    def current_stage(self):
-        """String. Current stage of this model version."""
-        return self._current_stage
+        self.model_path = model_path
+        self.model_type = model_type
+        self.version_desc = version_desc
+        self.version_status = version_status
+        self.current_stage = current_stage
 
     @classmethod
     def _properties(cls):
