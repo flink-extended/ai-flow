@@ -59,11 +59,6 @@ If release name contains chart name it will be used as a full name.
       secretKeyRef:
         name: {{ template "webserver_secret_key_secret" . }}
         key: webserver-secret-key
-  - name: AIRFLOW__WEBSERVER__NOTIFICATION_SQL_ALCHEMY_CONN
-    valueFrom:
-      secretKeyRef:
-        name: {{ template "airflow_metadata_secret" . }}
-        key: connection
   {{- if or (eq .Values.executor "CeleryExecutor") (eq .Values.executor "CeleryKubernetesExecutor") }}
   - name: AIRFLOW__CELERY__CELERY_RESULT_BACKEND
     valueFrom:
@@ -601,4 +596,28 @@ Create the name of the cleanup service account to use
   {{- $_ := set $auth $host $data -}}
   {{- $_ := set $config "auths" $auth -}}
   {{ $config | toJson | print }}
+{{- end }}
+
+{{- define "notification-db-connection" }}
+  {{- $notificationDbHost := .Values.data.notificationDbConnection.host | default (printf "%s-%s.%s" .Release.Name "mysql" .Release.Namespace) }}
+  {{- $pgbouncerHost := (printf "%s-%s.%s" .Release.Name "pgbouncer" .Release.Namespace) }}
+  {{- $host := ternary $pgbouncerHost $notificationDbHost .Values.pgbouncer.enabled }}
+  {{- $port := ((ternary .Values.ports.pgbouncer .Values.data.notificationDbConnection.port .Values.pgbouncer.enabled) | toString) }}
+  {{- $database := (ternary (printf "%s-%s" .Release.Name "notification") .Values.data.notificationDbConnection.db .Values.pgbouncer.enabled) }}
+  {{- $query := ternary (printf "sslmode=%s" .Values.data.notificationDbConnection.sslmode) "" (eq .Values.data.notificationDbConnection.protocol "postgresql") }}
+  {{- with .Values.data.notificationDbConnection }}
+    {{- urlJoin (dict "scheme" .protocol "userinfo" (printf "%s:%s" (.user | urlquery) (.pass | urlquery) ) "host" (printf "%s:%s" $host $port) "path" (printf "/%s" $database) "query" $query) }}
+  {{- end }}
+{{- end }}
+
+{{- define "aiflow-db-connection" }}
+  {{- $aiflowDbHost := .Values.data.aiflowDbConnection.host | default (printf "%s-%s.%s" .Release.Name "mysql" .Release.Namespace) }}
+  {{- $pgbouncerHost := (printf "%s-%s.%s" .Release.Name "pgbouncer" .Release.Namespace) }}
+  {{- $host := ternary $pgbouncerHost $aiflowDbHost .Values.pgbouncer.enabled }}
+  {{- $port := ((ternary .Values.ports.pgbouncer .Values.data.aiflowDbConnection.port .Values.pgbouncer.enabled) | toString) }}
+  {{- $database := (ternary (printf "%s-%s" .Release.Name "aiflow") .Values.data.aiflowDbConnection.db .Values.pgbouncer.enabled) }}
+  {{- $query := ternary (printf "sslmode=%s" .Values.data.aiflowDbConnection.sslmode) "" (eq .Values.data.aiflowDbConnection.protocol "postgresql") }}
+  {{- with .Values.data.aiflowDbConnection }}
+    {{- urlJoin (dict "scheme" .protocol "userinfo" (printf "%s:%s" (.user | urlquery) (.pass | urlquery) ) "host" (printf "%s:%s" $host $port) "path" (printf "/%s" $database) "query" $query) }}
+  {{- end }}
 {{- end }}

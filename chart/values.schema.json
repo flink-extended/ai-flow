@@ -694,13 +694,29 @@
             ]
         },
         "data": {
-            "description": "Airflow database & redis configuration.",
+            "description": "Airflow database, AIFlow database, Notification database & redis configuration.",
             "type": "object",
             "x-docsSection": "Database",
             "additionalProperties": false,
             "properties": {
                 "metadataSecretName": {
                     "description": "Metadata connection string secret.",
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "default": null
+                },
+                "aiflowDbSecretName": {
+                    "description": "AIFlow db connection string secret.",
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "default": null
+                },
+                "notificationDbSecretName": {
+                    "description": "Notification db connection string secret.",
                     "type": [
                         "string",
                         "null"
@@ -726,6 +742,96 @@
                 },
                 "metadataConnection": {
                     "description": "Metadata connection configuration.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "user": {
+                            "description": "The database user.",
+                            "type": "string",
+                            "default": "postgres"
+                        },
+                        "pass": {
+                            "description": "The user's password.",
+                            "type": "string",
+                            "default": "postgres"
+                        },
+                        "protocol": {
+                            "description": "The database protocol.",
+                            "type": "string",
+                            "default": "postgresql"
+                        },
+                        "host": {
+                            "description": "The database host.",
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "default": null
+                        },
+                        "port": {
+                            "description": "The database port.",
+                            "type": "integer",
+                            "default": 5432
+                        },
+                        "db": {
+                            "description": "The name of the database.",
+                            "type": "string",
+                            "default": "postgres"
+                        },
+                        "sslmode": {
+                            "description": "The database SSL parameter.",
+                            "type": "string",
+                            "default": "disable"
+                        }
+                    }
+                },
+                "aiflowDbConnection": {
+                    "description": "AIFlow DB connection configuration.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "user": {
+                            "description": "The database user.",
+                            "type": "string",
+                            "default": "postgres"
+                        },
+                        "pass": {
+                            "description": "The user's password.",
+                            "type": "string",
+                            "default": "postgres"
+                        },
+                        "protocol": {
+                            "description": "The database protocol.",
+                            "type": "string",
+                            "default": "postgresql"
+                        },
+                        "host": {
+                            "description": "The database host.",
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "default": null
+                        },
+                        "port": {
+                            "description": "The database port.",
+                            "type": "integer",
+                            "default": 5432
+                        },
+                        "db": {
+                            "description": "The name of the database.",
+                            "type": "string",
+                            "default": "postgres"
+                        },
+                        "sslmode": {
+                            "description": "The database SSL parameter.",
+                            "type": "string",
+                            "default": "disable"
+                        }
+                    }
+                },
+                "notificationDbConnection": {
+                    "description": "Notification DB connection configuration.",
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
