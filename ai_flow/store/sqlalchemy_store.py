@@ -18,11 +18,11 @@
 #
 import logging
 import time
-from typing import Optional, Text, List, Union
 
 import sqlalchemy.exc
 import sqlalchemy.orm
 from sqlalchemy import and_, cast, Integer, asc, desc
+from typing import Optional, Text, List, Union
 
 from ai_flow.common.status import Status
 from ai_flow.endpoint.server.exception import AIFlowException
@@ -54,7 +54,6 @@ from ai_flow.store.db.db_model import SqlMetricMeta, SqlMetricSummary
 from ai_flow.store.db.db_model import SqlRegisteredModel, SqlModelVersion
 from ai_flow.store.db.db_util import extract_db_engine_from_uri, create_sqlalchemy_engine, _get_managed_session_maker
 from ai_flow.util import json_utils
-from ai_flow.util import sqlalchemy_db
 from ai_flow.workflow.control_edge import WorkflowSchedulingRule
 
 if not hasattr(time, 'time_ns'):
@@ -862,8 +861,8 @@ class SqlAlchemyStore(AbstractStore):
                  if exists, Otherwise, returns None if the workflow snapshot does not exist.
         """
         with self.ManagedSessionMaker() as session:
-            workflow_snapshot = session.query(SqlWorkflowSnapshot)\
-                .filter(SqlWorkflowSnapshot.uuid == workflow_snapshot_id)\
+            workflow_snapshot = session.query(SqlWorkflowSnapshot) \
+                .filter(SqlWorkflowSnapshot.uuid == workflow_snapshot_id) \
                 .scalar()
             return None if workflow_snapshot is None \
                 else ResultToMeta.result_to_workflow_snapshot_meta(workflow_snapshot)
@@ -1412,8 +1411,8 @@ class SqlAlchemyStore(AbstractStore):
         if len(register_models) == 0:
             return None
         else:
-            _logger.info("Get registered model name: %s, versions: %s.", register_models[0].model_name,
-                         register_models[0].model_version)
+            _logger.debug("Get registered model name: %s, versions: %s.", register_models[0].model_name,
+                          register_models[0].model_version)
             return register_models[0]
 
     def create_registered_model(self, model_name, model_desc=None):
@@ -1560,8 +1559,8 @@ class SqlAlchemyStore(AbstractStore):
         if len(model_versions) == 0:
             return None
         else:
-            _logger.info("Get registered model version: %s of model name: %s.", model_versions[0],
-                         model_versions[0].model_name)
+            _logger.debug("Get registered model version: %s of model name: %s.", model_versions[0],
+                          model_versions[0].model_name)
             return model_versions[0]
 
     @classmethod
@@ -1635,7 +1634,7 @@ class SqlAlchemyStore(AbstractStore):
                 except sqlalchemy.exc.IntegrityError:
                     logging.info(model_version)
                     more_retries = self.CREATE_RETRY_TIMES - attempt - 1
-                    _logger.info(
+                    _logger.warning(
                         'Create model version (model_version=%s) error (model_name=%s). Retrying %s more time%s.',
                         model_version, model_name,
                         str(more_retries), 's' if more_retries > 1 else '')
