@@ -73,6 +73,29 @@ class TestCliServer(unittest.TestCase):
         finally:
             os.remove(pid_file_path)
 
+    def test_cli_server_start_twice(self):
+        aiflow_home = os.path.join(os.path.dirname(__file__), "..")
+        ai_flow.settings.AIFLOW_HOME = aiflow_home
+        pid_file_path = os.path.join(aiflow_home,
+                                     ai_flow.settings.AIFLOW_WEBSERVER_PID_FILENAME)
+        with self.assertLogs("ai_flow", "INFO") as log, TmpPidFile(pid_file_path), \
+                mock.patch.object(daemon, "DaemonContext") as DaemonContext, \
+                mock.patch.object(webserver_command, "start_web_server_by_config_file_path"):
+            DaemonContext.side_effect = mock.MagicMock()
+            with mock.patch.object(webserver_command, "check_pid_exist") as mock_check_pid_exist:
+                mock_check_pid_exist.return_value = False
+                webserver_command.webserver_start(self.parser.parse_args(['webserver', 'start']))
+            self.assertIn('This means a staled PID file', str(log.output))
+
+        with self.assertLogs("ai_flow", "INFO") as log, TmpPidFile(pid_file_path), \
+                mock.patch.object(daemon, "DaemonContext") as DaemonContext, \
+                mock.patch.object(webserver_command, "start_web_server_by_config_file_path"):
+            DaemonContext.side_effect = mock.MagicMock()
+            with mock.patch.object(webserver_command, "check_pid_exist") as mock_check_pid_exist2:
+                mock_check_pid_exist2.return_value = True
+                webserver_command.webserver_start(self.parser.parse_args(['webserver', 'start']))
+            self.assertIn('Web Server is running', str(log.output))
+
     def test_cli_webserver_stop_without_pid_file(self):
         aiflow_home = os.path.join(os.path.dirname(__file__), "..")
         ai_flow.settings.AIFLOW_HOME = aiflow_home

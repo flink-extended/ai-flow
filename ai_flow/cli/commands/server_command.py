@@ -47,8 +47,15 @@ def make_log_dir_if_not_exist():
 def server_start(args):
     pid_file_path = os.path.join(ai_flow.settings.AIFLOW_HOME, ai_flow.settings.AIFLOW_PID_FILENAME)
     if os.path.exists(pid_file_path):
-        logger.info("AIFlow Server is running, stop it first with 'aiflow server stop'.")
-        return
+        with open(pid_file_path, 'r') as f:
+            pid = int(f.read())
+        if not check_pid_exist(pid):
+            logger.info(
+                "Process pid: {} does not exist. This means a staled PID file. Removing the PID file".format(pid))
+            os.remove(pid_file_path)
+        else:
+            logger.info("AIFlow Server is running, stop it first with 'aiflow server stop'.")
+            return
     if args.daemon:
         make_log_dir_if_not_exist()
         log_path = os.path.join(ai_flow.settings.AIFLOW_HOME, "logs",
