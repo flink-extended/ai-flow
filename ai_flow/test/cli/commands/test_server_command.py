@@ -72,13 +72,28 @@ class TestCliServer(unittest.TestCase):
         ai_flow.settings.AIFLOW_HOME = aiflow_home
         pid_file_path = os.path.join(aiflow_home,
                                      ai_flow.settings.AIFLOW_PID_FILENAME)
-        try:
-            open(pid_file_path, 'a').close()
-            with self.assertLogs("ai_flow.cli.commands.server_command", "INFO") as log:
+        with self.assertLogs("ai_flow", "INFO") as log, TmpPidFile(pid_file_path), \
+                mock.patch.object(daemon, "DaemonContext") as DaemonContext, \
+                mock.patch.object(server_command, "AIFlowServerRunner") as AIFlowServerRunnerClass:
+            DaemonContext.side_effect = mock.MagicMock()
+            mock_server_runner = mock.MagicMock()
+            AIFlowServerRunnerClass.side_effect = [mock_server_runner]
+
+            with mock.patch.object(server_command, "check_pid_exist") as mock_check_pid_exist:
+                mock_check_pid_exist.return_value = False
+                server_command.server_start(self.parser.parse_args(['server', 'start']))
+            self.assertIn('This means a staled PID file', str(log.output))
+
+        with self.assertLogs("ai_flow", "INFO") as log, TmpPidFile(pid_file_path), \
+                mock.patch.object(daemon, "DaemonContext") as DaemonContext, \
+                mock.patch.object(server_command, "AIFlowServerRunner") as AIFlowServerRunnerClass:
+            DaemonContext.side_effect = mock.MagicMock()
+            mock_server_runner = mock.MagicMock()
+            AIFlowServerRunnerClass.side_effect = [mock_server_runner]
+            with mock.patch.object(server_command, "check_pid_exist") as mock_check_pid_exist2:
+                mock_check_pid_exist2.return_value = True
                 server_command.server_start(self.parser.parse_args(['server', 'start']))
             self.assertIn('AIFlow Server is running', str(log.output))
-        finally:
-            os.remove(pid_file_path)
 
     def test_cli_server_stop_without_pid_file(self):
         aiflow_home = os.path.join(os.path.dirname(__file__), "..")
