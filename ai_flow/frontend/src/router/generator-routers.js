@@ -59,7 +59,7 @@ const rootRouter = {
   component: 'BasicLayout',
   redirect: '/metadata',
   meta: {
-    title: 'Home'
+    title: 'menu.home'
   },
   children: []
 }
