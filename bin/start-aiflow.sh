@@ -21,6 +21,14 @@ set -e
 
 echo "[WARNING] This script will be deprecated, please use 'aiflow' command-line interface."
 
+export AIFLOW_HOME=${AIFLOW_HOME:-~/aiflow}
+
+if [ -e "${AIFLOW_HOME}"/aiflow_server.pid ] || [ -e "${AIFLOW_HOME}"/aiflow_web_server.pid ]; then
+  echo "AIFlow is running, stopping first"
+  aiflow server stop
+  aiflow webserver stop
+fi
+
 aiflow config init
 
 aiflow db init

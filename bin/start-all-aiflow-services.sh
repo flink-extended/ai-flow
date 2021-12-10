@@ -22,7 +22,14 @@ set -e
 BIN=$(dirname "${BASH_SOURCE-$0}")
 BIN=$(cd "$BIN"; pwd)
 
+export AIFLOW_HOME=${AIFLOW_HOME:-~/aiflow}
+export NOTIFICATION_HOME=${NOTIFICATION_HOME:-~/notification_service}
+
 # start notification service
+if [ -e "${NOTIFICATION_HOME}"/notification_server.pid ]; then
+  echo "Notification server is running, stop it first."
+  notification server stop
+fi
 notification config init
 notification db init
 notification server start -d
@@ -33,6 +40,11 @@ echo "Waiting for Notification Server started..."
 "${BIN}"/start-airflow.sh
 
 # start AIFlow
+if [ -e "${AIFLOW_HOME}"/aiflow_server.pid ] || [ -e "${AIFLOW_HOME}"/aiflow_web_server.pid ]; then
+  echo "AIFlow is running, stopping first"
+  aiflow server stop
+  aiflow webserver stop
+fi
 aiflow config init
 aiflow db init
 aiflow server start -d
