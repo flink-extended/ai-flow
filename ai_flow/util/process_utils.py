@@ -55,7 +55,6 @@ def stop_process(pid, process_name, timeout_sec: int = 60):
     :param timeout_sec: timeout before sending SIGKILL to kill the process
     """
 
-    timeout_sec = 60
     try:
         start_time = time.monotonic()
         while check_pid_exist(pid):
