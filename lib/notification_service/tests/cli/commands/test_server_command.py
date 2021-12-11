@@ -16,8 +16,6 @@
 # under the License.
 import logging
 import os
-import signal
-import time
 import unittest
 from unittest import mock
 
@@ -82,7 +80,6 @@ class TestCliServer(unittest.TestCase):
         with self.assertLogs("notification_service", "INFO") as log, TmpPidFile(pid_file_path), \
                 mock.patch.object(server_command, "_get_daemon_context") as get_daemon_context, \
                 mock.patch.object(server_command, "NotificationServerRunner") as NotificationServerRunnerClass:
-
             get_daemon_context.return_value = mock.MagicMock()
             mock_server_runner = mock.MagicMock()
             NotificationServerRunnerClass.side_effect = [mock_server_runner]
@@ -93,7 +90,7 @@ class TestCliServer(unittest.TestCase):
             self.assertIn('This means a staled PID file', str(log.output))
 
         with self.assertLogs("notification_service", "INFO") as log, TmpPidFile(pid_file_path), \
-               mock.patch.object(server_command, "_get_daemon_context") as get_daemon_context, \
+                mock.patch.object(server_command, "_get_daemon_context") as get_daemon_context, \
                 mock.patch.object(server_command, "NotificationServerRunner") as NotificationServerRunnerClass:
             get_daemon_context.return_value = mock.MagicMock()
             mock_server_runner = mock.MagicMock()
@@ -112,56 +109,29 @@ class TestCliServer(unittest.TestCase):
             log_output = "\n".join(log.output)
             self.assertIn("PID file of Notification server does not exist at", log_output)
 
-    def test_cli_server_stop_SIGTERM_fail(self):
+    def test_cli_server_stop_with_staled_pid_file(self):
         notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
         notification_service.settings.NOTIFICATION_HOME = notification_home
-        pid_file = os.path.join(notification_home, "notification_server.pid")
+        pid_file = os.path.join(notification_home, notification_service.settings.NOTIFICATION_PID_FILENAME)
 
-        with mock.patch.object(os, "kill") as mock_kill, TmpPidFile(pid_file), \
-                mock.patch.object(server_command, "check_pid_exist") as mock_pid_check:
-            mock_kill.side_effect = [RuntimeError("Boom"), None]
-            mock_pid_check.side_effect = [False]
-            with self.assertLogs("notification_service.cli.commands.server_command", "INFO") as log:
-                server_command.server_stop(self.parser.parse_args(['server', 'stop']))
-                log_output = "\n".join(log.output)
-                self.assertIn("Failed to stop Notification server", log_output)
-                self.assertIn("stopped", log_output)
-
-    def test_cli_server_stop_SIGTERM_SIGKILL_fail(self):
-        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
-        notification_service.settings.NOTIFICATION_HOME = notification_home
-        pid_file = os.path.join(notification_home, "notification_server.pid")
-
-        with mock.patch.object(os, "kill") as mock_kill, TmpPidFile(pid_file):
-            mock_kill.side_effect = [RuntimeError("Boom"), RuntimeError("Boom")]
-            with self.assertLogs("notification_service.cli.commands.server_command", "INFO") as log:
-                with self.assertRaises(RuntimeError):
-                    server_command.server_stop(self.parser.parse_args(['server', 'stop']))
-                log_output = "\n".join(log.output)
-                self.assertIn("Failed to stop Notification server", log_output)
-
-    def test_cli_server_stop_wait_process_exit_timeout(self):
-        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
-        notification_service.settings.NOTIFICATION_HOME = notification_home
-        pid_file = os.path.join(notification_home, "notification_server.pid")
-
-        with mock.patch.object(os, "kill") as mock_kill, \
-                TmpPidFile(pid_file), mock.patch.object(time, 'monotonic') as mock_monotonic:
-            mock_kill.return_value = True
-            mock_monotonic.side_effect = [0.0, 30.0, 70.0]
-            with self.assertRaises(RuntimeError):
-                server_command.server_stop(self.parser.parse_args(['server', 'stop']))
-            self.assertEqual(3, mock_monotonic.call_count)
+        with self.assertLogs("notification_service", "INFO") as log, TmpPidFile(pid_file), \
+                mock.patch.object(server_command, "check_pid_exist") as mock_check_pid_exist:
+            mock_check_pid_exist.return_value = False
+            server_command.server_stop(self.parser.parse_args(['server', 'stop']))
+            log_output = "\n".join(log.output)
+            self.assertIn("This means a staled PID file.", log_output)
+            self.assertFalse(os.path.exists(pid_file))
 
     def test_cli_server_stop(self):
         notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
         notification_service.settings.NOTIFICATION_HOME = notification_home
-        pid_file = os.path.join(notification_home, "notification_server.pid")
-        with mock.patch.object(os, "kill") as mock_kill, TmpPidFile(pid_file), \
-                mock.patch.object(server_command, "check_pid_exist") as mock_pid_check:
-            mock_pid_check.side_effect = [True, False]
+        pid_file = os.path.join(notification_home, notification_service.settings.NOTIFICATION_PID_FILENAME)
+        with TmpPidFile(pid_file), \
+                mock.patch.object(server_command, "stop_process") as mock_stop_process, \
+                mock.patch.object(server_command, "check_pid_exist") as mock_check_pid_exist:
+            mock_check_pid_exist.return_value = True
             server_command.server_stop(self.parser.parse_args(['server', 'stop']))
-            mock_kill.assert_called_once_with(15213, signal.SIGTERM)
+            mock_stop_process.assert_called_with(15213, "Notification server")
 
 
 class TmpPidFile:

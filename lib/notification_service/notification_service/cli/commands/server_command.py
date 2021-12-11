@@ -19,7 +19,6 @@ import datetime
 import logging
 import os
 import signal
-import time
 
 import daemon
 from daemon.pidfile import TimeoutPIDLockFile
@@ -27,7 +26,7 @@ from daemon.pidfile import TimeoutPIDLockFile
 import notification_service.settings
 from notification_service.server import NotificationServerRunner
 from notification_service.settings import get_configuration_file_path
-from notification_service.util.utils import check_pid_exist
+from notification_service.util.utils import check_pid_exist, stop_process
 
 logger = logging.getLogger(__name__)
 
@@ -105,24 +104,12 @@ def server_stop(args):
     with open(pid_file_path, 'r') as f:
         pid = int(f.read())
 
-    try:
-        os.kill(pid, signal.SIGTERM)
-    except Exception:
-        logger.warning("Failed to stop Notification server (pid: {}) with SIGTERM. Try to send SIGKILL".format(pid))
-        try:
-            os.kill(pid, signal.SIGKILL)
-        except Exception as e:
-            raise RuntimeError("Failed to kill Notification server (pid: {}) with SIGKILL.".format(pid)) from e
+    if not check_pid_exist(pid):
+        logger.info("Process pid: {} does not exist. This means a staled PID file. Removing the PID file".format(pid))
+        os.remove(pid_file_path)
+        return
 
-    stop_timeout = 60
-    start_time = time.monotonic()
-    while check_pid_exist(pid):
-        if time.monotonic() - start_time > stop_timeout:
-            raise RuntimeError(
-                "Notification server (pid: {}) does not exit after {} seconds.".format(pid, stop_timeout))
-        time.sleep(0.5)
-
-    logger.info("Notification server pid: {} stopped".format(pid))
+    stop_process(pid, "Notification server")
 
 
 def _get_daemon_context(log, pid_file_path: str) -> daemon.DaemonContext:
