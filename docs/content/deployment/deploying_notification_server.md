@@ -2,12 +2,12 @@
 
 In this guide, we demonstrate how to deploy a Notification Server.
 
-## Initialize Environment
+## Initialize Configuration
 
-To initialize the environment, you can run the following command:
+To initialize the default configuration file, you can run the following command:
 
 ```bash
-init-notification-env.sh
+notification config init
 ```
 
 This command will generate the [default configuration](default_config) file `notification_server.yaml` in
@@ -20,12 +20,19 @@ the configration, you need to remove it manually and then run the script again.
 
 If you want to learn all configurations, you can refer to [here](configuration).
 
+## Initialize Database
+
+The database uri of Notification Server is configured in `notification_server.yaml`, you can run following command to initialize database.
+```bash
+notification db init
+```
+
 ## Start the Notification Server
 
-You can start the Notification Server with the following command.
+You can start the Notification Server with the following command in daemon mode.
 
 ```bash
-start-notification.sh
+notification server start -d
 ```
 
 It will start the Notification Server in a background process. You can check the log of the Notification Server
@@ -49,15 +56,13 @@ This section shows an exhaustive list of available configuration of the Notifica
 
 ## Default Notification Server Configuration
 
-```{note}
-The environment variable is replaced during generation of the default config, i.e., calling 
-`init-notification-env.sh`. Therefore, if you want to prepare the config yourself from the following default config, 
-you must replace the environment variable, `NOTIFICATION_HOME`, manually. 
-```
-
 ```yaml
 # port of notification server
 server_port: 50052
 # uri of database backend for notification server
 db_uri: sqlite:///${NOTIFICATION_HOME}/ns.db
+```
+
+```{note}
+The variable `${NOTIFICATION_HOME}` in above configuration should be replaced with your own path.
 ```
