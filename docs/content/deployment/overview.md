@@ -1,6 +1,6 @@
 # Overview
 
-AIFlow is a platform that consists multiple components, AIFlow Server, Notification Server and Scheduler. The image
+AIFlow is a platform that consists of multiple components, AIFlow Server, Notification Server and Scheduler. The image
 below shows the components of an AIFlow deployment.
 
 AIFlow Server is the main component, which is responsible for submitting workflows to the scheduler, manage the life
@@ -13,7 +13,7 @@ component, please refer to [Architecture Overview](../architecture/overview.md).
 
 ## Installation
 
-Please make sure you follow the [Installation Guide](./installation.md) to install AIFlow.
+Before deploying, please make sure you have followed the [Installation Guide](./installation.md) to install AIFlow.
 
 ## Standalone Deployment
 

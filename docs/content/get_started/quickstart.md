@@ -19,7 +19,7 @@ start-all-aiflow-services.sh
 It will take a few minutes to start all servers for the first time. Once all servers have started, you will get the output like:
 
 ```text
-Starting notification server
+Starting Notification Server
 ...
 ...
 All services have been started!
@@ -52,7 +52,7 @@ We have prepared some [examples](https://github.com/alibaba/flink-ai-extended/re
 You can run following commands to download the examples and run the sklearn example.
 
 ```shell
-curl -Lf https://github.com/flink-extended/ai-flow/releases/download/ai-flow-release-0.2.2/examples.tar.gz -o /tmp/ai-flow-examples.tar.gz
+curl -Lf https://github.com/flink-extended/ai-flow/releases/download/release-0.3.0/examples.tar.gz -o /tmp/ai-flow-examples.tar.gz
 tar -zxvf /tmp/ai-flow-examples.tar.gz -C /tmp
 python /tmp/examples/sklearn_examples/workflows/batch_train_stream_predict/batch_train_stream_predict.py
 ```

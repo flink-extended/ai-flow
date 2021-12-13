@@ -7,12 +7,12 @@ If you use Airflow as the scheduler, the AIFlow server should run on the same ma
 Scheduler, such that the AIFlow Server can put the Airflow Dag files to the Airflow Scheduler dag folder.
 ```
 
-## Initialize Environment
+## Initialize Configuration
 
-To initialize the environment of AIFlow server and generate the default configuration file, you can run the following command:
+To initialize the default configuration file, you can run the following command:
 
 ```bash
-init-aiflow-env.sh
+aiflow config init
 ```
 
 This command will generate the [default configuration](default_aiflow_server_config) file `aiflow_server.yaml` in
@@ -25,6 +25,12 @@ the configration, you need to remove it manually and then run the script again.
 
 If you want to learn all configurations, you can refer to [here](configuration).
 
+## Initialize Database
+The database uri of AIFlow Server is configured in `aiflow_server.yaml`, you can run following command to initialize database.
+```bash
+aiflow db init
+```
+
 ## Start the AIFlow Server
 
 ```{note}
@@ -33,10 +39,12 @@ deployed a notification server and configure the notification uri in the AIFlow 
 config file accordingly. 
 ```
 
-You can start the AIFlow Server with the following command.
+You can start the AIFlow Server and AIFlow web server with the following commands.
 
 ```bash
-start-aiflow.sh
+aiflow server start -d
+
+aiflow webserver start -d
 ```
 
 It will start the AIFlow Server and AIFlow web server in background processes. You can check the log at
@@ -108,12 +116,6 @@ port|Integer|8000|The port where the AIFlow Web server is exposed.|
 
 ## Default AIFlow server Configuration example
 
-```{note}
-The environment variable is replaced during generation of the default config, i.e., calling `init-aiflow-env.sh`.
-Therefore, if you want to prepare the config yourself from the following default config, you must replace the 
-environment variable, `AIFLOW_HOME`, manually. 
-```
-
 ```yaml
 # Config of AIFlow server
 
@@ -158,4 +160,7 @@ web_server:
   airflow_web_server_uri: http://localhost:8080
   host: 0.0.0.0
   port: 8000
+```
+```{note}
+The variable `${AIFLOW_HOME}` in above configuration should be replaced with your own path.
 ```
