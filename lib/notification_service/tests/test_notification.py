@@ -439,7 +439,7 @@ class DbStorageTest(unittest.TestCase, NotificationTest):
         last_exception = None
         for i in range(60):
             try:
-                return NotificationClient(server_uri=server_uri, enable_ha=True)
+                return NotificationClient(server_uri=server_uri)
             except Exception as e:
                 time.sleep(2)
                 last_exception = e
@@ -522,7 +522,7 @@ class HaClientWithNonHaServerTest(unittest.TestCase, NotificationTest):
         last_exception = None
         for i in range(100):
             try:
-                return NotificationClient(server_uri=server_uri, enable_ha=True, properties=properties)
+                return NotificationClient(server_uri=server_uri, properties=properties)
             except Exception as e:
                 time.sleep(10)
                 last_exception = e
