@@ -33,18 +33,8 @@ class ModelVersion(_ModelRepoEntity):
         :param model_version: String user-defined model version
         """
         super(ModelVersion, self).__init__()
-        self._model_name = model_name
-        self._model_version = model_version
-
-    @property
-    def model_name(self):
-        """Name for registered model"""
-        return self._model_name
-
-    @property
-    def model_version(self):
-        """String user-defined version"""
-        return self._model_version
+        self.model_name = model_name
+        self.model_version = model_version
 
     # proto mappers
     @classmethod
