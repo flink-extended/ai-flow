@@ -18,6 +18,7 @@
 #
 import fcntl
 import os
+import time
 from typing import Text, Dict, Any
 from hdfs.client import InsecureClient
 from ai_flow.plugin_interface.blob_manager_interface import BlobManager
@@ -73,7 +74,7 @@ class HDFSBlobManager(BlobManager):
             try:
                 if not os.path.exists(local_file_path):
                     self.log.info("Downloading file from HDFS: {}".format(remote_file_path))
-                    self._hdfs_client.download(hdfs_path=remote_file_path, local_path=local_file_path)
+                    self._download_file_from_hdfs(hdfs_path=remote_file_path, local_path=local_file_path)
             except Exception as e:
                 self.log.error("Failed to download file: {}".format(remote_file_path), exc_info=e)
             finally:
@@ -88,6 +89,17 @@ class HDFSBlobManager(BlobManager):
         else:
             self.log.info("HDFS file: {} already exist at {}".format(remote_file_path, local_file_path))
         return local_file_path
+
+    def _download_file_from_hdfs(self, hdfs_path, local_path, retry_sleep_sec=5):
+        for i in range(3):
+            try:
+                self._hdfs_client.download(hdfs_path=hdfs_path, local_path=local_path)
+                return
+            except Exception as e:
+                self.log.error("Downloading file {} failed, retrying {}/3 in {} second".format(
+                    hdfs_path, i+1, retry_sleep_sec), exc_info=e)
+                time.sleep(retry_sleep_sec)
+        raise RuntimeError("Failed to download HDFS file: {}".format(hdfs_path))
 
     def _check_remote_path_legality(self, file_path: Text):
         """
