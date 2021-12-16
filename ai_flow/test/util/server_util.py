@@ -20,5 +20,5 @@ import grpc
 
 def wait_for_server_started(server_uri):
     channel = grpc.insecure_channel(server_uri)
-    grpc.channel_ready_future(channel).result()
+    grpc.channel_ready_future(channel).result(timeout=60)
 
