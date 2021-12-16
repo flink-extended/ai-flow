@@ -78,7 +78,7 @@ class TestSchedulerClient(unittest.TestCase):
                                               namespace='scheduler'))
 
         self.scheduler.start(watcher=W())
-        result = self.client.trigger_parse_dag(file_path='/test')
+        result = self.client.trigger_parse_dag(file_path='/test', timeout=5)
         self.assertTrue(result)
 
     def test_parse_dag_timeout(self):
@@ -97,8 +97,7 @@ class TestSchedulerClient(unittest.TestCase):
                                               namespace='scheduler'))
 
         self.scheduler.start(watcher=W())
-        time.sleep(5)
-        result = self.client.schedule_dag(dag_id='1', context='')
+        result = self.client.schedule_dag(dag_id='1', context='', timeout=5)
         self.assertEqual('1', result.dagrun_id)
 
     def test_schedule_dag_timeout(self):
@@ -117,7 +116,7 @@ class TestSchedulerClient(unittest.TestCase):
                                               namespace='scheduler'))
 
         self.scheduler.start(watcher=W())
-        result = self.client.stop_dag_run(dag_id='1', context=ExecutionContext(dagrun_id='1'))
+        result = self.client.stop_dag_run(dag_id='1', context=ExecutionContext(dagrun_id='1'), timeout=5)
         self.assertEqual('1', result.dagrun_id)
 
     def test_stop_dag_run_timeout(self):
@@ -138,7 +137,8 @@ class TestSchedulerClient(unittest.TestCase):
         self.scheduler.start(watcher=W())
         result = self.client.schedule_task(dag_id='1', task_id='t_1',
                                            action=SchedulingAction.START,
-                                           context=ExecutionContext(dagrun_id='1'))
+                                           context=ExecutionContext(dagrun_id='1'),
+                                           timeout=5)
         self.assertEqual('1', result.dagrun_id)
 
     def test_schedule_task_timeout(self):
