@@ -45,6 +45,7 @@ import org.aiflow.client.proto.MetadataServiceGrpc;
 import org.aiflow.client.proto.MetadataServiceOuterClass;
 import org.aiflow.client.proto.MetadataServiceOuterClass.ArtifactListProto;
 import org.aiflow.client.proto.MetadataServiceOuterClass.DatasetListProto;
+import org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.ListModelVersionRelationRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.ListRequest;
@@ -1144,6 +1145,29 @@ public class MetadataClient {
     public WorkflowSnapshotMeta getWorkflowSnapshot(Long workflowSnapshotId) throws Exception {
         IdRequest request = IdRequest.newBuilder().setId(workflowSnapshotId).build();
         Response response = metadataServiceStub.getWorkflowSnapshot(request);
+        WorkflowSnapshotProto.Builder builder = WorkflowSnapshotProto.newBuilder();
+        return StringUtils.isEmpty(metadataDetailResponse(response, this.parser, builder))
+                ? null
+                : buildWorkflowSnapshotMeta(builder.build());
+    }
+
+    /**
+     * Get a specific workflow snapshot by workflow id and signature.
+     *
+     * @param projectName the name of project which contains the workflow snapshot
+     * @param workflowName the name of workflow
+     * @param signature the uri of workflow snapshot
+     * @return {@link WorkflowSnapshotMeta} if exists, otherwise returns null.
+     */
+    public WorkflowSnapshotMeta getWorkflowSnapshotBySignature(
+            String projectName, String workflowName, String signature) throws Exception {
+        GetWorkflowSnapshotRequest request =
+                GetWorkflowSnapshotRequest.newBuilder()
+                        .setProjectName(projectName)
+                        .setWorkflowName(workflowName)
+                        .setSignature(stringValue(signature))
+                        .build();
+        Response response = metadataServiceStub.getWorkflowSnapshotBySignature(request);
         WorkflowSnapshotProto.Builder builder = WorkflowSnapshotProto.newBuilder();
         return StringUtils.isEmpty(metadataDetailResponse(response, this.parser, builder))
                 ? null

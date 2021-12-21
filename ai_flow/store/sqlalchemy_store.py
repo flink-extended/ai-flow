@@ -867,6 +867,25 @@ class SqlAlchemyStore(AbstractStore):
             return None if workflow_snapshot is None \
                 else ResultToMeta.result_to_workflow_snapshot_meta(workflow_snapshot)
 
+    def get_workflow_snapshot_by_signature(self,
+                                           workflow_id: int,
+                                           signature: Text) -> Optional[WorkflowSnapshotMeta]:
+        """
+        Get a specific workflow snapshot in metadata store by workflow_id and signature.
+
+        :param workflow_id: the workflow id
+        :param signature: the signature of workflow snapshot
+        :return: A single :py:class:`ai_flow.meta.workflow_snapshot_meta.WorkflowSnapshotMeta` object
+                 if exists, Otherwise, returns None if the workflow snapshot does not exist.
+        """
+        with self.ManagedSessionMaker() as session:
+            workflow_snapshot = session.query(SqlWorkflowSnapshot)\
+                .filter(SqlWorkflowSnapshot.workflow_id == workflow_id,
+                        SqlWorkflowSnapshot.signature == signature)\
+                .scalar()
+            return None if workflow_snapshot is None \
+                else ResultToMeta.result_to_workflow_snapshot_meta(workflow_snapshot)
+
     def list_workflow_snapshots(self,
                                 workflow_id: int = None,
                                 page_size: int = None,

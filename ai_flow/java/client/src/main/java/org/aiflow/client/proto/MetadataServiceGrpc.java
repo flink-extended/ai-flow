@@ -1688,6 +1688,37 @@ public final class MetadataServiceGrpc {
     return getGetWorkflowSnapshotMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest,
+      org.aiflow.client.proto.Message.Response> getGetWorkflowSnapshotBySignatureMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "getWorkflowSnapshotBySignature",
+      requestType = org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest.class,
+      responseType = org.aiflow.client.proto.Message.Response.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest,
+      org.aiflow.client.proto.Message.Response> getGetWorkflowSnapshotBySignatureMethod() {
+    io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest, org.aiflow.client.proto.Message.Response> getGetWorkflowSnapshotBySignatureMethod;
+    if ((getGetWorkflowSnapshotBySignatureMethod = MetadataServiceGrpc.getGetWorkflowSnapshotBySignatureMethod) == null) {
+      synchronized (MetadataServiceGrpc.class) {
+        if ((getGetWorkflowSnapshotBySignatureMethod = MetadataServiceGrpc.getGetWorkflowSnapshotBySignatureMethod) == null) {
+          MetadataServiceGrpc.getGetWorkflowSnapshotBySignatureMethod = getGetWorkflowSnapshotBySignatureMethod =
+              io.grpc.MethodDescriptor.<org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest, org.aiflow.client.proto.Message.Response>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "getWorkflowSnapshotBySignature"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.aiflow.client.proto.Message.Response.getDefaultInstance()))
+              .setSchemaDescriptor(new MetadataServiceMethodDescriptorSupplier("getWorkflowSnapshotBySignature"))
+              .build();
+        }
+      }
+    }
+    return getGetWorkflowSnapshotBySignatureMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest,
       org.aiflow.client.proto.Message.Response> getListWorkflowSnapshotsMethod;
 
@@ -2198,6 +2229,13 @@ public final class MetadataServiceGrpc {
 
     /**
      */
+    public void getWorkflowSnapshotBySignature(org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest request,
+        io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetWorkflowSnapshotBySignatureMethod(), responseObserver);
+    }
+
+    /**
+     */
     public void listWorkflowSnapshots(org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest request,
         io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
       asyncUnimplementedUnaryCall(getListWorkflowSnapshotsMethod(), responseObserver);
@@ -2583,6 +2621,13 @@ public final class MetadataServiceGrpc {
                 org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest,
                 org.aiflow.client.proto.Message.Response>(
                   this, METHODID_GET_WORKFLOW_SNAPSHOT)))
+          .addMethod(
+            getGetWorkflowSnapshotBySignatureMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest,
+                org.aiflow.client.proto.Message.Response>(
+                  this, METHODID_GET_WORKFLOW_SNAPSHOT_BY_SIGNATURE)))
           .addMethod(
             getListWorkflowSnapshotsMethod(),
             asyncUnaryCall(
@@ -3068,6 +3113,14 @@ public final class MetadataServiceGrpc {
 
     /**
      */
+    public void getWorkflowSnapshotBySignature(org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest request,
+        io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetWorkflowSnapshotBySignatureMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
     public void listWorkflowSnapshots(org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest request,
         io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response> responseObserver) {
       asyncUnaryCall(
@@ -3493,6 +3546,13 @@ public final class MetadataServiceGrpc {
     public org.aiflow.client.proto.Message.Response getWorkflowSnapshot(org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest request) {
       return blockingUnaryCall(
           getChannel(), getGetWorkflowSnapshotMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.aiflow.client.proto.Message.Response getWorkflowSnapshotBySignature(org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetWorkflowSnapshotBySignatureMethod(), getCallOptions(), request);
     }
 
     /**
@@ -3977,6 +4037,14 @@ public final class MetadataServiceGrpc {
 
     /**
      */
+    public com.google.common.util.concurrent.ListenableFuture<org.aiflow.client.proto.Message.Response> getWorkflowSnapshotBySignature(
+        org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetWorkflowSnapshotBySignatureMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
     public com.google.common.util.concurrent.ListenableFuture<org.aiflow.client.proto.Message.Response> listWorkflowSnapshots(
         org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest request) {
       return futureUnaryCall(
@@ -4045,8 +4113,9 @@ public final class MetadataServiceGrpc {
   private static final int METHODID_LIST_WORKFLOWS = 50;
   private static final int METHODID_REGISTER_WORKFLOW_SNAPSHOT = 51;
   private static final int METHODID_GET_WORKFLOW_SNAPSHOT = 52;
-  private static final int METHODID_LIST_WORKFLOW_SNAPSHOTS = 53;
-  private static final int METHODID_DELETE_WORKFLOW_SNAPSHOT = 54;
+  private static final int METHODID_GET_WORKFLOW_SNAPSHOT_BY_SIGNATURE = 53;
+  private static final int METHODID_LIST_WORKFLOW_SNAPSHOTS = 54;
+  private static final int METHODID_DELETE_WORKFLOW_SNAPSHOT = 55;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -4277,6 +4346,10 @@ public final class MetadataServiceGrpc {
           serviceImpl.getWorkflowSnapshot((org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest) request,
               (io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response>) responseObserver);
           break;
+        case METHODID_GET_WORKFLOW_SNAPSHOT_BY_SIGNATURE:
+          serviceImpl.getWorkflowSnapshotBySignature((org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest) request,
+              (io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response>) responseObserver);
+          break;
         case METHODID_LIST_WORKFLOW_SNAPSHOTS:
           serviceImpl.listWorkflowSnapshots((org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest) request,
               (io.grpc.stub.StreamObserver<org.aiflow.client.proto.Message.Response>) responseObserver);
@@ -4399,6 +4472,7 @@ public final class MetadataServiceGrpc {
               .addMethod(getListWorkflowsMethod())
               .addMethod(getRegisterWorkflowSnapshotMethod())
               .addMethod(getGetWorkflowSnapshotMethod())
+              .addMethod(getGetWorkflowSnapshotBySignatureMethod())
               .addMethod(getListWorkflowSnapshotsMethod())
               .addMethod(getDeleteWorkflowSnapshotMethod())
               .build();
