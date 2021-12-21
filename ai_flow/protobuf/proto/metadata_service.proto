@@ -340,8 +340,12 @@ service MetadataService {
     }
     rpc getWorkflowSnapshot (IdRequest) returns (Response) {
         option (google.api.http) = {
-        post: "/aiflow/metadata_store/workflow_snapshot/delete/id"
-        body: "*"
+        get: "/aiflow/metadata_store/workflow_snapshot/get/id"
+        };
+    }
+    rpc getWorkflowSnapshotBySignature (GetWorkflowSnapshotRequest) returns (Response) {
+        option (google.api.http) = {
+        get: "/aiflow/metadata_store/workflow_snapshot/get/signature"
         };
     }
     rpc listWorkflowSnapshots (ListWorkflowSnapshotsRequest) returns (Response) {
@@ -522,4 +526,10 @@ message ListWorkflowSnapshotsRequest {
 
 message WorkflowSnapshotListProto {
     repeated WorkflowSnapshotProto workflow_snapshots = 1;
+}
+
+message GetWorkflowSnapshotRequest {
+    string project_name = 1;
+    string workflow_name = 2;
+    google.protobuf.StringValue signature = 3;
 }

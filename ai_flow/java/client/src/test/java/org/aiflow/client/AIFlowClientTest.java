@@ -516,7 +516,8 @@ public class AIFlowClientTest {
                 uri, client.getWorkflowSnapshot(workflowSnapshot.getUuid()).getUri());
 
         WorkflowSnapshotMeta workflowSnapshot2 =
-                client.registerWorkflowSnapshot(projectName, workflowName, uri + "_2", signature);
+                client.registerWorkflowSnapshot(
+                        projectName, workflowName, uri + "_2", signature + "_2");
         WorkflowSnapshotMeta workflowSnapshot3 =
                 client.registerWorkflowSnapshot(projectName, workflowName2, uri + "_3", signature);
         List<WorkflowSnapshotMeta> snapshots =
@@ -541,6 +542,31 @@ public class AIFlowClientTest {
         Assertions.assertNull(client.getWorkflowSnapshot(Long.MAX_VALUE));
         Assertions.assertThrows(
                 Exception.class, () -> client.listWorkflowSnapshots("", "", 5L, 0L));
+
+        final String projectName = "project";
+        final String workflowName = "workflow";
+        final String uri = "/path/to/whatever";
+        final String signature = "md5sum";
+        ProjectMeta project = client.registerProject(projectName, uri, EMPTY_MAP);
+        WorkflowMeta workflow =
+                client.registerWorkflow(
+                        workflowName,
+                        project.getUuid(),
+                        new HashMap<String, String>() {
+                            {
+                                put("key1", "value1");
+                                put("key2", "value2");
+                            }
+                        });
+        client.registerWorkflowSnapshot(projectName, workflowName, uri, signature);
+        WorkflowSnapshotMeta responseBySignature =
+                client.getWorkflowSnapshotBySignature(projectName, workflowName, signature);
+        Assertions.assertEquals(uri, responseBySignature.getUri());
+
+        Assertions.assertNull(
+                client.getWorkflowSnapshotBySignature(projectName, "illegal_workflow", signature));
+        Assertions.assertNull(
+                client.getWorkflowSnapshotBySignature(projectName, workflowName, "illegal_md5sum"));
     }
 
     // test model

@@ -682,10 +682,23 @@ public class AIFlowClient {
      * Get a specific workflow snapshot in metadata store by snapshot id.
      *
      * @param workflowSnapshotId the workflow snapshot id
-     * @return: {@link WorkflowSnapshotMeta} if exists, otherwise returns null .
+     * @return: {@link WorkflowSnapshotMeta} if exists, otherwise returns null.
      */
     public WorkflowSnapshotMeta getWorkflowSnapshot(Long workflowSnapshotId) throws Exception {
         return this.metadataClient.getWorkflowSnapshot(workflowSnapshotId);
+    }
+
+    /**
+     * Get a specific workflow snapshot by workflow id and signature.
+     *
+     * @param projectName the name of project which contains the workflow snapshot
+     * @param workflowName the name of workflow
+     * @param signature the uri of workflow snapshot
+     * @return {@link WorkflowSnapshotMeta} if exists, otherwise returns null.
+     */
+    public WorkflowSnapshotMeta getWorkflowSnapshotBySignature(
+            String projectName, String workflowName, String signature) throws Exception {
+        return metadataClient.getWorkflowSnapshotBySignature(projectName, workflowName, signature);
     }
 
     /**

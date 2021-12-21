@@ -821,6 +821,23 @@ class MetadataClient(BaseClient):
         response = self.metadata_store_stub.getWorkflowSnapshot(request)
         return _unwrap_workflow_snapshot_response(response)
 
+    def get_workflow_snapshot_by_signature(self, project_name: Text, workflow_name: Text,
+                                           signature: Text) -> Optional[WorkflowSnapshotMeta]:
+        """
+        Get a specific workflow snapshot by workflow id and signature
+
+        :param project_name: the name of project which contains the workflow snapshot
+        :param workflow_name: the name of workflow
+        :param signature: the signature of workflow snapshot, E.g. md5
+        :return: A single :py:class:`ai_flow.meta.workflow_snapshot_meta.WorkflowSnapshotMeta` object
+                 if exists, Otherwise, returns None if the workflow snapshot does not exist.
+        """
+        request = metadata_service_pb2.GetWorkflowSnapshotRequest(project_name=project_name,
+                                                                  workflow_name=workflow_name,
+                                                                  signature=stringValue(signature))
+        response = self.metadata_store_stub.getWorkflowSnapshotBySignature(request)
+        return _unwrap_workflow_snapshot_response(response)
+
     def list_workflow_snapshots(self, project_name: Text, workflow_name: Text,
                                 page_size: int, offset: int) -> Optional[List[WorkflowSnapshotMeta]]:
         """
