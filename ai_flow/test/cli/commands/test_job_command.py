@@ -29,7 +29,7 @@ class TestCliJob(TestCommand):
         with redirect_stdout(io.StringIO()) as stdout:
             job_list_executions(
                 self.parser.parse_args(['job', 'list-executions', PROJECT_PATH, '1']))
-        self.assertEquals(11, len(str.splitlines(stdout.getvalue())))
+        self.assertEquals(8, len(str.splitlines(stdout.getvalue())[0].split('|')))
 
     def test_cli_job_restart_execution(self):
         with redirect_stdout(io.StringIO()) as stdout:
@@ -42,7 +42,7 @@ class TestCliJob(TestCommand):
         with redirect_stdout(io.StringIO()) as stdout:
             job_show_execution(
                 self.parser.parse_args(['job', 'show-execution', PROJECT_PATH, 'task_1', '1']))
-        self.assertEquals(8, len(str.splitlines(stdout.getvalue())))
+        self.assertEquals(8, len(str.splitlines(stdout.getvalue())[0].split('|')))
 
     def test_cli_job_start_execution(self):
         with redirect_stdout(io.StringIO()) as stdout:
