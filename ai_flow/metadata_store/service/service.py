@@ -453,6 +453,17 @@ class MetadataService(metadata_service_pb2_grpc.MetadataServiceServicer):
         workflow_snapshot = self.store.get_workflow_snapshot(workflow_snapshot_id=request.id)
         return _wrap_meta_response(MetaToProto.workflow_snapshot_meta_to_proto(workflow_snapshot))
 
+    def getWorkflowSnapshotBySignature(self, request, context):
+        workflow = self.store.get_workflow_by_name(request.project_name, request.workflow_name)
+        if not workflow:
+            workflow_snapshot = None
+        else:
+            workflow_snapshot = self.store.get_workflow_snapshot_by_signature(
+                workflow_id=workflow.uuid,
+                signature=request.signature.value if request.HasField('signature') else None
+            )
+        return _wrap_meta_response(MetaToProto.workflow_snapshot_meta_to_proto(workflow_snapshot))
+
     def listWorkflowSnapshots(self, request, context):
         workflow_snapshot_list = self.store.list_workflow_snapshots(workflow_id=request.workflow_id,
                                                                     page_size=request.page_size,

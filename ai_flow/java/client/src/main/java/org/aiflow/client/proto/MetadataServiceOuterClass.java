@@ -26124,6 +26124,927 @@ public final class MetadataServiceOuterClass {
 
   }
 
+  public interface GetWorkflowSnapshotRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ai_flow.GetWorkflowSnapshotRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string project_name = 1;</code>
+     * @return The projectName.
+     */
+    java.lang.String getProjectName();
+    /**
+     * <code>string project_name = 1;</code>
+     * @return The bytes for projectName.
+     */
+    com.google.protobuf.ByteString
+        getProjectNameBytes();
+
+    /**
+     * <code>string workflow_name = 2;</code>
+     * @return The workflowName.
+     */
+    java.lang.String getWorkflowName();
+    /**
+     * <code>string workflow_name = 2;</code>
+     * @return The bytes for workflowName.
+     */
+    com.google.protobuf.ByteString
+        getWorkflowNameBytes();
+
+    /**
+     * <code>.google.protobuf.StringValue signature = 3;</code>
+     * @return Whether the signature field is set.
+     */
+    boolean hasSignature();
+    /**
+     * <code>.google.protobuf.StringValue signature = 3;</code>
+     * @return The signature.
+     */
+    com.google.protobuf.StringValue getSignature();
+    /**
+     * <code>.google.protobuf.StringValue signature = 3;</code>
+     */
+    com.google.protobuf.StringValueOrBuilder getSignatureOrBuilder();
+  }
+  /**
+   * Protobuf type {@code ai_flow.GetWorkflowSnapshotRequest}
+   */
+  public static final class GetWorkflowSnapshotRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:ai_flow.GetWorkflowSnapshotRequest)
+      GetWorkflowSnapshotRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use GetWorkflowSnapshotRequest.newBuilder() to construct.
+    private GetWorkflowSnapshotRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private GetWorkflowSnapshotRequest() {
+      projectName_ = "";
+      workflowName_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetWorkflowSnapshotRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private GetWorkflowSnapshotRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              projectName_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              workflowName_ = s;
+              break;
+            }
+            case 26: {
+              com.google.protobuf.StringValue.Builder subBuilder = null;
+              if (signature_ != null) {
+                subBuilder = signature_.toBuilder();
+              }
+              signature_ = input.readMessage(com.google.protobuf.StringValue.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(signature_);
+                signature_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.aiflow.client.proto.MetadataServiceOuterClass.internal_static_ai_flow_GetWorkflowSnapshotRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.aiflow.client.proto.MetadataServiceOuterClass.internal_static_ai_flow_GetWorkflowSnapshotRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest.class, org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest.Builder.class);
+    }
+
+    public static final int PROJECT_NAME_FIELD_NUMBER = 1;
+    private volatile java.lang.Object projectName_;
+    /**
+     * <code>string project_name = 1;</code>
+     * @return The projectName.
+     */
+    @java.lang.Override
+    public java.lang.String getProjectName() {
+      java.lang.Object ref = projectName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        projectName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string project_name = 1;</code>
+     * @return The bytes for projectName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getProjectNameBytes() {
+      java.lang.Object ref = projectName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        projectName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int WORKFLOW_NAME_FIELD_NUMBER = 2;
+    private volatile java.lang.Object workflowName_;
+    /**
+     * <code>string workflow_name = 2;</code>
+     * @return The workflowName.
+     */
+    @java.lang.Override
+    public java.lang.String getWorkflowName() {
+      java.lang.Object ref = workflowName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        workflowName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string workflow_name = 2;</code>
+     * @return The bytes for workflowName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getWorkflowNameBytes() {
+      java.lang.Object ref = workflowName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        workflowName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SIGNATURE_FIELD_NUMBER = 3;
+    private com.google.protobuf.StringValue signature_;
+    /**
+     * <code>.google.protobuf.StringValue signature = 3;</code>
+     * @return Whether the signature field is set.
+     */
+    @java.lang.Override
+    public boolean hasSignature() {
+      return signature_ != null;
+    }
+    /**
+     * <code>.google.protobuf.StringValue signature = 3;</code>
+     * @return The signature.
+     */
+    @java.lang.Override
+    public com.google.protobuf.StringValue getSignature() {
+      return signature_ == null ? com.google.protobuf.StringValue.getDefaultInstance() : signature_;
+    }
+    /**
+     * <code>.google.protobuf.StringValue signature = 3;</code>
+     */
+    @java.lang.Override
+    public com.google.protobuf.StringValueOrBuilder getSignatureOrBuilder() {
+      return getSignature();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getProjectNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, projectName_);
+      }
+      if (!getWorkflowNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, workflowName_);
+      }
+      if (signature_ != null) {
+        output.writeMessage(3, getSignature());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getProjectNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, projectName_);
+      }
+      if (!getWorkflowNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, workflowName_);
+      }
+      if (signature_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getSignature());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest)) {
+        return super.equals(obj);
+      }
+      org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest other = (org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest) obj;
+
+      if (!getProjectName()
+          .equals(other.getProjectName())) return false;
+      if (!getWorkflowName()
+          .equals(other.getWorkflowName())) return false;
+      if (hasSignature() != other.hasSignature()) return false;
+      if (hasSignature()) {
+        if (!getSignature()
+            .equals(other.getSignature())) return false;
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PROJECT_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getProjectName().hashCode();
+      hash = (37 * hash) + WORKFLOW_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getWorkflowName().hashCode();
+      if (hasSignature()) {
+        hash = (37 * hash) + SIGNATURE_FIELD_NUMBER;
+        hash = (53 * hash) + getSignature().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code ai_flow.GetWorkflowSnapshotRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ai_flow.GetWorkflowSnapshotRequest)
+        org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.aiflow.client.proto.MetadataServiceOuterClass.internal_static_ai_flow_GetWorkflowSnapshotRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.aiflow.client.proto.MetadataServiceOuterClass.internal_static_ai_flow_GetWorkflowSnapshotRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest.class, org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest.Builder.class);
+      }
+
+      // Construct using org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        projectName_ = "";
+
+        workflowName_ = "";
+
+        if (signatureBuilder_ == null) {
+          signature_ = null;
+        } else {
+          signature_ = null;
+          signatureBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.aiflow.client.proto.MetadataServiceOuterClass.internal_static_ai_flow_GetWorkflowSnapshotRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest getDefaultInstanceForType() {
+        return org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest build() {
+        org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest buildPartial() {
+        org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest result = new org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest(this);
+        result.projectName_ = projectName_;
+        result.workflowName_ = workflowName_;
+        if (signatureBuilder_ == null) {
+          result.signature_ = signature_;
+        } else {
+          result.signature_ = signatureBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest) {
+          return mergeFrom((org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest other) {
+        if (other == org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest.getDefaultInstance()) return this;
+        if (!other.getProjectName().isEmpty()) {
+          projectName_ = other.projectName_;
+          onChanged();
+        }
+        if (!other.getWorkflowName().isEmpty()) {
+          workflowName_ = other.workflowName_;
+          onChanged();
+        }
+        if (other.hasSignature()) {
+          mergeSignature(other.getSignature());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object projectName_ = "";
+      /**
+       * <code>string project_name = 1;</code>
+       * @return The projectName.
+       */
+      public java.lang.String getProjectName() {
+        java.lang.Object ref = projectName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          projectName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string project_name = 1;</code>
+       * @return The bytes for projectName.
+       */
+      public com.google.protobuf.ByteString
+          getProjectNameBytes() {
+        java.lang.Object ref = projectName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          projectName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string project_name = 1;</code>
+       * @param value The projectName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setProjectName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        projectName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string project_name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearProjectName() {
+        
+        projectName_ = getDefaultInstance().getProjectName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string project_name = 1;</code>
+       * @param value The bytes for projectName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setProjectNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        projectName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object workflowName_ = "";
+      /**
+       * <code>string workflow_name = 2;</code>
+       * @return The workflowName.
+       */
+      public java.lang.String getWorkflowName() {
+        java.lang.Object ref = workflowName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          workflowName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string workflow_name = 2;</code>
+       * @return The bytes for workflowName.
+       */
+      public com.google.protobuf.ByteString
+          getWorkflowNameBytes() {
+        java.lang.Object ref = workflowName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          workflowName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string workflow_name = 2;</code>
+       * @param value The workflowName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setWorkflowName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        workflowName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string workflow_name = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearWorkflowName() {
+        
+        workflowName_ = getDefaultInstance().getWorkflowName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string workflow_name = 2;</code>
+       * @param value The bytes for workflowName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setWorkflowNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        workflowName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.StringValue signature_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder> signatureBuilder_;
+      /**
+       * <code>.google.protobuf.StringValue signature = 3;</code>
+       * @return Whether the signature field is set.
+       */
+      public boolean hasSignature() {
+        return signatureBuilder_ != null || signature_ != null;
+      }
+      /**
+       * <code>.google.protobuf.StringValue signature = 3;</code>
+       * @return The signature.
+       */
+      public com.google.protobuf.StringValue getSignature() {
+        if (signatureBuilder_ == null) {
+          return signature_ == null ? com.google.protobuf.StringValue.getDefaultInstance() : signature_;
+        } else {
+          return signatureBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.google.protobuf.StringValue signature = 3;</code>
+       */
+      public Builder setSignature(com.google.protobuf.StringValue value) {
+        if (signatureBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          signature_ = value;
+          onChanged();
+        } else {
+          signatureBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.google.protobuf.StringValue signature = 3;</code>
+       */
+      public Builder setSignature(
+          com.google.protobuf.StringValue.Builder builderForValue) {
+        if (signatureBuilder_ == null) {
+          signature_ = builderForValue.build();
+          onChanged();
+        } else {
+          signatureBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.google.protobuf.StringValue signature = 3;</code>
+       */
+      public Builder mergeSignature(com.google.protobuf.StringValue value) {
+        if (signatureBuilder_ == null) {
+          if (signature_ != null) {
+            signature_ =
+              com.google.protobuf.StringValue.newBuilder(signature_).mergeFrom(value).buildPartial();
+          } else {
+            signature_ = value;
+          }
+          onChanged();
+        } else {
+          signatureBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.google.protobuf.StringValue signature = 3;</code>
+       */
+      public Builder clearSignature() {
+        if (signatureBuilder_ == null) {
+          signature_ = null;
+          onChanged();
+        } else {
+          signature_ = null;
+          signatureBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.google.protobuf.StringValue signature = 3;</code>
+       */
+      public com.google.protobuf.StringValue.Builder getSignatureBuilder() {
+        
+        onChanged();
+        return getSignatureFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.google.protobuf.StringValue signature = 3;</code>
+       */
+      public com.google.protobuf.StringValueOrBuilder getSignatureOrBuilder() {
+        if (signatureBuilder_ != null) {
+          return signatureBuilder_.getMessageOrBuilder();
+        } else {
+          return signature_ == null ?
+              com.google.protobuf.StringValue.getDefaultInstance() : signature_;
+        }
+      }
+      /**
+       * <code>.google.protobuf.StringValue signature = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder> 
+          getSignatureFieldBuilder() {
+        if (signatureBuilder_ == null) {
+          signatureBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder>(
+                  getSignature(),
+                  getParentForChildren(),
+                  isClean());
+          signature_ = null;
+        }
+        return signatureBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:ai_flow.GetWorkflowSnapshotRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:ai_flow.GetWorkflowSnapshotRequest)
+    private static final org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest();
+    }
+
+    public static org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<GetWorkflowSnapshotRequest>
+        PARSER = new com.google.protobuf.AbstractParser<GetWorkflowSnapshotRequest>() {
+      @java.lang.Override
+      public GetWorkflowSnapshotRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new GetWorkflowSnapshotRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<GetWorkflowSnapshotRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GetWorkflowSnapshotRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   /**
    * Protobuf service {@code ai_flow.MetadataService}
    */
@@ -26593,6 +27514,14 @@ public final class MetadataServiceOuterClass {
           com.google.protobuf.RpcCallback<org.aiflow.client.proto.Message.Response> done);
 
       /**
+       * <code>rpc getWorkflowSnapshotBySignature(.ai_flow.GetWorkflowSnapshotRequest) returns (.ai_flow.Response) { ... }</code>
+       */
+      public abstract void getWorkflowSnapshotBySignature(
+          com.google.protobuf.RpcController controller,
+          org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest request,
+          com.google.protobuf.RpcCallback<org.aiflow.client.proto.Message.Response> done);
+
+      /**
        * <code>rpc listWorkflowSnapshots(.ai_flow.ListWorkflowSnapshotsRequest) returns (.ai_flow.Response) { ... }</code>
        */
       public abstract void listWorkflowSnapshots(
@@ -27038,6 +27967,14 @@ public final class MetadataServiceOuterClass {
         }
 
         @java.lang.Override
+        public  void getWorkflowSnapshotBySignature(
+            com.google.protobuf.RpcController controller,
+            org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest request,
+            com.google.protobuf.RpcCallback<org.aiflow.client.proto.Message.Response> done) {
+          impl.getWorkflowSnapshotBySignature(controller, request, done);
+        }
+
+        @java.lang.Override
         public  void listWorkflowSnapshots(
             com.google.protobuf.RpcController controller,
             org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest request,
@@ -27182,8 +28119,10 @@ public final class MetadataServiceOuterClass {
             case 52:
               return impl.getWorkflowSnapshot(controller, (org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest)request);
             case 53:
-              return impl.listWorkflowSnapshots(controller, (org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest)request);
+              return impl.getWorkflowSnapshotBySignature(controller, (org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest)request);
             case 54:
+              return impl.listWorkflowSnapshots(controller, (org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest)request);
+            case 55:
               return impl.deleteWorkflowSnapshot(controller, (org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest)request);
             default:
               throw new java.lang.AssertionError("Can't get here.");
@@ -27306,8 +28245,10 @@ public final class MetadataServiceOuterClass {
             case 52:
               return org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest.getDefaultInstance();
             case 53:
-              return org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest.getDefaultInstance();
+              return org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest.getDefaultInstance();
             case 54:
+              return org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest.getDefaultInstance();
+            case 55:
               return org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest.getDefaultInstance();
             default:
               throw new java.lang.AssertionError("Can't get here.");
@@ -27432,6 +28373,8 @@ public final class MetadataServiceOuterClass {
             case 53:
               return org.aiflow.client.proto.Message.Response.getDefaultInstance();
             case 54:
+              return org.aiflow.client.proto.Message.Response.getDefaultInstance();
+            case 55:
               return org.aiflow.client.proto.Message.Response.getDefaultInstance();
             default:
               throw new java.lang.AssertionError("Can't get here.");
@@ -27902,6 +28845,14 @@ public final class MetadataServiceOuterClass {
         com.google.protobuf.RpcCallback<org.aiflow.client.proto.Message.Response> done);
 
     /**
+     * <code>rpc getWorkflowSnapshotBySignature(.ai_flow.GetWorkflowSnapshotRequest) returns (.ai_flow.Response) { ... }</code>
+     */
+    public abstract void getWorkflowSnapshotBySignature(
+        com.google.protobuf.RpcController controller,
+        org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest request,
+        com.google.protobuf.RpcCallback<org.aiflow.client.proto.Message.Response> done);
+
+    /**
      * <code>rpc listWorkflowSnapshots(.ai_flow.ListWorkflowSnapshotsRequest) returns (.ai_flow.Response) { ... }</code>
      */
     public abstract void listWorkflowSnapshots(
@@ -28205,11 +29156,16 @@ public final class MetadataServiceOuterClass {
               done));
           return;
         case 53:
-          this.listWorkflowSnapshots(controller, (org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest)request,
+          this.getWorkflowSnapshotBySignature(controller, (org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest)request,
             com.google.protobuf.RpcUtil.<org.aiflow.client.proto.Message.Response>specializeCallback(
               done));
           return;
         case 54:
+          this.listWorkflowSnapshots(controller, (org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest)request,
+            com.google.protobuf.RpcUtil.<org.aiflow.client.proto.Message.Response>specializeCallback(
+              done));
+          return;
+        case 55:
           this.deleteWorkflowSnapshot(controller, (org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest)request,
             com.google.protobuf.RpcUtil.<org.aiflow.client.proto.Message.Response>specializeCallback(
               done));
@@ -28335,8 +29291,10 @@ public final class MetadataServiceOuterClass {
         case 52:
           return org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest.getDefaultInstance();
         case 53:
-          return org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest.getDefaultInstance();
+          return org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest.getDefaultInstance();
         case 54:
+          return org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest.getDefaultInstance();
+        case 55:
           return org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest.getDefaultInstance();
         default:
           throw new java.lang.AssertionError("Can't get here.");
@@ -28461,6 +29419,8 @@ public final class MetadataServiceOuterClass {
         case 53:
           return org.aiflow.client.proto.Message.Response.getDefaultInstance();
         case 54:
+          return org.aiflow.client.proto.Message.Response.getDefaultInstance();
+        case 55:
           return org.aiflow.client.proto.Message.Response.getDefaultInstance();
         default:
           throw new java.lang.AssertionError("Can't get here.");
@@ -29278,12 +30238,27 @@ public final class MetadataServiceOuterClass {
             org.aiflow.client.proto.Message.Response.getDefaultInstance()));
       }
 
+      public  void getWorkflowSnapshotBySignature(
+          com.google.protobuf.RpcController controller,
+          org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest request,
+          com.google.protobuf.RpcCallback<org.aiflow.client.proto.Message.Response> done) {
+        channel.callMethod(
+          getDescriptor().getMethods().get(53),
+          controller,
+          request,
+          org.aiflow.client.proto.Message.Response.getDefaultInstance(),
+          com.google.protobuf.RpcUtil.generalizeCallback(
+            done,
+            org.aiflow.client.proto.Message.Response.class,
+            org.aiflow.client.proto.Message.Response.getDefaultInstance()));
+      }
+
       public  void listWorkflowSnapshots(
           com.google.protobuf.RpcController controller,
           org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest request,
           com.google.protobuf.RpcCallback<org.aiflow.client.proto.Message.Response> done) {
         channel.callMethod(
-          getDescriptor().getMethods().get(53),
+          getDescriptor().getMethods().get(54),
           controller,
           request,
           org.aiflow.client.proto.Message.Response.getDefaultInstance(),
@@ -29298,7 +30273,7 @@ public final class MetadataServiceOuterClass {
           org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest request,
           com.google.protobuf.RpcCallback<org.aiflow.client.proto.Message.Response> done) {
         channel.callMethod(
-          getDescriptor().getMethods().get(54),
+          getDescriptor().getMethods().get(55),
           controller,
           request,
           org.aiflow.client.proto.Message.Response.getDefaultInstance(),
@@ -29578,6 +30553,11 @@ public final class MetadataServiceOuterClass {
       public org.aiflow.client.proto.Message.Response getWorkflowSnapshot(
           com.google.protobuf.RpcController controller,
           org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest request)
+          throws com.google.protobuf.ServiceException;
+
+      public org.aiflow.client.proto.Message.Response getWorkflowSnapshotBySignature(
+          com.google.protobuf.RpcController controller,
+          org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest request)
           throws com.google.protobuf.ServiceException;
 
       public org.aiflow.client.proto.Message.Response listWorkflowSnapshots(
@@ -30234,12 +31214,24 @@ public final class MetadataServiceOuterClass {
       }
 
 
+      public org.aiflow.client.proto.Message.Response getWorkflowSnapshotBySignature(
+          com.google.protobuf.RpcController controller,
+          org.aiflow.client.proto.MetadataServiceOuterClass.GetWorkflowSnapshotRequest request)
+          throws com.google.protobuf.ServiceException {
+        return (org.aiflow.client.proto.Message.Response) channel.callBlockingMethod(
+          getDescriptor().getMethods().get(53),
+          controller,
+          request,
+          org.aiflow.client.proto.Message.Response.getDefaultInstance());
+      }
+
+
       public org.aiflow.client.proto.Message.Response listWorkflowSnapshots(
           com.google.protobuf.RpcController controller,
           org.aiflow.client.proto.MetadataServiceOuterClass.ListWorkflowSnapshotsRequest request)
           throws com.google.protobuf.ServiceException {
         return (org.aiflow.client.proto.Message.Response) channel.callBlockingMethod(
-          getDescriptor().getMethods().get(53),
+          getDescriptor().getMethods().get(54),
           controller,
           request,
           org.aiflow.client.proto.Message.Response.getDefaultInstance());
@@ -30251,7 +31243,7 @@ public final class MetadataServiceOuterClass {
           org.aiflow.client.proto.MetadataServiceOuterClass.IdRequest request)
           throws com.google.protobuf.ServiceException {
         return (org.aiflow.client.proto.Message.Response) channel.callBlockingMethod(
-          getDescriptor().getMethods().get(54),
+          getDescriptor().getMethods().get(55),
           controller,
           request,
           org.aiflow.client.proto.Message.Response.getDefaultInstance());
@@ -30442,6 +31434,11 @@ public final class MetadataServiceOuterClass {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_ai_flow_WorkflowSnapshotListProto_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_ai_flow_GetWorkflowSnapshotRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_ai_flow_GetWorkflowSnapshotRequest_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -30538,178 +31535,185 @@ public final class MetadataServiceOuterClass {
       "\n\tpage_size\030\002 \001(\003\022\016\n\006offset\030\003 \001(\003\"W\n\031Wor" +
       "kflowSnapshotListProto\022:\n\022workflow_snaps" +
       "hots\030\001 \003(\0132\036.ai_flow.WorkflowSnapshotPro" +
-      "to2\2455\n\017MetadataService\022f\n\016getDatasetById" +
-      "\022\022.ai_flow.IdRequest\032\021.ai_flow.Response\"" +
-      "-\202\323\344\223\002\'\022%/aiflow/metadata_store/dataset/" +
-      "get/id\022l\n\020getDatasetByName\022\024.ai_flow.Nam" +
-      "eRequest\032\021.ai_flow.Response\"/\202\323\344\223\002)\022\'/ai" +
-      "flow/metadata_store/dataset/get/name\022d\n\014" +
-      "listDatasets\022\024.ai_flow.ListRequest\032\021.ai_" +
-      "flow.Response\"+\202\323\344\223\002%\022#/aiflow/metadata_" +
-      "store/dataset/list\022u\n\017registerDataset\022\037." +
-      "ai_flow.RegisterDatasetRequest\032\021.ai_flow" +
-      ".Response\".\202\323\344\223\002(\"#/aiflow/metadata_stor" +
-      "e/dataset/save:\001*\022\215\001\n\032registerDatasetWit" +
-      "hCatalog\022\037.ai_flow.RegisterDatasetReques" +
-      "t\032\021.ai_flow.Response\";\202\323\344\223\0025\"0/aiflow/me" +
-      "tadata_store/dataset/save_with_catalog:\001" +
-      "*\022w\n\020registerDatasets\022 .ai_flow.Register" +
-      "DatasetsRequest\032\021.ai_flow.Response\".\202\323\344\223" +
-      "\002(\"#/aiflow/metadata_store/dataset/save:" +
-      "\001*\022s\n\rupdateDataset\022\035.ai_flow.UpdateData" +
-      "setRequest\032\021.ai_flow.Response\"0\202\323\344\223\002*\"%/" +
-      "aiflow/metadata_store/dataset/update:\001*\022" +
-      "o\n\021deleteDatasetById\022\022.ai_flow.IdRequest" +
-      "\032\021.ai_flow.Response\"3\202\323\344\223\002-\"(/aiflow/met" +
-      "adata_store/dataset/delete/id:\001*\022u\n\023dele" +
-      "teDatasetByName\022\024.ai_flow.NameRequest\032\021." +
-      "ai_flow.Response\"5\202\323\344\223\002/\"*/aiflow/metada" +
-      "ta_store/dataset/delete/name:\001*\022s\n\024getMo" +
-      "delRelationById\022\022.ai_flow.IdRequest\032\021.ai" +
-      "_flow.Response\"4\202\323\344\223\002.\022,/aiflow/metadata" +
-      "_store/model_relation/get/id\022y\n\026getModel" +
-      "RelationByName\022\024.ai_flow.NameRequest\032\021.a" +
-      "i_flow.Response\"6\202\323\344\223\0020\022./aiflow/metadat" +
-      "a_store/model_relation/get/name\022p\n\021listM" +
-      "odelRelation\022\024.ai_flow.ListRequest\032\021.ai_" +
-      "flow.Response\"2\202\323\344\223\002,\022*/aiflow/metadata_" +
-      "store/model_relation/list\022\210\001\n\025registerMo" +
-      "delRelation\022%.ai_flow.RegisterModelRelat" +
-      "ionRequest\032\021.ai_flow.Response\"5\202\323\344\223\002/\"*/" +
-      "aiflow/metadata_store/model_relation/sav" +
-      "e:\001*\022|\n\027deleteModelRelationById\022\022.ai_flo" +
-      "w.IdRequest\032\021.ai_flow.Response\":\202\323\344\223\0024\"/" +
-      "/aiflow/metadata_store/model_relation/de" +
-      "lete/id:\001*\022\202\001\n\031deleteModelRelationByName" +
-      "\022\024.ai_flow.NameRequest\032\021.ai_flow.Respons" +
-      "e\"<\202\323\344\223\0026\"1/aiflow/metadata_store/model_" +
-      "relation/delete/name:\001*\022b\n\014getModelById\022" +
-      "\022.ai_flow.IdRequest\032\021.ai_flow.Response\"+" +
-      "\202\323\344\223\002%\022#/aiflow/metadata_store/model/get" +
-      "/id\022h\n\016getModelByName\022\024.ai_flow.NameRequ" +
-      "est\032\021.ai_flow.Response\"-\202\323\344\223\002\'\022%/aiflow/" +
-      "metadata_store/model/get/name\022o\n\rregiste" +
-      "rModel\022\035.ai_flow.RegisterModelRequest\032\021." +
-      "ai_flow.Response\",\202\323\344\223\002&\"!/aiflow/metada" +
-      "ta_store/model/save:\001*\022k\n\017deleteModelByI" +
-      "d\022\022.ai_flow.IdRequest\032\021.ai_flow.Response" +
-      "\"1\202\323\344\223\002+\"&/aiflow/metadata_store/model/d" +
-      "elete/id:\001*\022q\n\021deleteModelByName\022\024.ai_fl" +
-      "ow.NameRequest\032\021.ai_flow.Response\"3\202\323\344\223\002" +
-      "-\"(/aiflow/metadata_store/model/delete/n" +
-      "ame:\001*\022\231\001\n getModelVersionRelationByVers" +
-      "ion\022 .ai_flow.ModelVersionNameRequest\032\021." +
-      "ai_flow.Response\"@\202\323\344\223\002:\0228/aiflow/metada" +
-      "ta_store/modelVersion_relation/get/versi" +
-      "on\022\222\001\n\030listModelVersionRelation\022(.ai_flo" +
-      "w.ListModelVersionRelationRequest\032\021.ai_f" +
-      "low.Response\"9\202\323\344\223\0023\0221/aiflow/metadata_s" +
-      "tore/modelVersion_relation/list\022\235\001\n\034regi" +
-      "sterModelVersionRelation\022,.ai_flow.Regis" +
-      "terModelVersionRelationRequest\032\021.ai_flow" +
-      ".Response\"<\202\323\344\223\0026\"1/aiflow/metadata_stor" +
-      "e/modelVersion_relation/save:\001*\022\242\001\n#dele" +
-      "teModelVersionRelationByVersion\022 .ai_flo" +
-      "w.ModelVersionNameRequest\032\021.ai_flow.Resp" +
-      "onse\"F\202\323\344\223\002@\";/aiflow/metadata_store/mod" +
-      "elVersion_relation/delete/version:\001*\022\210\001\n" +
-      "\030getModelVersionByVersion\022 .ai_flow.Mode" +
-      "lVersionNameRequest\032\021.ai_flow.Response\"7" +
-      "\202\323\344\223\0021\022//aiflow/metadata_store/modelVers" +
-      "ion/get/version\022\204\001\n\024registerModelVersion" +
-      "\022$.ai_flow.RegisterModelVersionRequest\032\021" +
-      ".ai_flow.Response\"3\202\323\344\223\002-\"(/aiflow/metad" +
-      "ata_store/modelVersion/save:\001*\022\221\001\n\033delet" +
-      "eModelVersionByVersion\022 .ai_flow.ModelVe" +
-      "rsionNameRequest\032\021.ai_flow.Response\"=\202\323\344" +
-      "\223\0027\"2/aiflow/metadata_store/modelVersion" +
-      "/delete/version:\001*\022\210\001\n\027getDeployedModelV" +
-      "ersion\022\031.ai_flow.ModelNameRequest\032\021.ai_f" +
-      "low.Response\"?\202\323\344\223\0029\0227/aiflow/metadata_s" +
-      "tore/modelVersion/get_serving_version\022\236\001" +
-      "\n\036getLatestValidatedModelVersion\022\031.ai_fl" +
-      "ow.ModelNameRequest\032\021.ai_flow.Response\"N" +
-      "\202\323\344\223\002H\022F/aiflow/metadata_store/modelVers" +
-      "ion/get_latest_validated_model_version\022\236" +
-      "\001\n\036getLatestGeneratedModelVersion\022\031.ai_f" +
-      "low.ModelNameRequest\032\021.ai_flow.Response\"" +
-      "N\202\323\344\223\002H\022F/aiflow/metadata_store/modelVer" +
-      "sion/get_latest_generated_model_version\022" +
-      "f\n\016getProjectById\022\022.ai_flow.IdRequest\032\021." +
-      "ai_flow.Response\"-\202\323\344\223\002\'\022%/aiflow/metada" +
-      "ta_store/project/get/id\022l\n\020getProjectByN" +
-      "ame\022\024.ai_flow.NameRequest\032\021.ai_flow.Resp" +
-      "onse\"/\202\323\344\223\002)\022\'/aiflow/metadata_store/pro" +
-      "ject/get/name\022u\n\017registerProject\022\037.ai_fl" +
-      "ow.RegisterProjectRequest\032\021.ai_flow.Resp" +
-      "onse\".\202\323\344\223\002(\"#/aiflow/metadata_store/pro" +
-      "ject/save:\001*\022s\n\rupdateProject\022\035.ai_flow." +
-      "UpdateProjectRequest\032\021.ai_flow.Response\"" +
-      "0\202\323\344\223\002*\"%/aiflow/metadata_store/project/" +
-      "update:\001*\022c\n\013listProject\022\024.ai_flow.ListR" +
-      "equest\032\021.ai_flow.Response\"+\202\323\344\223\002%\022#/aifl" +
-      "ow/metadata_store/project/list\022o\n\021delete" +
-      "ProjectById\022\022.ai_flow.IdRequest\032\021.ai_flo" +
-      "w.Response\"3\202\323\344\223\002-\"(/aiflow/metadata_sto" +
-      "re/project/delete/id:\001*\022u\n\023deleteProject" +
-      "ByName\022\024.ai_flow.NameRequest\032\021.ai_flow.R" +
-      "esponse\"5\202\323\344\223\002/\"*/aiflow/metadata_store/" +
-      "project/delete/name:\001*\022h\n\017getArtifactByI" +
-      "d\022\022.ai_flow.IdRequest\032\021.ai_flow.Response" +
-      "\".\202\323\344\223\002(\022&/aiflow/metadata_store/artifac" +
-      "t/get/id\022n\n\021getArtifactByName\022\024.ai_flow." +
-      "NameRequest\032\021.ai_flow.Response\"0\202\323\344\223\002*\022(" +
-      "/aiflow/metadata_store/artifact/get/name" +
-      "\022v\n\016updateArtifact\022\036.ai_flow.UpdateArtif" +
-      "actRequest\032\021.ai_flow.Response\"1\202\323\344\223\002+\"&/" +
-      "aiflow/metadata_store/artifact/update:\001*" +
-      "\022x\n\020registerArtifact\022 .ai_flow.RegisterA" +
-      "rtifactRequest\032\021.ai_flow.Response\"/\202\323\344\223\002" +
-      ")\"$/aiflow/metadata_store/artifact/save:" +
-      "\001*\022e\n\014listArtifact\022\024.ai_flow.ListRequest" +
-      "\032\021.ai_flow.Response\",\202\323\344\223\002&\022$/aiflow/met" +
-      "adata_store/artifact/list\022q\n\022deleteArtif" +
-      "actById\022\022.ai_flow.IdRequest\032\021.ai_flow.Re" +
-      "sponse\"4\202\323\344\223\002.\")/aiflow/metadata_store/a" +
-      "rtifact/delete/id:\001*\022w\n\024deleteArtifactBy" +
+      "to\"z\n\032GetWorkflowSnapshotRequest\022\024\n\014proj" +
+      "ect_name\030\001 \001(\t\022\025\n\rworkflow_name\030\002 \001(\t\022/\n" +
+      "\tsignature\030\003 \001(\0132\034.google.protobuf.Strin" +
+      "gValue2\2726\n\017MetadataService\022f\n\016getDataset" +
+      "ById\022\022.ai_flow.IdRequest\032\021.ai_flow.Respo" +
+      "nse\"-\202\323\344\223\002\'\022%/aiflow/metadata_store/data" +
+      "set/get/id\022l\n\020getDatasetByName\022\024.ai_flow" +
+      ".NameRequest\032\021.ai_flow.Response\"/\202\323\344\223\002)\022" +
+      "\'/aiflow/metadata_store/dataset/get/name" +
+      "\022d\n\014listDatasets\022\024.ai_flow.ListRequest\032\021" +
+      ".ai_flow.Response\"+\202\323\344\223\002%\022#/aiflow/metad" +
+      "ata_store/dataset/list\022u\n\017registerDatase" +
+      "t\022\037.ai_flow.RegisterDatasetRequest\032\021.ai_" +
+      "flow.Response\".\202\323\344\223\002(\"#/aiflow/metadata_" +
+      "store/dataset/save:\001*\022\215\001\n\032registerDatase" +
+      "tWithCatalog\022\037.ai_flow.RegisterDatasetRe" +
+      "quest\032\021.ai_flow.Response\";\202\323\344\223\0025\"0/aiflo" +
+      "w/metadata_store/dataset/save_with_catal" +
+      "og:\001*\022w\n\020registerDatasets\022 .ai_flow.Regi" +
+      "sterDatasetsRequest\032\021.ai_flow.Response\"." +
+      "\202\323\344\223\002(\"#/aiflow/metadata_store/dataset/s" +
+      "ave:\001*\022s\n\rupdateDataset\022\035.ai_flow.Update" +
+      "DatasetRequest\032\021.ai_flow.Response\"0\202\323\344\223\002" +
+      "*\"%/aiflow/metadata_store/dataset/update" +
+      ":\001*\022o\n\021deleteDatasetById\022\022.ai_flow.IdReq" +
+      "uest\032\021.ai_flow.Response\"3\202\323\344\223\002-\"(/aiflow" +
+      "/metadata_store/dataset/delete/id:\001*\022u\n\023" +
+      "deleteDatasetByName\022\024.ai_flow.NameReques" +
+      "t\032\021.ai_flow.Response\"5\202\323\344\223\002/\"*/aiflow/me" +
+      "tadata_store/dataset/delete/name:\001*\022s\n\024g" +
+      "etModelRelationById\022\022.ai_flow.IdRequest\032" +
+      "\021.ai_flow.Response\"4\202\323\344\223\002.\022,/aiflow/meta" +
+      "data_store/model_relation/get/id\022y\n\026getM" +
+      "odelRelationByName\022\024.ai_flow.NameRequest" +
+      "\032\021.ai_flow.Response\"6\202\323\344\223\0020\022./aiflow/met" +
+      "adata_store/model_relation/get/name\022p\n\021l" +
+      "istModelRelation\022\024.ai_flow.ListRequest\032\021" +
+      ".ai_flow.Response\"2\202\323\344\223\002,\022*/aiflow/metad" +
+      "ata_store/model_relation/list\022\210\001\n\025regist" +
+      "erModelRelation\022%.ai_flow.RegisterModelR" +
+      "elationRequest\032\021.ai_flow.Response\"5\202\323\344\223\002" +
+      "/\"*/aiflow/metadata_store/model_relation" +
+      "/save:\001*\022|\n\027deleteModelRelationById\022\022.ai" +
+      "_flow.IdRequest\032\021.ai_flow.Response\":\202\323\344\223" +
+      "\0024\"//aiflow/metadata_store/model_relatio" +
+      "n/delete/id:\001*\022\202\001\n\031deleteModelRelationBy" +
       "Name\022\024.ai_flow.NameRequest\032\021.ai_flow.Res" +
-      "ponse\"6\202\323\344\223\0020\"+/aiflow/metadata_store/ar" +
-      "tifact/delete/name:\001*\022x\n\020registerWorkflo" +
-      "w\022 .ai_flow.RegisterWorkflowRequest\032\021.ai" +
-      "_flow.Response\"/\202\323\344\223\002)\"$/aiflow/metadata" +
-      "_store/workflow/save:\001*\022v\n\016updateWorkflo" +
-      "w\022\036.ai_flow.UpdateWorkflowRequest\032\021.ai_f" +
-      "low.Response\"1\202\323\344\223\002+\"&/aiflow/metadata_s" +
-      "tore/workflow/update:\001*\022h\n\017getWorkflowBy" +
-      "Id\022\022.ai_flow.IdRequest\032\021.ai_flow.Respons" +
-      "e\".\202\323\344\223\002(\022&/aiflow/metadata_store/workfl" +
-      "ow/get/id\022v\n\021getWorkflowByName\022\034.ai_flow" +
-      ".WorkflowNameRequest\032\021.ai_flow.Response\"" +
-      "0\202\323\344\223\002*\022(/aiflow/metadata_store/workflow" +
-      "/get/name\022q\n\022deleteWorkflowById\022\022.ai_flo" +
-      "w.IdRequest\032\021.ai_flow.Response\"4\202\323\344\223\002.\")" +
-      "/aiflow/metadata_store/workflow/delete/i" +
-      "d:\001*\022\177\n\024deleteWorkflowByName\022\034.ai_flow.W" +
-      "orkflowNameRequest\032\021.ai_flow.Response\"6\202" +
-      "\323\344\223\0020\"+/aiflow/metadata_store/workflow/d" +
-      "elete/name:\001*\022o\n\rlistWorkflows\022\035.ai_flow" +
-      ".ListWorkflowsRequest\032\021.ai_flow.Response" +
-      "\",\202\323\344\223\002&\022$/aiflow/metadata_store/workflo" +
-      "w/list\022\221\001\n\030registerWorkflowSnapshot\022(.ai" +
-      "_flow.RegisterWorkflowSnapshotRequest\032\021." +
-      "ai_flow.Response\"8\202\323\344\223\0022\"-/aiflow/metada" +
-      "ta_store/workflow_snapshot/save:\001*\022{\n\023ge" +
-      "tWorkflowSnapshot\022\022.ai_flow.IdRequest\032\021." +
-      "ai_flow.Response\"=\202\323\344\223\0027\"2/aiflow/metada" +
-      "ta_store/workflow_snapshot/delete/id:\001*\022" +
-      "\210\001\n\025listWorkflowSnapshots\022%.ai_flow.List" +
-      "WorkflowSnapshotsRequest\032\021.ai_flow.Respo" +
-      "nse\"5\202\323\344\223\002/\022-/aiflow/metadata_store/work" +
-      "flow_snapshot/list\022~\n\026deleteWorkflowSnap" +
-      "shot\022\022.ai_flow.IdRequest\032\021.ai_flow.Respo" +
-      "nse\"=\202\323\344\223\0027\"2/aiflow/metadata_store/work" +
-      "flow_snapshot/delete/id:\001*B)\n\027org.aiflow" +
-      ".client.protoZ\010/ai_flow\210\001\001\220\001\001b\006proto3"
+      "ponse\"<\202\323\344\223\0026\"1/aiflow/metadata_store/mo" +
+      "del_relation/delete/name:\001*\022b\n\014getModelB" +
+      "yId\022\022.ai_flow.IdRequest\032\021.ai_flow.Respon" +
+      "se\"+\202\323\344\223\002%\022#/aiflow/metadata_store/model" +
+      "/get/id\022h\n\016getModelByName\022\024.ai_flow.Name" +
+      "Request\032\021.ai_flow.Response\"-\202\323\344\223\002\'\022%/aif" +
+      "low/metadata_store/model/get/name\022o\n\rreg" +
+      "isterModel\022\035.ai_flow.RegisterModelReques" +
+      "t\032\021.ai_flow.Response\",\202\323\344\223\002&\"!/aiflow/me" +
+      "tadata_store/model/save:\001*\022k\n\017deleteMode" +
+      "lById\022\022.ai_flow.IdRequest\032\021.ai_flow.Resp" +
+      "onse\"1\202\323\344\223\002+\"&/aiflow/metadata_store/mod" +
+      "el/delete/id:\001*\022q\n\021deleteModelByName\022\024.a" +
+      "i_flow.NameRequest\032\021.ai_flow.Response\"3\202" +
+      "\323\344\223\002-\"(/aiflow/metadata_store/model/dele" +
+      "te/name:\001*\022\231\001\n getModelVersionRelationBy" +
+      "Version\022 .ai_flow.ModelVersionNameReques" +
+      "t\032\021.ai_flow.Response\"@\202\323\344\223\002:\0228/aiflow/me" +
+      "tadata_store/modelVersion_relation/get/v" +
+      "ersion\022\222\001\n\030listModelVersionRelation\022(.ai" +
+      "_flow.ListModelVersionRelationRequest\032\021." +
+      "ai_flow.Response\"9\202\323\344\223\0023\0221/aiflow/metada" +
+      "ta_store/modelVersion_relation/list\022\235\001\n\034" +
+      "registerModelVersionRelation\022,.ai_flow.R" +
+      "egisterModelVersionRelationRequest\032\021.ai_" +
+      "flow.Response\"<\202\323\344\223\0026\"1/aiflow/metadata_" +
+      "store/modelVersion_relation/save:\001*\022\242\001\n#" +
+      "deleteModelVersionRelationByVersion\022 .ai" +
+      "_flow.ModelVersionNameRequest\032\021.ai_flow." +
+      "Response\"F\202\323\344\223\002@\";/aiflow/metadata_store" +
+      "/modelVersion_relation/delete/version:\001*" +
+      "\022\210\001\n\030getModelVersionByVersion\022 .ai_flow." +
+      "ModelVersionNameRequest\032\021.ai_flow.Respon" +
+      "se\"7\202\323\344\223\0021\022//aiflow/metadata_store/model" +
+      "Version/get/version\022\204\001\n\024registerModelVer" +
+      "sion\022$.ai_flow.RegisterModelVersionReque" +
+      "st\032\021.ai_flow.Response\"3\202\323\344\223\002-\"(/aiflow/m" +
+      "etadata_store/modelVersion/save:\001*\022\221\001\n\033d" +
+      "eleteModelVersionByVersion\022 .ai_flow.Mod" +
+      "elVersionNameRequest\032\021.ai_flow.Response\"" +
+      "=\202\323\344\223\0027\"2/aiflow/metadata_store/modelVer" +
+      "sion/delete/version:\001*\022\210\001\n\027getDeployedMo" +
+      "delVersion\022\031.ai_flow.ModelNameRequest\032\021." +
+      "ai_flow.Response\"?\202\323\344\223\0029\0227/aiflow/metada" +
+      "ta_store/modelVersion/get_serving_versio" +
+      "n\022\236\001\n\036getLatestValidatedModelVersion\022\031.a" +
+      "i_flow.ModelNameRequest\032\021.ai_flow.Respon" +
+      "se\"N\202\323\344\223\002H\022F/aiflow/metadata_store/model" +
+      "Version/get_latest_validated_model_versi" +
+      "on\022\236\001\n\036getLatestGeneratedModelVersion\022\031." +
+      "ai_flow.ModelNameRequest\032\021.ai_flow.Respo" +
+      "nse\"N\202\323\344\223\002H\022F/aiflow/metadata_store/mode" +
+      "lVersion/get_latest_generated_model_vers" +
+      "ion\022f\n\016getProjectById\022\022.ai_flow.IdReques" +
+      "t\032\021.ai_flow.Response\"-\202\323\344\223\002\'\022%/aiflow/me" +
+      "tadata_store/project/get/id\022l\n\020getProjec" +
+      "tByName\022\024.ai_flow.NameRequest\032\021.ai_flow." +
+      "Response\"/\202\323\344\223\002)\022\'/aiflow/metadata_store" +
+      "/project/get/name\022u\n\017registerProject\022\037.a" +
+      "i_flow.RegisterProjectRequest\032\021.ai_flow." +
+      "Response\".\202\323\344\223\002(\"#/aiflow/metadata_store" +
+      "/project/save:\001*\022s\n\rupdateProject\022\035.ai_f" +
+      "low.UpdateProjectRequest\032\021.ai_flow.Respo" +
+      "nse\"0\202\323\344\223\002*\"%/aiflow/metadata_store/proj" +
+      "ect/update:\001*\022c\n\013listProject\022\024.ai_flow.L" +
+      "istRequest\032\021.ai_flow.Response\"+\202\323\344\223\002%\022#/" +
+      "aiflow/metadata_store/project/list\022o\n\021de" +
+      "leteProjectById\022\022.ai_flow.IdRequest\032\021.ai" +
+      "_flow.Response\"3\202\323\344\223\002-\"(/aiflow/metadata" +
+      "_store/project/delete/id:\001*\022u\n\023deletePro" +
+      "jectByName\022\024.ai_flow.NameRequest\032\021.ai_fl" +
+      "ow.Response\"5\202\323\344\223\002/\"*/aiflow/metadata_st" +
+      "ore/project/delete/name:\001*\022h\n\017getArtifac" +
+      "tById\022\022.ai_flow.IdRequest\032\021.ai_flow.Resp" +
+      "onse\".\202\323\344\223\002(\022&/aiflow/metadata_store/art" +
+      "ifact/get/id\022n\n\021getArtifactByName\022\024.ai_f" +
+      "low.NameRequest\032\021.ai_flow.Response\"0\202\323\344\223" +
+      "\002*\022(/aiflow/metadata_store/artifact/get/" +
+      "name\022v\n\016updateArtifact\022\036.ai_flow.UpdateA" +
+      "rtifactRequest\032\021.ai_flow.Response\"1\202\323\344\223\002" +
+      "+\"&/aiflow/metadata_store/artifact/updat" +
+      "e:\001*\022x\n\020registerArtifact\022 .ai_flow.Regis" +
+      "terArtifactRequest\032\021.ai_flow.Response\"/\202" +
+      "\323\344\223\002)\"$/aiflow/metadata_store/artifact/s" +
+      "ave:\001*\022e\n\014listArtifact\022\024.ai_flow.ListReq" +
+      "uest\032\021.ai_flow.Response\",\202\323\344\223\002&\022$/aiflow" +
+      "/metadata_store/artifact/list\022q\n\022deleteA" +
+      "rtifactById\022\022.ai_flow.IdRequest\032\021.ai_flo" +
+      "w.Response\"4\202\323\344\223\002.\")/aiflow/metadata_sto" +
+      "re/artifact/delete/id:\001*\022w\n\024deleteArtifa" +
+      "ctByName\022\024.ai_flow.NameRequest\032\021.ai_flow" +
+      ".Response\"6\202\323\344\223\0020\"+/aiflow/metadata_stor" +
+      "e/artifact/delete/name:\001*\022x\n\020registerWor" +
+      "kflow\022 .ai_flow.RegisterWorkflowRequest\032" +
+      "\021.ai_flow.Response\"/\202\323\344\223\002)\"$/aiflow/meta" +
+      "data_store/workflow/save:\001*\022v\n\016updateWor" +
+      "kflow\022\036.ai_flow.UpdateWorkflowRequest\032\021." +
+      "ai_flow.Response\"1\202\323\344\223\002+\"&/aiflow/metada" +
+      "ta_store/workflow/update:\001*\022h\n\017getWorkfl" +
+      "owById\022\022.ai_flow.IdRequest\032\021.ai_flow.Res" +
+      "ponse\".\202\323\344\223\002(\022&/aiflow/metadata_store/wo" +
+      "rkflow/get/id\022v\n\021getWorkflowByName\022\034.ai_" +
+      "flow.WorkflowNameRequest\032\021.ai_flow.Respo" +
+      "nse\"0\202\323\344\223\002*\022(/aiflow/metadata_store/work" +
+      "flow/get/name\022q\n\022deleteWorkflowById\022\022.ai" +
+      "_flow.IdRequest\032\021.ai_flow.Response\"4\202\323\344\223" +
+      "\002.\")/aiflow/metadata_store/workflow/dele" +
+      "te/id:\001*\022\177\n\024deleteWorkflowByName\022\034.ai_fl" +
+      "ow.WorkflowNameRequest\032\021.ai_flow.Respons" +
+      "e\"6\202\323\344\223\0020\"+/aiflow/metadata_store/workfl" +
+      "ow/delete/name:\001*\022o\n\rlistWorkflows\022\035.ai_" +
+      "flow.ListWorkflowsRequest\032\021.ai_flow.Resp" +
+      "onse\",\202\323\344\223\002&\022$/aiflow/metadata_store/wor" +
+      "kflow/list\022\221\001\n\030registerWorkflowSnapshot\022" +
+      "(.ai_flow.RegisterWorkflowSnapshotReques" +
+      "t\032\021.ai_flow.Response\"8\202\323\344\223\0022\"-/aiflow/me" +
+      "tadata_store/workflow_snapshot/save:\001*\022u" +
+      "\n\023getWorkflowSnapshot\022\022.ai_flow.IdReques" +
+      "t\032\021.ai_flow.Response\"7\202\323\344\223\0021\022//aiflow/me" +
+      "tadata_store/workflow_snapshot/get/id\022\230\001" +
+      "\n\036getWorkflowSnapshotBySignature\022#.ai_fl" +
+      "ow.GetWorkflowSnapshotRequest\032\021.ai_flow." +
+      "Response\">\202\323\344\223\0028\0226/aiflow/metadata_store" +
+      "/workflow_snapshot/get/signature\022\210\001\n\025lis" +
+      "tWorkflowSnapshots\022%.ai_flow.ListWorkflo" +
+      "wSnapshotsRequest\032\021.ai_flow.Response\"5\202\323" +
+      "\344\223\002/\022-/aiflow/metadata_store/workflow_sn" +
+      "apshot/list\022~\n\026deleteWorkflowSnapshot\022\022." +
+      "ai_flow.IdRequest\032\021.ai_flow.Response\"=\202\323" +
+      "\344\223\0027\"2/aiflow/metadata_store/workflow_sn" +
+      "apshot/delete/id:\001*B)\n\027org.aiflow.client" +
+      ".protoZ\010/ai_flow\210\001\001\220\001\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -30934,6 +31938,12 @@ public final class MetadataServiceOuterClass {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_flow_WorkflowSnapshotListProto_descriptor,
         new java.lang.String[] { "WorkflowSnapshots", });
+    internal_static_ai_flow_GetWorkflowSnapshotRequest_descriptor =
+      getDescriptor().getMessageTypes().get(32);
+    internal_static_ai_flow_GetWorkflowSnapshotRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_ai_flow_GetWorkflowSnapshotRequest_descriptor,
+        new java.lang.String[] { "ProjectName", "WorkflowName", "Signature", });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
     registry.add(com.google.api.AnnotationsProto.http);
