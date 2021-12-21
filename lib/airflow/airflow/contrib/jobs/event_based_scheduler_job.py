@@ -179,15 +179,25 @@ class EventBasedScheduler(LoggingMixin):
             elif isinstance(event, StopDagEvent):
                 self._stop_dag(event.dag_id, session)
             elif isinstance(event, DagRunFinishedEvent):
-                self._remove_periodic_events(event.dag_id, event.execution_date)
+                self._stop_scheduling_periodic_tasks(event.dag_id, event.execution_date)
             elif isinstance(event, PeriodicEvent):
                 dag_runs = DagRun.find(dag_id=event.dag_id, execution_date=event.execution_date)
                 if len(dag_runs) < 1:
                     self.log.warning("DagRun not found by dag_id:{}, execution_date:{}".format(
                         event.dag_id, event.execution_date))
                 else:
-                    ti = dag_runs[0].get_task_instance(event.task_id)
-                    self._send_scheduling_task_event(ti, SchedulingAction.RESTART)
+                    dag_run = dag_runs[0]
+                    if dag_run.get_state() == State.RUNNING:
+                        ti = dag_runs[0].get_task_instance(event.task_id)
+                        self._send_scheduling_task_event(ti, SchedulingAction.RESTART)
+                    else:
+                        self.periodic_manager.remove_task(dag_id=event.dag_id,
+                                                          execution_date=event.execution_date,
+                                                          task_id=event.task_id)
+                        self.log.info("Dag run's state is not running(dag_id:{} execution_date: {}), "
+                                      "so stop periodic scheduling task(id: {})".format(event.dag_id,
+                                                                                        str(event.execution_date),
+                                                                                        event.task_id))
             elif isinstance(event, StopSchedulerEvent):
                 self.log.info("{} {}".format(self.id, event.job_id))
                 if self.id == event.job_id or 0 == event.job_id:
@@ -268,7 +278,7 @@ class EventBasedScheduler(LoggingMixin):
         self.periodic_manager.store.unset_session()
 
     @provide_session
-    def _remove_periodic_events(self, dag_id, execution_date, session=None):
+    def _stop_scheduling_periodic_tasks(self, dag_id, execution_date, session=None):
         dagruns = DagRun.find(dag_id=dag_id, execution_date=execution_date)
         if not dagruns:
             self.log.warning(f'Gets no dagruns to remove periodic events with dag_id: {dag_id} '
@@ -304,7 +314,7 @@ class EventBasedScheduler(LoggingMixin):
                     # Explicitly check if the DagRun already exists. This is an edge case
                     # where a Dag Run is created but `DagModel.next_dagrun` and `DagModel.next_dagrun_create_after`
                     # are not updated.
-                    active_dagrun = session.query(DagRun)\
+                    active_dagrun = session.query(DagRun) \
                         .filter(DagRun.dag_id == dag_model.dag_id,
                                 DagRun.execution_date == dag_model.next_dagrun).first()
                     if active_dagrun is not None:
@@ -602,7 +612,7 @@ class EventBasedScheduler(LoggingMixin):
         """
         Stop the dag. Pause the dag and cancel all running dag_runs and task_instances.
         """
-        DagModel.get_dagmodel(dag_id, session)\
+        DagModel.get_dagmodel(dag_id, session) \
             .set_is_paused(is_paused=True, including_subdags=True, session=session)
         active_runs = DagRun.find(dag_id=dag_id, state=State.RUNNING)
         for dag_run in active_runs:
@@ -610,6 +620,7 @@ class EventBasedScheduler(LoggingMixin):
 
     def _stop_dag_run(self, dag_run: DagRun):
         dag_run.stop_dag_run()
+        self._stop_scheduling_periodic_tasks(dag_id=dag_run.dag_id, execution_date=dag_run.execution_date)
         for ti in dag_run.get_task_instances():
             if ti.state in State.unfinished:
                 self.executor.schedule_task(ti.key, SchedulingAction.STOP)

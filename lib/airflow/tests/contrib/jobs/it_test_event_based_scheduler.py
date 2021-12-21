@@ -22,6 +22,7 @@ import time
 import unittest
 import threading
 
+from airflow.contrib.jobs.periodic_manager import PeriodicManager
 from airflow.models.serialized_dag import SerializedDagModel
 
 from airflow.utils.types import DagRunType
@@ -31,9 +32,9 @@ from airflow.utils.state import State
 from typing import List
 
 from airflow.executors.scheduling_action import SchedulingAction
-from airflow.contrib.jobs.scheduler_client import EventSchedulerClient
+from airflow.contrib.jobs.scheduler_client import EventSchedulerClient, ExecutionContext
 from airflow.models.taskexecution import TaskExecution
-from notification_service.base_notification import BaseEvent, UNDEFINED_EVENT_TYPE
+from notification_service.base_notification import BaseEvent, UNDEFINED_EVENT_TYPE, EventWatcher
 from notification_service.client import NotificationClient
 from notification_service.event_storage import MemoryEventStorage
 from notification_service.server import NotificationServer
@@ -548,6 +549,77 @@ class TestEventBasedScheduler(unittest.TestCase):
         tes: List[TaskExecution] = self.get_task_execution("single", "task_1")
         self.assertGreater(len(tes), 1)
 
+    def run_stop_dagrun_function(self):
+        while True:
+            with create_session() as session:
+                tes = session.query(TaskExecution).filter(TaskExecution.dag_id == 'single',
+                                                          TaskExecution.task_id == 'task_1').all()
+                if len(tes) >= 1:
+                    dagrun = session.query(DagRun).filter(DagRun.dag_id == tes[0].dag_id,
+                                                          DagRun.execution_date == tes[0].execution_date).first()
+                    job = self.scheduler.periodic_manager.store.lookup_job(
+                        job_id=PeriodicManager.generate_job_id(dag_id=dagrun.dag_id,
+                                                               execution_date=dagrun.execution_date,
+                                                               task_id='task_1'))
+                    self.assertIsNotNone(job)
+                    sc_client = EventSchedulerClient(ns_client=self.client)
+                    sc_client.stop_dag_run(dag_id='single', context=ExecutionContext(dagrun_id=dagrun.run_id))
+                    job = self.scheduler.periodic_manager.store.lookup_job(
+                        job_id=PeriodicManager.generate_job_id(dag_id=dagrun.dag_id,
+                                                               execution_date=dagrun.execution_date,
+                                                               task_id='task_1'))
+                    self.assertIsNone(job)
+                    break
+                else:
+                    time.sleep(1)
+        self.client.send_event(StopSchedulerEvent(job_id=0).to_event())
+
+    def test_stop_dag_run_with_periodic_task(self):
+        dag_file = os.path.join(TEST_DAG_FOLDER, 'test_periodic_interval_task_dag.py')
+        t = threading.Thread(target=self.run_stop_dagrun_function, args=())
+        t.setDaemon(True)
+        t.start()
+        self.start_scheduler(dag_file)
+
+    def run_set_dagrun_finished_function(self):
+        while True:
+            with create_session() as session:
+                tes = session.query(TaskExecution).filter(TaskExecution.dag_id == 'single',
+                                                          TaskExecution.task_id == 'task_1').all()
+                if len(tes) >= 1 and tes[0].state == State.SUCCESS:
+                    dagrun = session.query(DagRun).filter(DagRun.dag_id == tes[0].dag_id,
+                                                          DagRun.execution_date == tes[0].execution_date).first()
+                    job = self.scheduler.periodic_manager.store.lookup_job(
+                        job_id=PeriodicManager.generate_job_id(dag_id=dagrun.dag_id,
+                                                               execution_date=dagrun.execution_date,
+                                                               task_id='task_1'))
+                    self.assertIsNotNone(job)
+                    dagrun.state = State.SUCCESS
+                    session.merge(dagrun)
+                    session.commit()
+
+                    for i in range(20):
+                        job = self.scheduler.periodic_manager.store.lookup_job(
+                            job_id=PeriodicManager.generate_job_id(dag_id=dagrun.dag_id,
+                                                                   execution_date=dagrun.execution_date,
+                                                                   task_id='task_1'))
+                        if job is None:
+                            break
+                        else:
+                            time.sleep(1)
+                    self.assertIsNone(job)
+                    break
+                else:
+                    time.sleep(1)
+        self.client.send_event(StopSchedulerEvent(job_id=0).to_event())
+
+    def test_set_dag_run_with_periodic_task_finished(self):
+        dag_file = os.path.join(TEST_DAG_FOLDER, 'test_periodic_interval_task_dag.py')
+        t = threading.Thread(target=self.run_set_dagrun_finished_function, args=())
+        t.setDaemon(True)
+        t.start()
+        self.start_scheduler(dag_file)
+
     def run_interval_periodic_task_twice_function(self, num):
         while True:
             with create_session() as session:
@@ -701,7 +773,7 @@ class TestEventBasedScheduler(unittest.TestCase):
             self.assertEqual(1, len(res))
             self.assertEqual('sleep', res[0].task_id)
 
-    def test__remove_periodic_events(self):
+    def test__stop_scheduling_periodic_tasks(self):
         dag_file = os.path.join(TEST_DAG_FOLDER, 'test_event_based_executor.py')
         scheduler = EventBasedSchedulerJob(
             dag_directory=dag_file,
@@ -724,8 +796,8 @@ class TestEventBasedScheduler(unittest.TestCase):
                            state=State.NONE)
 
         with self.assertLogs(scheduler.log, level='INFO') as cm:
-            scheduler._remove_periodic_events('no_dagrun_dag', dr1.execution_date)
-            scheduler._remove_periodic_events(dr1.dag_id, timezone.datetime(2222, 1, 2))
+            scheduler._stop_scheduling_periodic_tasks('no_dagrun_dag', dr1.execution_date)
+            scheduler._stop_scheduling_periodic_tasks(dr1.dag_id, timezone.datetime(2222, 1, 2))
         self.assertEqual(cm.output,
                          ['WARNING:airflow.contrib.jobs.event_based_scheduler_job.EventBasedScheduler:Gets '
                           'no dagruns to remove periodic events with dag_id: no_dagrun_dag and '
@@ -735,4 +807,4 @@ class TestEventBasedScheduler(unittest.TestCase):
                           'execution_date: 2222-01-02 00:00:00+00:00.'
                           ])
 
-        self.assertIsNone(scheduler._remove_periodic_events(dr1.dag_id, dr1.execution_date))
+        self.assertIsNone(scheduler._stop_scheduling_periodic_tasks(dr1.dag_id, dr1.execution_date))

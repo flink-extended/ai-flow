@@ -62,8 +62,9 @@ class PeriodicManager(LoggingMixin):
     def shutdown(self):
         self.sc.shutdown()
 
-    def _generate_job_id(self, dag_id, execution_date, task_id):
-        return '{}:{}:{}'.format(dag_id, execution_date, task_id)
+    @classmethod
+    def generate_job_id(cls, dag_id, execution_date, task_id):
+        return '{}:{}:{}'.format(dag_id, execution_date.strftime("%m-%d-%Y %H:%M:%S.%f"), task_id)
 
     def add_task(self,
                  dag_id: str,
@@ -94,7 +95,7 @@ class PeriodicManager(LoggingMixin):
                     raise ValueError('The cron expression {} is incorrect format, follow the pattern: '
                                      'second minute hour day month day_of_week optional(year).'.format(expr))
 
-            self.sc.add_job(id=self._generate_job_id(dag_id, execution_date, task_id),
+            self.sc.add_job(id=self.generate_job_id(dag_id, execution_date, task_id),
                             func=trigger_periodic_task, args=(dag_id, execution_date, task_id),
                             trigger=build_cron_trigger(periodic_config['cron'], periodic_config[
                                 'timezone'] if 'timezone' in periodic_config else None))
@@ -119,7 +120,7 @@ class PeriodicManager(LoggingMixin):
             if is_zero:
                 raise Exception('The interval config must be greater than 0.')
 
-            self.sc.add_job(id=self._generate_job_id(dag_id, execution_date, task_id),
+            self.sc.add_job(id=self.generate_job_id(dag_id, execution_date, task_id),
                             func=trigger_periodic_task, args=(dag_id, execution_date, task_id),
                             trigger=IntervalTrigger(seconds=temp_list[4],
                                                     minutes=temp_list[3],
@@ -133,7 +134,7 @@ class PeriodicManager(LoggingMixin):
                     dag_id: str,
                     execution_date: datetime,
                     task_id: str):
-        job_id = self._generate_job_id(dag_id, execution_date, task_id)
+        job_id = self.generate_job_id(dag_id, execution_date, task_id)
         job = self.sc.get_job(job_id)
         if job is not None:
             self.sc.remove_job(job_id=job_id)
