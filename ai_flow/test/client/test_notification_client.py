@@ -19,7 +19,7 @@ import unittest
 from notification_service.base_notification import BaseEvent
 from ai_flow.client.notification_client import get_notification_client
 from ai_flow.context.project_context import set_current_project_config
-from ai_flow.context.job_context import set_current_job_name
+from ai_flow.context.job_context import set_current_job_name, unset_current_job_name
 from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server, _NS_URI
 
 
@@ -43,6 +43,7 @@ class TestNotificationClient(unittest.TestCase):
         self.assertEqual('job_1', events[0].sender)
         self.assertEqual('a', events[0].key)
         self.assertEqual('a', events[0].value)
+        unset_current_job_name()
 
 
 if __name__ == '__main__':
