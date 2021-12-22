@@ -117,6 +117,7 @@ class AirFlowSchedulerBase(Scheduler, ABC):
         dag_id = self.airflow_dag_id(project_context.project_name, workflow.workflow_name)
         code_text = self.dag_generator.generate(workflow=workflow,
                                                 project_name=project_context.project_name,
+                                                resource_dir=self.config.get('resource_dir'),
                                                 context_extractor=context_extractor)
         deploy_path = self.config.get('airflow_deploy_path')
         if deploy_path is None:

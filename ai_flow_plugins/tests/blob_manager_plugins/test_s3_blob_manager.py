@@ -100,6 +100,14 @@ class TestS3BlobManager(unittest.TestCase):
 
     def test__get_s3_object_retry(self):
         config = {'service_name': 's3'}
+        config = {
+            'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager.HDFSBlobManager',
+            'blob_manager_config': {
+                'hdfs_url': 'mock',
+                'hdfs_user': 'mock',
+                'root_directory': 'hdfs:///path'
+            }
+        }
         s3_blob_manager = S3BlobManager(config)
 
         with mock.patch.object(s3_blob_manager, 's3_client') as mock_client:

@@ -18,6 +18,10 @@
 #
 import os
 import zipfile
+import time
+import fcntl
+from pathlib import Path
+from typing import Text
 
 
 def make_dir_zipfile(source_dir, output_filename):
@@ -36,3 +40,41 @@ def make_dir_zipfile(source_dir, output_filename):
 def make_file_zipfile(source_file, output_filename):
     with zipfile.ZipFile(output_filename, "w", zipfile.ZIP_DEFLATED) as zip_ref:
         zip_ref.write(source_file, os.path.basename(source_file))
+
+
+def extract_zip_file(zip_file_path: Text,
+                     extract_path: Text = None) -> str:
+    """
+    :param zip_file_path: The zip file path.
+    :param extract_path: The decompression path of the project zip file. If None,
+                         extract to the same directory as zip_file_path.
+    :return: The project path.
+    """
+    file_dir = os.path.dirname(zip_file_path)
+    file_name = os.path.basename(zip_file_path)
+    lock_file = os.path.join(file_dir, '{}.lock'.format(file_name))
+
+    dest_path = file_dir if extract_path is None else extract_path
+
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        top_dir = os.path.split(zip_ref.namelist()[0])[0]
+        downloaded_local_path = str(Path(dest_path) / top_dir)
+        if os.path.exists(lock_file):
+            while os.path.exists(lock_file):
+                time.sleep(1)
+            return downloaded_local_path
+        else:
+            if not os.path.exists(downloaded_local_path):
+                f = open(lock_file, 'w')
+                try:
+                    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+                    if not os.path.exists(downloaded_local_path):
+                        zip_ref.extractall(dest_path)
+                finally:
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+                f.close()
+                try:
+                    os.remove(lock_file)
+                except OSError:
+                    pass
+            return downloaded_local_path

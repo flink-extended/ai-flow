@@ -17,50 +17,81 @@
 # under the License.
 #
 import time
+import shutil
 import unittest
 import os
 from unittest import mock
-
-from ai_flow.util.path_util import get_file_dir
-from ai_flow.plugin_interface.blob_manager_interface import BlobManagerFactory
 from ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager import HDFSBlobManager
+from ai_flow.plugin_interface.blob_manager_interface import BlobManagerFactory, BlobConfig
+
+_TMP_FOLDER = '/tmp/' + __name__
+_TMP_FILE = os.path.join(_TMP_FOLDER, 'file.txt')
 
 
 class TestHDFSBlobManager(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls) -> None:
+        if not os.path.exists(_TMP_FOLDER):
+            os.mkdir(_TMP_FOLDER)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        if os.path.exists(_TMP_FOLDER):
+            shutil.rmtree(_TMP_FOLDER)
+
+    def setUp(self) -> None:
+        file = open(_TMP_FILE, 'w')
+        file.close()
+
+    def tearDown(self) -> None:
+        if os.path.exists(_TMP_FILE):
+            os.remove(_TMP_FILE)
+
     @unittest.skipUnless((os.environ.get('blob_server.hdfs_url') is not None
                           and os.environ.get('blob_server.hdfs_user') is not None
-                          and os.environ.get('blob_server.repo_name') is not None), 'need set hdfs')
+                          and os.environ.get('blob_server.repo_name') is not None), 'need set hdfs config')
     def test_project_upload_download_hdfs(self):
-        project_path = get_file_dir(__file__)
         config = {
             'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager.HDFSBlobManager',
-            'local_repository': '/tmp',
-            'hdfs_url': os.environ.get('hdfs_url'),
-            'hdfs_user': os.environ.get('hdfs_user'),
-            'repo_name': os.environ.get('repo_name')
+            'blob_manager_config': {
+                'hdfs_url': os.environ.get('blob_server.hdfs_url'),
+                'hdfs_user': os.environ.get('blob_server.hdfs_user'),
+                'root_directory': os.environ.get('blob_server.repo_name')
+            }
         }
+        blob_config = BlobConfig(config)
+        blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
+                                                              blob_config.blob_manager_config())
+        uploaded_path = blob_manager.upload(_TMP_FILE)
+        self.assertEqual(os.path.join(os.environ.get('blob_server.repo_name'), os.path.basename(_TMP_FILE)),
+                         uploaded_path)
 
-        blob_manager = BlobManagerFactory.get_blob_manager(config)
-        uploaded_path = blob_manager.upload_project('1', project_path)
-
-        downloaded_path = blob_manager.download_project('1', uploaded_path)
-        self.assertEqual('/tmp/workflow_1_project/project', downloaded_path)
+        downloaded_path = blob_manager.download(uploaded_path, _TMP_FOLDER)
+        self.assertEqual(os.path.join(_TMP_FOLDER, os.path.basename(_TMP_FILE)), downloaded_path)
 
     def test_download_existed_file(self):
-        config = {'hdfs_url': 'localhost:50070'}
-        hdfs_blob_manager = HDFSBlobManager(config)
-        workflow_snapshot_id = round(time.time() * 1000)
+        config = {
+            'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager.HDFSBlobManager',
+            'blob_manager_config': {
+                'hdfs_url': 'mock',
+                'hdfs_user': 'mock',
+                'root_directory': 'hdfs:///path'
+            }
+        }
+        blob_config = BlobConfig(config)
+        blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
+                                                              blob_config.blob_manager_config())
 
         def mock_download_file_from_hdfs(hdfs_path, local_path):
             with open(local_path, 'w') as f:
-                f.write(str(workflow_snapshot_id))
+                f.write(str(time.time() * 1000))
 
-        hdfs_blob_manager._download_file_from_hdfs = mock_download_file_from_hdfs
+        blob_manager._download_file_from_hdfs = mock_download_file_from_hdfs
         with mock.patch(
-                'ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager.extract_project_zip_file'):
-            hdfs_blob_manager.download_project(workflow_snapshot_id, 'dummy', '/tmp/')
-            hdfs_blob_manager.download_project(workflow_snapshot_id, 'dummy', '/tmp/')
+                'hdfs.client.InsecureClient'):
+            blob_manager.download('hdfs:///path/file1', _TMP_FOLDER)
+            blob_manager.download('hdfs:///path/file2', _TMP_FOLDER)
 
 
 if __name__ == '__main__':

@@ -81,3 +81,4 @@ class Workflow(Graph):
 class WorkflowPropertyKeys(object):
     BLOB = "blob"
     JOB_PLUGINS = "job_plugins"
+    GENERATED_DIR = "generated_dir"

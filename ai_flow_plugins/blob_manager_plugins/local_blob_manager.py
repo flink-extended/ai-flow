@@ -18,12 +18,8 @@
 #
 import os
 import shutil
-import tempfile
 from typing import Text, Dict, Any
-from pathlib import Path
 from ai_flow.plugin_interface.blob_manager_interface import BlobManager
-from ai_flow.util.file_util.zip_file_util import make_dir_zipfile
-from ai_flow_plugins.blob_manager_plugins.blob_manager_utils import extract_project_zip_file
 
 
 class LocalBlobManager(BlobManager):
@@ -32,60 +28,50 @@ class LocalBlobManager(BlobManager):
     LocalBlobManager contains 2 configuration items:
     1. local_repository: It represents the root path of the downloaded project package.
                          If local_path is set, local_path is used first.
-    2. remote_repository: It represents the root path of the upload project package.
     """
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
-        self._local_repo = config.get('local_repository', None)
-        self._remote_repo = config.get('remote_repository', None)
+        if not self.root_dir:
+            raise Exception('`root_directory` option of blob manager config is not configured.')
 
-    def upload_project(self, workflow_snapshot_id: Text, project_path: Text) -> Text:
+    def upload(self, local_file_path: Text) -> Text:
         """
-        upload a given project to blob server for remote execution.
+        Upload a given file to blob server. Uploaded file will be placed under self.root_dir.
 
-        :param workflow_snapshot_id: It is the unique identifier for each workflow generation.
-        :param project_path: The path of this project.
-        :return The uri of the uploaded project file in blob server.
+        :param local_file_path: the path of file to be uploaded.
+        :return the uri of the uploaded file in blob server.
         """
-        if self._remote_repo is not None:
-            with tempfile.TemporaryDirectory() as temp_dir:
-                zip_file_name = 'workflow_{}_project.zip'.format(workflow_snapshot_id)
-                upload_file_path = Path('{}/{}'.format(self._remote_repo, zip_file_name))
-                if os.path.exists(upload_file_path):
-                    os.remove(upload_file_path)
-                temp_dir_path = Path(temp_dir)
-                zip_file_path = temp_dir_path / zip_file_name
-                make_dir_zipfile(project_path, zip_file_path)
-                shutil.move(zip_file_path, upload_file_path)
-                return str(upload_file_path)
+        if not os.path.exists(self.root_dir):
+            os.makedirs(self.root_dir)
+        file_name = os.path.basename(local_file_path)
+        dest_path = os.path.join(self.root_dir, file_name)
+        shutil.move(local_file_path, dest_path)
+        return dest_path
+
+    def download(self, remote_file_path: Text, local_dir: Text = None) -> Text:
+        """
+        Download file from remote blob server to local directory.
+        Only files located in self.root_dir can be downloaded by BlobManager.
+
+        :param remote_file_path: The path of file to be downloaded.
+        :param local_dir: the local directory.
+        :return the local uri of the downloaded file.
+        """
+        self._check_remote_path_legality(remote_file_path)
+        if local_dir is not None:
+            file_name = os.path.basename(remote_file_path)
+            dest_path = os.path.join(local_dir, file_name)
+            if remote_file_path != dest_path:
+                shutil.copy(remote_file_path, dest_path)
+            return dest_path
         else:
-            return project_path
+            return remote_file_path
 
-    def download_project(self, workflow_snapshot_id, remote_path: Text, local_path: Text = None) -> Text:
+    def _check_remote_path_legality(self, file_path: Text):
         """
-        download the needed resource from remote blob server to local process for remote execution.
+        Check if the file can be downloaded by blob manager.
 
-        :param workflow_snapshot_id: It is the unique identifier for each workflow generation.
-        :param remote_path: The project package uri.
-        :param local_path: Download file root path.
-        :return The local project path.
+        :param file_path: The path of file to be checked.
         """
-        if self._local_repo is not None:
-            repo_path = local_path if local_path is not None else self._local_repo
-            local_zip_file_name = 'workflow_{}_project'.format(workflow_snapshot_id)
-            extract_path = str(Path(repo_path) / local_zip_file_name)
-            return extract_project_zip_file(workflow_snapshot_id=workflow_snapshot_id,
-                                            local_root_path=repo_path,
-                                            zip_file_path=remote_path,
-                                            extract_project_path=extract_path)
-        else:
-            return remote_path
-
-    def cleanup_project(self, workflow_snapshot_id, remote_path: Text):
-        """
-        clean up the project files downloaded or created during this execution.
-        :param workflow_snapshot_id: It is the unique identifier for each workflow generation.
-        :param remote_path: The project package uri.
-        """
-        pass
-
+        if not file_path.startswith(self.root_dir):
+            raise Exception("Cannot download {} from blob server".format(file_path))

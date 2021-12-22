@@ -15,19 +15,14 @@
 # specific language governing permissions and limitations
 # under the License.
 import threading
-import time
+import os
+from typing import Any, Text
 
 from airflow.exceptions import AirflowException
-
-from airflow.models.taskexecution import TaskExecution
-
-from ai_flow.workflow.status import Status
-
-from ai_flow.util.json_utils import dumps
-from typing import Any, Text
-import os
 from airflow.models.baseoperator import BaseOperator
 from airflow.utils.decorators import apply_defaults
+from ai_flow.util.file_util.zip_file_util import extract_zip_file
+from ai_flow.workflow.status import Status
 from ai_flow.common.module_load import import_string
 from ai_flow.runtime.job_runtime_util import prepare_job_runtime_env
 from ai_flow.util.time_utils import datetime_to_int64
@@ -89,6 +84,7 @@ class AIFlowOperator(BaseOperator):
             self,
             job: Job,
             workflow: Workflow,
+            resource_dir: Text = None,
             **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -100,6 +96,7 @@ class AIFlowOperator(BaseOperator):
         self.job_controller: JobController = class_object()
         self.job_handle: JobHandle = None
         self.job_runtime_env: JobRuntimeEnv = None
+        self.resource_dir = resource_dir
 
     def context_to_job_info(self, project_name: Text, context: Any) -> JobExecutionInfo:
         """
@@ -124,19 +121,18 @@ class AIFlowOperator(BaseOperator):
         config = {}
         config.update(self.workflow.properties['blob'])
         blob_config = BlobConfig(config)
-        local_repo = blob_config.blob_manager_config().get('local_repository')
-        if local_repo is not None:
-            # Maybe Download the project code
-            if not os.path.exists(local_repo):
-                os.makedirs(local_repo)
-            blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
-                                                                  blob_config.blob_manager_config())
-            project_path: Text = blob_manager \
-                .download_project(workflow_snapshot_id=self.workflow.workflow_snapshot_id,
-                                  remote_path=self.workflow.project_uri,
-                                  local_path=local_repo)
-        else:
-            project_path = self.workflow.project_uri
+
+        workflow_repo = os.path.join(self.resource_dir,
+                                     self.workflow.workflow_name,
+                                     str(self.workflow.workflow_snapshot_id))
+        if not os.path.exists(workflow_repo):
+            os.makedirs(workflow_repo)
+        blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
+                                                              blob_config.blob_manager_config())
+        project_zip_path = blob_manager.download(remote_file_path=self.workflow.project_uri,
+                                                 local_dir=workflow_repo)
+        project_path: Text = extract_zip_file(zip_file_path=project_zip_path)
+
         self.log.info("project_path:" + project_path)
         project_context = build_project_context(project_path)
 
@@ -147,7 +143,8 @@ class AIFlowOperator(BaseOperator):
             root_working_dir = os.path.join(project_context.project_path, 'temp')
         self.log.info('working dir: {}'.format(root_working_dir))
 
-        self.job_runtime_env = prepare_job_runtime_env(workflow_snapshot_id=self.workflow.workflow_snapshot_id,
+        workflow_generated_dir = self.workflow.properties.get(WorkflowPropertyKeys.GENERATED_DIR)
+        self.job_runtime_env = prepare_job_runtime_env(workflow_generated_dir=workflow_generated_dir,
                                                        workflow_name=self.workflow.workflow_name,
                                                        project_context=project_context,
                                                        job_execution_info=job_execution_info,
