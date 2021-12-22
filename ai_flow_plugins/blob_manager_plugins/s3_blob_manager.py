@@ -54,6 +54,8 @@ class S3BlobManager(BlobManager):
 
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
+        if not self.root_dir:
+            raise Exception('`root_directory` option of blob manager config is not configured.')
         self.s3_client = boto3.client(service_name=config.get('service_name', None),
                                       region_name=config.get('region_name', None),
                                       api_version=config.get('api_version', None),

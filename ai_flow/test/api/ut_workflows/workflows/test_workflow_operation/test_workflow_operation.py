@@ -32,6 +32,7 @@ _PORT = '50051'
 
 
 SCHEDULER_CLASS = 'ai_flow.test.api.mock_plugins.MockScheduler'
+TEMP_DIR = '/tmp/ai_flow_mock_blob_directory'
 
 
 class TestWorkflowOperation(unittest.TestCase):
@@ -54,6 +55,8 @@ class TestWorkflowOperation(unittest.TestCase):
                                   scheduler_service_config=config)
         cls.server.run()
         wait_for_server_started('localhost:{}'.format(_PORT))
+        if not os.path.exists(TEMP_DIR):
+            os.makedirs(TEMP_DIR)
 
     @classmethod
     def tearDownClass(cls):
@@ -61,6 +64,8 @@ class TestWorkflowOperation(unittest.TestCase):
         if os.path.exists(_SQLITE_DB_FILE):
             os.remove(_SQLITE_DB_FILE)
         stop_notification_server(cls.ns_server)
+        if os.path.exists(TEMP_DIR):
+            shutil.rmtree(TEMP_DIR)
 
     def setUp(self):
         init_ai_flow_context()
@@ -156,6 +161,8 @@ class TestWorkflowOperation(unittest.TestCase):
 
         js = workflow_operation.list_job_executions(execution_id='1')
         self.assertEqual(2, len(js))
+
+    # def test__upload_project_package(self):
 
 
 if __name__ == '__main__':

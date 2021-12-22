@@ -21,4 +21,6 @@ server_uri: localhost:50051
 notification_server_uri: localhost:50052
 blob:
   blob_manager_class: ai_flow.test.api.mock_plugins.MockBlobManger
+  blob_manager_config:
+    root_directory: /tmp/ai_flow_mock_blob_directory
 a: a
