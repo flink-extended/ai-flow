@@ -85,7 +85,7 @@ class TestSchedulerClient(unittest.TestCase):
         self.scheduler.start(watcher=PassWatcher())
         with self.assertRaises(TimeoutError) as context:
             result = self.client.trigger_parse_dag(file_path='/test', timeout=1)
-        self.assertTrue('Get response timeout' in str(context.exception))
+        self.assertTrue('Trigger the scheduler to parse the dag timeout' in str(context.exception))
 
     def test_schedule_dag(self):
         class W(EventWatcher):
@@ -104,7 +104,7 @@ class TestSchedulerClient(unittest.TestCase):
         self.scheduler.start(watcher=PassWatcher())
         with self.assertRaises(TimeoutError) as context:
             result = self.client.schedule_dag(dag_id='1', context='', timeout=1)
-        self.assertTrue('Get response timeout' in str(context.exception))
+        self.assertTrue('Trigger the scheduler to schedule the dag timeout' in str(context.exception))
 
     def test_stop_dag_run(self):
         class W(EventWatcher):
@@ -123,7 +123,7 @@ class TestSchedulerClient(unittest.TestCase):
         self.scheduler.start(watcher=PassWatcher())
         with self.assertRaises(TimeoutError) as context:
             result = self.client.stop_dag_run(dag_id='1', context=ExecutionContext(dagrun_id='1'), timeout=1)
-        self.assertTrue('Get response timeout' in str(context.exception))
+        self.assertTrue('Trigger the scheduler to stop the dag run timeout' in str(context.exception))
 
     def test_schedule_task(self):
         class W(EventWatcher):
@@ -148,7 +148,7 @@ class TestSchedulerClient(unittest.TestCase):
                                                action=SchedulingAction.START,
                                                context=ExecutionContext(dagrun_id='1'),
                                                timeout=1)
-        self.assertTrue('Get response timeout' in str(context.exception))
+        self.assertTrue('Trigger the scheduler to schedule the task timeout' in str(context.exception))
 
 
 if __name__ == '__main__':
