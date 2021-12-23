@@ -248,6 +248,7 @@ def get_ai_flow_client() -> Optional[AIFlowClient]:
     if _default_ai_flow_client is None:
         current_uri = current_project_config().get_server_uri()
         if current_uri is None:
+            logging.warning("The project config do not set server_uri item.")
             return None
         else:
             _default_ai_flow_client \

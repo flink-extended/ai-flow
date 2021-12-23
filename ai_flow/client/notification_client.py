@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 from typing import Optional
-
+import logging
 from ai_flow.context.job_context import current_job_name
 from ai_flow.context.project_context import current_project_config
 from notification_service.client import NotificationClient
@@ -28,6 +28,7 @@ def get_notification_client() -> Optional[NotificationClient]:
     global _default_notification_client_dict
     current_uri = current_project_config().get_notification_server_uri()
     if current_uri is None:
+        logging.warning("The project config do not set notification_server_uri item.")
         return None
     else:
         if current_job_name() in _default_notification_client_dict:
