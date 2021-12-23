@@ -39,6 +39,10 @@ import org.aiflow.client.entity.WorkflowSnapshotMeta;
 import org.aiflow.client.exception.AIFlowException;
 import org.aiflow.client.proto.Message;
 
+import org.aiflow.notification.client.NotificationClient;
+
+import com.alibaba.fastjson.JSONObject;
+import org.aiflow.notification.entity.EventMeta;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -63,12 +67,24 @@ public class AIFlowClientTest {
     private static final int SEC = 1000;
 
     private static AIFlowClient client;
+    private static NotificationClient nsClient;
     private static final Map EMPTY_MAP = Collections.emptyMap();
 
     @BeforeAll
     public static void beforeClass() throws Exception {
         int port = Integer.valueOf(getProperties("port"));
         client = new AIFlowClient(LOCALHOST + ":" + port);
+        int ns_port = Integer.valueOf(getProperties("ns_port"));
+        nsClient =
+                new NotificationClient(
+                        LOCALHOST + ":" + ns_port,
+                        "default",
+                        "sender",
+                        false,
+                        1000,
+                        1000,
+                        10000,
+                        new Properties());
     }
 
     @AfterAll
@@ -632,6 +648,7 @@ public class AIFlowClientTest {
 
     @Test
     public void testModelVersionOperations() throws Exception {
+        client.setNotificationClient(nsClient);
         String projectName = "project_name";
         String uri = "www.code.com";
         ProjectMeta project = client.registerProject(projectName, uri, EMPTY_MAP);
@@ -698,6 +715,15 @@ public class AIFlowClientTest {
                         Message.ModelVersionStage.GENERATED,
                         null);
         Assertions.assertEquals("2", response3.getVersion());
+
+        List<EventMeta> eventMetas = nsClient.listAllEvents(0, 0, Integer.MAX_VALUE);
+        Assertions.assertEquals(5, eventMetas.size());
+        Assertions.assertEquals("MODEL_GENERATED", eventMetas.get(0).getEventType());
+        Assertions.assertEquals("MODEL_DEPLOYED", eventMetas.get(1).getEventType());
+        Assertions.assertEquals("MODEL_GENERATED", eventMetas.get(2).getEventType());
+        Assertions.assertEquals("MODEL_DELETED", eventMetas.get(3).getEventType());
+        Assertions.assertEquals("MODEL_GENERATED", eventMetas.get(4).getEventType());
+        client.setNotificationClient(null);
     }
 
     @Test
@@ -854,6 +880,7 @@ public class AIFlowClientTest {
 
     @Test
     public void testGetRegisteredModelDetail() throws Exception {
+        client.setNotificationClient(nsClient);
         String modelName = "test_get_registered_model_detail";
         String modelDesc = "test get registered model detail";
         client.createRegisteredModel(modelName, modelDesc);
@@ -883,10 +910,19 @@ public class AIFlowClientTest {
         modelVersion2 = model2.getLatestModelVersion();
         Assertions.assertEquals("2", modelVersion2.getModelVersion());
         Assertions.assertEquals(modelPath2, modelVersion2.getModelPath());
+        List<EventMeta> eventMetas = nsClient.listAllEvents(0, 0, Integer.MAX_VALUE);
+        Assertions.assertEquals(2, eventMetas.size());
+        Assertions.assertEquals("MODEL_GENERATED", eventMetas.get(0).getEventType());
+        JSONObject value = JSONObject.parseObject(eventMetas.get(0).getValue());
+        Assertions.assertEquals(
+                Message.ModelVersionStage.GENERATED.getNumber(), value.get("current_stage"));
+        Assertions.assertEquals("MODEL_GENERATED", eventMetas.get(1).getEventType());
+        client.setNotificationClient(null);
     }
 
     @Test
     public void testUpdateModelVersion() throws Exception {
+        client.setNotificationClient(nsClient);
         String modelName = "test_update_model_version";
         String modelDesc = "test update model version";
         client.createRegisteredModel(modelName, modelDesc);
@@ -906,10 +942,19 @@ public class AIFlowClientTest {
         Assertions.assertEquals("1", response.getModelVersion());
         Assertions.assertEquals(modelPath2, response.getModelPath());
         Assertions.assertEquals(ModelStage.VALIDATED, response.getCurrentStage());
+        List<EventMeta> eventMetas = nsClient.listAllEvents(0, 0, Integer.MAX_VALUE);
+        Assertions.assertEquals(2, eventMetas.size());
+        Assertions.assertEquals("MODEL_GENERATED", eventMetas.get(0).getEventType());
+        JSONObject value = JSONObject.parseObject(eventMetas.get(0).getValue());
+        Assertions.assertEquals(
+                Message.ModelVersionStage.GENERATED.getNumber(), value.get("current_stage"));
+        Assertions.assertEquals("MODEL_VALIDATED", eventMetas.get(1).getEventType());
+        client.setNotificationClient(null);
     }
 
     @Test
     public void testDeleteModelVersion() throws Exception {
+        client.setNotificationClient(nsClient);
         String modelName = "test_delete_model_version";
         String modelDesc = "test delete model version";
         client.createRegisteredModel(modelName, modelDesc);
@@ -928,6 +973,9 @@ public class AIFlowClientTest {
         Assertions.assertEquals("1", detail.getModelVersion());
         client.deleteModelVersion(modelName, "1");
         Assertions.assertNull(client.getModelVersionDetail(modelName, "1"));
+        List<EventMeta> eventMetas = nsClient.listAllEvents(0, 0, Integer.MAX_VALUE);
+        Assertions.assertEquals(2, eventMetas.size());
+        client.setNotificationClient(null);
     }
 
     // test metric center

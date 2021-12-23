@@ -19,10 +19,14 @@
 from typing import Optional, List
 
 import grpc
+import json
 
+from notification_service.base_notification import BaseEvent
+from ai_flow.client.notification_client import get_notification_client
 from ai_flow.model_center.entity.model_version import ModelVersion
 from ai_flow.model_center.entity.model_version_detail import ModelVersionDetail
-from ai_flow.model_center.entity.model_version_stage import ModelVersionStage
+from ai_flow.model_center.entity.model_version_stage import ModelVersionStage, MODEL_VERSION_TO_EVENT_TYPE, \
+    ModelVersionEventType
 from ai_flow.model_center.entity.registered_model import RegisteredModel
 from ai_flow.model_center.entity.registered_model_detail import RegisteredModelDetail
 from ai_flow.protobuf import model_center_service_pb2_grpc
@@ -136,7 +140,14 @@ class ModelCenterClient(BaseClient):
                                                                             version_desc=stringValue(version_desc),
                                                                             current_stage=current_stage))
         response = self.model_center_stub.createModelVersion(request)
-        return ModelVersionDetail.from_proto(_parse_response(response, ModelVersionMeta()))
+        model_version_detail = ModelVersionDetail.from_proto(_parse_response(response, ModelVersionMeta()))
+        event_type = MODEL_VERSION_TO_EVENT_TYPE.get(model_version_detail.current_stage)
+        notification_client = get_notification_client()
+        if notification_client is not None:
+            notification_client.send_event(BaseEvent(model_version_detail.model_name,
+                                                     json.dumps(model_version_detail.__dict__),
+                                                     event_type))
+        return model_version_detail
 
     def update_model_version(self, model_name, model_version, model_path=None, model_type=None,
                              version_desc=None, current_stage=None) -> Optional[ModelVersionDetail]:
@@ -161,7 +172,14 @@ class ModelCenterClient(BaseClient):
                                             version_desc=stringValue(version_desc),
                                             current_stage=current_stage))
         response = self.model_center_stub.updateModelVersion(request)
-        return ModelVersionDetail.from_proto(_parse_response(response, ModelVersionMeta()))
+        model_version_detail = ModelVersionDetail.from_proto(_parse_response(response, ModelVersionMeta()))
+        event_type = MODEL_VERSION_TO_EVENT_TYPE.get(model_version_detail.current_stage)
+        notification_client = get_notification_client()
+        if notification_client is not None:
+            notification_client.send_event(BaseEvent(model_version_detail.model_name,
+                                                     json.dumps(model_version_detail.__dict__),
+                                                     event_type))
+        return model_version_detail
 
     def delete_model_version(self, model_name, model_version) -> ModelVersion:
         """
@@ -175,7 +193,14 @@ class ModelCenterClient(BaseClient):
         request = DeleteModelVersionRequest(model_meta=ModelMetaParam(model_name=stringValue(model_name),
                                                                       model_version=stringValue(model_version)))
         response = self.model_center_stub.deleteModelVersion(request)
-        return ModelVersion.from_resp_proto(_parse_response(response, ModelMetaParam()))
+        model_version_meta = ModelVersion.from_resp_proto(_parse_response(response, ModelMetaParam()))
+        event_type = ModelVersionEventType.MODEL_DELETED
+        notification_client = get_notification_client()
+        if notification_client is not None:
+            notification_client.send_event(BaseEvent(model_version_meta.model_name,
+                                                     json.dumps(model_version_meta.__dict__),
+                                                     event_type))
+        return model_version_meta
 
     def get_model_version_detail(self, model_name, model_version) -> Optional[ModelVersionDetail]:
         """

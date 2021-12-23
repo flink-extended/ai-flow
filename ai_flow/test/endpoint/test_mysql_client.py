@@ -76,6 +76,7 @@ class TestAIFlowClientMySQL(test_client.TestAIFlowClientSqlite):
 
     def tearDown(self) -> None:
         sqlalchemy_db.clear_db(self.store_uri, base.metadata)
+        self.ns_server.storage.clean_up()
 
 
 if __name__ == '__main__':
