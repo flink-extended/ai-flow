@@ -38,74 +38,26 @@ import org.aiflow.client.entity.WorkflowSnapshotMeta;
 import org.aiflow.client.exception.AIFlowException;
 import org.aiflow.client.proto.Message;
 
-import org.aiflow.notification.client.EventWatcher;
-import org.aiflow.notification.client.NotificationClient;
-
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
-import org.aiflow.notification.entity.EventMeta;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-
-import static org.aiflow.client.common.Constant.DEFAULT_NAMESPACE;
-import static org.aiflow.notification.conf.Configuration.CLIENT_ENABLE_IDEMPOTENCE_CONFIG_KEY;
 
 /** Client of AIFlow Rest Endpoint that provides Metadata/Model/Notification function service. */
 public class AIFlowClient {
 
     private final MetadataClient metadataClient;
     private final ModelCenterClient modelCenterClient;
-    private final NotificationClient notificationClient;
     private final MetricClient metricClient;
 
-    public AIFlowClient(
-            String target,
-            String defaultNamespace,
-            String sender,
-            Boolean enableHa,
-            Integer listMemberIntervalMs,
-            Integer retryIntervalMs,
-            Integer retryTimeoutMs,
-            String notificationServiceTarget)
-            throws Exception {
-        this(
-                ManagedChannelBuilder.forTarget(target).usePlaintext().build(),
-                StringUtils.isEmpty(defaultNamespace) ? DEFAULT_NAMESPACE : defaultNamespace,
-                sender,
-                enableHa,
-                listMemberIntervalMs,
-                retryIntervalMs,
-                retryTimeoutMs,
-                notificationServiceTarget);
+    public AIFlowClient(String target) throws Exception {
+        this(ManagedChannelBuilder.forTarget(target).usePlaintext().build());
     }
 
-    public AIFlowClient(
-            Channel channel,
-            String defaultNamespace,
-            String sender,
-            Boolean enableHa,
-            Integer listMemberIntervalMs,
-            Integer retryIntervalMs,
-            Integer retryTimeoutMs,
-            String notificationServiceTarget)
-            throws Exception {
+    public AIFlowClient(Channel channel) throws Exception {
         this.metadataClient = new MetadataClient(channel);
         this.modelCenterClient = new ModelCenterClient(channel);
-        Properties properties = new Properties();
-        properties.put(CLIENT_ENABLE_IDEMPOTENCE_CONFIG_KEY, "true");
-        this.notificationClient =
-                new NotificationClient(
-                        notificationServiceTarget,
-                        defaultNamespace,
-                        sender,
-                        enableHa,
-                        listMemberIntervalMs,
-                        retryIntervalMs,
-                        retryTimeoutMs,
-                        properties);
         this.metricClient = new MetricClient(channel);
     }
 
@@ -950,83 +902,6 @@ public class AIFlowClient {
     public ModelVersion getModelVersionDetail(String modelName, String modelVersion)
             throws Exception {
         return this.modelCenterClient.getModelVersionDetail(modelName, modelVersion);
-    }
-
-    /**
-     * Send the event to Notification Service.
-     *
-     * @param key Key of event updated in Notification Service.
-     * @param value Value of event updated in Notification Service.
-     * @param eventType Type of event updated in Notification Service.
-     * @param context Context of event updated in Notification Service.
-     * @return Object of Event created in Notification Service.
-     */
-    public EventMeta sendEvent(String key, String value, String eventType, String context)
-            throws Exception {
-        return this.notificationClient.sendEvent(key, value, eventType, context);
-    }
-
-    /**
-     * List specific `key` or `version` notifications in Notification Service.
-     *
-     * @param namespace Namespace of notification for listening.
-     * @param keys Keys of notification for listening.
-     * @param version (Optional) Version of notification for listening.
-     * @param eventType (Optional) Type of event for listening.
-     * @param startTime (Optional) Type of event for listening.
-     * @return List of Notification updated in Notification Service.
-     */
-    public List<EventMeta> listEvents(
-            String namespace,
-            List<String> keys,
-            long version,
-            String eventType,
-            long startTime,
-            String sender)
-            throws Exception {
-        return this.notificationClient.listEvents(
-                namespace, keys, version, eventType, startTime, sender);
-    }
-
-    /**
-     * Start listen specific `key` or `version` notifications in Notification Service.
-     *
-     * @param namespace Namespace of notification for listening.
-     * @param key Key of notification for listening.
-     * @param watcher Watcher instance for listening notification.
-     * @param version (Optional) Version of notification for listening.
-     * @param eventType (Optional) Type of event for listening.
-     * @param startTime (Optional) Type of event for listening.
-     */
-    public void startListenEvent(
-            String namespace,
-            String key,
-            EventWatcher watcher,
-            long version,
-            String eventType,
-            long startTime,
-            String sender) {
-        this.notificationClient.startListenEvent(
-                namespace, key, watcher, version, eventType, startTime, sender);
-    }
-
-    /**
-     * Stop listen specific `key` notifications in Notification Service.
-     *
-     * @param key Key of notification for listening.
-     */
-    public void stopListenEvent(String namespace, String key, String eventType, String sender) {
-        this.notificationClient.stopListenEvent(namespace, key, eventType, sender);
-    }
-
-    /**
-     * Get latest version of specific `key` notifications in Notification Service.
-     *
-     * @param namespace Namespace of notification for listening.
-     * @param key Key of notification for listening.
-     */
-    public long getLatestVersion(String namespace, String key) throws Exception {
-        return this.notificationClient.getLatestVersion(namespace, key);
     }
 
     /**

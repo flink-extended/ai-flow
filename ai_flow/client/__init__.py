@@ -35,6 +35,7 @@ from ai_flow.meta.workflow_snapshot_meta import WorkflowSnapshotMeta
 from ai_flow.model_center.entity.model_version_detail import ModelVersionDetail
 from ai_flow.model_center.entity.model_version_stage import ModelVersionStage
 from ai_flow.model_center.entity.registered_model_detail import RegisteredModelDetail
+from ai_flow.client.notification_client import get_notification_client
 
 
 def get_dataset_by_id(dataset_id) -> Optional[DatasetMeta]:

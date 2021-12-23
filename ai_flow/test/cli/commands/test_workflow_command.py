@@ -52,7 +52,7 @@ class TestCliWorkflow(TestCommand):
         with redirect_stdout(io.StringIO()) as stdout:
             workflow_list_executions(
                 self.parser.parse_args(['workflow', 'list-executions', PROJECT_PATH, 'workflow_1']))
-        self.assertEquals(11, len(str.splitlines(stdout.getvalue())))
+        self.assertEquals(7, len(str.splitlines(stdout.getvalue())[0].split('|')))
 
     def test_cli_workflow_pause_scheduling(self):
         with redirect_stdout(io.StringIO()) as stdout:
@@ -82,7 +82,7 @@ class TestCliWorkflow(TestCommand):
         with redirect_stdout(io.StringIO()) as stdout:
             workflow_show_execution(
                 self.parser.parse_args(['workflow', 'show-execution', PROJECT_PATH, '1']))
-        self.assertEquals(8, len(str.splitlines(stdout.getvalue())))
+        self.assertEquals(7, len(str.splitlines(stdout.getvalue())[0].split('|')))
 
     def test_cli_workflow_start_execution(self):
         with redirect_stdout(io.StringIO()) as stdout:
