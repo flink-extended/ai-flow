@@ -52,6 +52,15 @@ class TestOSSBlobManager(unittest.TestCase):
         if os.path.exists(_TMP_FILE):
             os.remove(_TMP_FILE)
 
+    def test_without_root_directory_set(self):
+        config = {
+            'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.oss_blob_manager.OssBlobManager'
+        }
+        blob_config = BlobConfig(config)
+        with self.assertRaisesRegex(Exception, '`root_directory` option of blob manager config is not configured'):
+            BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
+                                                   blob_config.blob_manager_config())
+
     @unittest.skipUnless((os.environ.get('blob_server.endpoint') is not None
                           and os.environ.get('blob_server.access_key_id') is not None
                           and os.environ.get('blob_server.access_key_secret') is not None
