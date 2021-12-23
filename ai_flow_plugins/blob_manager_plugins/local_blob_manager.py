@@ -25,9 +25,8 @@ from ai_flow.plugin_interface.blob_manager_interface import BlobManager
 class LocalBlobManager(BlobManager):
     """
     LocalBlobManager is an implementation of BlobManager based on the local file system.
-    LocalBlobManager contains 2 configuration items:
-    1. local_repository: It represents the root path of the downloaded project package.
-                         If local_path is set, local_path is used first.
+    LocalBlobManager contains configuration items:
+    1. root_directory: The upload directory of the project.
     """
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)

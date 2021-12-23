@@ -33,6 +33,7 @@ class OssBlobManager(BlobManager):
     1. access_key_id: The oss access key.
     2. access_key_secret: The oss access secret.
     3. bucket: The oss bucket name.
+    4. root_directory: The upload directory of the project.
     """
 
     def __init__(self, config: Dict[str, Any]):

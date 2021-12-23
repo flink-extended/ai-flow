@@ -30,7 +30,7 @@ class HDFSBlobManager(BlobManager):
     HDFSBlobManager contains configuration items:
     1. hdfs_url: Hostname or IP address of HDFS namenode, prefixed with protocol, followed by WebHDFS port on namenode
     2. hdfs_user: User default. Defaults to the current user's (as determined by `whoami`).
-    3. repo_name: The upload directory of the project.
+    3. root_directory: The upload directory of the project.
     """
 
     def __init__(self, config: Dict[str, Any]):

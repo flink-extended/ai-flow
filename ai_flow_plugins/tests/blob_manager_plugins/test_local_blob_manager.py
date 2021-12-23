@@ -70,7 +70,7 @@ class TestLocalBlobManager(unittest.TestCase):
         config = {
             'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.local_blob_manager.LocalBlobManager',
             'blob_manager_config': {
-                'root_directory': ''
+                'root_directory': _UPLOAD_FOLDER
             }
         }
         blob_config = BlobConfig(config)
@@ -78,8 +78,6 @@ class TestLocalBlobManager(unittest.TestCase):
                                                               blob_config.blob_manager_config())
 
         uploaded_path = blob_manager.upload(_TMP_FILE)
-        self.assertEqual(_TMP_FILE, uploaded_path)
-
         downloaded_path = blob_manager.download(uploaded_path)
         self.assertEqual(uploaded_path, downloaded_path)
 

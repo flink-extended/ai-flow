@@ -19,6 +19,7 @@
 import os
 import threading
 import unittest
+from tempfile import TemporaryDirectory
 from unittest import mock
 
 from ai_flow.plugin_interface.blob_manager_interface import BlobConfig, BlobManagerFactory
@@ -40,7 +41,7 @@ class TestS3BlobManager(unittest.TestCase):
                           and os.environ.get('blob_server.secret_access_key') is not None
                           and os.environ.get('blob_server.bucket_name') is not None), 'need set s3')
     def test_project_upload_download_s3(self):
-        project_path = get_file_dir(__file__)
+        upload_file = os.path.abspath(__file__)
         config = {
             'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.s3_blob_manager.S3BlobManager',
             'blob_manager_config': {
@@ -52,18 +53,19 @@ class TestS3BlobManager(unittest.TestCase):
                 'endpoint_url': os.environ.get('blob_server.endpoint_url'),
                 'access_key_id': os.environ.get('blob_server.access_key_id'),
                 'secret_access_key': os.environ.get('blob_server.secret_access_key'),
-                'bucket_name': os.environ.get('blob_server.bucket_name'),
-                'local_repository': '/tmp'
+                'bucket_name': os.environ.get('blob_server.bucket_name')
             }
         }
 
         blob_config = BlobConfig(config)
         blob_manager = BlobManagerFactory.create_blob_manager(
             blob_config.blob_manager_class(), blob_config.blob_manager_config())
-        uploaded_path = blob_manager.upload_project('1', project_path)
-
-        downloaded_path = blob_manager.download_project('1', uploaded_path)
-        self.assertEqual('/tmp/workflow_1_project/project', downloaded_path)
+        uploaded_path = blob_manager.upload(upload_file)
+        file_name = os.path.basename(upload_file)
+        self.assertEquals(uploaded_path, file_name)
+        with TemporaryDirectory() as tmp_dir:
+            downloaded_path = blob_manager.download(file_name, tmp_dir)
+            self.assertEqual(os.path.join(tmp_dir, file_name), downloaded_path)
 
     def test_concurrent_download_s3_file(self):
         project_zip = '/tmp/workflow_1_project.zip'
@@ -86,7 +88,7 @@ class TestS3BlobManager(unittest.TestCase):
                 'ai_flow_plugins.blob_manager_plugins.s3_blob_manager.extract_project_zip_file'):
             def download_loop():
                 for i in range(1000):
-                    s3_blob_manager.download_project('1', 'dummy_path', '/tmp')
+                    s3_blob_manager.download('dummy_path', '/tmp')
 
             try:
                 t1 = threading.Thread(target=download_loop)
@@ -100,14 +102,6 @@ class TestS3BlobManager(unittest.TestCase):
 
     def test__get_s3_object_retry(self):
         config = {'service_name': 's3'}
-        config = {
-            'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager.HDFSBlobManager',
-            'blob_manager_config': {
-                'hdfs_url': 'mock',
-                'hdfs_user': 'mock',
-                'root_directory': 'hdfs:///path'
-            }
-        }
         s3_blob_manager = S3BlobManager(config)
 
         with mock.patch.object(s3_blob_manager, 's3_client') as mock_client:
