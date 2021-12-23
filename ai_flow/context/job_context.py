@@ -59,3 +59,9 @@ def set_current_job_name(job_name):
     global __current_job_context__
     __current_job_context__.job_depth = 1
     __current_job_context__.current_job_name = job_name
+
+
+def unset_current_job_name():
+    global __current_job_context__
+    __current_job_context__.job_depth = 0
+    __current_job_context__.current_job_name = None

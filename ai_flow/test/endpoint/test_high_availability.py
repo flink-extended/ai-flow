@@ -23,7 +23,6 @@ from notification_service.event_storage import MemoryEventStorage
 from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 
-from ai_flow.project.project_config import ProjectConfig
 from ai_flow.client.ai_flow_client import AIFlowClient
 from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.store.db.base_model import base
@@ -65,14 +64,10 @@ class TestHighAvailableAIFlowServer(unittest.TestCase):
         self.server1.run()
         self.server2 = None
         self.server3 = None
-        self.config = ProjectConfig()
-        self.config.set_enable_ha(True)
-        self.config.set_notification_server_uri('localhost:30031')
-        self.config.set_project_name('test_project')
-        self.client = AIFlowClient(server_uri='localhost:50051', project_config=self.config)
+        self.client = AIFlowClient(server_uri='localhost:50051',
+                                   enable_ha=True)
 
     def tearDown(self) -> None:
-        self.client.stop_listen_event()
         self.client.disable_high_availability()
         if self.server1 is not None:
             self.server1.stop()

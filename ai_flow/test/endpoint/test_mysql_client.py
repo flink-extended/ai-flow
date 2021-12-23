@@ -62,15 +62,12 @@ class TestAIFlowClientMySQL(test_client.TestAIFlowClientSqlite):
 
         cls.server = AIFlowServer(store_uri=cls.store_uri, port=_PORT)
         cls.server.run()
-        test_client.client = AIFlowClient(server_uri='localhost:' + _PORT, notification_server_uri=_NS_URI)
-        test_client.client1 = AIFlowClient(server_uri='localhost:' + _PORT, notification_server_uri=_NS_URI)
-        test_client.client2 = AIFlowClient(server_uri='localhost:' + _PORT, notification_server_uri=_NS_URI)
+        test_client.client = AIFlowClient(server_uri='localhost:' + _PORT)
+        test_client.client1 = AIFlowClient(server_uri='localhost:' + _PORT)
+        test_client.client2 = AIFlowClient(server_uri='localhost:' + _PORT)
 
     @classmethod
     def tearDownClass(cls) -> None:
-        test_client.client.stop_listen_event()
-        test_client.client1.stop_listen_event()
-        test_client.client2.stop_listen_event()
         cls.server.stop()
         cls.ns_server.stop()
 
