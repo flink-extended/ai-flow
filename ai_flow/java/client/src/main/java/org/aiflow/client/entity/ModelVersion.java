@@ -23,6 +23,8 @@ import org.aiflow.client.proto.Message.ModelMetaParam;
 import org.aiflow.client.proto.Message.ModelVersionMeta;
 import org.aiflow.client.proto.Message.ModelVersionStatus;
 
+import com.google.gson.JsonObject;
+
 public class ModelVersion {
 
     private String modelName;
@@ -111,6 +113,18 @@ public class ModelVersion {
 
     public void setCurrentStage(ModelStage currentStage) {
         this.currentStage = currentStage;
+    }
+
+    public String toJsonString() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("model_name", this.modelName);
+        jsonObject.addProperty("model_version", this.modelVersion);
+        jsonObject.addProperty("model_path", this.modelPath);
+        jsonObject.addProperty("model_type", this.modelType);
+        jsonObject.addProperty("version_desc", this.versionDesc);
+        jsonObject.addProperty("version_status", this.versionStatus.getNumber());
+        jsonObject.addProperty("current_stage", this.currentStage.getModelStage().getNumber());
+        return jsonObject.toString();
     }
 
     @Override

@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import json
 import os
 import time
 import unittest
@@ -28,6 +29,9 @@ from ai_flow.common.properties import Properties
 from ai_flow.common.status import Status
 from ai_flow.meta.dataset_meta import DatasetMeta, DataType, Schema
 from ai_flow.meta.job_meta import State
+from ai_flow.context.project_context import set_current_project_config
+from ai_flow.context.job_context import set_current_job_name, unset_current_job_name
+from ai_flow.client.notification_client import get_notification_client
 from ai_flow.meta.metric_meta import MetricType, MetricMeta, MetricSummary
 from ai_flow.model_center.entity.model_version_stage import ModelVersionStage
 from ai_flow.protobuf.message_pb2 import RESOURCE_ALREADY_EXISTS
@@ -367,6 +371,10 @@ class AIFlowClientTestCases(object):
     """test model version"""
 
     def test_model_version_api(self):
+        set_current_project_config({"server_uri": "localhost:{}".format(_PORT),
+                                    "notification_server_uri": _NS_URI,
+                                    "project_name": "project"})
+        set_current_job_name("job_1")
         project = client.register_project(name='project', uri='www.code.com')
         model = client.register_model(model_name='test_register_model',
                                       model_desc='test register model', project_id=project.uuid)
@@ -411,6 +419,15 @@ class AIFlowClientTestCases(object):
         self.assertEqual(model_version_meta.model_path, 'fs://source1.pkl')
         self.assertIsNone(model_version_meta.model_type)
         self.assertEqual(model_version_meta.version_desc, 'test model version 1')
+
+        events = get_notification_client().list_all_events(start_version=0)
+        for e in events:
+            print(e.key, e.value)
+        self.assertEqual(5, len(events))
+        self.assertEqual(ModelVersionStage.GENERATED, json.loads(events[0].value)['current_stage'])
+        self.assertEqual(ModelVersionStage.DEPLOYED, json.loads(events[1].value)['current_stage'])
+        self.assertEqual(ModelVersionStage.GENERATED, json.loads(events[2].value)['current_stage'])
+        unset_current_job_name()
 
     def test_get_latest_model_version(self):
         project = client.register_project(name='project', uri='www.code.com')
@@ -649,6 +666,10 @@ class AIFlowClientTestCases(object):
         self.assertEqual(model_version.version_desc, version_desc2)
 
     def test_create_model_version(self):
+        set_current_project_config({"server_uri": "localhost:{}".format(_PORT),
+                                    "notification_server_uri": _NS_URI,
+                                    "project_name": "project"})
+        set_current_job_name("job_1")
         model_name = 'test_create_model_version'
         model_desc = 'test create model version'
         response = client.create_registered_model(model_name=model_name, model_desc=model_desc)
@@ -680,8 +701,17 @@ class AIFlowClientTestCases(object):
         self.assertEqual(response.model_path, model_path2)
         self.assertEqual(response.model_type, model_type2)
         self.assertEqual(response.version_desc, version_desc2)
+        events = get_notification_client().list_all_events(start_version=0)
+        self.assertEqual(2, len(events))
+        self.assertEqual(ModelVersionStage.GENERATED, json.loads(events[0].value)['current_stage'])
+        self.assertEqual(ModelVersionStage.GENERATED, json.loads(events[1].value)['current_stage'])
+        unset_current_job_name()
 
     def test_update_model_version(self):
+        set_current_project_config({"server_uri": "localhost:{}".format(_PORT),
+                                    "notification_server_uri": _NS_URI,
+                                    "project_name": "project"})
+        set_current_job_name("job_1")
         model_name = 'test_update_model_version'
         model_desc = 'test update model version'
         response = client.create_registered_model(model_name=model_name, model_desc=model_desc)
@@ -721,8 +751,18 @@ class AIFlowClientTestCases(object):
         response = client.update_model_version(model_name=model_name, model_version='1',
                                                current_stage=ModelVersionStage.DEPLOYED)
         self.assertEqual(response.current_stage, ModelVersionStage.DEPLOYED)
+        events = get_notification_client().list_all_events(start_version=0)
+        self.assertEqual(3, len(events))
+        self.assertEqual(ModelVersionStage.GENERATED, json.loads(events[0].value)['current_stage'])
+        self.assertEqual(ModelVersionStage.VALIDATED, json.loads(events[1].value)['current_stage'])
+        self.assertEqual(ModelVersionStage.DEPLOYED, json.loads(events[2].value)['current_stage'])
+        unset_current_job_name()
 
     def test_delete_model_version(self):
+        set_current_project_config({"server_uri": "localhost:{}".format(_PORT),
+                                    "notification_server_uri": _NS_URI,
+                                    "project_name": "project"})
+        set_current_job_name("job_1")
         model_name = 'test_delete_model_version'
         model_desc = 'test delete model version'
         response = client.create_registered_model(model_name=model_name, model_desc=model_desc)
@@ -744,6 +784,11 @@ class AIFlowClientTestCases(object):
         client.delete_model_version(model_name, '1')
         response = client.get_model_version_detail(model_name, '1')
         self.assertIsNone(response)
+        events = get_notification_client().list_all_events(start_version=0)
+        self.assertEqual(2, len(events))
+        self.assertEqual(ModelVersionStage.GENERATED, json.loads(events[0].value)['current_stage'])
+        self.assertEqual("MODEL_DELETED", events[1].event_type)
+        unset_current_job_name()
 
     def test_get_model_version_detail(self):
         model_name = 'test_get_model_version_detail'
@@ -1064,6 +1109,7 @@ class TestAIFlowClientSqlite(AIFlowClientTestCases, unittest.TestCase):
 
     def tearDown(self) -> None:
         sqlalchemy_db.clear_db(_SQLITE_DB_URI, base.metadata)
+        self.ns_server.storage.clean_up()
 
 
 @unittest.skip("Skip until HA is re-implemented.")
@@ -1102,6 +1148,7 @@ class TestAIFlowClientSqliteWithSingleHighAvailableServer(
 
     def tearDown(self) -> None:
         sqlalchemy_db.clear_db(_SQLITE_DB_URI, base.metadata)
+        self.ns_server.storage.clean_up()
 
 
 if __name__ == '__main__':
