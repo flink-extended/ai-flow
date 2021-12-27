@@ -234,6 +234,11 @@ class AirFlowScheduler(AirFlowSchedulerBase):
             if dagrun is None:
                 return None
             project_name, workflow_name = self.dag_id_to_namespace_workflow(dagrun.dag_id)
+            if dagrun.state in State.finished:
+                return WorkflowExecutionInfo(workflow_info=WorkflowInfo(namespace=project_name,
+                                                                        workflow_name=workflow_name),
+                                             workflow_execution_id=workflow_execution_id,
+                                             status=status.Status.FINISHED)
             context: ExecutionContext = ExecutionContext(dagrun_id=dagrun.run_id)
             current_context = self.airflow_client.stop_dag_run(dagrun.dag_id, context)
             return WorkflowExecutionInfo(workflow_info=WorkflowInfo(namespace=project_name,
