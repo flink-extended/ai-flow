@@ -41,7 +41,8 @@ import org.aiflow.client.proto.Message;
 
 import org.aiflow.notification.client.NotificationClient;
 
-import com.alibaba.fastjson.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.aiflow.notification.entity.EventMeta;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -913,9 +914,10 @@ public class AIFlowClientTest {
         List<EventMeta> eventMetas = nsClient.listAllEvents(0, 0, Integer.MAX_VALUE);
         Assertions.assertEquals(2, eventMetas.size());
         Assertions.assertEquals("MODEL_GENERATED", eventMetas.get(0).getEventType());
-        JSONObject value = JSONObject.parseObject(eventMetas.get(0).getValue());
+        JsonObject value = new Gson().fromJson(eventMetas.get(0).getValue(), JsonObject.class);
         Assertions.assertEquals(
-                Message.ModelVersionStage.GENERATED.getNumber(), value.get("current_stage"));
+                Message.ModelVersionStage.GENERATED.getNumber(),
+                value.get("current_stage").getAsInt());
         Assertions.assertEquals("MODEL_GENERATED", eventMetas.get(1).getEventType());
         client.setNotificationClient(null);
     }
@@ -945,9 +947,10 @@ public class AIFlowClientTest {
         List<EventMeta> eventMetas = nsClient.listAllEvents(0, 0, Integer.MAX_VALUE);
         Assertions.assertEquals(2, eventMetas.size());
         Assertions.assertEquals("MODEL_GENERATED", eventMetas.get(0).getEventType());
-        JSONObject value = JSONObject.parseObject(eventMetas.get(0).getValue());
+        JsonObject value = new Gson().fromJson(eventMetas.get(0).getValue(), JsonObject.class);
         Assertions.assertEquals(
-                Message.ModelVersionStage.GENERATED.getNumber(), value.get("current_stage"));
+                Message.ModelVersionStage.GENERATED.getNumber(),
+                value.get("current_stage").getAsInt());
         Assertions.assertEquals("MODEL_VALIDATED", eventMetas.get(1).getEventType());
         client.setNotificationClient(null);
     }

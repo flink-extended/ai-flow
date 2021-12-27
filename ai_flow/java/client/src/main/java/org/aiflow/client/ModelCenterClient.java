@@ -43,7 +43,7 @@ import org.aiflow.client.proto.ModelCenterServiceOuterClass.UpdateRegisteredMode
 
 import org.aiflow.notification.client.NotificationClient;
 
-import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
 import com.google.protobuf.util.JsonFormat.Parser;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
@@ -327,12 +327,12 @@ public class ModelCenterClient {
                         ? null
                         : buildModelVersion(builder.build());
         if (null != modelVersionResult && null != this.notificationClient) {
-            JSONObject value = new JSONObject();
-            value.put("model_name", modelVersionResult.getModelName());
-            value.put("model_version", modelVersionResult.getModelVersion());
+            JsonObject value = new JsonObject();
+            value.addProperty("model_name", modelVersionResult.getModelName());
+            value.addProperty("model_version", modelVersionResult.getModelVersion());
             this.notificationClient.sendEvent(
                     modelVersionResult.getModelName(),
-                    value.toJSONString(),
+                    value.toString(),
                     modelStageToEventTypeMap.get(ModelStage.DELETED),
                     "");
         }

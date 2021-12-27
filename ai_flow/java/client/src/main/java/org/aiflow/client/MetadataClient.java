@@ -69,7 +69,7 @@ import org.aiflow.client.proto.MetadataServiceOuterClass.WorkflowNameRequest;
 
 import org.aiflow.notification.client.NotificationClient;
 
-import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
 import com.google.protobuf.util.JsonFormat.Parser;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
@@ -726,12 +726,12 @@ public class MetadataClient {
         Status status = metadataDeleteResponse(response);
         if (Status.OK == status && null != this.notificationClient) {
             ModelMeta modelMeta = this.getModelById(modelId);
-            JSONObject value = new JSONObject();
-            value.put("model_name", modelMeta.getName());
-            value.put("model_version", version);
+            JsonObject value = new JsonObject();
+            value.addProperty("model_name", modelMeta.getName());
+            value.addProperty("model_version", version);
             this.notificationClient.sendEvent(
                     modelMeta.getName(),
-                    value.toJSONString(),
+                    value.toString(),
                     modelStageToEventTypeMap.get(ModelStage.DELETED),
                     "");
         }

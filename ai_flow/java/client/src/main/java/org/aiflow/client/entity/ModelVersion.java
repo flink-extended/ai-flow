@@ -23,7 +23,7 @@ import org.aiflow.client.proto.Message.ModelMetaParam;
 import org.aiflow.client.proto.Message.ModelVersionMeta;
 import org.aiflow.client.proto.Message.ModelVersionStatus;
 
-import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
 
 public class ModelVersion {
 
@@ -116,15 +116,15 @@ public class ModelVersion {
     }
 
     public String toJsonString() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("model_name", this.modelName);
-        jsonObject.put("model_version", this.modelVersion);
-        jsonObject.put("model_path", this.modelPath);
-        jsonObject.put("model_type", this.modelType);
-        jsonObject.put("version_desc", this.versionDesc);
-        jsonObject.put("version_status", this.versionStatus);
-        jsonObject.put("current_stage", this.currentStage.getModelStage().getNumber());
-        return jsonObject.toJSONString();
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("model_name", this.modelName);
+        jsonObject.addProperty("model_version", this.modelVersion);
+        jsonObject.addProperty("model_path", this.modelPath);
+        jsonObject.addProperty("model_type", this.modelType);
+        jsonObject.addProperty("version_desc", this.versionDesc);
+        jsonObject.addProperty("version_status", this.versionStatus.getNumber());
+        jsonObject.addProperty("current_stage", this.currentStage.getModelStage().getNumber());
+        return jsonObject.toString();
     }
 
     @Override
