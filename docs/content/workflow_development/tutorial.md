@@ -82,8 +82,7 @@ blob:
         access_key_secret: [The secret of the access key]
         endpoint: [Access domain name or CNAME]
         bucket: [The name of the bucket]
-        repo_name: [The upload directory of the bucket]
-        local_repository: [The download directory of the local]
+        root_directory: [The upload directory of the bucket]
 ```
 
 * `HDFSBlobManager`
@@ -97,8 +96,7 @@ blob:
   blob_manager_config:
         hdfs_url: [Hostname or IP address of HDFS namenode, prefixed with protocol, followed by WebHDFS port on namenode]
         hdfs_user: [User default. Defaults to the current user's (as determined by `whoami`)]
-        repo_name: [The upload directory of the bucket]
-        local_repository: [The download directory of the local]
+        root_directory: [The upload directory of the bucket]
 ```
 
 * `S3BlobManager`
@@ -121,7 +119,6 @@ blob:
         session_token: [The session key for your AWS account]
         config: [Advanced client configuration options]
         bucket_name: [The S3 bucket name]
-        local_repository: [The download directory of the local]
 ```
 
 ### Prepare a Workflow

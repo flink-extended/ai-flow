@@ -25,10 +25,10 @@ class MockBlockManager(BlobManager):
     def __init__(self, config):
         super().__init__(config)
 
-    def upload_project(self, workflow_snapshot_id: Text, project_path: Text) -> Text:
+    def upload(self, local_file_path: Text) -> Text:
         return 'upload'
 
-    def download_project(self, workflow_snapshot_id, remote_path: Text, local_path: Text = None) -> Text:
+    def download(self, remote_file_path: Text, local_dir: Text) -> Text:
         return 'download'
 
 
@@ -36,15 +36,18 @@ class TestBlobManager(unittest.TestCase):
 
     def test_blob_manager_factory(self):
         config = {
-            'blob_manager_class': 'ai_flow.test.plugin_interface.test_blob_manager.MockBlockManager'
+            'blob_manager_class': 'ai_flow.test.plugin_interface.test_blob_manager.MockBlockManager',
+            'blob_manager_config': {
+                'root_directory': '/tmp'
+            }
         }
         blob_config = BlobConfig(config)
         blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
                                                               blob_config.blob_manager_config())
-        uploaded_path = blob_manager.upload_project('1', None)
+        uploaded_path = blob_manager.upload('')
         self.assertEqual('upload', uploaded_path)
 
-        downloaded_path = blob_manager.download_project('1', uploaded_path)
+        downloaded_path = blob_manager.download('', '')
         self.assertEqual('download', downloaded_path)
 
 

@@ -39,6 +39,7 @@ from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
 from ai_flow.scheduler_service.service.workflow_event_manager import WorkflowEventManager
 from ai_flow.store.db.db_util import create_db_store
 from ai_flow.util import json_utils
+from ai_flow.util.file_util.zip_file_util import extract_zip_file
 from ai_flow.workflow.control_edge import WorkflowAction
 from ai_flow.workflow.workflow import Workflow
 from ai_flow.workflow.workflow import WorkflowPropertyKeys
@@ -87,11 +88,9 @@ class SchedulerService(SchedulingServiceServicer):
             blob_config = BlobConfig(raw_config)
             blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
                                                                   blob_config.blob_manager_config())
-            project_path: Text = blob_manager \
-                .download_project(workflow_snapshot_id=workflow.workflow_snapshot_id,
-                                  remote_path=workflow.project_uri,
-                                  local_path=self._scheduler_service_config.repository())
-
+            project_zip_path = blob_manager.download(remote_file_path=workflow.project_uri,
+                                                     local_dir=self._scheduler_service_config.repository())
+            project_path: Text = extract_zip_file(zip_file_path=project_zip_path)
             project_context: ProjectContext = build_project_context(project_path)
             project_name = project_context.project_name
 

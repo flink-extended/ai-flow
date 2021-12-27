@@ -24,5 +24,4 @@ blob:
   blob_manager_config:
     hdfs_url: http://hadoop-dfs:50070
     hdfs_user: hdfs
-    repo_name: /tmp
-    local_repository: /tmp
+    root_directory: /tmp

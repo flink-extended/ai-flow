@@ -14,6 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import shutil
 import unittest
 import os
 from ai_flow.ai_graph.ai_graph import current_graph
@@ -32,6 +33,7 @@ _PORT = '50051'
 
 
 SCHEDULER_CLASS = 'ai_flow.test.api.mock_plugins.MockScheduler'
+TEMP_DIR = '/tmp/ai_flow_mock_blob_directory'
 
 
 class TestWorkflowOperation(unittest.TestCase):
@@ -54,6 +56,8 @@ class TestWorkflowOperation(unittest.TestCase):
                                   scheduler_service_config=config)
         cls.server.run()
         wait_for_server_started('localhost:{}'.format(_PORT))
+        if not os.path.exists(TEMP_DIR):
+            os.makedirs(TEMP_DIR)
 
     @classmethod
     def tearDownClass(cls):
@@ -61,6 +65,8 @@ class TestWorkflowOperation(unittest.TestCase):
         if os.path.exists(_SQLITE_DB_FILE):
             os.remove(_SQLITE_DB_FILE)
         stop_notification_server(cls.ns_server)
+        if os.path.exists(TEMP_DIR):
+            shutil.rmtree(TEMP_DIR)
 
     def setUp(self):
         init_ai_flow_context()

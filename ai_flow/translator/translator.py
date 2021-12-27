@@ -41,7 +41,7 @@ import time
 import os
 from ai_flow.ai_graph.ai_node import ReadDatasetNode, WriteDatasetNode
 from ai_flow.context.workflow_config_loader import current_workflow_config
-from ai_flow.workflow.workflow import Workflow
+from ai_flow.workflow.workflow import Workflow, WorkflowPropertyKeys
 from ai_flow.workflow.job import Job
 from ai_flow.ai_graph.ai_graph import AIGraph, AISubGraph
 from ai_flow.ai_graph.data_edge import DataEdge
@@ -133,8 +133,9 @@ class WorkflowConstructor(object):
     def build_workflow(self, split_graph: SplitGraph, project_context: ProjectContext) -> Workflow:
         workflow = Workflow()
         workflow.workflow_config = current_workflow_config()
-        workflow.workflow_snapshot_id = '{}.{}.{}'.format(project_context.project_name, workflow.workflow_name,
-                                                          round(time.time() * 1000))
+        workflow_generated_dir = '{}.{}.{}'.format(project_context.project_name, workflow.workflow_name,
+                                             round(time.time() * 1000))
+        workflow.properties[WorkflowPropertyKeys.GENERATED_DIR] = workflow_generated_dir
         # add ai_nodes to workflow
         for sub in split_graph.nodes.values():
             if sub.config.job_type not in self.job_generator_registry.object_dict:
@@ -144,8 +145,9 @@ class WorkflowConstructor(object):
                 .get_object(sub.config.job_type)
 
             # set job resource dir
+
             job_resource_dir = os.path.join(project_context.get_generated_path(),
-                                            workflow.workflow_snapshot_id,
+                                            workflow_generated_dir,
                                             sub.config.job_name)
             if not os.path.exists(job_resource_dir):
                 os.makedirs(job_resource_dir)

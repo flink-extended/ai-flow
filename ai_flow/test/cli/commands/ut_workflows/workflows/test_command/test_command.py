@@ -16,6 +16,7 @@
 # under the License.
 
 import os
+import shutil
 import unittest
 
 from ai_flow.ai_graph.ai_graph import current_graph
@@ -39,6 +40,7 @@ _SCHEDULER_CLASS = 'ai_flow.test.api.mock_plugins.MockScheduler'
 _WORKFLOW_NAME = 'test_workflow_operation'
 
 PROJECT_PATH = get_parent_dir(get_parent_dir(get_file_dir(__file__)))
+TEMP_DIR = '/tmp/ai_flow_mock_blob_directory'
 
 
 class TestCommand(unittest.TestCase):
@@ -65,6 +67,8 @@ class TestCommand(unittest.TestCase):
         cls.aiflow_server.run()
         wait_for_server_started(_SERVER_URI)
         init_ai_flow_context()
+        if not os.path.exists(TEMP_DIR):
+            os.makedirs(TEMP_DIR)
 
     @classmethod
     def tearDownClass(cls):
@@ -73,6 +77,8 @@ class TestCommand(unittest.TestCase):
             os.remove(_SQLITE_DB_FILE)
         stop_notification_server(cls.notification_server)
         job_plugin_interface.__job_controller_manager__.object_dict.pop('mock')
+        if os.path.exists(TEMP_DIR):
+            shutil.rmtree(TEMP_DIR)
 
     def setUp(self):
         self.build_ai_graph()

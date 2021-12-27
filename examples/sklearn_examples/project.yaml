@@ -21,3 +21,5 @@ server_uri: localhost:50051
 notification_server_uri: localhost:50052
 blob:
   blob_manager_class: ai_flow_plugins.blob_manager_plugins.local_blob_manager.LocalBlobManager
+  blob_manager_config:
+    root_directory: /tmp/aiflow-examples/sklearn_examples

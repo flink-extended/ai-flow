@@ -37,6 +37,7 @@ class TestAirflowScheduler(unittest.TestCase):
         self.temp_deploy_path = tempfile.TemporaryDirectory().name
         self.logger.info("temp airflow deploy path: {}".format(self.temp_deploy_path))
         self.scheduler = AirFlowScheduler({'airflow_deploy_path': self.temp_deploy_path,
+                                           'resource_dir': self.temp_deploy_path,
                                            'notification_server_uri': 'localhost:50051'})
         self.scheduler._airflow_client = Mock()
         self.scheduler.dag_generator = Mock()

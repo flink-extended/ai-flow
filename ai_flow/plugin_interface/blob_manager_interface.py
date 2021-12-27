@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import logging
 from abc import ABC, abstractmethod
 from typing import Text, Dict
 
@@ -56,39 +57,39 @@ class BlobConfig(AIFlowConfiguration):
 
 class BlobManager(ABC):
     """
-    A BlobManager is responsible for uploading and downloading files and resource for an execution of an ai flow project.
+    BlobManager is responsible for uploading and downloading files and resources for ai-flow projects.
+    Every project should have its own BlobManager to store resources, all resources are uploaded to
+    root directory of BlobManager.
+
     """
     def __init__(self, config: Dict):
+        self._log = logging.getLogger(self.__class__.__module__ + '.' + self.__class__.__name__)
         self.config = config
+        self.root_dir = config.get('root_directory')
+
+    @property
+    def log(self) -> logging.Logger:
+        return self._log
 
     @abstractmethod
-    def upload_project(self, workflow_snapshot_id: Text, project_path: Text) -> Text:
+    def upload(self, local_file_path: Text) -> Text:
         """
-        upload a given project to blob server for remote execution.
+        Upload a given file to blob server. Uploaded file will be placed under self.root_dir.
 
-        :param workflow_snapshot_id: It is the unique identifier for each workflow generation.
-        :param project_path: the path of this project.
-        :return the uri of the uploaded project file in blob server.
+        :param local_file_path: the path of file to be uploaded.
+        :return the uri of the uploaded file in blob server.
         """
         pass
 
     @abstractmethod
-    def download_project(self, workflow_snapshot_id, remote_path: Text, local_path: Text = None) -> Text:
+    def download(self, remote_file_path: Text, local_dir: Text) -> Text:
         """
-        download the needed resource from remote blob server to local process for remote execution.
+        Download file from remote blob server to local directory.
+        Only files located in self.root_dir can be downloaded by BlobManager.
 
-        :param workflow_snapshot_id: It is the unique identifier for each workflow generation.
-        :param remote_path: The project package uri.
-        :param local_path: Download file root path.
-        :return Local project path.
-        """
-        pass
-
-    def cleanup_project(self, workflow_snapshot_id, remote_path: Text):
-        """
-        clean up the project files downloaded or created during this execution.
-        :param workflow_snapshot_id: It is the unique identifier for each workflow generation.
-        :param remote_path: The project package uri.
+        :param remote_file_path: The path of file to be downloaded.
+        :param local_dir: the local directory.
+        :return the local uri of the downloaded file.
         """
         pass
 
