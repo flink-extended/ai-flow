@@ -89,8 +89,7 @@ To use a custom blob manager, users can set the ``blob.blob_manager_class`` conf
         access_key_secret:
         endpoint: 
         bucket: 
-        repo_name: 
-        local_repository: 
+        root_directory:
     ...
 ```
 

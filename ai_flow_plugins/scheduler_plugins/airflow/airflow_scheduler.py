@@ -115,16 +115,14 @@ class AirFlowSchedulerBase(Scheduler, ABC):
 
     def submit_workflow(self, workflow: Workflow, context_extractor, project_context: ProjectContext) -> WorkflowInfo:
         dag_id = self.airflow_dag_id(project_context.project_name, workflow.workflow_name)
+        self._check_configurable_path('resource_dir')
         code_text = self.dag_generator.generate(workflow=workflow,
                                                 project_name=project_context.project_name,
+                                                resource_dir=self.config.get('resource_dir'),
                                                 context_extractor=context_extractor)
-        deploy_path = self.config.get('airflow_deploy_path')
-        if deploy_path is None:
-            raise Exception("airflow_deploy_path config not set!")
-        if not os.path.exists(deploy_path):
-            os.makedirs(deploy_path)
-
-        airflow_file_path = self._write_to_deploy_path(code_text, dag_id + ".py", deploy_path)
+        self._check_configurable_path('airflow_deploy_path')
+        airflow_file_path = self._write_to_deploy_path(code_text, dag_id + ".py",
+                                                       self.config.get('airflow_deploy_path'))
 
         self.airflow_client.trigger_parse_dag(airflow_file_path)
         return WorkflowInfo(namespace=project_context.project_name,
@@ -165,6 +163,14 @@ class AirFlowSchedulerBase(Scheduler, ABC):
                                 properties={'dag_file': airflow_file_path})
         else:
             return None
+
+    def _check_configurable_path(self, config_str):
+        config_path = self.config.get(config_str)
+        if config_path is None:
+            raise Exception("{} config not set!".format(config_str))
+        if not os.path.exists(config_path):
+            os.makedirs(config_path)
+
 
 
 class AirFlowScheduler(AirFlowSchedulerBase):

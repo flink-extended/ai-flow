@@ -20,68 +20,92 @@ import unittest
 import os
 import shutil
 import threading
-from ai_flow.util.path_util import get_file_dir
 from ai_flow.plugin_interface.blob_manager_interface import BlobConfig, BlobManagerFactory
+
+
+_TMP_FOLDER = '/tmp/' + __name__
+_UPLOAD_FOLDER = os.path.join(_TMP_FOLDER, 'upload')
+_DOWNLOAD_FOLDER = os.path.join(_TMP_FOLDER, 'download')
+_TMP_FILE = os.path.join(_TMP_FOLDER, 'file.txt')
 
 
 class TestLocalBlobManager(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls) -> None:
+        os.mkdir(_TMP_FOLDER)
+        os.mkdir(_UPLOAD_FOLDER)
+        os.mkdir(_DOWNLOAD_FOLDER)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        if os.path.exists(_TMP_FOLDER):
+            shutil.rmtree(_TMP_FOLDER)
+
+    def setUp(self) -> None:
+        file = open(_TMP_FILE, 'w')
+        file.close()
+
+    def tearDown(self) -> None:
+        if os.path.exists(_TMP_FILE):
+            os.remove(_TMP_FILE)
+
+    def test_without_root_directory_set(self):
+        config = {
+            'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.local_blob_manager.LocalBlobManager'
+        }
+        blob_config = BlobConfig(config)
+        with self.assertRaisesRegex(Exception, '`root_directory` option of blob manager config is not configured'):
+            BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
+                                                   blob_config.blob_manager_config())
+
+
     def test_project_upload_download_local(self):
-        project_path = get_file_dir(__file__)
-        config = {'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.local_blob_manager.LocalBlobManager'}
+        config = {
+            'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.local_blob_manager.LocalBlobManager',
+            'blob_manager_config': {
+                'root_directory': _UPLOAD_FOLDER
+            }
+        }
         blob_config = BlobConfig(config)
         blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
                                                               blob_config.blob_manager_config())
-        uploaded_path = blob_manager.upload_project('1', project_path)
-        self.assertEqual(uploaded_path, project_path)
+        uploaded_path = blob_manager.upload(_TMP_FILE)
+        self.assertEqual(os.path.join(_UPLOAD_FOLDER, os.path.basename(_TMP_FILE), uploaded_path), uploaded_path)
 
-        downloaded_path = blob_manager.download_project('1', uploaded_path)
-        self.assertEqual(project_path, downloaded_path)
+        downloaded_path = blob_manager.download(uploaded_path, _DOWNLOAD_FOLDER)
+        self.assertEqual(os.path.join(_DOWNLOAD_FOLDER, os.path.basename(_TMP_FILE)), downloaded_path)
 
     def test_project_upload_download_local_2(self):
-        project_path = get_file_dir(__file__)
         config = {
             'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.local_blob_manager.LocalBlobManager',
             'blob_manager_config': {
-                'local_repository': '/tmp',
-                'remote_repository': '/tmp'
+                'root_directory': _UPLOAD_FOLDER
             }
         }
         blob_config = BlobConfig(config)
         blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
                                                               blob_config.blob_manager_config())
 
-        uploaded_path = blob_manager.upload_project('1', project_path)
-
-        downloaded_path = blob_manager.download_project('1', uploaded_path)
-        self.assertEqual('/tmp/workflow_1_project/blob_manager_plugins', downloaded_path)
+        uploaded_path = blob_manager.upload(_TMP_FILE)
+        downloaded_path = blob_manager.download(uploaded_path)
+        self.assertEqual(uploaded_path, downloaded_path)
 
     def test_project_download_local_same_time(self):
-        project_path = get_file_dir(__file__)
-        upload_path = '/tmp/upload'
-        download_path = '/tmp/download'
-        if not os.path.exists(upload_path):
-            os.makedirs(upload_path)
-        if not os.path.exists(download_path):
-            os.makedirs(download_path)
         config = {
             'blob_manager_class': 'ai_flow_plugins.blob_manager_plugins.local_blob_manager.LocalBlobManager',
             'blob_manager_config': {
-                'local_repository': download_path,
-                'remote_repository': upload_path
+                'root_directory': _UPLOAD_FOLDER
             }
         }
         blob_config = BlobConfig(config)
         blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
                                                               blob_config.blob_manager_config())
 
-        uploaded_path = blob_manager.upload_project('1', project_path)
-        download_project_path = "/tmp/download/workflow_1_project"
-        if os.path.exists(download_project_path):
-            shutil.rmtree(download_project_path)
+        uploaded_path = blob_manager.upload(_TMP_FILE)
 
         def download_project():
-            blob_manager.download_project('1', uploaded_path)
+            blob_manager.download(uploaded_path)
 
         t1 = threading.Thread(target=download_project, args=())
         t1.setDaemon(True)
@@ -91,12 +115,8 @@ class TestLocalBlobManager(unittest.TestCase):
         t2.start()
         t1.join()
         t2.join()
-        downloaded_path = blob_manager.download_project('1', uploaded_path)
-        self.assertEqual('/tmp/download/workflow_1_project/blob_manager_plugins', downloaded_path)
-        if os.path.exists(upload_path):
-            shutil.rmtree(upload_path)
-        if os.path.exists(download_path):
-            shutil.rmtree(download_path)
+        downloaded_path = blob_manager.download(uploaded_path, _DOWNLOAD_FOLDER)
+        self.assertEqual(os.path.join(_DOWNLOAD_FOLDER, os.path.basename(_TMP_FILE)), downloaded_path)
 
 
 if __name__ == '__main__':

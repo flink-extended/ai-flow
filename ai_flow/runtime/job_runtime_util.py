@@ -22,14 +22,14 @@ from ai_flow.context.project_context import ProjectContext
 from ai_flow.runtime.job_runtime_env import JobRuntimeEnv
 
 
-def prepare_job_runtime_env(workflow_snapshot_id,
+def prepare_job_runtime_env(workflow_generated_dir,
                             workflow_name,
                             project_context: ProjectContext,
                             job_execution_info: JobExecutionInfo,
                             root_working_dir=None) -> JobRuntimeEnv:
     """
     Prepare the operating environment for the ai flow job(ai_flow.workflow.job.Job)
-    :param workflow_snapshot_id: It is the unique identifier for each workflow generation.
+    :param workflow_generated_dir: The generated directory of workflow.
     :param workflow_name: The name of the workflow(ai_flow.workflow.workflow.Workflow).
     :param project_context: The context of the project which the job belongs.
     :param job_execution_info: The information of the execution of the job.
@@ -52,7 +52,7 @@ def prepare_job_runtime_env(workflow_snapshot_id,
                        job_runtime_env.workflow_dir)
         if os.path.exists(project_context.get_generated_path()):
             os.symlink(os.path.join(project_context.get_generated_path(),
-                                    workflow_snapshot_id,
+                                    workflow_generated_dir,
                                     job_execution_info.job_name),
                        job_runtime_env.generated_dir)
         if os.path.exists(project_context.get_resources_path()):

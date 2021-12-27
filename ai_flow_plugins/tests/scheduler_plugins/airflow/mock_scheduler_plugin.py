@@ -41,7 +41,8 @@ class MockScheduler(Scheduler):
 
     def submit_workflow(self, workflow: Workflow, context_extractor, project_context: ProjectContext) -> WorkflowInfo:
         code_text = self.dag_generator.generate(workflow=workflow,
-                                                project_name=project_context.project_name)
+                                                project_name=project_context.project_name,
+                                                resource_dir='/tmp')
         return WorkflowInfo(workflow_name=workflow.workflow_name, properties={'code': code_text})
 
     def delete_workflow(self, project_name: Text, workflow_name: Text) -> WorkflowInfo:

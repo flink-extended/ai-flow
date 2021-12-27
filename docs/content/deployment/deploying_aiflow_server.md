@@ -100,6 +100,7 @@ This section shows an exhaustive list of available configuration of the AIFlow S
 |Key|Type|Default|Description|
 |---|---|---|---|
 |airflow_deploy_path|String|(none)|Airflow dag file deployment directory, i.e., where to submit the Airflow dag file. If it is not set, the dags_folder in airflow config will be used.|
+|resource_dir|String|(none)|The directory to save resources when running Airflow tasks|
 |notification_server_uri|String|(none)|The Notification Server uri used by the AirflowScheduler.|
 
 (aiflow_web_server)=
@@ -149,7 +150,8 @@ scheduler_service:
       # AirFlow dag file deployment directory, i.e., where the airflow dag will be. If it is not set, the dags_folder in
       # airflow config will be used
       #airflow_deploy_path: /tmp/dags
-
+      # The directory to save resources when running Airflow tasks.
+      resource_dir: /tmp
       # Notification service uri used by the AirFlowScheduler.
       notification_server_uri: 127.0.0.1:50052
   # The path to a local directory where the scheduler service download the Workflow codes.
