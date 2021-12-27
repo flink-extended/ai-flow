@@ -17,7 +17,6 @@
 # under the License.
 #
 import os
-import os
 import subprocess
 import unittest
 

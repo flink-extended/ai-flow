@@ -14,6 +14,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import os
+import shutil
 from typing import Text, Dict, Optional, List
 
 from ai_flow.runtime.job_runtime_env import JobRuntimeEnv
@@ -36,11 +38,14 @@ class MockBlobManger(BlobManager):
     def __init__(self, config):
         super().__init__(config)
 
-    def upload_project(self, workflow_snapshot_id: Text, project_path: Text) -> Text:
-        return project_path
+    def upload(self, local_file_path: Text) -> Text:
+        file_name = os.path.basename(local_file_path)
+        dest_path = os.path.join(self.root_dir, file_name)
+        shutil.move(local_file_path, dest_path)
+        return dest_path
 
-    def download_project(self, workflow_snapshot_id, remote_path: Text, local_path: Text = None) -> Text:
-        return remote_path
+    def download(self, remote_file_path: Text, local_dir: Text) -> Text:
+        return remote_file_path
 
 
 class MockJobFactory(JobPluginFactory, JobGenerator, JobController):

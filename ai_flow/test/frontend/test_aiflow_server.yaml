@@ -52,7 +52,8 @@ scheduler_service:
       # AirFlow dag file deployment directory, i.e., where the airflow dag will be. If it is not set, the dags_folder in
       # airflow config will be used
       #airflow_deploy_path: /tmp/dags
-
+      # The directory to save resources when running Airflow tasks.
+      resource_dir: /tmp
       # Notification service uri used by the AirFlowScheduler.
       notification_service_uri: 127.0.0.1:50052
 
