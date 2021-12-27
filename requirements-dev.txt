@@ -1,3 +1,5 @@
 coverage>=6.1.1
+apache-flink==1.14.2
 flake8
 pytest
+mock
