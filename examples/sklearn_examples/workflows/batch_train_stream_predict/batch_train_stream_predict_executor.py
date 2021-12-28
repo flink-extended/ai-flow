@@ -192,7 +192,7 @@ class ModelPusher(PythonProcessor):
         notification_client.send_event(BaseEvent(key=model_name, value=validated_model.version,
                                                  event_type=ModelVersionEventType.MODEL_DEPLOYED))
 
-        af.get_ai_flow_client().send_event(BaseEvent(key='START_PREDICTION', value=validated_model.version))
+        af.get_notification_client().send_event(BaseEvent(key='START_PREDICTION', value=validated_model.version))
         print(validated_model.version)
 
         # Copy deployed model to deploy_model_dir
@@ -275,7 +275,7 @@ class ModelPredictor(PythonProcessor):
     def open(self, execution_context: ExecutionContext):
         # In this class, we show the usage of start_listen_event method which make it possible to send various events.
         # Users can also refer `stream train stream predict` dataset to directly use provided API to get model version.
-        af.get_ai_flow_client().start_listen_event(key='START_PREDICTION', watcher=self.watcher)
+        af.get_notification_client().start_listen_event(key='START_PREDICTION', watcher=self.watcher)
         model_meta: af.ModelMeta = execution_context.config.get('model_info')
         self.model_name = model_meta.name
         print("### {} setup done for {}".format(self.__class__.__name__, self.model_name))

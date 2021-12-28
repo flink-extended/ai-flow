@@ -114,7 +114,7 @@ class DailyDataReadySensor(PythonProcessor):
                 return []
 
         print('all data for {} is ready'.format(process_date))
-        af.get_ai_flow_client().send_event(BaseEvent(key='daily_data', value='ready', event_type='DATA_EVENT',
+        af.get_notification_client().send_event(BaseEvent(key='daily_data', value='ready', event_type='DATA_EVENT',
                                                      context=process_date.isoformat()))
 
 
