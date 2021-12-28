@@ -25,7 +25,8 @@ from notification_service.event_storage import MemoryEventStorage
 from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 from airflow.contrib.jobs.scheduler_client import EventSchedulerClient, ExecutionContext
-from airflow.events.scheduler_events import SchedulerInnerEventType
+from airflow.events.scheduler_events import SchedulerInnerEventType, Status
+from airflow.exceptions import AirflowResponseError
 from airflow.executors.scheduling_action import SchedulingAction
 
 PORT = 50053
@@ -75,7 +76,8 @@ class TestSchedulerClient(unittest.TestCase):
                                               default_namespace="scheduler")
                 s_client.send_event(BaseEvent(key=events[0].key, value='',
                                               event_type=SchedulerInnerEventType.PARSE_DAG_RESPONSE.value,
-                                              namespace='scheduler'))
+                                              namespace='scheduler',
+                                              context=Status.SUCCESS))
 
         self.scheduler.start(watcher=W())
         result = self.client.trigger_parse_dag(file_path='/test', timeout=5)
@@ -94,7 +96,8 @@ class TestSchedulerClient(unittest.TestCase):
                                               default_namespace="scheduler")
                 s_client.send_event(BaseEvent(key=events[0].key, value='1',
                                               event_type=SchedulerInnerEventType.RESPONSE.value,
-                                              namespace='scheduler'))
+                                              namespace='scheduler',
+                                              context=Status.SUCCESS))
 
         self.scheduler.start(watcher=W())
         result = self.client.schedule_dag(dag_id='1', context='', timeout=5)
@@ -113,7 +116,8 @@ class TestSchedulerClient(unittest.TestCase):
                                               default_namespace="scheduler")
                 s_client.send_event(BaseEvent(key=events[0].key, value='1',
                                               event_type=SchedulerInnerEventType.RESPONSE.value,
-                                              namespace='scheduler'))
+                                              namespace='scheduler',
+                                              context=Status.SUCCESS))
 
         self.scheduler.start(watcher=W())
         result = self.client.stop_dag_run(dag_id='1', context=ExecutionContext(dagrun_id='1'), timeout=5)
@@ -132,7 +136,8 @@ class TestSchedulerClient(unittest.TestCase):
                                               default_namespace="scheduler")
                 s_client.send_event(BaseEvent(key=events[0].key, value='1',
                                               event_type=SchedulerInnerEventType.RESPONSE.value,
-                                              namespace='scheduler'))
+                                              namespace='scheduler',
+                                              context=Status.SUCCESS))
 
         self.scheduler.start(watcher=W())
         result = self.client.schedule_task(dag_id='1', task_id='t_1',
@@ -149,6 +154,84 @@ class TestSchedulerClient(unittest.TestCase):
                                                context=ExecutionContext(dagrun_id='1'),
                                                timeout=1)
         self.assertTrue('Trigger the scheduler to schedule the task timeout' in str(context.exception))
+
+    def test_stop_scheduling_task(self):
+        class W(EventWatcher):
+            def process(self, events: List[BaseEvent]):
+                s_client = NotificationClient(server_uri="localhost:{}".format(PORT),
+                                              default_namespace="scheduler")
+                s_client.send_event(BaseEvent(key=events[0].key, value='1',
+                                              event_type=SchedulerInnerEventType.RESPONSE.value,
+                                              namespace='scheduler',
+                                              context=Status.SUCCESS))
+
+        self.scheduler.start(watcher=W())
+        error = None
+        try:
+            self.client.stop_scheduling_task(dag_id='1', dagrun_id='1', task_id='1')
+        except Exception as e:
+            error = str(e)
+        self.assertIsNone(error)
+
+    def test_stop_scheduling_task_timeout(self):
+        self.scheduler.start(watcher=PassWatcher())
+        with self.assertRaises(TimeoutError) as context:
+            self.client.stop_scheduling_task(dag_id='1', dagrun_id='1', task_id='1', timeout=1)
+        self.assertTrue("Stop scheduling task timeout" in str(context.exception))
+
+    def test_stop_scheduling_task_with_error(self):
+        class W(EventWatcher):
+            def process(self, events: List[BaseEvent]):
+                s_client = NotificationClient(server_uri="localhost:{}".format(PORT),
+                                              default_namespace="scheduler")
+                s_client.send_event(BaseEvent(key=events[0].key, value='error',
+                                              event_type=SchedulerInnerEventType.RESPONSE.value,
+                                              namespace='scheduler',
+                                              context=Status.ERROR))
+
+        self.scheduler.start(watcher=W())
+        with self.assertRaises(AirflowResponseError) as context:
+            self.client.stop_scheduling_task(dag_id='1', dagrun_id='1', task_id='t_1')
+        self.assertTrue("error" in str(context.exception))
+
+    def test_resume_scheduling_task(self):
+        class W(EventWatcher):
+            def process(self, events: List[BaseEvent]):
+                s_client = NotificationClient(server_uri="localhost:{}".format(PORT),
+                                              default_namespace="scheduler")
+                s_client.send_event(BaseEvent(key=events[0].key, value='1',
+                                              event_type=SchedulerInnerEventType.RESPONSE.value,
+                                              namespace='scheduler',
+                                              context=Status.SUCCESS))
+
+        self.scheduler.start(watcher=W())
+        error = None
+        try:
+            self.client.resume_scheduling_task(dag_id='1', dagrun_id='1', task_id='1')
+        except Exception as e:
+            error = str(e)
+        self.assertIsNone(error)
+
+    def test_resume_scheduling_task_timeout(self):
+        self.scheduler.start(watcher=PassWatcher())
+        with self.assertRaises(TimeoutError) as context:
+            self.client.resume_scheduling_task(dag_id='1', dagrun_id='1', task_id='1', timeout=1)
+        self.assertTrue("Resume scheduling task timeout" in str(context.exception))
+
+    def test_resume_scheduling_task_with_error(self):
+        class W(EventWatcher):
+            def process(self, events: List[BaseEvent]):
+                s_client = NotificationClient(server_uri="localhost:{}".format(PORT),
+                                              default_namespace="scheduler")
+                s_client.send_event(BaseEvent(key=events[0].key, value='error',
+                                              event_type=SchedulerInnerEventType.RESPONSE.value,
+                                              namespace='scheduler',
+                                              context=Status.ERROR))
+
+        self.scheduler.start(watcher=W())
+        with self.assertRaises(AirflowResponseError) as context:
+            self.client.resume_scheduling_task(dag_id='1', dagrun_id='1', task_id='t_1')
+        self.assertTrue("error" in str(context.exception))
 
 
 if __name__ == '__main__':

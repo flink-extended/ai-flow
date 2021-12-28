@@ -1430,6 +1430,27 @@ class TestTaskInstance(unittest.TestCase):
         ti.refresh_from_db()
         self.assertEqual(ti.state, State.SUCCESS)
 
+    @provide_session
+    def test_set_is_schedulable(self, session=None):
+        dag = DAG(
+            'test_is_schedulable',
+            start_date=DEFAULT_DATE,
+        )
+
+        task = DummyOperator(
+            task_id='op',
+            dag=dag,
+        )
+        ti = TI(task=task, execution_date=datetime.datetime.now(), state=State.QUEUED)
+        self.assertTrue(ti.is_schedulable)
+        ti.is_schedulable = False
+        session.merge(ti)
+        session.commit()
+        ti_from_db = session.query(TI).filter(TI.dag_id == ti.dag_id,
+                                              TI.task_id == ti.task_id,
+                                              TI.execution_date == ti.execution_date).first()
+        self.assertFalse(ti_from_db.is_schedulable)
+
     @staticmethod
     def _test_previous_dates_setup(
         schedule_interval: Union[str, datetime.timedelta, None], catchup: bool, scenario: List[str]

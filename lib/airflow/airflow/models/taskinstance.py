@@ -235,6 +235,7 @@ class TaskInstance(Base, LoggingMixin):  # pylint: disable=R0902,R0904
     is_active = Column(Boolean, default=False)
     seq_num = Column(Integer, default=0)
     executor_config = Column(PickleType(pickler=dill))
+    _is_schedulable = Column('is_schedulable', Boolean, default=True)
 
     external_executor_id = Column(String(ID_LEN, **COLLATION_ARGS))
     # If adding new fields here then remember to add them to
@@ -318,6 +319,17 @@ class TaskInstance(Base, LoggingMixin):  # pylint: disable=R0902,R0904
     @try_number.setter
     def try_number(self, value):
         self._try_number = value
+
+    @property
+    def is_schedulable(self):
+        if self._is_schedulable is None:
+            return True
+        else:
+            return self._is_schedulable
+
+    @is_schedulable.setter
+    def is_schedulable(self, value: bool):
+        self._is_schedulable = value
 
     @property
     def prev_attempted_tries(self):

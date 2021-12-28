@@ -128,6 +128,8 @@ class UserDefineMessageType(Enum):
     RUN_DAG = 'RUN_DAG'
     STOP_DAG_RUN = 'STOP_DAG_RUN'
     EXECUTE_TASK = 'EXECUTE_TASK'
+    STOP_SCHEDULING_TASK = 'STOP_SCHEDULING_TASK'
+    RESUME_SCHEDULING_TASK = 'RESUME_SCHEDULING_TASK'
 
 
 class BaseUserDefineMessage(object):
@@ -175,6 +177,22 @@ class ExecuteTaskMessage(BaseUserDefineMessage):
         self.action = action
 
 
+class StopSchedulingTaskMessage(BaseUserDefineMessage):
+    def __init__(self, dag_id, dagrun_id, task_id):
+        super().__init__(UserDefineMessageType.STOP_SCHEDULING_TASK)
+        self.dag_id = dag_id
+        self.dagrun_id = dagrun_id
+        self.task_id = task_id
+
+
+class ResumeSchedulingTaskMessage(BaseUserDefineMessage):
+    def __init__(self, dag_id, dagrun_id, task_id):
+        super().__init__(UserDefineMessageType.RESUME_SCHEDULING_TASK)
+        self.dag_id = dag_id
+        self.dagrun_id = dagrun_id
+        self.task_id = task_id
+
+
 class RequestEvent(SchedulerInnerEvent):
     def __init__(self, request_id, body):
         self.request_id = request_id
@@ -189,18 +207,27 @@ class RequestEvent(SchedulerInnerEvent):
         return RequestEvent(event.key, event.value)
 
 
+class Status(object):
+    SUCCESS = 'SUCCESS'
+    ERROR = 'ERROR'
+
+
 class ResponseEvent(SchedulerInnerEvent):
-    def __init__(self, request_id, body):
+    def __init__(self, request_id, body, status=Status.SUCCESS):
         self.request_id = request_id
         self.body = body
+        self.status = status
 
     @classmethod
     def to_base_event(cls, event: 'ResponseEvent') -> BaseEvent:
-        return BaseEvent(key=str(event.request_id), value=event.body, event_type=SchedulerInnerEventType.RESPONSE.value)
+        return BaseEvent(key=str(event.request_id),
+                         value=event.body,
+                         event_type=SchedulerInnerEventType.RESPONSE.value,
+                         context=event.status)
 
     @classmethod
     def from_base_event(cls, event: BaseEvent) -> 'SchedulerInnerEvent':
-        return ResponseEvent(event.key, event.value)
+        return ResponseEvent(event.key, event.value, event.context)
 
 
 class StopSchedulerEvent(SchedulerInnerEvent):
