@@ -131,11 +131,12 @@ class TestAirflowScheduler(unittest.TestCase):
             DagRun(dag_id='dag1.run1', state=State.FAILED)
 
         workflow_execution = self.scheduler.stop_workflow_execution(workflow_execution_id='1')
-        self.assertEquals(Status.FINISHED, workflow_execution.status)
+        self.assertEquals(Status.FAILED, workflow_execution.status)
 
         mock_session.return_value.__enter__.return_value.query.return_value.filter.\
             return_value.first.return_value = DagRun(dag_id='dag1.run1', state=State.RUNNING)
-        self.assertEquals(Status.FINISHED, workflow_execution.status)
+        workflow_execution = self.scheduler.stop_workflow_execution(workflow_execution_id='1')
+        self.assertEquals(Status.KILLED, workflow_execution.status)
 
     @staticmethod
     def _get_project_context(project_name):
