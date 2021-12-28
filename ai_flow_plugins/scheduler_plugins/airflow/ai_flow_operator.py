@@ -122,16 +122,16 @@ class AIFlowOperator(BaseOperator):
         config.update(self.workflow.properties['blob'])
         blob_config = BlobConfig(config)
 
-        workflow_repo = os.path.join(self.resource_dir,
-                                     self.workflow.workflow_name,
-                                     str(self.workflow.workflow_snapshot_id))
+        workflow_repo = os.path.join(self.resource_dir, self.workflow.workflow_name)
         if not os.path.exists(workflow_repo):
             os.makedirs(workflow_repo)
         blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_class(),
                                                               blob_config.blob_manager_config())
         project_zip_path = blob_manager.download(remote_file_path=self.workflow.project_uri,
                                                  local_dir=workflow_repo)
-        project_path: Text = extract_zip_file(zip_file_path=project_zip_path)
+        extract_path = os.path.splitext(project_zip_path)[0]
+        project_path: Text = extract_zip_file(zip_file_path=project_zip_path,
+                                              extract_path=extract_path)
 
         self.log.info("project_path:" + project_path)
         project_context = build_project_context(project_path)
