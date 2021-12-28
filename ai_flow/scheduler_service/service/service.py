@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import logging
+import os
 import traceback
 from typing import Text
 
@@ -90,7 +91,9 @@ class SchedulerService(SchedulingServiceServicer):
                                                                   blob_config.blob_manager_config())
             project_zip_path = blob_manager.download(remote_file_path=workflow.project_uri,
                                                      local_dir=self._scheduler_service_config.repository())
-            project_path: Text = extract_zip_file(zip_file_path=project_zip_path)
+            extract_path = os.path.splitext(project_zip_path)[0]
+            project_path: Text = extract_zip_file(zip_file_path=project_zip_path,
+                                                  extract_path=extract_path)
             project_context: ProjectContext = build_project_context(project_path)
             project_name = project_context.project_name
 
