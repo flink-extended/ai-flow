@@ -44,14 +44,14 @@ project_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 class PyProcessor3(python.PythonProcessor):
 
     def process(self, execution_context: ExecutionContext, input_list: List) -> List:
-        af.get_ai_flow_client().send_event(BaseEvent(key='k_1', value='v_1'))
+        af.get_notification_client().send_event(BaseEvent(key='k_1', value='v_1'))
         return []
 
 
 class PyProcessor4(python.PythonProcessor):
 
     def process(self, execution_context: ExecutionContext, input_list: List) -> List:
-        af.get_ai_flow_client().send_event(BaseEvent(key='k_2', value='v_2'))
+        af.get_notification_client().send_event(BaseEvent(key='k_2', value='v_2'))
         return []
 
 
