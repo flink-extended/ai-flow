@@ -17,14 +17,22 @@
 from abc import abstractmethod
 from typing import Dict, Text, Tuple
 
-from pyflink.dataset import ExecutionEnvironment
 from pyflink.datastream import StreamExecutionEnvironment
-from pyflink.table import (BatchTableEnvironment, StreamTableEnvironment, TableConfig)
+from pyflink.version import __version__
 
 from ai_flow.context.job_context import current_job_name
-from ai_flow_plugins.job_plugins.flink.flink_wrapped_env import (
-    WrappedBatchTableEnvironment, WrappedStatementSet,
-    WrappedStreamTableEnvironment, WrappedTableEnvironment)
+from ai_flow_plugins.job_plugins.flink.flink_version import INCLUDE_DATASET_VERSIONS
+from ai_flow_plugins.job_plugins.flink.flink_wrapped_env import WrappedStatementSet, WrappedTableEnvironment
+
+if __version__ in INCLUDE_DATASET_VERSIONS:
+    from pyflink.dataset import ExecutionEnvironment
+    from pyflink.table import (BatchTableEnvironment, StreamTableEnvironment, TableConfig)
+
+    from ai_flow_plugins.job_plugins.flink.flink_wrapped_env import (
+        WrappedBatchTableEnvironment,
+        WrappedStreamTableEnvironment)
+else:
+    from pyflink.table import (TableEnvironment, EnvironmentSettings)
 
 
 class FlinkEnv(object):
@@ -32,42 +40,65 @@ class FlinkEnv(object):
     FlinkEnv is responsible for creating the objects(ExecutionEnvironment, TableEnvironment, StatementSet)
     needed to build a flink job.
     """
-
-    @abstractmethod
-    def create_env(self) -> Tuple[ExecutionEnvironment, WrappedTableEnvironment, WrappedStatementSet]:
-        pass
+    if __version__ in INCLUDE_DATASET_VERSIONS:
+        @abstractmethod
+        def create_env(self) -> Tuple[StreamExecutionEnvironment, ExecutionEnvironment, WrappedTableEnvironment,
+                                      WrappedStatementSet]:
+            pass
+    else:
+        @abstractmethod
+        def create_env(self) -> Tuple[StreamExecutionEnvironment, WrappedTableEnvironment, WrappedStatementSet]:
+            pass
 
 
 class FlinkBatchEnv(FlinkEnv):
     """
     FlinkBatchEnv is the default implementation of FlinkEnv, used in flink batch jobs.
     """
-
-    def create_env(self) -> Tuple[ExecutionEnvironment, WrappedTableEnvironment, WrappedStatementSet]:
-        exec_env = ExecutionEnvironment.get_execution_environment()
-        exec_env.set_parallelism(1)
-        t_config = TableConfig()
-        _t_env = BatchTableEnvironment.create(exec_env, t_config)
-        t_env = WrappedBatchTableEnvironment.create_from(_t_env)
-        t_env.get_config().get_configuration().set_string("taskmanager.memory.task.off-heap.size", '80m')
-        statement_set = t_env.create_statement_set()
-        return exec_env, t_env, statement_set
+    if __version__ in INCLUDE_DATASET_VERSIONS:
+        def create_env(self) -> Tuple[StreamExecutionEnvironment, ExecutionEnvironment, WrappedTableEnvironment,
+                                      WrappedStatementSet]:
+            exec_env = ExecutionEnvironment.get_execution_environment()
+            exec_env.set_parallelism(1)
+            _t_env = BatchTableEnvironment.create(exec_env, TableConfig())
+            t_env = WrappedBatchTableEnvironment.create_from(_t_env)
+            t_env.get_config().get_configuration().set_string("taskmanager.memory.task.off-heap.size", '80m')
+            statement_set = t_env.create_statement_set()
+            return None, exec_env, t_env, statement_set
+    else:
+        def create_env(self) -> Tuple[StreamExecutionEnvironment, WrappedTableEnvironment, WrappedStatementSet]:
+            exec_env = StreamExecutionEnvironment.get_execution_environment()
+            exec_env.set_parallelism(1)
+            _t_env = TableEnvironment.create(EnvironmentSettings.in_batch_mode())
+            t_env = WrappedTableEnvironment.create_from(_t_env)
+            t_env.get_config().get_configuration().set_string("taskmanager.memory.task.off-heap.size", '80m')
+            statement_set = t_env.create_statement_set()
+            return exec_env, t_env, statement_set
 
 
 class FlinkStreamEnv(FlinkEnv):
     """
     FlinkStreamEnv is the default implementation of FlinkEnv, used in flink streaming jobs.
     """
-
-    def create_env(self) -> Tuple[ExecutionEnvironment, WrappedTableEnvironment, WrappedStatementSet]:
-        exec_env = StreamExecutionEnvironment.get_execution_environment()
-        exec_env.set_parallelism(1)
-        t_config = TableConfig()
-        _t_env = StreamTableEnvironment.create(exec_env, t_config)
-        t_env = WrappedStreamTableEnvironment.create_from(_t_env)
-        t_env.get_config().get_configuration().set_string("taskmanager.memory.task.off-heap.size", '80m')
-        statement_set = t_env.create_statement_set()
-        return exec_env, t_env, statement_set
+    if __version__ in INCLUDE_DATASET_VERSIONS:
+        def create_env(self) -> Tuple[StreamExecutionEnvironment, ExecutionEnvironment, WrappedTableEnvironment,
+                                      WrappedStatementSet]:
+            stream_exec_env: StreamExecutionEnvironment = StreamExecutionEnvironment.get_execution_environment()
+            stream_exec_env.set_parallelism(1)
+            _t_env = StreamTableEnvironment.create(stream_exec_env, TableConfig())
+            t_env = WrappedStreamTableEnvironment.create_from(_t_env)
+            t_env.get_config().get_configuration().set_string("taskmanager.memory.task.off-heap.size", '80m')
+            statement_set = t_env.create_statement_set()
+            return stream_exec_env, None, t_env, statement_set
+    else:
+        def create_env(self) -> Tuple[StreamExecutionEnvironment, WrappedTableEnvironment, WrappedStatementSet]:
+            stream_exec_env: StreamExecutionEnvironment = StreamExecutionEnvironment.get_execution_environment()
+            stream_exec_env.set_parallelism(1)
+            _t_env = TableEnvironment.create(EnvironmentSettings.in_streaming_mode())
+            t_env = WrappedTableEnvironment.create_from(_t_env)
+            t_env.get_config().get_configuration().set_string("taskmanager.memory.task.off-heap.size", '80m')
+            statement_set = t_env.create_statement_set()
+            return stream_exec_env, t_env, statement_set
 
 
 __flink_env__: FlinkEnv = FlinkBatchEnv()

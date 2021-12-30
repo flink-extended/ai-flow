@@ -16,40 +16,52 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from pyflink.dataset import ExecutionEnvironment
-
-import ai_flow as af
 from typing import List
+
 import pandas as pd
-from sklearn.utils import shuffle
+from census_common import get_accuracy_score
 from flink_ml_tensorflow.tensorflow_TFConfig import TFConfig
 from flink_ml_tensorflow.tensorflow_on_flink_mlconf import MLCONSTANTS
 from flink_ml_tensorflow.tensorflow_on_flink_table import train
+from notification_service.base_notification import DEFAULT_NAMESPACE, BaseEvent
+from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.table import EnvironmentSettings, Table, TableConfig, TableEnvironment
+from pyflink.version import __version__
+from sklearn.utils import shuffle
+
+import ai_flow as af
 from ai_flow.client.ai_flow_client import get_ai_flow_client
+from ai_flow.model_center.entity.model_version_stage import ModelVersionStage
 from ai_flow.util.path_util import get_file_dir
 from ai_flow_plugins.job_plugins.flink import FlinkPythonProcessor, ExecutionContext, FlinkEnv
+from ai_flow_plugins.job_plugins.flink import INCLUDE_DATASET_VERSIONS
 from ai_flow_plugins.job_plugins.python import PythonProcessor
 from ai_flow_plugins.job_plugins.python.python_processor import ExecutionContext as PyExecutionContext
-from pyflink.table import EnvironmentSettings, Table, BatchTableEnvironment, TableConfig
-from ai_flow.model_center.entity.model_version_stage import ModelVersionStage
-from notification_service.base_notification import DEFAULT_NAMESPACE, BaseEvent
-from census_common import get_accuracy_score
+
+if __version__ in INCLUDE_DATASET_VERSIONS:
+    from pyflink.dataset import ExecutionEnvironment
+    from pyflink.table import BatchTableEnvironment
 
 
 class BatchTableEnvCreator(FlinkEnv):
 
     def create_env(self):
-        batch_env = ExecutionEnvironment.get_execution_environment()
-        batch_env.set_parallelism(1)
-        t_config = TableConfig()
-        t_env = BatchTableEnvironment.create(
-            batch_env,
-            t_config
-        )
-        statement_set = t_env.create_statement_set()
-        t_env.get_config().set_python_executable('python')
-        t_env.get_config().get_configuration().set_boolean('python.fn-execution.memory.managed', True)
-        return batch_env, t_env, statement_set
+        if __version__ in INCLUDE_DATASET_VERSIONS:
+            batch_env = ExecutionEnvironment.get_execution_environment()
+            batch_env.set_parallelism(1)
+            t_env = BatchTableEnvironment.create(batch_env, TableConfig())
+            statement_set = t_env.create_statement_set()
+            t_env.get_config().set_python_executable('python')
+            t_env.get_config().get_configuration().set_boolean('python.fn-execution.memory.managed', True)
+            return None, batch_env, t_env, statement_set
+        else:
+            batch_env = StreamExecutionEnvironment.get_execution_environment()
+            batch_env.set_parallelism(1)
+            t_env = TableEnvironment.create(EnvironmentSettings.in_batch_mode())
+            statement_set = t_env.create_statement_set()
+            t_env.get_config().set_python_executable('python')
+            t_env.get_config().get_configuration().set_boolean('python.fn-execution.memory.managed', True)
+            return batch_env, t_env, statement_set
 
 
 class BatchPreprocessExecutor(PythonProcessor):
@@ -84,8 +96,12 @@ class BatchTrainExecutor(FlinkPythonProcessor):
 
         tf_config = TFConfig(work_num, ps_num, prop, python_file, func, env_path)
 
-        train(execution_context.execution_env, execution_context.table_env, execution_context.statement_set,
-              input_tb, tf_config, output_schema)
+        if __version__ in INCLUDE_DATASET_VERSIONS:
+            train(execution_context.execution_env, execution_context.table_env, execution_context.statement_set,
+                  input_tb, tf_config, output_schema)
+        else:
+            train(execution_context.stream_execution_env, execution_context.table_env, execution_context.statement_set,
+                  input_tb, tf_config, output_schema)
         execution_context.statement_set.wrapped_context.need_execute = True
         return []
 

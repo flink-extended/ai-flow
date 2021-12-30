@@ -17,14 +17,19 @@
 from abc import abstractmethod
 from typing import List, Dict, Text, Optional, Union
 
-from pyflink.dataset import ExecutionEnvironment
-from pyflink.table import TableEnvironment, Table
+from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.table import Table
 from pyflink.table.udf import UserDefinedScalarFunctionWrapper
+from pyflink.version import __version__
 
 from ai_flow import DatasetMeta
 from ai_flow.plugin_interface.scheduler_interface import JobExecutionInfo
 from ai_flow.util import json_utils
+from ai_flow_plugins.job_plugins.flink.flink_version import INCLUDE_DATASET_VERSIONS
 from ai_flow_plugins.job_plugins.flink.flink_wrapped_env import WrappedStatementSet, WrappedTableEnvironment
+
+if __version__ in INCLUDE_DATASET_VERSIONS:
+    from pyflink.dataset import ExecutionEnvironment
 
 
 class ExecutionContext(json_utils.Jsonable):
@@ -33,19 +38,34 @@ class ExecutionContext(json_utils.Jsonable):
     AINode node configuration parameters(config), ExecutionEnvironment, TableEnvironment and StatementSet.
     ExecutionContext is passed as a parameter to the process function of FlinkPythonProcessor.
     """
-
-    def __init__(self,
-                 job_execution_info: JobExecutionInfo,
-                 config: Dict,
-                 execution_env: ExecutionEnvironment,
-                 table_env: WrappedTableEnvironment,
-                 statement_set: WrappedStatementSet
-                 ):
-        self._job_execution_info = job_execution_info
-        self._config: Dict = config
-        self._execution_env = execution_env
-        self._table_env = table_env
-        self._statement_set = statement_set
+    if __version__ in INCLUDE_DATASET_VERSIONS:
+        def __init__(self,
+                     job_execution_info: JobExecutionInfo,
+                     config: Dict,
+                     stream_execution_env: StreamExecutionEnvironment,
+                     execution_env: ExecutionEnvironment,
+                     table_env: WrappedTableEnvironment,
+                     statement_set: WrappedStatementSet
+                     ):
+            self._job_execution_info = job_execution_info
+            self._config: Dict = config
+            self._stream_execution_env = stream_execution_env
+            self._execution_env = execution_env
+            self._table_env = table_env
+            self._statement_set = statement_set
+    else:
+        def __init__(self,
+                     job_execution_info: JobExecutionInfo,
+                     config: Dict,
+                     stream_execution_env: StreamExecutionEnvironment,
+                     table_env: WrappedTableEnvironment,
+                     statement_set: WrappedStatementSet
+                     ):
+            self._job_execution_info = job_execution_info
+            self._config: Dict = config
+            self._stream_execution_env = stream_execution_env
+            self._table_env = table_env
+            self._statement_set = statement_set
 
     @property
     def job_execution_info(self) -> JobExecutionInfo:
@@ -64,8 +84,13 @@ class ExecutionContext(json_utils.Jsonable):
         return self._config
 
     @property
-    def execution_env(self) -> ExecutionEnvironment:
-        return self._execution_env
+    def stream_execution_env(self) -> StreamExecutionEnvironment:
+        return self._stream_execution_env
+
+    if __version__ in INCLUDE_DATASET_VERSIONS:
+        @property
+        def execution_env(self) -> ExecutionEnvironment:
+            return self._execution_env
 
     @property
     def table_env(self) -> WrappedTableEnvironment:
@@ -127,6 +152,7 @@ class UDFWrapper(object):
     """
     A wrapper for flink udf, which will be utilized by FlinkSqlProcessor to pass user-defined functions(udf and udtf).
     """
+
     def __init__(self, name, func: Union[str, UserDefinedScalarFunctionWrapper]):
         """
        :param name: The name of user-defined functions which will be registered in the table env.
@@ -144,6 +170,7 @@ class FlinkSqlProcessor(FlinkPythonProcessor):
     """
     FlinkSqlProcessor is the processor of flink sql jobs based on pyflink.
     """
+
     @abstractmethod
     def sql_statements(self, execution_context: ExecutionContext) -> List[str]:
         """
