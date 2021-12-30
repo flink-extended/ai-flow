@@ -20,34 +20,46 @@
 import time
 from typing import List
 
+from census_common import get_accuracy_score
 from flink_ml_tensorflow.tensorflow_TFConfig import TFConfig
 from flink_ml_tensorflow.tensorflow_on_flink_mlconf import MLCONSTANTS
 from flink_ml_tensorflow.tensorflow_on_flink_table import train
+from kafka_util import census_kafka_data
 from pyflink.datastream import StreamExecutionEnvironment
 from pyflink.table import StreamTableEnvironment, EnvironmentSettings, Table, TableEnvironment
+from pyflink.version import __version__
 
 import ai_flow as af
 from ai_flow.model_center.entity.model_version_stage import ModelVersionStage
-from ai_flow_plugins.job_plugins.flink import FlinkPythonProcessor, ExecutionContext, FlinkEnv, WrappedStreamTableEnvironment
+from ai_flow_plugins.job_plugins.flink import FlinkPythonProcessor, ExecutionContext, FlinkEnv, \
+    WrappedStreamTableEnvironment, WrappedTableEnvironment, INCLUDE_DATASET_VERSIONS
 from ai_flow_plugins.job_plugins.python import PythonProcessor
 from ai_flow_plugins.job_plugins.python.python_processor import ExecutionContext as PyExecutionContext
-from census_common import get_accuracy_score
-from kafka_util import census_kafka_data
 
 
 class StreamTableEnvCreator(FlinkEnv):
 
     def create_env(self):
-        stream_env = StreamExecutionEnvironment.get_execution_environment()
-        stream_env.set_parallelism(1)
-        _t_env = StreamTableEnvironment.create(
-            stream_env,
-            environment_settings=EnvironmentSettings.new_instance().in_streaming_mode().use_blink_planner().build())
-        t_env = WrappedStreamTableEnvironment.create_from(_t_env)
-        statement_set = t_env.create_statement_set()
-        t_env.get_config().set_python_executable('python')
-        t_env.get_config().get_configuration().set_boolean('python.fn-execution.memory.managed', True)
-        return stream_env, t_env, statement_set
+        if __version__ in INCLUDE_DATASET_VERSIONS:
+            stream_env = StreamExecutionEnvironment.get_execution_environment()
+            stream_env.set_parallelism(1)
+            _t_env = StreamTableEnvironment.create(
+                stream_env,
+                environment_settings=EnvironmentSettings.new_instance().in_streaming_mode().use_blink_planner().build())
+            t_env = WrappedStreamTableEnvironment.create_from(_t_env)
+            statement_set = t_env.create_statement_set()
+            t_env.get_config().set_python_executable('python')
+            t_env.get_config().get_configuration().set_boolean('python.fn-execution.memory.managed', True)
+            return stream_env, None, t_env, statement_set
+        else:
+            stream_env = StreamExecutionEnvironment.get_execution_environment()
+            stream_env.set_parallelism(1)
+            _t_env = TableEnvironment.create(EnvironmentSettings.in_streaming_mode())
+            t_env = WrappedTableEnvironment.create_from(_t_env)
+            statement_set = t_env.create_statement_set()
+            t_env.get_config().set_python_executable('python')
+            t_env.get_config().get_configuration().set_boolean('python.fn-execution.memory.managed', True)
+            return stream_env, t_env, statement_set
 
 
 class StreamPreprocessSource(FlinkPythonProcessor):
@@ -181,7 +193,7 @@ class StreamTrainExecutor(FlinkPythonProcessor):
 
         tf_config = TFConfig(work_num, ps_num, prop, python_file, func, env_path)
 
-        train(execution_context.execution_env, execution_context.table_env, execution_context.statement_set,
+        train(execution_context.stream_execution_env, execution_context.table_env, execution_context.statement_set,
               input_tb, tf_config, output_schema)
         execution_context.statement_set.wrapped_context.need_execute = True
         return []

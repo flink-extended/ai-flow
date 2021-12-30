@@ -15,9 +15,16 @@
 # specific language governing permissions and limitations
 # under the License.
 from typing import List, Text
-from pyflink.table import StatementSet, TableEnvironment
-from pyflink.table.table_environment import BatchTableEnvironment, StreamTableEnvironment
+
+from pyflink.table.statement_set import StatementSet
+from pyflink.table.table_environment import TableEnvironment
 from pyflink.table.table_result import TableResult
+from pyflink.version import __version__
+
+from ai_flow_plugins.job_plugins.flink.flink_version import INCLUDE_DATASET_VERSIONS
+
+if __version__ in INCLUDE_DATASET_VERSIONS:
+    from pyflink.table.table_environment import BatchTableEnvironment, StreamTableEnvironment
 
 
 class WrappedTableEnvironmentContext:
@@ -72,25 +79,31 @@ class WrappedTableEnvironment(TableEnvironment):
     def wait_execution_results(self):
         self.wrapped_context.wait_execution_results()
 
-
-class WrappedBatchTableEnvironment(BatchTableEnvironment, WrappedTableEnvironment):
-
-    def __init__(self, j_tenv):
-        super().__init__(j_tenv)
-
-    @staticmethod
-    def create_from(t_env: BatchTableEnvironment) -> 'WrappedBatchTableEnvironment':
-        return WrappedBatchTableEnvironment(t_env._j_tenv)
+    if __version__ not in INCLUDE_DATASET_VERSIONS:
+        @staticmethod
+        def create_from(t_env: TableEnvironment) -> 'WrappedTableEnvironment':
+            return WrappedTableEnvironment(j_tenv=t_env._j_tenv)
 
 
-class WrappedStreamTableEnvironment(StreamTableEnvironment, WrappedTableEnvironment):
+if __version__ in INCLUDE_DATASET_VERSIONS:
+    class WrappedBatchTableEnvironment(BatchTableEnvironment, WrappedTableEnvironment):
 
-    def __init__(self, j_tenv):
-        super().__init__(j_tenv)
+        def __init__(self, j_tenv):
+            super().__init__(j_tenv)
 
-    @staticmethod
-    def create_from(t_env: StreamTableEnvironment) -> 'WrappedStreamTableEnvironment':
-        return WrappedStreamTableEnvironment(t_env._j_tenv)
+        @staticmethod
+        def create_from(t_env: BatchTableEnvironment) -> 'WrappedBatchTableEnvironment':
+            return WrappedBatchTableEnvironment(t_env._j_tenv)
+
+
+    class WrappedStreamTableEnvironment(StreamTableEnvironment, WrappedTableEnvironment):
+
+        def __init__(self, j_tenv):
+            super().__init__(j_tenv)
+
+        @staticmethod
+        def create_from(t_env: StreamTableEnvironment) -> 'WrappedStreamTableEnvironment':
+            return WrappedStreamTableEnvironment(t_env._j_tenv)
 
 
 class WrappedStatementSetContext:

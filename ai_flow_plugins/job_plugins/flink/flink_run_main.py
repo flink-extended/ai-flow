@@ -18,34 +18,45 @@
 #
 import importlib
 import sys
-
 from typing import List
 
-from ai_flow.ai_graph.ai_node import AINode
-from ai_flow.util import serialization_utils
+from pyflink.version import __version__
 
-from ai_flow.util.serialization_utils import read_object_from_serialized_file
+from ai_flow.ai_graph.ai_node import AINode
+from ai_flow.plugin_interface.scheduler_interface import JobExecutionInfo
 from ai_flow.runtime.job_runtime_context import init_job_runtime_context
 from ai_flow.runtime.job_runtime_env import JobRuntimeEnv
-from ai_flow.plugin_interface.scheduler_interface import JobExecutionInfo
-from ai_flow_plugins.job_plugins.flink import FlinkPythonProcessor, ExecutionContext
-from ai_flow_plugins.job_plugins.flink.flink_job_plugin import RunGraph
+from ai_flow.util import serialization_utils
+from ai_flow.util.serialization_utils import read_object_from_serialized_file
+from ai_flow_plugins.job_plugins.flink import FlinkPythonProcessor, ExecutionContext, INCLUDE_DATASET_VERSIONS
 from ai_flow_plugins.job_plugins.flink.flink_env import FlinkEnv
+from ai_flow_plugins.job_plugins.flink.flink_job_plugin import RunGraph
 
 
 def flink_execute_func(run_graph: RunGraph, job_execution_info: JobExecutionInfo, flink_env: FlinkEnv):
     processors: List[FlinkPythonProcessor] = []
     contexts: List[ExecutionContext] = []
-    exec_env, table_env, statement_set = flink_env.create_env()
+    if __version__ in INCLUDE_DATASET_VERSIONS:
+        stream_exec_env, exec_env, table_env, statement_set = flink_env.create_env()
+    else:
+        stream_exec_env, table_env, statement_set = flink_env.create_env()
     for index in range(len(run_graph.nodes)):
         caller: FlinkPythonProcessor = serialization_utils.deserialize(run_graph.processor_bytes[index])
         processors.append(caller)
         node: AINode = run_graph.nodes[index]
-        execution_context = ExecutionContext(config=node.node_config,
-                                             job_execution_info=job_execution_info,
-                                             execution_env=exec_env,
-                                             table_env=table_env,
-                                             statement_set=statement_set)
+        if __version__ in INCLUDE_DATASET_VERSIONS:
+            execution_context = ExecutionContext(config=node.node_config,
+                                                 job_execution_info=job_execution_info,
+                                                 stream_execution_env=stream_exec_env,
+                                                 execution_env=exec_env,
+                                                 table_env=table_env,
+                                                 statement_set=statement_set)
+        else:
+            execution_context = ExecutionContext(config=node.node_config,
+                                                 job_execution_info=job_execution_info,
+                                                 stream_execution_env=stream_exec_env,
+                                                 table_env=table_env,
+                                                 statement_set=statement_set)
         contexts.append(execution_context)
 
     def setup():
@@ -72,10 +83,10 @@ def flink_execute_func(run_graph: RunGraph, job_execution_info: JobExecutionInfo
         else:
             value_map[node.node_id] = c.process(contexts[i], [])
     close()
-    
+
     if statement_set.wrapped_context.need_execute:
         statement_set.execute()
-    
+
     job_id_list = table_env.wrapped_context.get_job_ids() + statement_set.wrapped_context.get_job_ids()
     if len(job_id_list) > 0:
         with open('./job_id', 'w') as fp:
