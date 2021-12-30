@@ -83,7 +83,7 @@ class SingleJobScheduler(Scheduler):
                                                                          workflow_name=self.workflow.workflow_name)))
         self.job_runtime_env: JobRuntimeEnv = prepare_job_runtime_env(
             root_working_dir=self.project_context.project_path + '/temp',
-            workflow_snapshot_id=self.workflow.workflow_snapshot_id,
+            workflow_generated_dir=self.workflow.properties.get(WorkflowPropertyKeys.GENERATED_DIR),
             workflow_name=self.workflow.workflow_name,
             job_execution_info=job_execution_info,
             project_context=self.project_context)

@@ -19,12 +19,16 @@ import shutil
 import time
 from typing import List
 
-from ai_flow_plugins.job_plugins.flink.flink_processor import UDFWrapper
 from pyflink.table import Table, DataTypes, ScalarFunction
-from pyflink.table.descriptors import Schema, OldCsv, FileSystem
 from pyflink.table.udf import udf
+from pyflink.version import __version__
 
 from ai_flow_plugins.job_plugins import flink
+from ai_flow_plugins.job_plugins.flink import INCLUDE_DATASET_VERSIONS
+from ai_flow_plugins.job_plugins.flink.flink_processor import UDFWrapper
+
+if __version__ in INCLUDE_DATASET_VERSIONS:
+    from pyflink.table.descriptors import Schema, OldCsv, FileSystem
 
 
 class PassUDF(ScalarFunction):
@@ -60,12 +64,23 @@ class Source(flink.FlinkPythonProcessor):
     def process(self, execution_context: flink.ExecutionContext, input_list: List[Table] = None) -> List[Table]:
         input_file = os.path.join(os.getcwd(), 'resources', 'word_count.txt')
         t_env = execution_context.table_env
-        t_env.connect(FileSystem().path(input_file)) \
-            .with_format(OldCsv()
-                         .field('word', DataTypes.STRING())) \
-            .with_schema(Schema()
-                         .field('word', DataTypes.STRING())) \
-            .create_temporary_table('mySource')
+        if __version__ in INCLUDE_DATASET_VERSIONS:
+            t_env.connect(FileSystem().path(input_file)) \
+                .with_format(OldCsv()
+                             .field('word', DataTypes.STRING())) \
+                .with_schema(Schema()
+                             .field('word', DataTypes.STRING())) \
+                .create_temporary_table('mySource')
+        else:
+            t_env.execute_sql('''
+                                            create table mySource (
+                                                word string
+                                            ) with (
+                                                'connector' = 'filesystem',
+                                                'path' = '{}',
+                                                'format' = 'csv'
+                                            )
+                                        '''.format(input_file))
         return [t_env.from_path('mySource')]
 
 
@@ -77,15 +92,27 @@ class Sink(flink.FlinkPythonProcessor):
 
         t_env = execution_context.table_env
         statement_set = execution_context.statement_set
-        t_env.connect(FileSystem().path(output_file)) \
-            .with_format(OldCsv()
-                         .field_delimiter('\t')
-                         .field('word', DataTypes.STRING())
-                         .field('count', DataTypes.BIGINT())) \
-            .with_schema(Schema()
-                         .field('word', DataTypes.STRING())
-                         .field('count', DataTypes.BIGINT())) \
-            .create_temporary_table('mySink')
+        if __version__ in INCLUDE_DATASET_VERSIONS:
+            t_env.connect(FileSystem().path(output_file)) \
+                .with_format(OldCsv()
+                             .field_delimiter('\t')
+                             .field('word', DataTypes.STRING())
+                             .field('count', DataTypes.BIGINT())) \
+                .with_schema(Schema()
+                             .field('word', DataTypes.STRING())
+                             .field('count', DataTypes.BIGINT())) \
+                .create_temporary_table('mySink')
+        else:
+            t_env.execute_sql('''
+                                                    create table mySink (
+                                                        word string,
+                                                        `count` bigint
+                                                    ) with (
+                                                        'connector' = 'filesystem',
+                                                        'path' = '{}',
+                                                        'format' = 'csv'
+                                                    )
+                                                '''.format(output_file))
         statement_set.add_insert('mySink', input_list[0])
         return []
 
@@ -99,15 +126,27 @@ class SinkWithExecuteSql(flink.FlinkPythonProcessor):
             os.remove(output_file)
 
         t_env = execution_context.table_env
-        t_env.connect(FileSystem().path(output_file)) \
-            .with_format(OldCsv()
-                         .field_delimiter('\t')
-                         .field('word', DataTypes.STRING())
-                         .field('count', DataTypes.BIGINT())) \
-            .with_schema(Schema()
-                         .field('word', DataTypes.STRING())
-                         .field('count', DataTypes.BIGINT())) \
-            .create_temporary_table('mySink')
+        if __version__ in INCLUDE_DATASET_VERSIONS:
+            t_env.connect(FileSystem().path(output_file)) \
+                .with_format(OldCsv()
+                             .field_delimiter('\t')
+                             .field('word', DataTypes.STRING())
+                             .field('count', DataTypes.BIGINT())) \
+                .with_schema(Schema()
+                             .field('word', DataTypes.STRING())
+                             .field('count', DataTypes.BIGINT())) \
+                .create_temporary_table('mySink')
+        else:
+            t_env.execute_sql('''
+                                        create table mySink (
+                                            word string,
+                                            `count` bigint
+                                        ) with (
+                                            'connector' = 'filesystem',
+                                            'path' = '{}',
+                                            'format' = 'csv'
+                                        )
+                                            '''.format(output_file))
         t_env.execute_sql(f"""
         INSERT INTO mySink
         SELECT *
@@ -126,15 +165,27 @@ class SinkWithAddInsertSql(flink.FlinkPythonProcessor):
 
         t_env = execution_context.table_env
         s_set = execution_context.statement_set
-        t_env.connect(FileSystem().path(output_file)) \
-            .with_format(OldCsv()
-                         .field_delimiter('\t')
-                         .field('word', DataTypes.STRING())
-                         .field('count', DataTypes.BIGINT())) \
-            .with_schema(Schema()
-                         .field('word', DataTypes.STRING())
-                         .field('count', DataTypes.BIGINT())) \
-            .create_temporary_table('mySink')
+        if __version__ in INCLUDE_DATASET_VERSIONS:
+            t_env.connect(FileSystem().path(output_file)) \
+                .with_format(OldCsv()
+                             .field_delimiter('\t')
+                             .field('word', DataTypes.STRING())
+                             .field('count', DataTypes.BIGINT())) \
+                .with_schema(Schema()
+                             .field('word', DataTypes.STRING())
+                             .field('count', DataTypes.BIGINT())) \
+                .create_temporary_table('mySink')
+        else:
+            t_env.execute_sql('''
+                                                    create table mySink (
+                                                        word string,
+                                                        `count` bigint
+                                                    ) with (
+                                                        'connector' = 'filesystem',
+                                                        'path' = '{}',
+                                                        'format' = 'csv'
+                                                    )
+                                                        '''.format(output_file))
         s_set.add_insert_sql(f"""
         INSERT INTO mySink
         SELECT *
