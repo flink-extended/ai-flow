@@ -25,6 +25,7 @@ import cloudpickle
 from ai_flow.api.context_extractor import BroadcastAllContextExtractor
 from ai_flow.context.project_context import ProjectContext
 from ai_flow.project.project_config import ProjectConfig
+from ai_flow.workflow.status import Status
 from ai_flow.workflow.workflow import Workflow
 from ai_flow.workflow.workflow_config import WorkflowConfig
 from ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler import AirFlowScheduler
@@ -122,6 +123,21 @@ class TestAirflowScheduler(unittest.TestCase):
 
         finally:
             os.remove(context_extractor_path)
+
+    @patch('ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler.create_session')
+    def test_airflow_scheduler_kill_workflow_execution(self, mock_session):
+        from airflow.models import DagRun
+        from airflow.utils.state import State
+        mock_session.return_value.__enter__.return_value.query.return_value.filter.return_value.first.return_value = \
+            DagRun(dag_id='dag1.run1', state=State.FAILED)
+
+        workflow_execution = self.scheduler.stop_workflow_execution(workflow_execution_id='1')
+        self.assertEquals(Status.FAILED, workflow_execution.status)
+
+        mock_session.return_value.__enter__.return_value.query.return_value.filter.\
+            return_value.first.return_value = DagRun(dag_id='dag1.run1', state=State.RUNNING)
+        workflow_execution = self.scheduler.stop_workflow_execution(workflow_execution_id='1')
+        self.assertEquals(Status.KILLED, workflow_execution.status)
 
     @staticmethod
     def _get_project_context(project_name):
