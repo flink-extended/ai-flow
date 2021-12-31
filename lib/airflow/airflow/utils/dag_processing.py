@@ -53,7 +53,7 @@ from airflow.utils.mixins import MultiprocessingStartMethodMixin
 from airflow.utils.process_utils import kill_child_processes_by_pids, reap_process_group
 from airflow.utils.session import provide_session
 from airflow.utils.state import State
-from airflow.events.scheduler_events import SCHEDULER_NAMESPACE, SchedulerInnerEventType
+from airflow.events.scheduler_events import SCHEDULER_NAMESPACE, SchedulerInnerEventType, ResponseEvent, Status
 
 
 class AbstractDagFileProcessorProcess(metaclass=ABCMeta):
@@ -786,7 +786,8 @@ class DagFileProcessorManager(LoggingMixin):  # pylint: disable=too-many-instanc
             if start_process_time > process_time:
                 self.ns_client.send_event(BaseEvent(key=event.key,
                                                     value=file_path,
-                                                    event_type=SchedulerInnerEventType.PARSE_DAG_RESPONSE.value))
+                                                    event_type=SchedulerInnerEventType.PARSE_DAG_RESPONSE.value,
+                                                    context=Status.SUCCESS))
                 self.message_buffer.pop(file_path)
 
     def _add_file_to_queue(self):

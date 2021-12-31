@@ -62,7 +62,7 @@ class SchedulerInnerEvent(object):
     def from_base_event(cls, event: BaseEvent) -> 'SchedulerInnerEvent':
         raise NotImplementedError()
 
-    def to_event(self)->BaseEvent:
+    def to_event(self) -> BaseEvent:
         return self.to_base_event(self)
 
 

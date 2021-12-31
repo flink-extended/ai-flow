@@ -685,7 +685,8 @@ class EventBasedSchedulerJob(BaseJob):
         super().__init__(*args, **kwargs)
         if notification_server_uri is None:
             notification_server_uri = conf.get('scheduler', 'notification_server_uri', fallback='127.0.0.1:50052')
-        self.log.info("Starting event based scheduler with notification server uri: {}".format(notification_server_uri))
+        self.log.info("Starting event based scheduler with notification server uri: {} dag dir: {}"
+                      .format(notification_server_uri, dag_directory))
         self.mailbox: Mailbox = Mailbox()
         self.dag_trigger: DagTrigger = DagTrigger(
             dag_directory=dag_directory,
@@ -814,6 +815,7 @@ class EventBasedSchedulerJob(BaseJob):
             start_time=self.start_time,
             version=self.last_event_version
         )
+        self.log.info("start listen event from time: {} version: {}".format(self.start_time, self.last_event_version))
 
     def _stop_listen_events(self):
         self.notification_client.stop_listen_events()

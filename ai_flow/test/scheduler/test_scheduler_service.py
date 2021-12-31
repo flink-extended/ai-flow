@@ -20,9 +20,7 @@ import os
 import unittest
 
 from ai_flow.api.context_extractor import WORKFLOW_EXECUTION_DEFAULT_CONTEXT
-from ai_flow.util import json_utils
 from ai_flow.workflow.control_edge import MeetAllEventCondition, MeetAnyEventCondition, WorkflowAction
-from typing import Text, List, Optional
 
 from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
 from ai_flow.workflow.status import Status
@@ -30,66 +28,13 @@ from ai_flow.protobuf.message_pb2 import StateProto
 
 from ai_flow.endpoint.client.scheduler_client import SchedulerClient
 from ai_flow.endpoint.server.server import AIFlowServer
-from ai_flow.context.project_context import ProjectContext
-from ai_flow.plugin_interface.scheduler_interface import Scheduler
-from ai_flow.workflow.workflow import Workflow
 from ai_flow.plugin_interface.scheduler_interface import JobExecutionInfo, WorkflowExecutionInfo, WorkflowInfo
 from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
+from ai_flow.test.test_util import MOCK_SCHEDULER_CLASS as SCHEDULER_CLASS
 
 _SQLITE_DB_FILE = 'aiflow.db'
 _SQLITE_DB_URI = '%s%s' % ('sqlite:///', _SQLITE_DB_FILE)
 _PORT = '50051'
-
-
-class MockScheduler(Scheduler):
-    def stop_workflow_execution_by_context(self, workflow_name: Text, context: Text) -> Optional[WorkflowExecutionInfo]:
-        pass
-
-    def delete_workflow(self, project_name: Text, workflow_name: Text) -> WorkflowInfo:
-        pass
-
-    def start_job_execution(self, job_name: Text, workflow_execution_id: Text) -> JobExecutionInfo:
-        pass
-
-    def stop_job_execution(self, job_name: Text, workflow_execution_id: Text) -> JobExecutionInfo:
-        pass
-
-    def restart_job_execution(self, job_name: Text, workflow_execution_id: Text) -> JobExecutionInfo:
-        pass
-
-    def get_job_executions(self, job_name: Text, workflow_execution_id: Text) -> List[JobExecutionInfo]:
-        pass
-
-    def list_job_executions(self, workflow_execution_id: Text) -> List[JobExecutionInfo]:
-        pass
-
-    def submit_workflow(self, workflow: Workflow, context_extractor, project_context: ProjectContext) -> WorkflowInfo:
-        pass
-
-    def pause_workflow_scheduling(self, project_name: Text, workflow_name: Text) -> WorkflowInfo:
-        pass
-
-    def resume_workflow_scheduling(self, project_name: Text, workflow_name: Text) -> WorkflowInfo:
-        pass
-
-    def start_new_workflow_execution(self, project_name: Text, workflow_name: Text, context: Text = None) \
-            -> WorkflowExecutionInfo:
-        pass
-
-    def stop_all_workflow_execution(self, project_name: Text, workflow_name: Text) -> List[WorkflowExecutionInfo]:
-        pass
-
-    def stop_workflow_execution(self, workflow_execution_id: Text) -> WorkflowExecutionInfo:
-        pass
-
-    def get_workflow_execution(self, workflow_execution_id: Text) -> WorkflowExecutionInfo:
-        pass
-
-    def list_workflow_executions(self, project_name: Text, workflow_name: Text) -> List[WorkflowExecutionInfo]:
-        pass
-
-
-SCHEDULER_CLASS = 'ai_flow.test.scheduler.test_scheduler_service.MockScheduler'
 
 
 class TestSchedulerService(unittest.TestCase):
