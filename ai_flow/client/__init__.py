@@ -350,7 +350,7 @@ def update_model_version(model_name, model_version, model_path=None, model_type=
 
 
 def delete_model_version(model_name, model_version) -> Status:
-    return get_ai_flow_client().delete_model_version_by_version(model_name, model_version)
+    return get_ai_flow_client().delete_model_version(model_name, model_version)
 
 
 def get_model_version_detail(model_name, model_version) -> Optional[ModelVersionDetail]:
