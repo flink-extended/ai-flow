@@ -131,12 +131,12 @@ class TestAirflowScheduler(unittest.TestCase):
         mock_session.return_value.__enter__.return_value.query.return_value.filter.return_value.first.return_value = \
             DagRun(dag_id='dag1.run1', state=State.FAILED)
 
-        workflow_execution = self.scheduler.stop_workflow_execution(workflow_execution_id='1')
+        workflow_execution = self.scheduler.stop_workflow_execution(workflow_execution_id='1|1')
         self.assertEquals(Status.FAILED, workflow_execution.status)
 
         mock_session.return_value.__enter__.return_value.query.return_value.filter.\
             return_value.first.return_value = DagRun(dag_id='dag1.run1', state=State.RUNNING)
-        workflow_execution = self.scheduler.stop_workflow_execution(workflow_execution_id='1')
+        workflow_execution = self.scheduler.stop_workflow_execution(workflow_execution_id='1|1')
         self.assertEquals(Status.KILLED, workflow_execution.status)
 
     @staticmethod
