@@ -19,7 +19,7 @@ import io
 from contextlib import redirect_stdout
 
 from ai_flow.cli.commands.job_command import job_list_executions, job_restart_execution, job_show_execution, \
-    job_start_execution, job_stop_execution
+    job_start_execution, job_stop_execution, job_stop_scheduling, job_resume_scheduling
 from ai_flow.test.cli.commands.ut_workflows.workflows.test_command.test_command import TestCommand, PROJECT_PATH
 
 
@@ -57,3 +57,15 @@ class TestCliJob(TestCommand):
                 self.parser.parse_args(['job', 'stop-execution', PROJECT_PATH, 'task_1', '1']))
         self.assertEquals('Job: {}, workflow execution: {}, stopped: {}.'.format('task_1', '1', True),
                           str.splitlines(stdout.getvalue())[0])
+
+    def test_cli_job_stop_scheduling(self):
+        with redirect_stdout(io.StringIO()) as stdout:
+            job_stop_scheduling(
+                self.parser.parse_args(['job', 'stop-scheduling', PROJECT_PATH, 'task_1', '1']))
+        self.assertTrue("stop scheduling" in stdout.getvalue())
+
+    def test_cli_job_resume_scheduling(self):
+        with redirect_stdout(io.StringIO()) as stdout:
+            job_resume_scheduling(
+                self.parser.parse_args(['job', 'resume-scheduling', PROJECT_PATH, 'task_1', '1']))
+        self.assertTrue("resume scheduling" in stdout.getvalue())
