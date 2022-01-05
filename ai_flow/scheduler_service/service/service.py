@@ -349,3 +349,24 @@ class SchedulerService(SchedulingServiceServicer):
         except Exception as err:
             return ListJobInfoResponse(result=ResultProto(status=StatusProto.ERROR,
                                                           error_message=traceback.format_exc()))
+
+    def stopSchedulingJob(self, request, context):
+        try:
+            rq: ScheduleJobRequest = request
+            self._scheduler.stop_scheduling_job(workflow_execution_id=rq.execution_id,
+                                                job_name=rq.job_name)
+            response = ResultProto(status=StatusProto.OK)
+            return response
+        except Exception as err:
+            return ResultProto(status=StatusProto.ERROR, error_message=traceback.format_exc())
+
+    def resumeSchedulingJob(self, request, context):
+        try:
+            rq: ScheduleJobRequest = request
+            self._scheduler.resume_scheduling_job(workflow_execution_id=rq.execution_id,
+                                                  job_name=rq.job_name)
+            response = ResultProto(status=StatusProto.OK)
+            return response
+        except Exception as err:
+            return ResultProto(status=StatusProto.ERROR, error_message=traceback.format_exc())
+

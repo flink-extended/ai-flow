@@ -15,13 +15,31 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
 
-protobuf==3.15.6
-grpcio==1.35.0
-sqlalchemy>=1.3.18, <2
-pyyaml>=5.1, <5.4
-rich==9.2.0
-python-dateutil==2.8.0
-alembic>=1.2, <2.0
-python-daemon>=2.1.1, <2.2
+"""task_instance_add_is_schedulable
+
+Revision ID: 818f168686ac
+Revises: cf3cb8473f3c
+Create Date: 2021-12-28 15:26:13.728326
+
+"""
+
+import sqlalchemy as sa
+from alembic import op
+
+
+# revision identifiers, used by Alembic.
+revision = '818f168686ac'
+down_revision = 'cf3cb8473f3c'
+branch_labels = None
+depends_on = None
+
+
+def upgrade():
+    """Apply task_instance_add_is_schedulable"""
+    op.add_column('task_instance', sa.Column('is_schedulable', sa.Boolean, nullable=True, default=True))
+
+
+def downgrade():
+    """Unapply task_instance_add_is_schedulable"""
+    op.drop_column('task_instance', 'is_schedulable')

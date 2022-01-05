@@ -18,63 +18,8 @@
 #
 import unittest
 import os
-from typing import Text, List, Optional
-
-from ai_flow.context.project_context import ProjectContext
 from ai_flow.endpoint.server.server_runner import AIFlowServerRunner
-from ai_flow.plugin_interface.scheduler_interface import Scheduler, JobExecutionInfo, WorkflowExecutionInfo, \
-    WorkflowInfo
-from ai_flow.workflow.workflow import Workflow
 from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
-
-
-class MockScheduler(Scheduler):
-
-    def stop_workflow_execution_by_context(self, workflow_name: Text, context: Text) -> Optional[WorkflowExecutionInfo]:
-        pass
-
-    def delete_workflow(self, project_name: Text, workflow_name: Text) -> WorkflowInfo:
-        pass
-
-    def submit_workflow(self, workflow: Workflow, context_extractor, project_context: ProjectContext) -> WorkflowInfo:
-        pass
-
-    def pause_workflow_scheduling(self, project_name: Text, workflow_name: Text) -> WorkflowInfo:
-        pass
-
-    def resume_workflow_scheduling(self, project_name: Text, workflow_name: Text) -> WorkflowInfo:
-        pass
-
-    def start_new_workflow_execution(self, project_name: Text, workflow_name: Text, context: Text = None) \
-            -> Optional[WorkflowExecutionInfo]:
-        pass
-
-    def stop_all_workflow_execution(self, project_name: Text, workflow_name: Text) -> List[WorkflowExecutionInfo]:
-        pass
-
-    def stop_workflow_execution(self, workflow_execution_id: Text) -> Optional[WorkflowExecutionInfo]:
-        pass
-
-    def get_workflow_execution(self, workflow_execution_id: Text) -> Optional[WorkflowExecutionInfo]:
-        pass
-
-    def list_workflow_executions(self, project_name: Text, workflow_name: Text) -> List[WorkflowExecutionInfo]:
-        pass
-
-    def start_job_execution(self, job_name: Text, workflow_execution_id: Text) -> JobExecutionInfo:
-        pass
-
-    def stop_job_execution(self, job_name: Text, workflow_execution_id: Text) -> JobExecutionInfo:
-        pass
-
-    def restart_job_execution(self, job_name: Text, workflow_execution_id: Text) -> JobExecutionInfo:
-        pass
-
-    def get_job_executions(self, job_name: Text, workflow_execution_id: Text) -> List[JobExecutionInfo]:
-        pass
-
-    def list_job_executions(self, workflow_execution_id: Text) -> List[JobExecutionInfo]:
-        pass
 
 
 class TestServerRunner(unittest.TestCase):

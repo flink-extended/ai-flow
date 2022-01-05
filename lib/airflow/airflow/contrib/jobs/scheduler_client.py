@@ -19,7 +19,9 @@ import queue
 import time
 from airflow.contrib.jobs.event_based_scheduler_job import SCHEDULER_NAMESPACE
 from airflow.events.scheduler_events import RequestEvent, SchedulerInnerEventType, \
-    ResponseEvent, RunDagMessage, ExecuteTaskMessage, StopDagRunMessage
+    ResponseEvent, RunDagMessage, ExecuteTaskMessage, StopDagRunMessage, \
+    StopSchedulingTaskMessage, ResumeSchedulingTaskMessage, Status
+from airflow.exceptions import AirflowResponseError
 from airflow.executors.scheduling_action import SchedulingAction
 from notification_service.base_notification import BaseEvent, EventWatcher
 from notification_service.client import NotificationClient, ThreadEventWatcherHandle
@@ -58,7 +60,12 @@ class EventSchedulerClient(object):
     def generate_id(id):
         return '{}_{}'.format(id, time.time_ns())
 
-    def trigger_parse_dag(self, file_path, timeout: Optional[int] = 60) -> bool:
+    @staticmethod
+    def _check_response_success(response: ResponseEvent):
+        if response.status != Status.SUCCESS:
+            raise AirflowResponseError(response.body)
+
+    def trigger_parse_dag(self, file_path, timeout: Optional[int] = 90) -> bool:
         id = self.generate_id('')
         watcher: ResponseWatcher = ResponseWatcher()
         handler: ThreadEventWatcherHandle \
@@ -70,7 +77,8 @@ class EventSchedulerClient(object):
                                             event_type=SchedulerInnerEventType.PARSE_DAG_REQUEST.value,
                                             value=file_path))
         try:
-            result = watcher.get_result(timeout=timeout)
+            result: ResponseEvent = ResponseEvent.from_base_event(watcher.get_result(timeout))
+            self._check_response_success(result)
         except TimeoutError as e:
             raise TimeoutError("Trigger the scheduler to parse the dag timeout({}).".format(timeout))
         finally:
@@ -87,6 +95,7 @@ class EventSchedulerClient(object):
         self.ns_client.send_event(RequestEvent(request_id=id, body=RunDagMessage(dag_id, context).to_json()).to_event())
         try:
             result: ResponseEvent = ResponseEvent.from_base_event(watcher.get_result(timeout))
+            self._check_response_success(result)
         except TimeoutError as e:
             raise TimeoutError("Trigger the scheduler to schedule the dag timeout({}).".format(timeout))
         finally:
@@ -106,6 +115,7 @@ class EventSchedulerClient(object):
                                                .to_json()).to_event())
         try:
             result: ResponseEvent = ResponseEvent.from_base_event(watcher.get_result(timeout))
+            self._check_response_success(result)
         except TimeoutError as e:
             raise TimeoutError("Trigger the scheduler to stop the dag run timeout({}).".format(timeout))
         finally:
@@ -129,8 +139,71 @@ class EventSchedulerClient(object):
                                                .to_json()).to_event())
         try:
             result: ResponseEvent = ResponseEvent.from_base_event(watcher.get_result(timeout))
+            self._check_response_success(result)
         except TimeoutError as e:
             raise TimeoutError("Trigger the scheduler to schedule the task timeout({}).".format(timeout))
         finally:
             handler.stop()
         return ExecutionContext(dagrun_id=result.body)
+
+    def stop_scheduling_task(self, dag_id, dagrun_id, task_id, timeout: Optional[int] = 30):
+        """
+        Stop scheduling the task.
+        :param dag_id: The id of the DAG.
+        :param dagrun_id: The run_id of the dagrun.
+        :param task_id: The task id.
+        :param timeout: If optional args 'timeout' is None,
+            block if necessary until a response is received. If 'timeout' is
+            a non-negative number, it blocks at most 'timeout' seconds and raises
+            the TimeoutError exception if no response was received within that time.
+        """
+        id = self.generate_id('{}_{}_{}'.format(dag_id, dagrun_id, task_id))
+        watcher: ResponseWatcher = ResponseWatcher()
+        handler: ThreadEventWatcherHandle \
+            = self.ns_client.start_listen_event(key=id,
+                                                event_type=SchedulerInnerEventType.RESPONSE.value,
+                                                namespace=SCHEDULER_NAMESPACE, watcher=watcher)
+        self.ns_client.send_event(RequestEvent(request_id=id,
+                                               body=StopSchedulingTaskMessage(dag_id=dag_id,
+                                                                              dagrun_id=dagrun_id,
+                                                                              task_id=task_id)
+                                               .to_json()).to_event())
+        try:
+            result: ResponseEvent = ResponseEvent.from_base_event(watcher.get_result(timeout))
+            self._check_response_success(result)
+        except TimeoutError as e:
+            raise TimeoutError("Stop scheduling task timeout({}), dagrun_id: {} task_id {}."
+                               .format(timeout, dagrun_id, task_id))
+        finally:
+            handler.stop()
+
+    def resume_scheduling_task(self, dag_id, dagrun_id, task_id, timeout: Optional[int] = 30):
+        """
+        Resume scheduling the task.
+        :param dag_id: The id of the DAG
+        :param dagrun_id: The run_id of the dagrun.
+        :param task_id: The task id.
+        :param timeout: If optional args 'timeout' is None,
+            block if necessary until a response is received. If 'timeout' is
+            a non-negative number, it blocks at most 'timeout' seconds and raises
+            the TimeoutError exception if no response was received within that time.
+        """
+        id = self.generate_id('{}_{}_{}'.format(dag_id, dagrun_id, task_id))
+        watcher: ResponseWatcher = ResponseWatcher()
+        handler: ThreadEventWatcherHandle \
+            = self.ns_client.start_listen_event(key=id,
+                                                event_type=SchedulerInnerEventType.RESPONSE.value,
+                                                namespace=SCHEDULER_NAMESPACE, watcher=watcher)
+        self.ns_client.send_event(RequestEvent(request_id=id,
+                                               body=ResumeSchedulingTaskMessage(dag_id=dag_id,
+                                                                                dagrun_id=dagrun_id,
+                                                                                task_id=task_id)
+                                               .to_json()).to_event())
+        try:
+            result: ResponseEvent = ResponseEvent.from_base_event(watcher.get_result(timeout))
+            self._check_response_success(result)
+        except TimeoutError as e:
+            raise TimeoutError("Resume scheduling task timeout({}), dagrun_id: {} task_id {}."
+                               .format(timeout, dagrun_id, task_id))
+        finally:
+            handler.stop()

@@ -21,6 +21,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
+from . import message_pb2 as message__pb2
 from . import scheduling_service_pb2 as scheduling__service__pb2
 
 
@@ -122,6 +123,16 @@ class SchedulingServiceStub(object):
                 '/ai_flow.SchedulingService/listJobs',
                 request_serializer=scheduling__service__pb2.ScheduleJobRequest.SerializeToString,
                 response_deserializer=scheduling__service__pb2.ListJobInfoResponse.FromString,
+                )
+        self.stopSchedulingJob = channel.unary_unary(
+                '/ai_flow.SchedulingService/stopSchedulingJob',
+                request_serializer=scheduling__service__pb2.ScheduleJobRequest.SerializeToString,
+                response_deserializer=message__pb2.ResultProto.FromString,
+                )
+        self.resumeSchedulingJob = channel.unary_unary(
+                '/ai_flow.SchedulingService/resumeSchedulingJob',
+                request_serializer=scheduling__service__pb2.ScheduleJobRequest.SerializeToString,
+                response_deserializer=message__pb2.ResultProto.FromString,
                 )
 
 
@@ -240,6 +251,18 @@ class SchedulingServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def stopSchedulingJob(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def resumeSchedulingJob(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_SchedulingServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -332,6 +355,16 @@ def add_SchedulingServiceServicer_to_server(servicer, server):
                     servicer.listJobs,
                     request_deserializer=scheduling__service__pb2.ScheduleJobRequest.FromString,
                     response_serializer=scheduling__service__pb2.ListJobInfoResponse.SerializeToString,
+            ),
+            'stopSchedulingJob': grpc.unary_unary_rpc_method_handler(
+                    servicer.stopSchedulingJob,
+                    request_deserializer=scheduling__service__pb2.ScheduleJobRequest.FromString,
+                    response_serializer=message__pb2.ResultProto.SerializeToString,
+            ),
+            'resumeSchedulingJob': grpc.unary_unary_rpc_method_handler(
+                    servicer.resumeSchedulingJob,
+                    request_deserializer=scheduling__service__pb2.ScheduleJobRequest.FromString,
+                    response_serializer=message__pb2.ResultProto.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -646,5 +679,39 @@ class SchedulingService(object):
         return grpc.experimental.unary_unary(request, target, '/ai_flow.SchedulingService/listJobs',
             scheduling__service__pb2.ScheduleJobRequest.SerializeToString,
             scheduling__service__pb2.ListJobInfoResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def stopSchedulingJob(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.SchedulingService/stopSchedulingJob',
+            scheduling__service__pb2.ScheduleJobRequest.SerializeToString,
+            message__pb2.ResultProto.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def resumeSchedulingJob(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.SchedulingService/resumeSchedulingJob',
+            scheduling__service__pb2.ScheduleJobRequest.SerializeToString,
+            message__pb2.ResultProto.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

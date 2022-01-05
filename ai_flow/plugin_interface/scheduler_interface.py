@@ -435,6 +435,24 @@ class Scheduler(ABC):
         """
         pass
 
+    @abstractmethod
+    def stop_scheduling_job(self, workflow_execution_id: Text, job_name: Text):
+        """
+        Stop scheduling the job.
+        :param workflow_execution_id: The workflow execution id.
+        :param job_name: The job name.
+        """
+        pass
+
+    @abstractmethod
+    def resume_scheduling_job(self, workflow_execution_id: Text, job_name: Text):
+        """
+        Resume scheduling the job.
+        :param workflow_execution_id: The workflow execution id.
+        :param job_name: The job name.
+        """
+        pass
+
 
 class SchedulerFactory(object):
     """

@@ -549,6 +549,42 @@ class TestEventBasedScheduler(unittest.TestCase):
         tes: List[TaskExecution] = self.get_task_execution("single", "task_1")
         self.assertGreater(len(tes), 1)
 
+    def run_stop_and_resume_scheduling_interval_task_function(self):
+        sc_client = EventSchedulerClient(ns_client=self.client)
+        while True:
+            with create_session() as session:
+                dagrun = session.query(DagRun).first()
+                if dagrun is not None:
+                    run_id = dagrun.run_id
+                    sc_client.stop_scheduling_task(dag_id='single', dagrun_id=run_id, task_id='task_1')
+                    break
+                else:
+                    time.sleep(1)
+        time.sleep(15)
+        with create_session() as session:
+            tes = session.query(TaskExecution).filter(TaskExecution.dag_id == 'single',
+                                                      TaskExecution.task_id == 'task_1').all()
+            self.assertEqual(0, len(tes))
+            sc_client.resume_scheduling_task(dag_id='single', dagrun_id=run_id, task_id='task_1')
+        while True:
+            with create_session() as session:
+                tes = session.query(TaskExecution).filter(TaskExecution.dag_id == 'single',
+                                                          TaskExecution.task_id == 'task_1').all()
+                if len(tes) > 2:
+                    break
+                else:
+                    time.sleep(1)
+        self.client.send_event(StopSchedulerEvent(job_id=0).to_event())
+
+    def test_stop_and_resume_scheduling_interval_task(self):
+        dag_file = os.path.join(TEST_DAG_FOLDER, 'test_periodic_interval_task_dag.py')
+        t = threading.Thread(target=self.run_stop_and_resume_scheduling_interval_task_function, args=())
+        t.setDaemon(True)
+        t.start()
+        self.start_scheduler(dag_file)
+        tes: List[TaskExecution] = self.get_task_execution("single", "task_1")
+        self.assertGreater(len(tes), 1)
+
     def run_stop_dagrun_function(self):
         while True:
             with create_session() as session:

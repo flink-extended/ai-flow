@@ -18,7 +18,7 @@
 """Job command"""
 
 from ai_flow.api.workflow_operation import list_job_executions, restart_job_execution, get_job_execution, \
-    start_job_execution, stop_job_execution
+    start_job_execution, stop_job_execution, stop_scheduling_job, resume_scheduling_job
 from ai_flow.cli.simple_table import AIFlowConsole
 from ai_flow.util.cli_utils import init_config
 from ai_flow.util.time_utils import parse_date
@@ -86,3 +86,17 @@ def job_stop_execution(args):
     job_execution = stop_job_execution(args.job_name, args.workflow_execution_id)
     print("Job: {}, workflow execution: {}, stopped: {}.".format(args.job_name, args.workflow_execution_id,
                                                                  job_execution is not None))
+
+
+@init_config
+def job_stop_scheduling(args):
+    """Stops scheduling the job by job name and workflow execution id."""
+    stop_scheduling_job(job_name=args.job_name, execution_id=args.workflow_execution_id)
+    print("Job: {}, workflow execution: {}, stop scheduling.".format(args.job_name, args.workflow_execution_id))
+
+
+@init_config
+def job_resume_scheduling(args):
+    """Resumes scheduling the job by job name and workflow execution id."""
+    resume_scheduling_job(job_name=args.job_name, execution_id=args.workflow_execution_id)
+    print("Job: {}, workflow execution: {}, resume scheduling.".format(args.job_name, args.workflow_execution_id))

@@ -336,3 +336,29 @@ class SchedulerClient(BaseClient):
         if response.result.status != StatusProto.OK:
             raise Exception(response.result.error_message)
         return response.job_list
+
+    def stop_scheduling_job(self, execution_id: Text, job_name: Text):
+        """
+        Stop scheduling the job.
+        :param execution_id: The workflow execution id.
+        :param job_name: The job name.
+        """
+        request = scheduling_service_pb2.ScheduleJobRequest()
+        request.job_name = job_name
+        request.execution_id = execution_id
+        response = self.scheduling_stub.stopSchedulingJob(request)
+        if response.status != StatusProto.OK:
+            raise Exception(response.error_message)
+
+    def resume_scheduling_job(self, execution_id: Text, job_name: Text):
+        """
+        Resume scheduling the job.
+        :param execution_id: The workflow execution id.
+        :param job_name: The job name.
+        """
+        request = scheduling_service_pb2.ScheduleJobRequest()
+        request.job_name = job_name
+        request.execution_id = execution_id
+        response = self.scheduling_stub.resumeSchedulingJob(request)
+        if response.status != StatusProto.OK:
+            raise Exception(response.error_message)
