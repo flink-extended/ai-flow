@@ -59,8 +59,8 @@ class TestBash(unittest.TestCase):
             af.user_define_operation(processor=bash.BashProcessor(bash_command='echo "Xiao ming hello world!"'))
         w = af.workflow_operation.submit_workflow(workflow_name='test_bash')
         je = af.workflow_operation.start_job_execution(job_name='task_1', execution_id='1')
-        je = af.workflow_operation.get_job_execution(job_name='task_1', execution_id='1')
-        self.assertEqual(Status.FINISHED, je.status)
+        jes = af.workflow_operation.get_job_execution(job_name='task_1', execution_id='1')
+        self.assertEqual(Status.FINISHED, jes[0].status)
 
     def test_stop_bash_task(self):
         time.sleep(1)
@@ -69,9 +69,9 @@ class TestBash(unittest.TestCase):
         w = af.workflow_operation.submit_workflow(workflow_name='test_bash')
         je = af.workflow_operation.start_job_execution(job_name='task_1', execution_id='1')
         af.workflow_operation.stop_job_execution(job_name='task_1', execution_id='1')
-        je = af.workflow_operation.get_job_execution(job_name='task_1', execution_id='1')
-        self.assertEqual(Status.FAILED, je.status)
-        self.assertTrue('err' in je.properties)
+        jes = af.workflow_operation.get_job_execution(job_name='task_1', execution_id='1')
+        self.assertEqual(Status.FAILED, jes[0].status)
+        self.assertTrue('err' in jes[0].properties)
 
 
 if __name__ == '__main__':

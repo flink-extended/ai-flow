@@ -407,17 +407,17 @@ def list_job_executions(execution_id: Text) -> List[JobExecutionInfo]:
 
 
 def get_job_execution(job_name: Text,
-                      execution_id: Text) -> JobExecutionInfo:
+                      execution_id: Text) -> List[JobExecutionInfo]:
     """
     Gets the :class:`~ai_flow.plugin_interface.scheduler_interface.JobExecutionInfo` with the given name of job and
     id of corresponding workflow execution.
 
     :param job_name: The name of the job.
     :param execution_id: The id of corresponding workflow execution.
-    :return: The :class:`~ai_flow.plugin_interface.scheduler_interface.JobExecutionInfo` which contains the information
+    :return: List of the :class:`~ai_flow.plugin_interface.scheduler_interface.JobExecutionInfo` which contains the information
                  about the job execution.
     """
-    return proto_to_job(get_ai_flow_client().get_job(job_name, execution_id))
+    return proto_to_job_list(get_ai_flow_client().get_job(job_name, execution_id))
 
 
 def stop_scheduling_job(execution_id: Text, job_name: Text):

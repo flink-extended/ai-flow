@@ -55,9 +55,9 @@ def job_restart_execution(args):
 @init_config
 def job_show_execution(args):
     """Shows the job execution by job name and workflow execution id."""
-    job_execution = get_job_execution(args.job_name, args.workflow_execution_id)
+    job_executions = get_job_execution(args.job_name, args.workflow_execution_id)
     AIFlowConsole().print_as(
-        data=[job_execution],
+        data=sorted(job_executions, key=lambda j: j.job_execution_id),
         output=args.output,
         mapper=lambda x: {
             'job_execution_id': x.job_execution_id,
