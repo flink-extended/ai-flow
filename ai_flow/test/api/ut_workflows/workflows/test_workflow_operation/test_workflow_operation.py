@@ -163,6 +163,22 @@ class TestWorkflowOperation(unittest.TestCase):
         js = workflow_operation.list_job_executions(execution_id='1')
         self.assertEqual(2, len(js))
 
+    def test_stop_scheduling_job(self):
+        error = False
+        try:
+            workflow_operation.stop_scheduling_job(execution_id='1', job_name='task_1')
+        except Exception:
+            error = True
+        self.assertFalse(error)
+
+    def test_resume_scheduling_job(self):
+        error = False
+        try:
+            workflow_operation.resume_scheduling_job(execution_id='1', job_name='task_1')
+        except Exception:
+            error = True
+        self.assertFalse(error)
+
 
 if __name__ == '__main__':
     unittest.main()

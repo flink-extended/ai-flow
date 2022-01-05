@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,13 +14,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-
-protobuf==3.15.6
-grpcio==1.35.0
-sqlalchemy>=1.3.18, <2
-pyyaml>=5.1, <5.4
-rich==9.2.0
-python-dateutil==2.8.0
-alembic>=1.2, <2.0
-python-daemon>=2.1.1, <2.2

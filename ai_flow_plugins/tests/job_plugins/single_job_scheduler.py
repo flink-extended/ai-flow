@@ -111,3 +111,9 @@ class SingleJobScheduler(Scheduler):
 
     def list_job_executions(self, execution_id: Text) -> List[JobExecutionInfo]:
         pass
+
+    def stop_scheduling_job(self, workflow_execution_id: Text, job_name: Text):
+        pass
+
+    def resume_scheduling_job(self, workflow_execution_id: Text, job_name: Text):
+        pass

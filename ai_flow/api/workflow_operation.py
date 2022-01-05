@@ -418,3 +418,21 @@ def get_job_execution(job_name: Text,
                  about the job execution.
     """
     return proto_to_job(get_ai_flow_client().get_job(job_name, execution_id))
+
+
+def stop_scheduling_job(execution_id: Text, job_name: Text):
+    """
+    Stop scheduling the job.
+    :param execution_id: The workflow execution id.
+    :param job_name: The job name.
+    """
+    get_ai_flow_client().stop_scheduling_job(execution_id=execution_id, job_name=job_name)
+
+
+def resume_scheduling_job(execution_id: Text, job_name: Text):
+    """
+    Resume scheduling the job.
+    :param execution_id: The workflow execution id.
+    :param job_name: The job name.
+    """
+    get_ai_flow_client().resume_scheduling_job(execution_id=execution_id, job_name=job_name)

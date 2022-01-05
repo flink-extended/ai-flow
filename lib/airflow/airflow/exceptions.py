@@ -212,3 +212,7 @@ class AirflowFileParseException(AirflowException):
 
 class ConnectionNotUnique(AirflowException):
     """Raise when multiple values are found for the same conn_id"""
+
+
+class AirflowResponseError(AirflowException):
+    """Raise when scheduler's response has error"""

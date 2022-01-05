@@ -280,6 +280,18 @@ JOB_COMMANDS = (
         help='Stops the job execution by job name and workflow execution id.',
         func=lazy_load_command('ai_flow.cli.commands.job_command.job_stop_execution'),
         args=(ARG_PROJECT_PATH, ARG_JOB_NAME, ARG_WORKFLOW_EXECUTION_ID),
+    ),
+    ActionCommand(
+        name='stop-scheduling',
+        help='Stops scheduling the job by job name and workflow execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.job_command.job_stop_scheduling'),
+        args=(ARG_PROJECT_PATH, ARG_JOB_NAME, ARG_WORKFLOW_EXECUTION_ID),
+    ),
+    ActionCommand(
+        name='resume-scheduling',
+        help='Resumes scheduling the job by job name and workflow execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.job_command.job_resume_scheduling'),
+        args=(ARG_PROJECT_PATH, ARG_JOB_NAME, ARG_WORKFLOW_EXECUTION_ID),
     )
 )
 
