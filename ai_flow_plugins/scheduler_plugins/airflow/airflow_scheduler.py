@@ -79,7 +79,7 @@ class AirFlowSchedulerBase(Scheduler, ABC):
         return tmp[0], tmp[1]
 
     @classmethod
-    def create_workflow_execution_id(cls, dag_id, run_id) -> Text:
+    def generate_workflow_execution_id(cls, dag_id, run_id) -> Text:
         return '{}|{}'.format(dag_id, run_id)
 
     @classmethod
@@ -243,7 +243,7 @@ class AirFlowScheduler(AirFlowSchedulerBase):
             else:
                 return WorkflowExecutionInfo(
                     workflow_info=WorkflowInfo(namespace=project_name, workflow_name=workflow_name),
-                    workflow_execution_id=self.create_workflow_execution_id(dag_id=dag_id, run_id=dagrun.run_id),
+                    workflow_execution_id=self.generate_workflow_execution_id(dag_id=dag_id, run_id=dagrun.run_id),
                     status=status.Status.INIT)
 
     def stop_all_workflow_execution(self, project_name: Text, workflow_name: Text) -> List[WorkflowExecutionInfo]:
@@ -306,7 +306,7 @@ class AirFlowScheduler(AirFlowSchedulerBase):
                     result.append(WorkflowExecutionInfo(workflow_info=WorkflowInfo(namespace=project_name,
                                                                                    workflow_name=workflow_name),
                                                         workflow_execution_id
-                                                        =self.create_workflow_execution_id(dag_id, dagrun.run_id),
+                                                        =self.generate_workflow_execution_id(dag_id, dagrun.run_id),
                                                         status=status_,
                                                         start_date=str(datetime_to_int64(dagrun.start_date)),
                                                         end_date=str(datetime_to_int64(dagrun.end_date)),
@@ -420,7 +420,7 @@ class AirFlowScheduler(AirFlowSchedulerBase):
                                    workflow_execution
                                    =WorkflowExecutionInfo(workflow_info=WorkflowInfo(namespace=project_name,
                                                                                      workflow_name=workflow_name),
-                                                          workflow_execution_id=self.create_workflow_execution_id(
+                                                          workflow_execution_id=self.generate_workflow_execution_id(
                                                               dag_id=dagrun.dag_id,
                                                               run_id=dagrun.run_id),
                                                           status=self.airflow_state_to_status(dagrun.state)))
@@ -492,7 +492,7 @@ class AirFlowSchedulerRestful(AirFlowSchedulerBase):
         else:
             return WorkflowExecutionInfo(
                 workflow_info=WorkflowInfo(namespace=project_name, workflow_name=workflow_name),
-                workflow_execution_id=self.create_workflow_execution_id(dag_id, context.dagrun_id),
+                workflow_execution_id=self.generate_workflow_execution_id(dag_id, context.dagrun_id),
                 status=status.Status.INIT)
 
     def stop_all_workflow_execution(self, project_name: Text, workflow_name: Text) -> List[WorkflowExecutionInfo]:
@@ -501,7 +501,7 @@ class AirFlowSchedulerRestful(AirFlowSchedulerBase):
         result = []
         for dagrun in dagrun_list:
             status_ = self.airflow_state_to_status(dagrun.get('state'))
-            workflow_execution_id = self.create_workflow_execution_id(dag_id, dagrun.get('dag_run_id'))
+            workflow_execution_id = self.generate_workflow_execution_id(dag_id, dagrun.get('dag_run_id'))
             if status_ == State.RUNNING:
                 self.stop_workflow_execution(workflow_execution_id)
             result.append(WorkflowExecutionInfo(workflow_info=WorkflowInfo(namespace=project_name,
@@ -553,7 +553,7 @@ class AirFlowSchedulerRestful(AirFlowSchedulerBase):
         result = []
         for dagrun in dagrun_list:
             status_ = self.airflow_state_to_status(dagrun.get('state'))
-            workflow_execution_id = self.create_workflow_execution_id(dag_id, dagrun.get('dag_run_id'))
+            workflow_execution_id = self.generate_workflow_execution_id(dag_id, dagrun.get('dag_run_id'))
             result.append(WorkflowExecutionInfo(workflow_info=WorkflowInfo(namespace=project_name,
                                                                            workflow_name=workflow_name),
                                                 workflow_execution_id=workflow_execution_id,
@@ -642,7 +642,7 @@ class AirFlowSchedulerRestful(AirFlowSchedulerBase):
 
     def build_job_execution_info_list(self, dagrun, task_list):
         project_name, workflow_name = self.dag_id_to_namespace_workflow(dagrun.get('dag_id'))
-        workflow_execution_id = self.create_workflow_execution_id(dagrun.get('dag_id'), dagrun.get('dag_run_id'))
+        workflow_execution_id = self.generate_workflow_execution_id(dagrun.get('dag_id'), dagrun.get('dag_run_id'))
         result = []
         for task in task_list:
             job = JobExecutionInfo(job_name=task.get('task_id'),

@@ -624,22 +624,21 @@ class EventBasedScheduler(LoggingMixin):
                 ).to_event())
                 self.notification_client.send_event(ResponseEvent(event.request_id, dagrun.run_id).to_event())
             elif message.message_type == UserDefineMessageType.STOP_SCHEDULING_TASK:
-                dagrun = DagRun.get_run_by_id(session=session, dag_id=message.dag_id, run_id=message.dagrun_id)
-                ti: TI = dagrun.get_task_instance(task_id=message.task_id)
-                ti.is_schedulable = False
-                session.merge(ti)
-                session.commit()
-                self.notification_client.send_event(ResponseEvent(event.request_id, ti.task_id).to_event())
+                self._process_scheduling_job_request(event, message, False, session)
             elif message.message_type == UserDefineMessageType.RESUME_SCHEDULING_TASK:
-                dagrun = DagRun.get_run_by_id(session=session, dag_id=message.dag_id, run_id=message.dagrun_id)
-                ti: TI = dagrun.get_task_instance(task_id=message.task_id)
-                ti.is_schedulable = True
-                session.merge(ti)
-                session.commit()
-                self.notification_client.send_event(ResponseEvent(event.request_id, ti.task_id).to_event())
+                self._process_scheduling_job_request(event, message, True, session)
+
         except Exception as e:
             self.log.exception("Error occurred when processing request event.")
             self.notification_client.send_event(ResponseEvent(event.request_id, str(e), Status.ERROR).to_event())
+
+    def _process_scheduling_job_request(self, event, message, is_schedulable, session):
+        dagrun = DagRun.get_run_by_id(session=session, dag_id=message.dag_id, run_id=message.dagrun_id)
+        ti: TI = dagrun.get_task_instance(task_id=message.task_id)
+        ti.is_schedulable = is_schedulable
+        session.merge(ti)
+        session.commit()
+        self.notification_client.send_event(ResponseEvent(event.request_id, ti.task_id).to_event())
 
     def _stop_dag(self, dag_id, session: Session):
         """
