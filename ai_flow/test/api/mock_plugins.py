@@ -80,6 +80,12 @@ class MockJobFactory(JobPluginFactory, JobGenerator, JobController):
 
 class MockScheduler(Scheduler):
 
+    def stop_scheduling_job(self, workflow_execution_id: Text, job_name: Text):
+        pass
+
+    def resume_scheduling_job(self, workflow_execution_id: Text, job_name: Text):
+        pass
+
     def stop_workflow_execution_by_context(self, workflow_name: Text, context: Text) -> Optional[WorkflowExecutionInfo]:
         return WorkflowExecutionInfo(workflow_execution_id='1', status=Status.RUNNING)
 

@@ -24,8 +24,8 @@ make install
 pip install google-api-core==1.26.1
 
 # install grpcio
-pip install grpcio==1.34.0
-pip install grpcio-tools==1.34.0
+pip install grpcio==1.35.0
+pip install grpcio-tools==1.35.0
 
 # install grpc gateway
 sh install_grpc_gateway.sh

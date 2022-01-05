@@ -18,7 +18,13 @@
 #
 import os
 
+from typing import Text, Optional, List
+
+from ai_flow.context.project_context import ProjectContext
+from ai_flow.plugin_interface.scheduler_interface import Scheduler, WorkflowExecutionInfo, WorkflowInfo, \
+    JobExecutionInfo
 from ai_flow.util import path_util
+from ai_flow.workflow.workflow import Workflow
 
 DEFAULT_MYSQL_USERNAME = ''
 DEFAULT_MYSQL_PASSWORD = ''
@@ -87,3 +93,60 @@ def get_mongodb_server_url():
             "specify MONGODB host via MONGODB_TEST_HOST and specify MONGODB port "
             "via MONGODB_TEST_PORT.")
     return 'mongodb://%s:%s@%s:%s' % (db_username, db_password, db_host, db_port)
+
+
+class MockScheduler(Scheduler):
+    def stop_scheduling_job(self, workflow_execution_id: Text, job_name: Text):
+        pass
+
+    def resume_scheduling_job(self, workflow_execution_id: Text, job_name: Text):
+        pass
+
+    def stop_workflow_execution_by_context(self, workflow_name: Text, context: Text) -> Optional[WorkflowExecutionInfo]:
+        pass
+
+    def delete_workflow(self, project_name: Text, workflow_name: Text) -> WorkflowInfo:
+        pass
+
+    def start_job_execution(self, job_name: Text, workflow_execution_id: Text) -> JobExecutionInfo:
+        pass
+
+    def stop_job_execution(self, job_name: Text, workflow_execution_id: Text) -> JobExecutionInfo:
+        pass
+
+    def restart_job_execution(self, job_name: Text, workflow_execution_id: Text) -> JobExecutionInfo:
+        pass
+
+    def get_job_executions(self, job_name: Text, workflow_execution_id: Text) -> List[JobExecutionInfo]:
+        pass
+
+    def list_job_executions(self, workflow_execution_id: Text) -> List[JobExecutionInfo]:
+        pass
+
+    def submit_workflow(self, workflow: Workflow, context_extractor, project_context: ProjectContext) -> WorkflowInfo:
+        pass
+
+    def pause_workflow_scheduling(self, project_name: Text, workflow_name: Text) -> WorkflowInfo:
+        pass
+
+    def resume_workflow_scheduling(self, project_name: Text, workflow_name: Text) -> WorkflowInfo:
+        pass
+
+    def start_new_workflow_execution(self, project_name: Text, workflow_name: Text, context: Text = None) \
+            -> WorkflowExecutionInfo:
+        pass
+
+    def stop_all_workflow_execution(self, project_name: Text, workflow_name: Text) -> List[WorkflowExecutionInfo]:
+        pass
+
+    def stop_workflow_execution(self, workflow_execution_id: Text) -> WorkflowExecutionInfo:
+        pass
+
+    def get_workflow_execution(self, workflow_execution_id: Text) -> WorkflowExecutionInfo:
+        pass
+
+    def list_workflow_executions(self, project_name: Text, workflow_name: Text) -> List[WorkflowExecutionInfo]:
+        pass
+
+
+MOCK_SCHEDULER_CLASS = 'ai_flow.test.test_util.MockScheduler'

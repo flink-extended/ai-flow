@@ -90,6 +90,12 @@ class TestFlink(unittest.TestCase):
     def tearDownClass(cls) -> None:
         cls.master.stop()
         stop_notification_server(cls.ns_server)
+        generated = '{}/generated'.format(project_path)
+        if os.path.exists(generated):
+            shutil.rmtree(generated)
+        temp = '/tmp/aiflow'
+        if os.path.exists(temp):
+            shutil.rmtree(temp)
 
     def setUp(self):
         airflow_db_utils.clear_all()

@@ -161,3 +161,9 @@ class MockScheduler(Scheduler):
                                                                 start_date=str(int(time.time() * 1000))
                                                                 )
         return [job_execution_info]
+
+    def stop_scheduling_job(self, workflow_execution_id: Text, job_name: Text):
+        pass
+
+    def resume_scheduling_job(self, workflow_execution_id: Text, job_name: Text):
+        pass

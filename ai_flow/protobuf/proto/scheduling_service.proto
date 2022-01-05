@@ -212,4 +212,18 @@ service SchedulingService {
         get: "/aiflow/scheduling/job/list"
         };
     };
+
+    rpc stopSchedulingJob (ScheduleJobRequest) returns (ResultProto) {
+        option (google.api.http) = {
+        post: "/aiflow/scheduling/job/stop_scheduling"
+        body: "*"
+        };
+    };
+
+     rpc resumeSchedulingJob (ScheduleJobRequest) returns (ResultProto) {
+        option (google.api.http) = {
+        post: "/aiflow/scheduling/job/resume_scheduling"
+        body: "*"
+        };
+    };
 }

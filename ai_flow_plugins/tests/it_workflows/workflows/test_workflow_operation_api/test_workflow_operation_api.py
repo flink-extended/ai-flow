@@ -21,8 +21,9 @@ import shutil
 from typing import List
 
 from airflow.models.dagrun import DagRun
+from airflow.models.taskexecution import TaskExecution
 from airflow.utils.session import create_session
-from airflow.utils.state import State
+from notification_service.base_notification import BaseEvent
 from notification_service.client import NotificationClient
 
 from ai_flow import AIFlowServerRunner, init_ai_flow_context
@@ -45,7 +46,7 @@ class PyProcessor1(python.PythonProcessor):
         return []
 
 
-class TestPython(unittest.TestCase):
+class TestWorkflowOperationAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.ns_server = start_notification_server()
@@ -73,21 +74,47 @@ class TestPython(unittest.TestCase):
         if os.path.exists(temp):
             shutil.rmtree(temp)
 
-    def test_python_task(self):
+    def test_stop_and_resume_scheduling_job(self):
         def run_workflow(client: NotificationClient):
             with af.job_config('task_1'):
                 af.user_define_operation(processor=PyProcessor1())
+            af.action_on_event(job_name='task_1',
+                               event_key='a',
+                               event_value='a',
+                               event_type='a',
+                               sender='*',
+                               namespace='*',
+                               action=af.JobAction.RESTART)
             w = af.workflow_operation.submit_workflow(
                 workflow_name=af.current_workflow_config().workflow_name)
             wei = af.workflow_operation.start_new_workflow_execution(
                 workflow_name=af.current_workflow_config().workflow_name)
             set_workflow_execution_info(wei)
+            # start the workflow execution
             while True:
                 with create_session() as session:
                     dag_run = session.query(DagRun) \
                         .filter(DagRun.dag_id == 'test_project.{}'
                                 .format(af.current_workflow_config().workflow_name)).first()
-                    if dag_run is not None and dag_run.state == State.SUCCESS:
+                    if dag_run is not None:
+                        break
+                    else:
+                        time.sleep(1)
+
+            client.send_event(BaseEvent(key='a', value='a', event_type='a'))
+            time.sleep(5)
+            af.workflow_operation.stop_scheduling_job(execution_id=wei.workflow_execution_id, job_name='task_1')
+            client.send_event(BaseEvent(key='a', value='a', event_type='a'))
+            time.sleep(5)
+            af.workflow_operation.resume_scheduling_job(execution_id=wei.workflow_execution_id, job_name='task_1')
+            client.send_event(BaseEvent(key='a', value='a', event_type='a'))
+            while True:
+                with create_session() as session:
+                    task_executions = session.query(TaskExecution) \
+                        .filter(TaskExecution.dag_id == 'test_project.{}'
+                                .format(af.current_workflow_config().workflow_name),
+                                TaskExecution.task_id == 'task_1').all()
+                    if task_executions is not None and len(task_executions) > 1:
                         break
                     else:
                         time.sleep(1)
@@ -95,14 +122,11 @@ class TestPython(unittest.TestCase):
         run_ai_flow_workflow(dag_id=get_dag_id(af.current_project_config().get_project_name(),
                                                af.current_workflow_config().workflow_name),
                              test_function=run_workflow)
-        workflow_execution_info = af.workflow_operation.get_workflow_execution(
-            execution_id=get_workflow_execution_info().workflow_execution_id)
-        self.assertEqual(Status.FINISHED, workflow_execution_info.status)
 
-        job_execution_info = af.workflow_operation.get_job_execution(job_name='task_1',
-                                                                     execution_id=get_workflow_execution_info().
-                                                                     workflow_execution_id)
-        self.assertEqual(Status.FINISHED, job_execution_info.status)
+        job_execution_info_list = af.workflow_operation.list_job_executions(execution_id=get_workflow_execution_info().
+                                                                            workflow_execution_id)
+        self.assertEqual(2, len(job_execution_info_list))
+        self.assertEqual(Status.FINISHED, job_execution_info_list[0].status)
 
 
 if __name__ == '__main__':

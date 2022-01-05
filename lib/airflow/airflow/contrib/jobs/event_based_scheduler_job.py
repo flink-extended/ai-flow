@@ -57,7 +57,7 @@ from airflow.events.scheduler_events import (
     StopSchedulerEvent, TaskSchedulingEvent, DagExecutableEvent, TaskStateChangedEvent, EventHandleEvent, RequestEvent,
     ResponseEvent, StopDagEvent, ParseDagRequestEvent, ParseDagResponseEvent, SchedulerInnerEventUtil,
     BaseUserDefineMessage, UserDefineMessageType, SCHEDULER_NAMESPACE, DagRunFinishedEvent, PeriodicEvent,
-    DagRunCreatedEvent)
+    DagRunCreatedEvent, Status)
 
 from notification_service.base_notification import BaseEvent
 from notification_service.client import EventWatcher, NotificationClient
@@ -141,7 +141,15 @@ class EventBasedScheduler(LoggingMixin):
             elif isinstance(event, RequestEvent):
                 self._process_request_event(event)
             elif isinstance(event, TaskSchedulingEvent):
-                self._schedule_task(event)
+                is_schedulable = self._task_is_schedulable(dag_id=event.dag_id,
+                                                           task_id=event.task_id,
+                                                           execution_date=event.execution_date,
+                                                           session=session)
+                if is_schedulable:
+                    self._schedule_task(event)
+                else:
+                    self.log.info("dag_id: {} task_id: {} execution_date: {} is not schedulable."
+                                  .format(event.dag_id, event.task_id, event.execution_date))
             elif isinstance(event, TaskStateChangedEvent):
                 dagrun = self._find_dagrun(event.dag_id, event.execution_date, session)
                 if dagrun is not None:
@@ -374,6 +382,16 @@ class EventBasedScheduler(LoggingMixin):
                 dag_model.next_dagrun
             )
 
+    @staticmethod
+    def _task_is_schedulable(dag_id, task_id, execution_date, session) -> bool:
+        task_instance = session.query(TI).filter(TI.dag_id == dag_id,
+                                                 TI.task_id == task_id,
+                                                 TI.execution_date == execution_date).first()
+        if task_instance is None or task_instance.is_schedulable is False:
+            return False
+        else:
+            return True
+
     def _schedule_task(self, scheduling_event: TaskSchedulingEvent):
         task_key = TaskInstanceKey(
             scheduling_event.dag_id,
@@ -605,8 +623,22 @@ class EventBasedScheduler(LoggingMixin):
                     action=SchedulingAction(message.action)
                 ).to_event())
                 self.notification_client.send_event(ResponseEvent(event.request_id, dagrun.run_id).to_event())
-        except Exception:
+            elif message.message_type == UserDefineMessageType.STOP_SCHEDULING_TASK:
+                self._process_scheduling_job_request(event, message, False, session)
+            elif message.message_type == UserDefineMessageType.RESUME_SCHEDULING_TASK:
+                self._process_scheduling_job_request(event, message, True, session)
+
+        except Exception as e:
             self.log.exception("Error occurred when processing request event.")
+            self.notification_client.send_event(ResponseEvent(event.request_id, str(e), Status.ERROR).to_event())
+
+    def _process_scheduling_job_request(self, event, message, is_schedulable, session):
+        dagrun = DagRun.get_run_by_id(session=session, dag_id=message.dag_id, run_id=message.dagrun_id)
+        ti: TI = dagrun.get_task_instance(task_id=message.task_id)
+        ti.is_schedulable = is_schedulable
+        session.merge(ti)
+        session.commit()
+        self.notification_client.send_event(ResponseEvent(event.request_id, ti.task_id).to_event())
 
     def _stop_dag(self, dag_id, session: Session):
         """
@@ -652,7 +684,8 @@ class EventBasedSchedulerJob(BaseJob):
         super().__init__(*args, **kwargs)
         if notification_server_uri is None:
             notification_server_uri = conf.get('scheduler', 'notification_server_uri', fallback='127.0.0.1:50052')
-        self.log.info("Starting event based scheduler with notification server uri: {}".format(notification_server_uri))
+        self.log.info("Starting event based scheduler with notification server uri: {} dag dir: {}"
+                      .format(notification_server_uri, dag_directory))
         self.mailbox: Mailbox = Mailbox()
         self.dag_trigger: DagTrigger = DagTrigger(
             dag_directory=dag_directory,
@@ -781,6 +814,7 @@ class EventBasedSchedulerJob(BaseJob):
             start_time=self.start_time,
             version=self.last_event_version
         )
+        self.log.info("start listen event from time: {} version: {}".format(self.start_time, self.last_event_version))
 
     def _stop_listen_events(self):
         self.notification_client.stop_listen_events()

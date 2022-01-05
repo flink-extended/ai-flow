@@ -67,7 +67,7 @@ class TestPeriodicJob(unittest.TestCase):
         generated = '{}/generated'.format(project_path)
         if os.path.exists(generated):
             shutil.rmtree(generated)
-        temp = '{}/temp'.format(project_path)
+        temp = '/tmp/aiflow'
         if os.path.exists(temp):
             shutil.rmtree(temp)
 
