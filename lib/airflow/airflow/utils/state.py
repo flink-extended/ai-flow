@@ -142,7 +142,7 @@ class State:
     a run or has not even started.
     """
 
-    failed_states = frozenset([FAILED, UPSTREAM_FAILED, KILLED])
+    failed_states = frozenset([FAILED, UPSTREAM_FAILED])
     """
     A list of states indicating that a task or dag is a failed state.
     """
