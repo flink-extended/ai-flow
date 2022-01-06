@@ -28,9 +28,12 @@ jobs:
         run: |
           IMAGE_REPO=${{ github.event.inputs.image_repository || env.DEFAULT_IMAGE_REPO }}
           IMAGE_TAG=${{ github.event.inputs.image_tag }}
+          AUTO_BUILD_LATEST=false
+          [ -z ${IMAGE_TAG} ] && [ ${IMAGE_REPO} = ${{ env.DEFAULT_IMAGE_REPO }} ] && AUTO_BUILD_LATEST=true
           [ -z ${IMAGE_TAG} ] && IMAGE_TAG=${GITHUB_REF##*/}-`echo ${GITHUB_SHA} | cut -c1-8`
           echo "IMAGE_REPO=${IMAGE_REPO}" >> $GITHUB_ENV
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+          echo "AUTO_BUILD_LATEST=${AUTO_BUILD_LATEST}" >> $GITHUB_ENV
 
       - name: Log in to to docker registry
         run: |
@@ -45,3 +48,8 @@ jobs:
         run: |
           echo pushing ${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}
           docker push  ${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}
+          if [ ${{ env.AUTO_BUILD_LATEST }} = true ] ; then
+            docker tag ${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }} ${{ env.IMAGE_REPO }}:latest
+            echo pushing ${{ env.IMAGE_REPO }}:latest
+            docker push ${{ env.IMAGE_REPO }}:latest
+          fi
