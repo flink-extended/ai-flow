@@ -342,7 +342,8 @@ aiflow job [-h] COMMAND ...
 
 > COMMAND
 
-Possible choices: list-executions, restart-execution, show-execution, start-execution, stop-execution.
+Possible choices: list-executions, restart-execution, show-execution, start-execution, stop-execution, 
+resume-scheduling, stop-scheduling.
 
 #### Sub-commands
 
@@ -393,6 +394,7 @@ The name of the job.
 > workflow_execution_id
 
 The id of the workflow execution.
+
 
 ###### show-execution
 
@@ -467,6 +469,53 @@ The name of the job.
 > workflow_execution_id
 
 The id of the workflow execution.
+
+
+##### stop-scheduling
+
+Stops scheduling the job by job name and workflow execution id.
+
+```
+aiflow job stop-scheduling [-h] project_path job_name workflow_execution_id
+```
+
+##### Positional Arguments
+
+> project_path
+
+The path of the project.
+
+> job_name
+
+The name of the job.
+
+> workflow_execution_id
+
+The id of the workflow execution.
+
+
+##### resume-scheduling
+
+Resumes scheduling the job by job name and workflow execution id.
+
+```
+aiflow job resume-scheduling [-h] project_path job_name workflow_execution_id
+```
+
+##### Positional Arguments
+
+> project_path
+
+The path of the project.
+
+> job_name
+
+The name of the job.
+
+> workflow_execution_id
+
+The id of the workflow execution.
+
 
 (aiflow-cli-config)=
 
