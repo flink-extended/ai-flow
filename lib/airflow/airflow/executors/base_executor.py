@@ -153,8 +153,7 @@ class BaseExecutor(LoggingMixin):
                     self._send_message(ti)
             elif SchedulingAction.STOP == action:
                 if ti.state in State.unfinished:
-                    if self._stop_task_instance(key):
-                        self._send_message(ti)
+                    self._stop_task_instance(key)
             elif SchedulingAction.RESTART == action:
                 if ti.state in State.running:
                     self._restart_task_instance(key)
