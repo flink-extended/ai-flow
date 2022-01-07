@@ -322,7 +322,7 @@ class SchedulerClient(BaseClient):
         response = self.scheduling_stub.getJob(request)
         if response.result.status != StatusProto.OK:
             raise Exception(response.result.error_message)
-        return response.job
+        return response.job_list
 
     def list_jobs(self, execution_id: Text) -> List[JobProto]:
         """

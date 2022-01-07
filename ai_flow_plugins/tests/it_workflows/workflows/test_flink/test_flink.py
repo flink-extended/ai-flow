@@ -134,10 +134,10 @@ class TestFlink(unittest.TestCase):
             execution_id=get_workflow_execution_info().workflow_execution_id)
         self.assertEqual(Status.FINISHED, workflow_execution_info.status)
 
-        job_execution_info = af.workflow_operation.get_job_execution(job_name='task_1',
-                                                                     execution_id=get_workflow_execution_info().
-                                                                     workflow_execution_id)
-        self.assertEqual(Status.FINISHED, job_execution_info.status)
+        job_execution_infos = af.workflow_operation.get_job_executions(job_name='task_1',
+                                                                       execution_id=get_workflow_execution_info().
+                                                                       workflow_execution_id)
+        self.assertEqual(Status.FINISHED, job_execution_infos[0].status)
 
 
 if __name__ == '__main__':
