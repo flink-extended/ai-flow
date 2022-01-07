@@ -305,11 +305,11 @@ class TestSchedulerService(unittest.TestCase):
                                     workflow_execution=WorkflowExecutionInfo(workflow_execution_id='id',
                                                                              status=Status.INIT))]
             client = SchedulerClient("localhost:{}".format(_PORT))
-            job = client.get_job(job_name='job_name', execution_id='id')
-            self.assertEqual('job_name', job.name)
-            self.assertEqual(StateProto.RUNNING, job.job_state)
-            self.assertEqual('id', job.workflow_execution.execution_id)
-            self.assertEqual(StateProto.INIT, job.workflow_execution.execution_state)
+            jobs = client.get_job(job_name='job_name', execution_id='id')
+            self.assertEqual('job_name', jobs[0].name)
+            self.assertEqual(StateProto.RUNNING, jobs[0].job_state)
+            self.assertEqual('id', jobs[0].workflow_execution.execution_id)
+            self.assertEqual(StateProto.INIT, jobs[0].workflow_execution.execution_state)
 
     def test_list_jobs(self):
         with mock.patch(SCHEDULER_CLASS) as mockScheduler:

@@ -331,13 +331,16 @@ class SchedulerService(SchedulingServiceServicer):
             rq: ScheduleJobRequest = request
             jobs = self._scheduler.get_job_executions(rq.job_name, rq.execution_id)
             if jobs is None:
-                return JobInfoResponse(
+                return ListJobInfoResponse(
                     result=ResultProto(status=StatusProto.ERROR,
                                        error_message='{} do not exist!'.format(rq.job_name)))
-            return JobInfoResponse(result=ResultProto(status=StatusProto.OK), job=job_to_proto(jobs[0]))
+            else:
+                response = ListJobInfoResponse(result=ResultProto(status=StatusProto.OK))
+                response.job_list.extend(job_list_to_proto(jobs))
+                return response
         except Exception as err:
-            return JobInfoResponse(result=ResultProto(status=StatusProto.ERROR,
-                                                      error_message=traceback.format_exc()))
+            return ListJobInfoResponse(result=ResultProto(status=StatusProto.ERROR,
+                                                          error_message=traceback.format_exc()))
 
     def listJobs(self, request, context):
         try:

@@ -201,7 +201,7 @@ service SchedulingService {
     };
 
 
-    rpc getJob (ScheduleJobRequest) returns (JobInfoResponse) {
+    rpc getJob (ScheduleJobRequest) returns (ListJobInfoResponse) {
         option (google.api.http) = {
         get: "/aiflow/scheduling/job/get"
         };

@@ -83,6 +83,10 @@ class AirFlowSchedulerBase(Scheduler, ABC):
         return '{}|{}'.format(dag_id, run_id)
 
     @classmethod
+    def generate_job_execution_id(cls, dag_id, run_id, task_id, seq_num) -> Text:
+        return '{}|{}|{}|{}'.format(dag_id, run_id, task_id, seq_num)
+
+    @classmethod
     def parse_dag_id_and_run_id(cls, workflow_execution_id: Text) -> (Text, Text):
         return workflow_execution_id.split('|')
 
@@ -412,7 +416,11 @@ class AirFlowScheduler(AirFlowSchedulerBase):
         project_name, workflow_name = self.dag_id_to_namespace_workflow(dagrun.dag_id)
         result = []
         for task in task_list:
-            job = JobExecutionInfo(job_name=task.task_id,
+            job = JobExecutionInfo(job_execution_id=self.generate_job_execution_id(dag_id=dagrun.dag_id,
+                                                                                   run_id=dagrun.run_id,
+                                                                                   task_id=task.task_id,
+                                                                                   seq_num=task.seq_num),
+                                   job_name=task.task_id,
                                    status=self.airflow_state_to_status(task.state),
                                    start_date=str(datetime_to_int64(task.start_date)),
                                    end_date=str(datetime_to_int64(task.end_date)),
@@ -645,7 +653,11 @@ class AirFlowSchedulerRestful(AirFlowSchedulerBase):
         workflow_execution_id = self.generate_workflow_execution_id(dagrun.get('dag_id'), dagrun.get('dag_run_id'))
         result = []
         for task in task_list:
-            job = JobExecutionInfo(job_name=task.get('task_id'),
+            job = JobExecutionInfo(job_execution_id=self.generate_job_execution_id(dag_id=dagrun.get('dag_id'),
+                                                                                   run_id=dagrun.get('dag_run_id'),
+                                                                                   task_id=task.get('task_id'),
+                                                                                   seq_num=task.get('seq_num')),
+                                   job_name=task.get('task_id'),
                                    status=self.airflow_state_to_status(task.get('state')),
                                    start_date=self.datetime_str_to_int64_str(task.get('start_date')),
                                    end_date=self.datetime_str_to_int64_str(task.get('end_date')),

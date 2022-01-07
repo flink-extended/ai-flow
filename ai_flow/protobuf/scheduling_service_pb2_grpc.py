@@ -117,7 +117,7 @@ class SchedulingServiceStub(object):
         self.getJob = channel.unary_unary(
                 '/ai_flow.SchedulingService/getJob',
                 request_serializer=scheduling__service__pb2.ScheduleJobRequest.SerializeToString,
-                response_deserializer=scheduling__service__pb2.JobInfoResponse.FromString,
+                response_deserializer=scheduling__service__pb2.ListJobInfoResponse.FromString,
                 )
         self.listJobs = channel.unary_unary(
                 '/ai_flow.SchedulingService/listJobs',
@@ -349,7 +349,7 @@ def add_SchedulingServiceServicer_to_server(servicer, server):
             'getJob': grpc.unary_unary_rpc_method_handler(
                     servicer.getJob,
                     request_deserializer=scheduling__service__pb2.ScheduleJobRequest.FromString,
-                    response_serializer=scheduling__service__pb2.JobInfoResponse.SerializeToString,
+                    response_serializer=scheduling__service__pb2.ListJobInfoResponse.SerializeToString,
             ),
             'listJobs': grpc.unary_unary_rpc_method_handler(
                     servicer.listJobs,
@@ -661,7 +661,7 @@ class SchedulingService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/ai_flow.SchedulingService/getJob',
             scheduling__service__pb2.ScheduleJobRequest.SerializeToString,
-            scheduling__service__pb2.JobInfoResponse.FromString,
+            scheduling__service__pb2.ListJobInfoResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
