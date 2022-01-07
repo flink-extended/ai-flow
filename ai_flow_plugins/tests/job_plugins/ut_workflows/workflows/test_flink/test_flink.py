@@ -65,7 +65,7 @@ class TestFlink(unittest.TestCase):
             flink.set_flink_env(flink.FlinkBatchEnv())
         w = af.workflow_operation.submit_workflow(workflow_name=af.current_workflow_config().workflow_name)
         je = af.workflow_operation.start_job_execution(job_name='task_1', execution_id='1')
-        jes = af.workflow_operation.get_job_execution(job_name='task_1', execution_id='1')
+        jes = af.workflow_operation.get_job_executions(job_name='task_1', execution_id='1')
         self.assertEqual(Status.FINISHED, jes[0].status)
 
     def test_local_flink_task_with_flink_sql_processor(self):
@@ -77,7 +77,7 @@ class TestFlink(unittest.TestCase):
 
         workflow = af.workflow_operation.submit_workflow(workflow_name=af.current_workflow_config().workflow_name)
         job_execution = af.workflow_operation.start_job_execution(job_name='task_1', execution_id='1')
-        job_executions = af.workflow_operation.get_job_execution(job_name='task_1', execution_id='1')
+        job_executions = af.workflow_operation.get_job_executions(job_name='task_1', execution_id='1')
         self.assertEqual(Status.FINISHED, job_executions[0].status)
 
     def test_stop_local_flink_task(self):
@@ -89,7 +89,7 @@ class TestFlink(unittest.TestCase):
         je = af.workflow_operation.start_job_execution(job_name='task_1', execution_id='1')
         time.sleep(2)
         af.workflow_operation.stop_job_execution(job_name='task_1', execution_id='1')
-        jes = af.workflow_operation.get_job_execution(job_name='task_1', execution_id='1')
+        jes = af.workflow_operation.get_job_executions(job_name='task_1', execution_id='1')
         self.assertEqual(Status.FAILED, jes[0].status)
         self.assertTrue('err' in jes[0].properties)
 
@@ -108,7 +108,7 @@ class TestFlink(unittest.TestCase):
         af.workflow_operation.submit_workflow(
             workflow_name=af.current_workflow_config().workflow_name)
         af.workflow_operation.start_job_execution(job_name='task_1', execution_id='1')
-        jes = af.workflow_operation.get_job_execution(job_name='task_1', execution_id='1')
+        jes = af.workflow_operation.get_job_executions(job_name='task_1', execution_id='1')
         self.assertEqual(Status.FINISHED, jes[0].status)
 
     def test_local_flink_execute_statementset_add_insert_sql_task(self):
@@ -129,7 +129,7 @@ class TestFlink(unittest.TestCase):
             workflow_name=af.current_workflow_config().workflow_name)
         af.workflow_operation.start_job_execution(
             job_name='task_1', execution_id='1')
-        jes = af.workflow_operation.get_job_execution(
+        jes = af.workflow_operation.get_job_executions(
             job_name='task_1', execution_id='1')
         self.assertEqual(Status.FINISHED, jes[0].status)
 
@@ -141,7 +141,7 @@ class TestFlink(unittest.TestCase):
             af.user_define_operation(input=[processed], processor=Sink())
         w = af.workflow_operation.submit_workflow(workflow_name=af.current_workflow_config().workflow_name)
         je = af.workflow_operation.start_job_execution(job_name='task_2', execution_id='1')
-        jes = af.workflow_operation.get_job_execution(job_name='task_2', execution_id='1')
+        jes = af.workflow_operation.get_job_executions(job_name='task_2', execution_id='1')
         self.assertEqual(Status.FINISHED, jes[0].status)
 
     @unittest.skip("need start flink cluster")
@@ -154,7 +154,7 @@ class TestFlink(unittest.TestCase):
         je = af.workflow_operation.start_job_execution(job_name='task_2', execution_id='1')
         time.sleep(20)
         af.workflow_operation.stop_job_execution(job_name='task_2', execution_id='1')
-        jes = af.workflow_operation.get_job_execution(job_name='task_2', execution_id='1')
+        jes = af.workflow_operation.get_job_executions(job_name='task_2', execution_id='1')
         self.assertEqual(Status.FAILED, jes[0].status)
         self.assertTrue('err' in jes[0].properties)
 
@@ -169,7 +169,7 @@ class TestFlink(unittest.TestCase):
         je = af.workflow_operation.start_job_execution(job_name=job_name, execution_id='1')
         time.sleep(10)
         af.workflow_operation.stop_job_execution(job_name=job_name, execution_id='1')
-        jes = af.workflow_operation.get_job_execution(job_name=job_name, execution_id='1')
+        jes = af.workflow_operation.get_job_executions(job_name=job_name, execution_id='1')
         self.assertEqual(Status.FAILED, jes[0].status)
         self.assertTrue('err' in jes[0].properties)
 
@@ -192,7 +192,7 @@ class TestFlink(unittest.TestCase):
         je = af.workflow_operation.start_job_execution(job_name=job_name, execution_id='1')
         time.sleep(10)
         af.workflow_operation.stop_job_execution(job_name=job_name, execution_id='1')
-        jes = af.workflow_operation.get_job_execution(job_name=job_name, execution_id='1')
+        jes = af.workflow_operation.get_job_executions(job_name=job_name, execution_id='1')
         self.assertEqual(Status.FAILED, jes[0].status)
         self.assertTrue('err' in jes[0].properties)
         dep_dir = os.path.join(project_path, 'dependencies')
@@ -221,7 +221,7 @@ class TestFlink(unittest.TestCase):
                                                                         args=args))
         w = af.workflow_operation.submit_workflow(workflow_name=af.current_workflow_config().workflow_name)
         je = af.workflow_operation.start_job_execution(job_name='task_2', execution_id='1')
-        jes = af.workflow_operation.get_job_execution(job_name='task_2', execution_id='1')
+        jes = af.workflow_operation.get_job_executions(job_name='task_2', execution_id='1')
         self.assertEqual(Status.FINISHED, jes[0].status)
         dep_dir = os.path.join(project_path, 'dependencies')
         if os.path.exists(dep_dir):

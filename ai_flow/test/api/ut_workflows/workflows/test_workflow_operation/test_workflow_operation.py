@@ -154,7 +154,7 @@ class TestWorkflowOperation(unittest.TestCase):
 
     def test_get_job_execution(self):
 
-        j = workflow_operation.get_job_execution(job_name='task_1', execution_id='1')
+        j = workflow_operation.get_job_executions(job_name='task_1', execution_id='1')
         self.assertEqual('task_1', j[0].job_name)
         self.assertEqual('test_label', j[0].execution_label)
 

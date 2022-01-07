@@ -406,8 +406,8 @@ def list_job_executions(execution_id: Text) -> List[JobExecutionInfo]:
     return proto_to_job_list(get_ai_flow_client().list_jobs(execution_id))
 
 
-def get_job_execution(job_name: Text,
-                      execution_id: Text) -> List[JobExecutionInfo]:
+def get_job_executions(job_name: Text,
+                       execution_id: Text) -> List[JobExecutionInfo]:
     """
     Gets the :class:`~ai_flow.plugin_interface.scheduler_interface.JobExecutionInfo` with the given name of job and
     id of corresponding workflow execution.

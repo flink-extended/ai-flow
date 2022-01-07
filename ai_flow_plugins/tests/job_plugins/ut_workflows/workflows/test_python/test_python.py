@@ -61,7 +61,7 @@ class TestPython(unittest.TestCase):
             af.user_define_operation(processor=PyProcessor1())
         w = af.workflow_operation.submit_workflow(workflow_name=af.current_workflow_config().workflow_name)
         je = af.workflow_operation.start_job_execution(job_name='task_1', execution_id='1')
-        jes = af.workflow_operation.get_job_execution(job_name='task_1', execution_id='1')
+        jes = af.workflow_operation.get_job_executions(job_name='task_1', execution_id='1')
         self.assertEqual(Status.FINISHED, jes[0].status)
 
     def test_stop_python_task(self):
@@ -72,7 +72,7 @@ class TestPython(unittest.TestCase):
         je = af.workflow_operation.start_job_execution(job_name='task_1', execution_id='1')
         time.sleep(2)
         af.workflow_operation.stop_job_execution(job_name='task_1', execution_id='1')
-        jes = af.workflow_operation.get_job_execution(job_name='task_1', execution_id='1')
+        jes = af.workflow_operation.get_job_executions(job_name='task_1', execution_id='1')
         self.assertEqual(Status.FAILED, jes[0].status)
         self.assertTrue('err' in jes[0].properties)
 

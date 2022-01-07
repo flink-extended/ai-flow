@@ -168,9 +168,9 @@ class TestBash(unittest.TestCase):
         self.assertTrue(result is not None)
         self.assertEqual(Status.FINISHED, result.status)
 
-        job_execution_infos = af.workflow_operation.get_job_execution(job_name='task_1',
-                                                                      execution_id=get_workflow_execution_info().
-                                                                      workflow_execution_id)
+        job_execution_infos = af.workflow_operation.get_job_executions(job_name='task_1',
+                                                                       execution_id=get_workflow_execution_info().
+                                                                       workflow_execution_id)
         self.assertEqual(Status.FINISHED, job_execution_infos[0].status)
 
     def test_event_workflow_apis(self):
