@@ -45,6 +45,11 @@ limitations under the License. -->
         <span slot="_execution_label" slot-scope="text">
           <ellipsis :length="32" tooltip>{{ text }}</ellipsis>
         </span>
+        <span slot="action" slot-scope="text, record">
+          <template>
+            <a @click="handleLog(record)">Log</a>
+          </template>
+        </span>
       </s-table>
     </a-card>
     <a-card :bordered="false">
@@ -114,6 +119,12 @@ const columns = [
     title: 'End Date',
     dataIndex: '_end_date',
     customRender: (t) => formateDate(new Date(parseInt(t)), 'YYYY-MM-dd hh:mm')
+  },
+  {
+    title: 'Action',
+    dataIndex: 'action',
+    width: '150px',
+    scopedSlots: { customRender: 'action' }
   }
 ]
 
@@ -145,6 +156,13 @@ export default {
     this.getAIFlowVersion()
   },
   methods: {
+    handleLog (record) {
+      if (record._job_type === 'bash' || record._job_type === 'python' || record._job_type === 'flink') {
+        window.open(`/job-execution/log?workflow_execution_id=${encodeURIComponent(this.queryParam.workflow_execution_id)}&job_name=${encodeURIComponent(record._job_name)}&job_type=${encodeURIComponent(record._job_type)}&job_execution_id=${encodeURIComponent(record._job_execution_id)}`, '_blank')
+      } else {
+        alert(`Viewing logs of ${record._job_type} type of job is not supported.`)
+      }
+    },
     resetSearchForm () {
       this.queryParam = {
         date: moment(new Date())

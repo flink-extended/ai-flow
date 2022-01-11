@@ -50,8 +50,10 @@ class SchedulerService(SchedulingServiceServicer):
     def __init__(self,
                  scheduler_service_config: SchedulerServiceConfig,
                  db_uri,
-                 notification_server_uri):
+                 notification_server_uri,
+                 base_log_folder):
         self._scheduler_service_config = scheduler_service_config
+        scheduler_service_config.scheduler().scheduler_config().update({'base_log_folder': base_log_folder})
         self._scheduler: Scheduler \
             = SchedulerFactory.create_scheduler(scheduler_service_config.scheduler().scheduler_class(),
                                                 scheduler_service_config.scheduler().scheduler_config())
