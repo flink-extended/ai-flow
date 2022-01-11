@@ -37,11 +37,19 @@ from ai_flow.test.util.notification_service_utils import start_notification_serv
 
 project_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
+ResourceDir = '/tmp/airflow'
+WorkflowExecutionIdFile = ResourceDir + '/workflow_execution_id'
+JobExecutionIdFile = ResourceDir + '/job_execution_id'
+
 
 class PyProcessor1(python.PythonProcessor):
 
     def process(self, execution_context: ExecutionContext, input_list: List) -> List:
         print("Zhang san hello world!")
+        with open(WorkflowExecutionIdFile, 'w') as f:
+            f.write(execution_context.job_execution_info.workflow_execution.workflow_execution_id)
+        with open(JobExecutionIdFile, 'w') as f:
+            f.write(execution_context.job_execution_info.job_execution_id)
         return []
 
 
@@ -69,7 +77,7 @@ class TestPython(unittest.TestCase):
         generated = '{}/generated'.format(project_path)
         if os.path.exists(generated):
             shutil.rmtree(generated)
-        temp = '/tmp/aiflow'
+        temp = ResourceDir
         if os.path.exists(temp):
             shutil.rmtree(temp)
 
@@ -103,6 +111,12 @@ class TestPython(unittest.TestCase):
                                                                        execution_id=get_workflow_execution_info().
                                                                        workflow_execution_id)
         self.assertEqual(Status.FINISHED, job_execution_infos[0].status)
+        with open(WorkflowExecutionIdFile, 'r') as f:
+            workflow_execution_id = f.read()
+        with open(JobExecutionIdFile, 'r') as f:
+            job_execution_id = f.read()
+        self.assertEqual(workflow_execution_id, workflow_execution_info.workflow_execution_id)
+        self.assertEqual(job_execution_id, job_execution_infos[0].job_execution_id)
 
 
 if __name__ == '__main__':

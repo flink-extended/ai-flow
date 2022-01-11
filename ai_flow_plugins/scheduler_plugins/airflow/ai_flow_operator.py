@@ -33,6 +33,7 @@ from ai_flow.plugin_interface.blob_manager_interface import BlobManagerFactory
 from ai_flow.plugin_interface.scheduler_interface import JobExecutionInfo, WorkflowExecutionInfo, WorkflowInfo
 from ai_flow.workflow.job import Job
 from ai_flow.workflow.workflow import Workflow, WorkflowPropertyKeys
+from ai_flow_plugins.scheduler_plugins.airflow.airflow_scheduler import AirFlowSchedulerBase
 
 
 class StoppableThread(threading.Thread):
@@ -103,14 +104,23 @@ class AIFlowOperator(BaseOperator):
         The function of this function is to turn the context of airflow into execution information of a job.
         """
         wi = WorkflowInfo(namespace=project_name, workflow_name=self.workflow.workflow_name)
-        we = WorkflowExecutionInfo(workflow_execution_id=str(context.get('dag_run').id),
+        we = WorkflowExecutionInfo(workflow_execution_id=
+                                   AirFlowSchedulerBase.generate_workflow_execution_id(
+                                       dag_id=context.get('dag').dag_id,
+                                       run_id=context.get('dag_run').run_id
+                                   ),
                                    workflow_info=wi,
                                    start_date=str(datetime_to_int64(context.get('dag_run').start_date)),
                                    end_date=str(datetime_to_int64(context.get('dag_run').end_date)),
                                    status=context.get('dag_run').get_state(),
                                    context=context.get('dag_run').context)
         je = JobExecutionInfo(job_name=self.job.job_name,
-                              job_execution_id=str(context.get('ti').try_number),
+                              job_execution_id=AirFlowSchedulerBase.generate_job_execution_id(
+                                  dag_id=context.get('dag').dag_id,
+                                  run_id=context.get('dag_run').run_id,
+                                  task_id=context.get('ti').task_id,
+                                  seq_num=str(context.get('te').seq_num),
+                              ),
                               status=context.get('ti').state,
                               start_date=str(datetime_to_int64(context.get('ti').start_date)),
                               end_date=str(datetime_to_int64(context.get('ti').end_date)),
