@@ -1,6 +1,6 @@
 # Background
 We provide some examples for using AIFlow, including event-triggered workflow scheduling, 
-event-triggered job scheduling, periodic scheduling of workflows, etc.
+event-triggered job scheduling, periodic workflow scheduling, periodic job scheduling, etc.
 
 # Start all services
 AIFlow contains three long-running servers, 
