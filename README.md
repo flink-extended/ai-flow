@@ -22,6 +22,8 @@ Learn more about AIFlow at https://ai-flow.readthedocs.io
 
 We happily welcome contributions to AIFlow in any ways, whether reporting problems, drafting features, or contributing code changes.
 You can report problems to request features in the [GitHub Issues](https://github.com/flink-extended/ai-flow/issues).
+If you want to contribute code changes, please check out the [contributing documentation](./CONTRIBUTING.md).
+
 
 ## Contact Us
 
