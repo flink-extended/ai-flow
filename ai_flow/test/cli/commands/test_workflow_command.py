@@ -22,30 +22,29 @@ from ai_flow import current_project_config
 from ai_flow.cli.commands.workflow_command import workflow_delete, workflow_list, workflow_list_executions, \
     workflow_pause_scheduling, workflow_show, workflow_show_execution, workflow_resume_scheduling, \
     workflow_start_execution, workflow_stop_execution, workflow_stop_executions, workflow_submit
-from ai_flow.context.workflow_config_loader import current_workflow_config
-from ai_flow.test.cli.commands.ut_workflows.workflows.test_command.test_command import TestCommand, PROJECT_PATH
+from ai_flow.test.cli.commands.test_command import TestCommand, PROJECT_PATH, WORKFLOW_NAME
 
 
 class TestCliWorkflow(TestCommand):
 
     def test_cli_workflow_delete(self):
         workflow_submit(
-            self.parser.parse_args(['workflow', 'submit', PROJECT_PATH, current_workflow_config().workflow_name]))
+            self.parser.parse_args(['workflow', 'submit', PROJECT_PATH, WORKFLOW_NAME]))
         with redirect_stdout(io.StringIO()) as stdout:
             workflow_delete(
                 self.parser.parse_args(
-                    ['workflow', 'delete', PROJECT_PATH, current_workflow_config().workflow_name, '-y']))
-        self.assertEquals('Workflow: {}, deleted: {}.'.format(current_workflow_config().workflow_name, True),
+                    ['workflow', 'delete', PROJECT_PATH, WORKFLOW_NAME, '-y']))
+        self.assertEquals('Workflow: {}, deleted: {}.'.format(WORKFLOW_NAME, True),
                           str.splitlines(stdout.getvalue())[0])
 
     def test_cli_workflow_list(self):
         workflow_submit(
-            self.parser.parse_args(['workflow', 'submit', PROJECT_PATH, current_workflow_config().workflow_name]))
+            self.parser.parse_args(['workflow', 'submit', PROJECT_PATH, WORKFLOW_NAME]))
         with redirect_stdout(io.StringIO()) as stdout:
             workflow_list(
                 self.parser.parse_args(['workflow', 'list', PROJECT_PATH]))
         self.assertEquals('{} | {}  | {}         | {}'.format(current_project_config().get_project_name(),
-                                                              current_workflow_config().workflow_name, '{}', 'None'),
+                                                              WORKFLOW_NAME, '{}', 'None'),
                           str.splitlines(stdout.getvalue())[2].strip())
 
     def test_cli_workflow_list_executions(self):
@@ -70,12 +69,12 @@ class TestCliWorkflow(TestCommand):
 
     def test_cli_workflow_show(self):
         workflow_submit(
-            self.parser.parse_args(['workflow', 'submit', PROJECT_PATH, current_workflow_config().workflow_name]))
+            self.parser.parse_args(['workflow', 'submit', PROJECT_PATH, WORKFLOW_NAME]))
         with redirect_stdout(io.StringIO()) as stdout:
             workflow_show(
-                self.parser.parse_args(['workflow', 'show', PROJECT_PATH, current_workflow_config().workflow_name]))
+                self.parser.parse_args(['workflow', 'show', PROJECT_PATH, WORKFLOW_NAME]))
         self.assertEquals('{} | {}  | {}         | {}'.format(current_project_config().get_project_name(),
-                                                              current_workflow_config().workflow_name, '{}', 'None'),
+                                                              WORKFLOW_NAME, '{}', 'None'),
                           str.splitlines(stdout.getvalue())[2].strip())
 
     def test_cli_workflow_show_execution(self):
@@ -108,6 +107,6 @@ class TestCliWorkflow(TestCommand):
     def test_cli_workflow_submit(self):
         with redirect_stdout(io.StringIO()) as stdout:
             workflow_submit(
-                self.parser.parse_args(['workflow', 'submit', PROJECT_PATH, current_workflow_config().workflow_name]))
-        self.assertEquals('Workflow: {}, submitted: {}.\n'.format(current_workflow_config().workflow_name, True),
+                self.parser.parse_args(['workflow', 'submit', PROJECT_PATH, WORKFLOW_NAME]))
+        self.assertEquals('Workflow: {}, submitted: {}.\n'.format(WORKFLOW_NAME, True),
                           stdout.getvalue())
