@@ -20,7 +20,7 @@ from contextlib import redirect_stdout
 
 from ai_flow.cli.commands.job_command import job_list_executions, job_restart_execution, job_show_execution, \
     job_start_execution, job_stop_execution, job_stop_scheduling, job_resume_scheduling
-from ai_flow.test.cli.commands.ut_workflows.workflows.test_command.test_command import TestCommand, PROJECT_PATH
+from ai_flow.test.cli.commands.test_command import TestCommand, PROJECT_PATH
 
 
 class TestCliJob(TestCommand):
