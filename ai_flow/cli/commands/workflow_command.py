@@ -16,7 +16,10 @@
 # under the License.
 
 """Workflow command"""
+import os
 import sys
+
+from importlib._bootstrap_external import SourceFileLoader
 
 from ai_flow.api.workflow_operation import delete_workflow, get_workflow, get_workflow_execution, list_workflows, \
     list_workflow_executions, pause_workflow_scheduling, resume_workflow_scheduling, start_new_workflow_execution, \
@@ -148,5 +151,7 @@ def workflow_stop_executions(args):
 @init_config
 def workflow_submit(args):
     """Submits the workflow by workflow name."""
+    SourceFileLoader(args.workflow_name,
+                     os.path.join(args.project_path, 'workflows', args.workflow_name, '{}.py'.format(args.workflow_name))).load_module()
     workflow = submit_workflow(args.workflow_name)
     print("Workflow: {}, submitted: {}.".format(args.workflow_name, workflow is not None))
