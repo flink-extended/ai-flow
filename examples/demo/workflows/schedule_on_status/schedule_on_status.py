@@ -12,11 +12,16 @@ with af.job_config('job_1'):
 with af.job_config('job_2'):
     af.user_define_operation(processor=BashProcessor("sleep 60"))
 with af.job_config('job_3'):
-    af.user_define_operation(processor=BashProcessor("echo hello"))
+    af.user_define_operation(processor=BashProcessor("echo job_3"))
+with af.job_config('job_4'):
+    af.user_define_operation(processor=BashProcessor("echo job_4"))
 
 # job_2 and job_3 will be started as soon as status of job_1 changed to RUNNING
 af.action_on_job_status('job_2', 'job_1', upstream_job_status=Status.RUNNING, action=JobAction.START)
 af.action_on_job_status('job_3', 'job_1', upstream_job_status=Status.RUNNING, action=JobAction.START)
+
+# job_4 will be started as soon as job_1 finished
+af.action_on_job_status('job_4', 'job_1')
 
 # job_2 will be stopped as soon as job_1 finished
 af.action_on_job_status('job_2', 'job_1', upstream_job_status=Status.FINISHED, action=JobAction.STOP)

@@ -4,3 +4,5 @@ job_2:
   job_type: bash
 job_3:
   job_type: bash
+job_4:
+  job_type: bash
