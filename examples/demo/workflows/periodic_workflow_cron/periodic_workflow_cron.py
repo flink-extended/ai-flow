@@ -10,6 +10,5 @@ with af.job_config('job_1'):
 with af.job_config('job_2'):
     af.user_define_operation(processor=BashProcessor("echo job_2"))
 
-# task_2 will be started after task_1 finished. Since we configured task_1 to runs periodically,
-# the task_2 will also be triggered multiple times as long as task_1 finished.
-af.action_on_job_status('job_2', 'job_1')
+# Define relations between 2 jobs, job_2 would started after job_1 finished.
+af.action_on_job_status(job_name='job_2', upstream_job_name='job_1')

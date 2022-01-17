@@ -30,9 +30,7 @@ aiflow workflow start-execution ${project_path} ${workflow_name}
 
 [periodic_workflow_cron](workflows/periodic_workflow_cron)
 
-[periodic_job_interval](workflows/periodic_job_interval)
-
-[periodic_job_cron](workflows/periodic_job_cron)
+[periodic_job](workflows/periodic_job)
 
 [job_scheduling_on_status](workflows/job_scheduling_on_status)
 
