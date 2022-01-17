@@ -12,5 +12,3 @@ job_2:
 # Following configuration means the workflow will be executed every minute from now on.
 periodic_config:
   interval: "0,0,1,0"
-
-

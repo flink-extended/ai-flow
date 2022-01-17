@@ -10,5 +10,3 @@ job_1:
     interval: "0,0,1,0"
 job_2:
   job_type: bash
-
-
