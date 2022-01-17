@@ -1,0 +1,16 @@
+job_1:
+  job_type: bash
+job_2:
+  job_type: bash
+
+
+# The workflow with periodic config will be executed periodically as configured.
+# You can set the `interval` to express the execution interval of a workflow.
+#
+# interval_expression:
+#    days:int,hours:int,minutes:int,seconds:int
+# Following configuration means the workflow will be executed every minute from now on.
+periodic_config:
+  interval: "0,0,1,0"
+
+
