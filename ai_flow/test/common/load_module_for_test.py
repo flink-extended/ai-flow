@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,27 +14,9 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-import inspect
-import os
-import unittest
 
-from ai_flow.common.module_load import import_string, load_module
+class NeedLoadedClass(object):
+    pass
 
 
-class TestModuleLoad(unittest.TestCase):
-    def test_import_string(self):
-        a = import_string("unittest.TestCase")()
-        self.assertTrue(isinstance(a, unittest.TestCase))
-
-        with self.assertRaises(ImportError):
-            import_string("invalid")
-
-        with self.assertRaises(ImportError):
-            import_string("test_util.ClassB")
-
-    def test_load_module(self):
-        full_path = os.path.join(os.path.dirname(__file__), 'load_module_for_test.py')
-        mod = load_module(full_path)
-        self.assertTrue('LOAD_OBJ' in mod.__dict__)
-        self.assertTrue('NeedLoadedClass' in mod.__dict__)
+LOAD_OBJ = NeedLoadedClass()
