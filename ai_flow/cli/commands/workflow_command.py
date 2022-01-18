@@ -19,12 +19,11 @@
 import os
 import sys
 
-from importlib._bootstrap_external import SourceFileLoader
-
 from ai_flow.api.workflow_operation import delete_workflow, get_workflow, get_workflow_execution, list_workflows, \
     list_workflow_executions, pause_workflow_scheduling, resume_workflow_scheduling, start_new_workflow_execution, \
     stop_all_workflow_executions, stop_workflow_execution, submit_workflow
 from ai_flow.cli.simple_table import AIFlowConsole
+from ai_flow.common.module_load import load_module
 from ai_flow.util.cli_utils import init_config
 from ai_flow.util.time_utils import parse_date
 
@@ -151,7 +150,15 @@ def workflow_stop_executions(args):
 @init_config
 def workflow_submit(args):
     """Submits the workflow by workflow name."""
-    SourceFileLoader(args.workflow_name,
-                     os.path.join(args.project_path, 'workflows', args.workflow_name, '{}.py'.format(args.workflow_name))).load_module()
+    dependencies_path = os.path.join(args.project_path, 'dependencies', 'python')
+    if os.path.exists(dependencies_path):
+        sys.path.insert(0, dependencies_path)
+    workflow_path = os.path.join(args.project_path, 'workflows', args.workflow_name)
+    sys.path.insert(0, workflow_path)
+    workflow_file_path = os.path.join(args.project_path,
+                                      'workflows',
+                                      args.workflow_name,
+                                      '{}.py'.format(args.workflow_name))
+    load_module(workflow_file_path)
     workflow = submit_workflow(args.workflow_name)
     print("Workflow: {}, submitted: {}.".format(args.workflow_name, workflow is not None))
