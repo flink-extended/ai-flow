@@ -102,13 +102,6 @@ def run_project(run_graph_file, working_dir, flink_env_file):
     flink_env: FlinkEnv = read_object_from_serialized_file(flink_env_file)
     job_runtime_env = JobRuntimeEnv(working_dir)
     job_execution_info = job_runtime_env.job_execution_info
-    entry_module_path = job_execution_info.workflow_execution.workflow_info.workflow_name
-    mdl = importlib.import_module(entry_module_path)
-    if "__all__" in mdl.__dict__:
-        names = mdl.__dict__["__all__"]
-    else:
-        names = [x for x in mdl.__dict__ if not x.startswith("_")]
-    globals().update({k: getattr(mdl, k) for k in names})
     init_job_runtime_context(job_runtime_env)
     try:
         flink_execute_func(run_graph=run_graph, job_execution_info=job_execution_info, flink_env=flink_env)
