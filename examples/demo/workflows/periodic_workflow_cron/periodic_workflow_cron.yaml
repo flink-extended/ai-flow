@@ -1,0 +1,14 @@
+job_1:
+  job_type: bash
+job_2:
+  job_type: bash
+
+
+# The workflow with periodic config will be executed periodically as configured.
+# You can set the `cron` to express the execution date of a workflow.
+#
+# cron_expression:
+#    seconds minutes hours days months weeks years
+# Following configuration means the workflow will be executed every minute.
+periodic_config:
+  cron: "0 */1 * * * * *"
