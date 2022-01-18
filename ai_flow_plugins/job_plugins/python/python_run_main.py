@@ -72,14 +72,6 @@ def python_execute_func(run_graph: RunGraph, job_execution_info: JobExecutionInf
 def run_project(run_graph_file, working_dir):
     run_graph: RunGraph = read_object_from_serialized_file(run_graph_file)
     job_runtime_env = JobRuntimeEnv(working_dir=working_dir)
-    workflow_name = job_runtime_env.job_execution_info.workflow_execution.workflow_info.workflow_name
-    entry_module_path = workflow_name
-    mdl = importlib.import_module(entry_module_path)
-    if "__all__" in mdl.__dict__:
-        names = mdl.__dict__["__all__"]
-    else:
-        names = [x for x in mdl.__dict__ if not x.startswith("_")]
-    globals().update({k: getattr(mdl, k) for k in names})
     init_job_runtime_context(job_runtime_env)
     try:
         python_execute_func(run_graph=run_graph, job_execution_info=job_runtime_env.job_execution_info)
