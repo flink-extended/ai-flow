@@ -30,7 +30,6 @@ Welcome to AIFlow's Documentation!
 
    content/get_started/index
    content/workflow_development/index
-   content/configuration/configuration
    content/architecture/index
    content/deployment/index
    content/customize/index

@@ -1,6 +1,6 @@
 # Running AIFlow in Docker
 
-This section will show you how to start AIFlow in docker if you don't want to install AIFlow locally.
+This section will show you how to start AIFlow in docker container.
 
 ## Pulling Docker Image
 Run following command to pull latest AIFlow docker image.
@@ -9,7 +9,7 @@ docker pull flinkaiflow/flink-ai-flow:latest
 ```
 
 ## Starting AIFlow in Docker
-Run following command to enter docker container.
+Run following command to enter the docker container in interactive mode.
 ```shell script
 docker run -it -p 8080:8080 -p 8000:8000 flinkaiflow/flink-ai-flow:latest /bin/bash
 ```
@@ -19,7 +19,7 @@ After entering docker container, run following command to start AIFlow.
 start-all-aiflow-services.sh
 ```
 
-## View Web Server
+## Viewing Web Server
 
 Once all servers started, you can visit the AIFlow Web [[http://127.0.0.1:8000](http://127.0.0.1:8000)] with the default username(admin) and password(admin):
 
@@ -32,7 +32,3 @@ with the default username(admin) and password(admin) to view the execution of wo
 
 ## What’s Next?
 Now you can head to the [Example](./run_example.md) section to run a machine learning workflow with AIFlow.
-
-
-
-

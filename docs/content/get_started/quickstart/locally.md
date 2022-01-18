@@ -39,7 +39,7 @@ All services have been started!
 You may run into issues caused by different operating systems or versions, 
 please refer to [Troubleshooting](./troubleshooting.md) section to get solutions.
 ```
-## View Web Server
+## Viewing Web Server
 
 Once all servers started, you can visit the AIFlow Web [[http://127.0.0.1:8000](http://127.0.0.1:8000)] with the default username(admin) and password(admin):
 
