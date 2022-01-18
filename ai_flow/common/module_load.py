@@ -15,7 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import os
 from importlib import import_module
+import importlib.util
+from importlib.machinery import SourceFileLoader
 
 
 def import_string(dotted_path):
@@ -34,3 +37,13 @@ def import_string(dotted_path):
         return getattr(module, class_name)
     except AttributeError:
         raise ImportError(f'Module "{module_path}" does not define a "{class_name}" attribute/class')
+
+
+def load_module(full_path):
+    module_dir, module_file = os.path.split(full_path)
+    module_name, module_ext = os.path.splitext(module_file)
+    loader = SourceFileLoader(module_name, full_path)
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    mod = importlib.util.module_from_spec(spec)
+    loader.exec_module(mod)
+    return mod
