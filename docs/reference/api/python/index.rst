@@ -21,7 +21,7 @@ Python API
 =========================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents
 
    source_rst/ai_flow
