@@ -16,17 +16,17 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import pickle
+import cloudpickle
 
 _BYTES_ENCODE = "ISO-8859-1"
 
 
 def serialize(o: object) -> bytes:
-    return pickle.dumps(o)
+    return cloudpickle.dumps(o)
 
 
 def deserialize(s: bytes) -> object:
-    return pickle.loads(s)
+    return cloudpickle.loads(s)
 
 
 def read_object_from_serialized_file(file_path):
