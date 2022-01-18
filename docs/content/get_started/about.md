@@ -19,11 +19,4 @@ real-time machine learning systems as well as other real-time workflows.
 
 4. Publish and subscribe various events and take corresponding actions.
 
-## Contact Us
-
-For more information, you can join the **AIFlow Users Group** on [DingTalk](https://www.dingtalk.com) to contact us.
-The number of the DingTalk group is `35876083`. 
-
-You can also join the group by scanning the QR code below:
-
-![contact](../images/dingtalk_qr_code.png)
+## Use Cases

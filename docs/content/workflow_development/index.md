@@ -1,8 +1,10 @@
 # Workflow Development
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 
+concepts
+prepare_a_project
+create_a_workflow
 tutorial
-
 ```

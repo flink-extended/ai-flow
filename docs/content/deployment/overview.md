@@ -13,7 +13,7 @@ component, please refer to [Architecture Overview](../architecture/overview.md).
 
 ## Installation
 
-Before deploying, please make sure you have followed the [Installation Guide](./installation.md) to install AIFlow.
+Before deploying, please make sure you have followed the [Installation Guide](../get_started/installation.md) to install AIFlow.
 
 ## Standalone Deployment
 
