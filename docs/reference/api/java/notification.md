@@ -1,16 +1,9 @@
 # Notification
 
-AIFlow 0.2.1 is our latest stable release.
-
 ## Maven Dependencies
 
-```xml
-<dependency>
-  <groupId>org.aiflow</groupId>
-  <artifactId>notification-client</artifactId>
-  <version>0.2.1</version>
-</dependency>
-```
+You can get maven dependencies of Notification client from [mavem repository](https://mvnrepository.com/artifact/org.ai-flow/notification-client) and add to your `pom.xml`. 
+These dependencies include a GRPC client to visit the Python `Notification Server`.
 
 ## Client JavaDoc
 

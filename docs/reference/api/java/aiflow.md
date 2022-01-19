@@ -1,18 +1,9 @@
 # AIFlow
 
-AIFlow 0.2.1 is our latest stable release.
-
 ## Maven Dependencies
 
-You can add the following dependencies to your `pom.xml` to include AIFlow Service client in your project. These dependencies include a AIFlow GRPC client to visit the Python `AIFlowServer`.
-
-```xml
-<dependency>
-  <groupId>org.aiflow</groupId>
-  <artifactId>aiflow-client</artifactId>
-  <version>0.2.1</version>
-</dependency>
-```
+You can get maven dependencies of AIFlow client from [mavem repository](https://mvnrepository.com/artifact/org.ai-flow/aiflow-client) and add to your `pom.xml`. 
+These dependencies include a AIFlow GRPC client to visit the Python `AIFlowServer`.
 
 ## Client JavaDoc
 
