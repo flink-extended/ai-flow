@@ -1676,7 +1676,9 @@ class SqlAlchemyStore(AbstractStore):
         """
         with self.ManagedSessionMaker() as session:
             serving_model_version = self.get_deployed_model_version(model_version.model_name)
-            if serving_model_version is not None and current_stage == 'DEPLOYED':
+            if serving_model_version is not None \
+                    and model_version.model_version != serving_model_version.model_version \
+                    and current_stage.upper() == 'DEPLOYED':
                 raise AIFlowException('There is already a serving model version="{}" of model="{}"'.
                                       format(serving_model_version.model_version, serving_model_version.model_name))
             sql_model_version = self._get_sql_model_version(session, model_version)

@@ -728,7 +728,8 @@ class AbstractTestStore(object):
         serving_model_version = self.store.get_deployed_model_version(model_name)
         self.assertEqual(serving_model_version.model_version, model_version.model_version)
         self.assertRaises(AIFlowException, self.store.update_model_version,
-                          model_version=model_version, current_stage='DEPLOYED')
+                          model_version=self._create_model_version(model_name),
+                          current_stage='DEPLOYED')
 
     def test_get_latest_validated_model_version(self):
         model_name = 'test_for_get_validated_model_version'
@@ -794,10 +795,10 @@ class AbstractTestStore(object):
         assert exception_context.exception.error_code == INVALID_PARAMETER_VALUE
 
         # stages are case-insensitive and auto-corrected to system stage names
-        for stage_name in ['DEPLOYED', 'deployed', 'DePloyEd']:
+        for stage_name in ['VALIDATED', 'validated', 'VaLiDaTeD']:
             self.store.update_model_version(model_version1, current_stage=stage_name)
             model_version_detail5 = self.store.get_model_version_detail(model_version1)
-            self.assertEqual(model_version_detail5.current_stage, 'Deployed')
+            self.assertEqual(model_version_detail5.current_stage, 'Validated')
 
     def test_delete_model_version(self):
         model_name = 'test_delete_model_version'

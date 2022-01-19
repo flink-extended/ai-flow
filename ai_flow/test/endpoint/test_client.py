@@ -325,8 +325,10 @@ class AIFlowClientTestCases(object):
                                     current_stage=ModelVersionStage.DEPLOYED)
         deployed_model_version = client.get_deployed_model_version(model_name=model.name)
         self.assertEqual(deployed_model_version.version, model_version.version)
-        self.assertRaises(AIFlowException,
-                          client.update_model_version, model_name=model.name, model_version=model_version.version,
+        self.assertRaises(AIFlowException, client.update_model_version,
+                          model_name=model.name,
+                          model_version=client.register_model_version(model=model.uuid,
+                                                                      model_path='/path/to/your/model/version').version,
                           current_stage=ModelVersionStage.DEPLOYED)
 
     def test_save_model_get_id_and_name(self):
