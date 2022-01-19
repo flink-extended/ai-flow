@@ -22,9 +22,53 @@ import subprocess
 import sys
 from shutil import copytree, rmtree
 from setuptools import setup, find_packages
+from typing import Dict, List
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 in_source = os.path.isfile(CURRENT_DIR + "/run_tests.sh")
+
+devel = [
+    'coverage>=6.1.1',
+    'flake8',
+    'pytest',
+    'mock',
+]
+mysql = [
+    'pymysql==0.9.3',
+    'mysqlclient>=1.3.6,<1.4',
+]
+celery = [
+    'apache-airflow-providers-celery==1.0.1',
+    'redis~=3.2',
+]
+hdfs = [
+    'hdfs~=2.6.0',
+]
+oss = [
+    'oss2==2.9.1',
+]
+mongo = [
+    'mongoengine~=0.22.1',
+]
+example_requires = [
+    'numpy==1.18.1',
+    'pandas==0.24.2',
+    'scikit-learn==0.21.2',
+]
+flink = [
+    'apache-flink==1.12.5',
+]
+
+EXTRAS_REQUIREMENTS: Dict[str, List[str]] = {
+    'devel': devel,
+    'mysql': mysql,
+    'celery': celery,
+    'hdfs': hdfs,
+    'oss': oss,
+    'mongo': mongo,
+    'example-requires': example_requires,
+    'flink': flink,
+}
 
 
 def remove_if_exists(file_path):
@@ -111,6 +155,7 @@ try:
         url='https://github.com/flink-extended/ai-flow',
         packages=find_packages(),
         install_requires=require_packages,
+        extras_require=EXTRAS_REQUIREMENTS,
         python_requires='>=3.6, <3.8' if os.getenv('BUILD_MINI_AI_FLOW_PACKAGE') == 'true' else '>=3.7, <3.8',
         include_package_data=True,
         scripts=get_script(),

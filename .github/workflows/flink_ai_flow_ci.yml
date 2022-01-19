@@ -24,10 +24,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
         pip install -e ./lib/notification_service
         pip install -e ./lib/airflow
         pip install -e .
+        pip install -e ".[devel]"
+        pip install -e ".[flink]"
     - name: Install java client
       run: |
         cd ./lib/notification_service/java
