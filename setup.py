@@ -59,6 +59,9 @@ flink = [
     'apache-flink==1.12.5',
 ]
 
+devel += mongo
+devel += mysql
+
 EXTRAS_REQUIREMENTS: Dict[str, List[str]] = {
     'devel': devel,
     'mysql': mysql,
