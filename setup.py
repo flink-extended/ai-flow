@@ -47,6 +47,10 @@ hdfs = [
 oss = [
     'oss2==2.9.1',
 ]
+s3 = [
+    'boto3~=1.19.7',
+    'botocore~=1.22.7',
+]
 mongo = [
     'mongoengine~=0.22.1',
 ]
@@ -61,6 +65,8 @@ flink = [
 
 devel += mongo
 devel += mysql
+devel += oss
+devel += s3
 
 EXTRAS_REQUIREMENTS: Dict[str, List[str]] = {
     'devel': devel,
