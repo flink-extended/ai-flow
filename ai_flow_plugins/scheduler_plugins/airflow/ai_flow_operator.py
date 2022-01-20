@@ -86,6 +86,7 @@ class AIFlowOperator(BaseOperator):
             job: Job,
             workflow: Workflow,
             resource_dir: Text = None,
+            base_log_folder: Text = None,
             **kwargs,
     ) -> None:
         super().__init__(**kwargs)
@@ -98,6 +99,7 @@ class AIFlowOperator(BaseOperator):
         self.job_handle: JobHandle = None
         self.job_runtime_env: JobRuntimeEnv = None
         self.resource_dir = resource_dir
+        self.base_log_folder = base_log_folder
 
     def context_to_job_info(self, project_name: Text, context: Any) -> JobExecutionInfo:
         """
@@ -158,7 +160,8 @@ class AIFlowOperator(BaseOperator):
                                                        workflow_name=self.workflow.workflow_name,
                                                        project_context=project_context,
                                                        job_execution_info=job_execution_info,
-                                                       root_working_dir=root_working_dir)
+                                                       root_working_dir=root_working_dir,
+                                                       base_log_folder=self.base_log_folder)
 
     def execute(self, context: Any):
         self.log.info("context:" + str(context))

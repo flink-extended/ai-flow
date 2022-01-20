@@ -26,7 +26,8 @@ def prepare_job_runtime_env(workflow_generated_dir,
                             workflow_name,
                             project_context: ProjectContext,
                             job_execution_info: JobExecutionInfo,
-                            root_working_dir=None) -> JobRuntimeEnv:
+                            root_working_dir=None,
+                            base_log_folder=None) -> JobRuntimeEnv:
     """
     Prepare the operating environment for the ai flow job(ai_flow.workflow.job.Job)
     :param workflow_generated_dir: The generated directory of workflow.
@@ -34,6 +35,7 @@ def prepare_job_runtime_env(workflow_generated_dir,
     :param project_context: The context of the project which the job belongs.
     :param job_execution_info: The information of the execution of the job.
     :param root_working_dir: The working directory of the execution of the job(ai_flow.workflow.job.Job).
+    :param base_log_folder: The base folder of the logs.
     :return: ai_flow.runtime.job_runtime_env.JobRuntimeEnv object.
     """
     working_dir = os.path.join(root_working_dir,
@@ -41,10 +43,14 @@ def prepare_job_runtime_env(workflow_generated_dir,
                                job_execution_info.job_name,
                                str(time.strftime("%Y%m%d%H%M%S", time.localtime())))
     job_runtime_env: JobRuntimeEnv = JobRuntimeEnv(working_dir=working_dir,
-                                                   job_execution_info=job_execution_info)
+                                                   job_execution_info=job_execution_info,
+                                                   project_context=project_context,
+                                                   base_log_folder=base_log_folder)
     if not os.path.exists(working_dir):
-        os.makedirs(job_runtime_env.log_dir)
+        os.makedirs(working_dir)
         job_runtime_env.save_job_execution_info()
+        if not os.path.exists(job_runtime_env.log_dir):
+            os.makedirs(job_runtime_env.log_dir)
         if not os.path.exists(os.path.dirname(job_runtime_env.workflow_dir)):
             os.makedirs(os.path.dirname(job_runtime_env.workflow_dir))
         if not os.path.exists(job_runtime_env.workflow_dir):

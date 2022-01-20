@@ -23,6 +23,7 @@ from typing import Text
 from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.endpoint.server.server_config import AIFlowServerConfig
 from ai_flow.client.ai_flow_client import get_ai_flow_client
+from ai_flow.settings import AIFLOW_HOME
 from ai_flow.util.net_utils import get_ip_addr
 import logging
 
@@ -78,7 +79,10 @@ class AIFlowServerRunner(object):
             scheduler_service_config=self.server_config.get_scheduler_service_config(),
             enabled_ha=self.server_config.get_enable_ha(),
             ha_server_uri=get_ip_addr() + ":" + str(self.server_config.get_server_port()),
-            ttl_ms=self.server_config.get_ha_ttl_ms())
+            ttl_ms=self.server_config.get_ha_ttl_ms(),
+            base_log_folder=self.server_config.get_base_log_folder()
+            if self.server_config.get_base_log_folder()
+            else AIFLOW_HOME)
         self.server.run(is_block=is_block)
         if not is_block:
             self._wait_for_server_available(timeout=self.server_config.get_wait_for_server_started_timeout())

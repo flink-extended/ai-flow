@@ -88,18 +88,19 @@ class DAGGenerator(object):
     def __init__(self):
         self.op_count = -1
 
-    def generate_op_code(self, job, resource_dir):
+    def generate_op_code(self, job, resource_dir, base_log_folder):
         self.op_count += 1
         OP_DEFINE = """
 job_json_{0} = '''{1}'''
 job_{0} = json_utils.loads(job_json_{0})
-op_{0} = AIFlowOperator(task_id='{2}', job=job_{0}, workflow=workflow, dag=dag, resource_dir='{3}'"""
+op_{0} = AIFlowOperator(task_id='{2}', job=job_{0}, workflow=workflow, dag=dag, resource_dir='{3}', base_log_folder='{4}'"""
         if 'airflow_args' in job.job_config.properties and len(job.job_config.properties.get('airflow_args')) > 0:
 
             op_code = OP_DEFINE.format(self.op_count,
                                        json_utils.dumps(job),
                                        job.job_name,
-                                       resource_dir)
+                                       resource_dir,
+                                       base_log_folder)
             airflow_args = job.job_config.properties.get('airflow_args')
             end_code = ''
             for k, v in airflow_args.items():
@@ -111,7 +112,8 @@ op_{0} = AIFlowOperator(task_id='{2}', job=job_{0}, workflow=workflow, dag=dag, 
             return 'op_{}'.format(self.op_count), OP_DEFINE.format(self.op_count,
                                                                    json_utils.dumps(job),
                                                                    job.job_name,
-                                                                   resource_dir) + ')\n'
+                                                                   resource_dir,
+                                                                   base_log_folder) + ')\n'
 
     def generate_upstream(self, op_1, op_2):
         return DAGTemplate.UPSTREAM_OP.format(op_1, op_2)
@@ -136,6 +138,7 @@ op_{0} = AIFlowOperator(task_id='{2}', job=job_{0}, workflow=workflow, dag=dag, 
                  workflow: Workflow,
                  project_name: Text,
                  resource_dir: Text,
+                 base_log_folder: Text,
                  context_extractor: ContextExtractor = BroadcastAllContextExtractor()) -> Text:
         code_text = DAGTemplate.AIRFLOW_IMPORT
         code_text += import_job_plugins_text(workflow)
@@ -166,7 +169,7 @@ op_{0} = AIFlowOperator(task_id='{2}', job=job_{0}, workflow=workflow, dag=dag, 
 
         task_map = {}
         for name, job in workflow.jobs.items():
-            op_name, code = self.generate_op_code(job, resource_dir)
+            op_name, code = self.generate_op_code(job, resource_dir, base_log_folder)
             code_text += code
             task_map[job.job_name] = op_name
             if name in workflow.workflow_config.job_periodic_config_dict:

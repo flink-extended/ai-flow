@@ -133,6 +133,7 @@ class AirFlowSchedulerBase(Scheduler, ABC):
         code_text = self.dag_generator.generate(workflow=workflow,
                                                 project_name=project_context.project_name,
                                                 resource_dir=self.config.get('resource_dir'),
+                                                base_log_folder=self.config.get('base_log_folder'),
                                                 context_extractor=context_extractor)
         self._check_configurable_path('airflow_deploy_path')
         airflow_file_path = self._write_to_deploy_path(code_text, dag_id + ".py",
