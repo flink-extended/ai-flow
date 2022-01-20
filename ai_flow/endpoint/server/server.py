@@ -41,6 +41,7 @@ from ai_flow.metric.service.metric_service import MetricService
 from ai_flow.model_center.service.service import ModelCenterService
 from ai_flow.protobuf.high_availability_pb2_grpc import add_HighAvailabilityManagerServicer_to_server
 from ai_flow.scheduler_service.service.service import SchedulerService, SchedulerServiceConfig
+from ai_flow.settings import AIFLOW_HOME
 from ai_flow.store.db.base_model import base
 from ai_flow.store.db.db_util import extract_db_engine_from_uri, create_db_store
 from ai_flow.store.mongo_store import MongoStoreConnManager
@@ -76,7 +77,8 @@ class AIFlowServer(object):
                  ha_manager=None,
                  ha_server_uri=None,
                  ha_storage=None,
-                 ttl_ms: int = 10000):
+                 ttl_ms: int = 10000,
+                 base_log_folder: str = AIFLOW_HOME):
         self.store_uri = store_uri
         self.db_type = DBType.value_of(extract_db_engine_from_uri(store_uri))
         self.executor = Executor(futures.ThreadPoolExecutor(max_workers=10))
@@ -99,7 +101,7 @@ class AIFlowServer(object):
             metric_service_pb2_grpc.add_MetricServiceServicer_to_server(MetricService(db_uri=store_uri), self.server)
 
         if start_scheduler_service:
-            self._add_scheduler_service(scheduler_service_config, store_uri, notification_server_uri)
+            self._add_scheduler_service(scheduler_service_config, store_uri, notification_server_uri, base_log_folder)
 
         if enabled_ha:
             self._add_ha_service(ha_manager, ha_server_uri, ha_storage, store_uri, ttl_ms)
@@ -108,10 +110,10 @@ class AIFlowServer(object):
 
         self._stop = threading.Event()
 
-    def _add_scheduler_service(self, scheduler_service_config, db_uri, notification_server_uri):
+    def _add_scheduler_service(self, scheduler_service_config, db_uri, notification_server_uri, base_log_folder):
         logging.info("start scheduler service.")
         real_config = SchedulerServiceConfig(scheduler_service_config)
-        self.scheduler_service = SchedulerService(real_config, db_uri, notification_server_uri)
+        self.scheduler_service = SchedulerService(real_config, db_uri, notification_server_uri, base_log_folder)
         scheduling_service_pb2_grpc.add_SchedulingServiceServicer_to_server(self.scheduler_service,
                                                                             self.server)
 
