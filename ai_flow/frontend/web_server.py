@@ -17,10 +17,13 @@
 # under the License.
 #
 import getopt
+import io
 import json
 import logging
+import os
 import sys
-from logging.config import dictConfig
+import time
+import zipfile
 
 from ai_flow.ai_graph.ai_graph import AIGraph
 from ai_flow.ai_graph.ai_node import AINode, ReadDatasetNode, WriteDatasetNode
@@ -29,14 +32,16 @@ from ai_flow.endpoint.server.server_config import AIFlowServerConfig
 from ai_flow.meta.workflow_meta import WorkflowMeta
 from ai_flow.plugin_interface.scheduler_interface import Scheduler, SchedulerFactory
 from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
+from ai_flow.settings import AIFLOW_HOME
 from ai_flow.store.abstract_store import Filters, AbstractStore, Orders
 from ai_flow.store.db.db_util import create_db_store
 from ai_flow.util.json_utils import loads, Jsonable, dumps
 from ai_flow.version import __version__
 from ai_flow.workflow.control_edge import ControlEdge
 from django.core.paginator import Paginator
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, Response, make_response, redirect
 from flask_cors import CORS
+from logging.config import dictConfig
 from typing import List, Dict
 from werkzeug.local import LocalProxy
 
@@ -65,6 +70,7 @@ CORS(app=app)
 store: AbstractStore = None
 scheduler: Scheduler = None
 airflow: str = None
+config: AIFlowServerConfig = None
 logger = logging.getLogger(__name__)
 
 
@@ -319,6 +325,18 @@ def json_pagination_response(page_no: int, total_count: int, data: List):
     return json.dumps({'pageNo': page_no, 'totalCount': total_count, 'data': data})
 
 
+def make_zip(source_dir, target_file):
+    if os.path.exists(target_file):
+        os.remove(target_file)
+    zip_file = zipfile.ZipFile(os.path.join(source_dir, target_file), 'w')
+    for parent, dirs, files in os.walk(source_dir):
+        for file in files:
+            if file != target_file:
+                file_path = os.path.join(parent, file)
+                zip_file.write(file_path, file_path[len(os.path.dirname(source_dir)):].strip(os.path.sep))
+    zip_file.close()
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -404,10 +422,62 @@ def workflow_execution_metadata():
 def job_execution_metadata():
     workflow_execution_id = request.args.get('workflow_execution_id')
     job_execution_list = scheduler.list_job_executions(workflow_execution_id) if workflow_execution_id else None
+    page_job_executions = Paginator(job_execution_list, int(request.args.get('pageSize'))).get_page(
+      int(request.args.get('pageNo'))).object_list if job_execution_list else None
+    job_execution_objects = []
+    if page_job_executions:
+        workflow_info = page_job_executions[0].workflow_execution.workflow_info
+        workflow_graph = extract_graph(store.get_workflow_by_name(workflow_info.namespace,
+                                                                  workflow_info.workflow_name))
+        job_types = {}
+        for node in workflow_graph.nodes.values():
+            job_types.update({node.config.job_name: node.config.job_type})
+        for page_job_execution in page_job_executions:
+            job_execution_object = page_job_execution.__dict__
+            job_execution_object.update({'_job_type': job_types.get(page_job_execution.job_name)})
+            job_execution_objects.append(job_execution_object)
     return pagination_response(page_no=int(request.args.get('pageNo')),
-                               total_count=len(job_execution_list) if job_execution_list else 0,
-                               data=Paginator(job_execution_list, int(request.args.get('pageSize'))).get_page(
-                                   int(request.args.get('pageNo'))).object_list if job_execution_list else [])
+                                total_count=len(job_execution_list) if job_execution_list else 0,
+                                data=job_execution_objects)
+
+
+@app.route('/job-execution/log')
+def job_execution_log():
+    job_type = request.args.get('job_type')
+    job_execution_id = request.args.get('job_execution_id')
+    workflow_execution_id = request.args.get('workflow_execution_id')
+    job_executions = scheduler.get_job_executions(request.args.get('job_name'),
+                                                  workflow_execution_id)
+    log_job_execution = None
+    for job_execution in job_executions:
+        if job_execution.job_execution_id == job_execution_id:
+            log_job_execution = job_execution
+            break
+    if log_job_execution:
+        if job_type == 'bash':
+            return redirect('{}/graph?dag_id={}'.format(airflow, workflow_execution_id.split('|')[0]))
+        else:
+            base_log_folder = config.get_base_log_folder()
+            log_dir = os.path.join(base_log_folder if base_log_folder else AIFLOW_HOME, 'logs',
+                                   log_job_execution.workflow_execution.workflow_info.namespace,
+                                   log_job_execution.workflow_execution.workflow_info.workflow_name,
+                                   log_job_execution.job_name,
+                                   log_job_execution.job_execution_id)
+            if os.path.exists(log_dir):
+                log_file = 'logs.zip'
+                make_zip(log_dir, log_file)
+                file_obj = io.BytesIO()
+                with zipfile.ZipFile(file_obj, 'w') as zip_file:
+                    zip_info = zipfile.ZipInfo(log_file)
+                    zip_info.date_time = time.localtime(time.time())[:6]
+                    zip_info.compress_type = zipfile.ZIP_DEFLATED
+                    with open(os.path.join(log_dir, log_file), 'rb') as fd:
+                        zip_file.writestr(zip_info, fd.read())
+                file_obj.seek(0)
+                return Response(file_obj.getvalue(),
+                                mimetype='application/zip',
+                                headers={'Content-Disposition': 'attachment;filename={}'.format(log_file)})
+    return make_response('No log found.')
 
 
 @app.route('/dataset')
@@ -505,6 +575,7 @@ def main(argv):
 
 
 def start_web_server_by_config_file_path(config_file_path):
+    global config
     config = AIFlowServerConfig()
     config.load_from_file(config_file_path)
     store_uri = config.get_db_uri()

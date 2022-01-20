@@ -16,8 +16,11 @@
 # under the License.
 import os
 from typing import Text
+
+from ai_flow.context.project_context import ProjectContext
 from ai_flow.plugin_interface.scheduler_interface import JobExecutionInfo
 from ai_flow.project.project_config import ProjectConfig
+from ai_flow.settings import AIFLOW_HOME
 from ai_flow.workflow.workflow_config import WorkflowConfig, load_workflow_config
 
 from ai_flow.util import serialization_utils
@@ -34,11 +37,14 @@ class JobRuntimeEnv(object):
 
     def __init__(self,
                  working_dir: Text,
-                 job_execution_info: JobExecutionInfo = None):
+                 job_execution_info: JobExecutionInfo = None,
+                 project_context: ProjectContext = None,
+                 base_log_folder: Text = None):
         self._working_dir: Text = working_dir
         self._job_execution_info: JobExecutionInfo = job_execution_info
         self._workflow_config: WorkflowConfig = None
-        self._project_config: ProjectConfig = None
+        self._project_config: ProjectConfig = project_context.project_config if project_context else None
+        self._base_log_folder: Text = base_log_folder if base_log_folder else AIFLOW_HOME
 
     @property
     def working_dir(self) -> Text:
@@ -75,7 +81,11 @@ class JobRuntimeEnv(object):
         """
         return: The directory where job logs are stored.
         """
-        return os.path.join(self._working_dir, 'logs')
+        return os.path.join(self._base_log_folder, 'logs',
+                            self.project_config.get_project_name(),
+                            self.job_execution_info.workflow_execution.workflow_info.workflow_name,
+                            self.job_execution_info.job_name,
+                            self.job_execution_info.job_execution_id)
 
     @property
     def resource_dir(self) -> Text:

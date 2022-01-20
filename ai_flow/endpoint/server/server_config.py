@@ -16,7 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
 from ai_flow.common.configuration import AIFlowConfiguration
 from enum import Enum
 from typing import Text
@@ -135,3 +134,6 @@ class AIFlowServerConfig(AIFlowConfiguration):
             return self.get('wait_for_server_started_timeout')
         else:
             return 5.0
+
+    def get_base_log_folder(self):
+        return self.get('base_log_folder')
