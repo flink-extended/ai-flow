@@ -28,7 +28,6 @@ jobs:
         pip install -e ./lib/airflow
         pip install -e .
         pip install -e ".[devel]"
-        pip install -e ".[flink]"
     - name: Install java client
       run: |
         cd ./lib/notification_service/java
