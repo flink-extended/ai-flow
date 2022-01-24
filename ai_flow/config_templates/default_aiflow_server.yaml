@@ -57,6 +57,9 @@ scheduler_service:
   # The path to a local directory where the scheduler service download the Workflow codes.
   #repository: /tmp
 
+# The base log folder of the job executions.
+# base_log_folder: {AIFLOW_HOME}
+
 # web server config
 web_server:
   airflow_web_server_uri: http://localhost:8080
