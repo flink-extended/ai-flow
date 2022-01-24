@@ -74,6 +74,7 @@ This section shows an exhaustive list of available configuration of the AIFlow S
 |start_scheduler_service|Boolean|True|Whether to start the scheduler service in AIFlow Server.|
 |scheduler_service|Dict|[Scheduler Service](scheduler_service)|The configuration of the [Scheduler Service](scheduler_service).|
 |web_server|Dict|[AIFlow Web Server](aiflow_web_server)|The configuration of the [AIFlow Web Server](aiflow_web_server). |
+|base_log_folder|String|${AIFLOW_HOME}|The base log folder of the job executions.|
 
 (scheduler_service)=
 
