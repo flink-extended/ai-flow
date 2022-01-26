@@ -19,17 +19,13 @@
 import fcntl
 import logging
 import os
-import tempfile
 import time
-from pathlib import Path
 from typing import Text, Dict, Any
 
 import boto3
 from botocore.config import Config
 
 from ai_flow.plugin_interface.blob_manager_interface import BlobManager
-from ai_flow.util.file_util.zip_file_util import make_dir_zipfile
-from ai_flow_plugins.blob_manager_plugins.blob_manager_utils import extract_project_zip_file
 
 logger = logging.getLogger(__name__)
 
