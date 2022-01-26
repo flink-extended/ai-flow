@@ -23,7 +23,6 @@ from unittest import mock
 
 import os
 
-from ai_flow.util.path_util import get_file_dir
 from ai_flow.plugin_interface.blob_manager_interface import BlobConfig, BlobManagerFactory
 from ai_flow_plugins.blob_manager_plugins.oss_blob_manager import OssBlobManager
 

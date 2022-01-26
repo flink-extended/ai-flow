@@ -85,7 +85,7 @@ class TestS3BlobManager(unittest.TestCase):
 
         s3_blob_manager._get_s3_object = mock_get_s3_object
         with mock.patch(
-                'ai_flow_plugins.blob_manager_plugins.s3_blob_manager.extract_project_zip_file'):
+                'ai_flow_plugins.blob_manager_plugins.blob_manager_utils.extract_project_zip_file'):
             def download_loop():
                 for i in range(1000):
                     s3_blob_manager.download('dummy_path', '/tmp')

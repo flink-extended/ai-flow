@@ -21,7 +21,6 @@ import shutil
 import unittest
 import os
 from unittest import mock
-from ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager import HDFSBlobManager
 from ai_flow.plugin_interface.blob_manager_interface import BlobManagerFactory, BlobConfig
 
 _TMP_FOLDER = '/tmp/' + __name__

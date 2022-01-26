@@ -17,8 +17,6 @@
 # under the License.
 #
 import os
-import logging
-import tempfile
 import fcntl
 import time
 from typing import Text, Dict, Any
