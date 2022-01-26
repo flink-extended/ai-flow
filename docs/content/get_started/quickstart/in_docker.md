@@ -31,4 +31,4 @@ with the default username(admin) and password(admin) to view the execution of wo
 ![airflow login ui](../../images/airflow_login_ui.png)
 
 ## What’s Next?
-Now you can head to the [Example](./run_example.md) section to run a machine learning workflow with AIFlow.
+Now you can head to the [Example](../tutorials_and_examples/run_example.md) section to run a machine learning workflow with AIFlow.

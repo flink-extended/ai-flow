@@ -5,7 +5,7 @@ model inference, metric monitoring, etc.
 
 The figure below shows a common machine learning workflow:
 
-![machine learning workflow](../images/machine_learning_workflow.png)
+![machine learning workflow](images/machine_learning_workflow.png)
 The workflow consists of 4 stages: feature engineering, model training, model validation, and model inference.
 
 1. Feature engineering produces the sample data from the raw data.

@@ -29,10 +29,12 @@ Welcome to AIFlow's Documentation!
    :caption: Contents
 
    content/get_started/index
-   content/workflow_development/index
+   content/concepts
+   content/development/index
    content/architecture/index
    content/deployment/index
    content/customize/index
+   content/how_to_guides
 
 .. toctree::
    :maxdepth: 1

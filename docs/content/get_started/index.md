@@ -5,4 +5,5 @@
 
 about
 quickstart/index
+tutorials_and_examples/index
 ```

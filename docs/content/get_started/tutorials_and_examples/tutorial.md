@@ -56,7 +56,7 @@ In `project_name`, we define the project's name, which will be the default names
 ```{note}
 Namespace in AIFlow is used for isolation. Each workflow can only send events to its own namespace while it can listen on multiple namespaces. 
 The reason for enabling listening on multiple namespaces is that the workflow could be triggered by external events from Notification Server.
-``` 
+```
 For `server_uri`,  they tell where the AIFlow Server is running on.
 
 For `notification_server_uri`,  they tell where the Notification Server is running on.
@@ -66,60 +66,6 @@ It also tells the AIFlow Server where and how to download the workflow code.
 
 Here we choose to use `LocalBlobManager` and as a result, the AIFlow Server will download the workflow code locally. 
 Please note that `LocalBlobManager` can only work when you submit your workflow on the same machine as the AIFlow server.
-
-We currently also provide other implementations of `BlobManager` like `OssBlobManager` and `HDFSBlobManager` which allows users to **submit their workflow to a remote AIFlow Server**.
-
-* `OssBlobManager`
-
-```yaml
-project_name: tutorial_project
-server_uri: [Remote AIFlow server uri]
-notification_server_uri: [Remote Notification server uri]
-blob:
-  blob_manager_class: ai_flow_plugins.blob_manager_plugins.oss_blob_manager.OssBlobManager
-  blob_manager_config:
-        access_key_id: [The id of the access key]
-        access_key_secret: [The secret of the access key]
-        endpoint: [Access domain name or CNAME]
-        bucket: [The name of the bucket]
-        root_directory: [The upload directory of the bucket]
-```
-
-* `HDFSBlobManager`
-
-```yaml
-project_name: tutorial_project
-server_uri: [Remote AIFlow server uri]
-notification_server_uri: [Remote Notification server uri]
-blob:
-  blob_manager_class: ai_flow_plugins.blob_manager_plugins.hdfs_blob_manager.HDFSBlobManager
-  blob_manager_config:
-        hdfs_url: [Hostname or IP address of HDFS namenode, prefixed with protocol, followed by WebHDFS port on namenode]
-        hdfs_user: [User default. Defaults to the current user's (as determined by `whoami`)]
-        root_directory: [The upload directory of the bucket]
-```
-
-* `S3BlobManager`
-
-```yaml
-project_name: tutorial_project
-server_uri: [Remote AIFlow server uri]
-notification_server_uri: [Remote Notification server uri]
-blob:
-  blob_manager_class: ai_flow_plugins.blob_manager_plugins.s3_blob_manager.S3BlobManager
-  blob_manager_config:
-        service_name: [The name of a service, e.g. 's3' or 'ec2']
-        region_name: [The name of the region associated with the client]
-        api_version: [The API version to use]
-        use_ssl: [Whether or not to use SSL]
-        verify: [Whether or not to verify SSL certificates]
-        endpoint_url: [The complete URL to use for the constructed client]
-        access_key_id: [The access key for your AWS account]
-        secret_access_key: [The secret key for your AWS account]
-        session_token: [The session key for your AWS account]
-        config: [Advanced client configuration options]
-        bucket_name: [The S3 bucket name]
-```
 
 ### Prepare a Workflow
 
@@ -231,7 +177,7 @@ On the other hand, `read_dataset()` and `train()` are of another type. We call t
 
 In AIFlow, `Channel` represents the output of AINodes. More vividly, `Channel` is one end of the `DataEdge`. The following picture shows the relation among `AINodes`, `DataEdges` and `Channels`:
 
-![Alt text](../images/tutorial/channels.png)
+![Alt text](../../images/tutorial/channels.png)
 
 In the example, AINode N0 has 3 outputs(i.e., 3 channels whose source node is N0). We can make N1 accepts the c0 and c1 channels and N2 accepts c1 and c2 channels. Accordingly, there are 4 DataEdges in all. With such design, we can manipulate the data dependencies more flexibly and reuse the data easier.
 
@@ -420,7 +366,7 @@ python workflows/tutorial_workflow/tutorial_workflow.py
 
 Once the bash command returns(it should take no longer than 1 minute), go to check the Airflow WebUI to see if the workflow is submitted successfully. If it is success, wait a minute(because we set the training job to be executed every 1 minute in the config file) then you can see the graph like this:
 
-![Alt text](../images/tutorial/success_workflow.png)
+![Alt text](../../images/tutorial/success_workflow.png)
 
 You can view the prediction output under in the file `examples/tutorial_project/workflows/tutorial_workflow/predict_result.csv` as well.
 
@@ -428,4 +374,4 @@ If you find any job fails, you can go to check logs under directory like `exampl
 
 ## Conclusion
 
-Congratulations! You have been equipped with necessary knowledge to write your own workflow. For further reading, you can check our [Overview](../architecture/overview.md), [API](../api/index.rst) and [Examples](https://github.com/flink-extended/ai-flow/tree/master/examples/). 
+Congratulations! You have been equipped with necessary knowledge to write your own workflow. For further reading, you can check our [Overview](../../architecture/overview.md), [API](../../../reference/api/index.rst) and [Examples](https://github.com/flink-extended/ai-flow/tree/master/examples/). 
