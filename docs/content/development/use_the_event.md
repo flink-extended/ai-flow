@@ -6,16 +6,16 @@ On behalf of [Notification Service](https://github.com/flink-extended/ai-flow/tr
 
 An event has the following fields that users can specified when creating an event.
 
-* key: required,
+* key: required, the name of event
 * value: required, the actual event contents
 * event_type: optional, the type of event which helps filter
-* context: optional,
+* context: optional, some context of the event
 
 An event also has some metadata fields.
 
-* version: 
+* version: the offset of event
 * create_time: the timestamp of event creation
-* namespace: 
+* namespace: the namespace of event which helps isolate and filter
 * sender: the client who sent the event
 
 ## Notification Client

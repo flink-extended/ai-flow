@@ -21,7 +21,17 @@ AIFlow uses the following convention to avoid redundant configurations, that is 
 
 ## Defining the Workflow
 
-We define [workflow](../concepts.md#Workflow) in Python. The workflow can be described as a graph, [jobs](../concepts.md#Job) are represented as the nodes while the relationship between jobs are represented as the edge. 
+We define [workflow](../concepts.md#workflow) in Python. The workflow can be described as a graph, [jobs](../concepts.md#Job) are represented as the nodes while the relationship between jobs are represented as the edge. 
+
+### Initializing the Context
+
+Before defining the workflow, you need to initialize the context of the workflow as below:
+
+```python
+import ai_flow as af
+
+af.init_ai_flow_context()
+```
 
 ### Defining Jobs
 
@@ -59,9 +69,8 @@ job_1:
 
 ### Configuring the Workflow
 
-Except for job-related configurations, you can also do some configurations for the workflow. The workflow configuraions mainly includes three parts:
+Except for job-related configurations, you can also do some configurations for the workflow. The workflow configuraions mainly includes two parts:
 
-- dependencies
 - periodic configuration
 - custom properties
 
@@ -75,13 +84,9 @@ periodic_config:
 properties:
   owner: Bob
 
-dependencies:
-  jars:
-    - hadoop.jar
-    - flink.jar
 ```
 
 ### A Full Example
 
-For more comprehensive understanding, you can follow the [tutorial](../get_started/tutorials_and_examples/tutorial.md) to write a complete workflow step by step.
+For more comprehensive understanding, you can follow the [tutorial](../get_started/tutorial.md) to write a complete workflow step by step.
 

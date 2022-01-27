@@ -4,8 +4,6 @@ This tutorial will show you how to create and run a workflow using AIFlow SDK an
 
 ## Creating a workflow
 
-(target)=
-
 ### Target
 
 In the tutorial, we will write a simple machine learning workflow to train a KNN model using iris training dataset and verify the effectiveness of the model. 

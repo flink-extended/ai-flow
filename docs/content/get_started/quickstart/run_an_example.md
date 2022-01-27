@@ -1,7 +1,7 @@
-# Machine Learning with AIFlow
+# Run an Example
 
 We have prepared some examples for you to get started, you can get all examples in [github source](https://github.com/flink-extended/ai-flow/tree/master/examples).
-Here you can run following commands to download and run a machine learning example.
+You can clone the repository or run following commands to download and run a machine learning example.
 
 ```shell
 curl -Lf https://github.com/flink-extended/ai-flow/releases/download/release-0.3.0/examples.tar.gz -o /tmp/ai-flow-examples.tar.gz
@@ -27,4 +27,4 @@ event after the sklearn model generated. After passing the model validation,
 the model pushing is triggered by the `MODEL_VALIDATED` event. 
 The model streaming prediction is triggered by the `MODEL_DEPLOYED` event.
 
-For more details about how to write your workflow, please refer to the [Workflow Development](../../workflow_development/index.md) document.
+For more details about how to write your workflow, please refer to the [tutorial](../tutorial.md) and  [development](../../development/index.md) document.
