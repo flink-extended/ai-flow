@@ -1,8 +1,8 @@
-# Run Workflows
+# Running Workflows
 
-## Submit the Workflows
+## Submitting the Workflows
 Before running the workflow, you need to submit the code and configuration of your workflow to remote AIFlowServer.
-There are 2 ways to submit the workflow.
+There are two ways to submit the workflow.
 
 1. Command-Line Interface
     ```shell script
@@ -12,11 +12,13 @@ There are 2 ways to submit the workflow.
     ```python
     import ai_flow as af
     
+    af.init_ai_flow_context()
+    
     workflow_name = af.current_workflow_config().workflow_name
     af.workflow_operation.submit_workflow(workflow_name)
     ```
 
-## Run the Workflow
+## Running the Workflow
 At this point you can manually start to run the workflow you just submitted. Every time you run the workflow, a new [workflow execution](./concepts.md#Workflow Execution) would be created. You also have 2 ways to start a new workflow execution.
 
 1. Command-Line Interface
@@ -29,6 +31,8 @@ At this point you can manually start to run the workflow you just submitted. Eve
 2. Python API
     ```python
     import ai_flow as af
+    
+    af.init_ai_flow_context()
     
     workflow_name = af.current_workflow_config().workflow_name
     af.workflow_operation.start_new_workflow_execution(workflow_name)

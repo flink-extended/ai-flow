@@ -1,11 +1,6 @@
 # Blob Manager Plugin
 
-When executing a workflow, AIFlow will upload the corresponding artifacts(code, dependencies and resources) to a shared storage. AIFlow does that for two purposes:
-
-1. Make the distribution of the artifacts easier and more scalable in a distributed environment.
-2. Take a snapshot of the code for each execution, so that users can easily see what is the workflow that is running even after something is changed.
-
-AIFlow relies on a blob manager to upload and download the artifacts. The blob manager is a pluggable component and currently AIFlow provides implementations based on local file system and Alibaba OSS out of the box.
+AIFlow provides some commonly used implementation of `blob manager`, however, you can also implement your own `blob manager` if provided ones dose not meet your requirements.
 
 ## Implement a blob manager plugin
 

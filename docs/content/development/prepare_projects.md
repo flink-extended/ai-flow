@@ -1,38 +1,46 @@
-# Prepare Projects
+# Preparing Projects
 
-A project contains multiple business related workflows. Before creating the workflow, we should prepare a project whose directory structure is as follows:
+A project contains multiple business-related projects workflows. These workflows are organized in the same directory of the project along with some common config files and resources.
+
+## Preparing the Structure
+
+Currently, users need to prepare the structure of the directory manually like follows:
 
 ```
-tutorial_project/
-        |- workflows/
-           |- first_workflow/
-              |- first_workflow.py 
-              |- first_workflow.yaml 
-        |- dependencies/
-            |-python 
-            |-jar
-        |- resources/
-        └─ project.yaml
+aiflow-examples/
+    |- workflows/
+       |- first_workflow/
+          |- first_workflow.py 
+          |- first_workflow.yaml 
+    |- dependencies/
+        |-python 
+        |-jar
+    |- resources/
+    └─ project.yaml
 ```
 
-`tutorial_project` is the root directory of the project and `workflows` is used to save codes and config files of workflows in this project. 
+`aiflow-examples` is the root directory of the project, you can rename it as needed.
 
-The `dependecies` directory is used to save python/jar dependencies that will be used by our workflow.
+The `workflows` directory is used to save codes and config files of workflows in this project. For more information about organizing workflows, please refer to [create workflows](create_workflows.md).
 
-The `resources` directory is for saving all other files(e.g., config files) that will be used by the project.
+The `dependencies` directory is used to save python/jar dependencies that will be used by your workflows. The dependencies would be packaged and uploaded to workers that execute the workflow.
 
-The `project.yaml` is the project config file. 
+The `resources` directory is for saving all other user files(e.g., config files) that will be used by the project. It would also be uploaded to workers that execute the workflow.
 
-#### project.yaml
+The `project.yaml` is the config file of the project, we will describe the details in the following section.
 
-Every project has a project.yaml to takes some common configurations of all workflows in the project. Here is an example of the project.yaml for tutorial project.
+## Project Config
+
+Every project has a `project.yaml` to takes some common configurations of all workflows in the project. Here is an example of the project.yaml.
 
 ```yaml
-project_name: tutorial_project
+project_name: aiflow-examples
 server_uri: localhost:50051
 notification_server_uri: localhost:50052
 blob:
   blob_manager_class: ai_flow_plugins.blob_manager_plugins.local_blob_manager.LocalBlobManager
+  blob_manager_config:
+    root_directory: /tmp/aiflow-examples/demo
 ```
 
 The `project_name` is used to define the project's name, which will be the default `namespace` of workflows in this project as well. 
@@ -44,10 +52,6 @@ The reason for being able to listening on multiple namespaces is that the workfl
 
 The `server_uri` is where the AIFlow Server is running on, so that the workflows in project can communicate with .
 
-For `notification_server_uri`,  they tell where the Notification Server is running on.
+The `notification_server_uri` is where the Notification Server is running on, so that the workflows in project can communicate with.
 
-Then, we configure the `blob` property which specifies where the workflow code will be updated when submitting. 
-It also tells the AIFlow Server where and how to download the workflow code.
-
-Here we choose to use `LocalBlobManager` and as a result, the AIFlow Server will download the workflow code locally. 
-Please note that `LocalBlobManager` can only work when you submit your workflow on the same machine as the AIFlow server. More types of blob manager, please refer to [Use the Blob](./use_the_blob.md). 
+The `blob` configuration block specifies where the project codes would be uploaded so that the AIFlow Server and workers could download the codes to execute. Here we choose to use `LocalBlobManager` and as a result, the AIFlow Server will download the workflow code locally. Please note that `LocalBlobManager` can only work when you submit your workflow on the same machine as the AIFlow server. More types of blob manager, please refer to [Blob Manager](./blob_manager.md). 

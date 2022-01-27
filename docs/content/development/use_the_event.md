@@ -1,6 +1,6 @@
-# Use the Event
+# Using the Event
 
-On behalf of Notification Service, AIFlow can send or receive messages to control the execution of jobs. More than that, users can also implement their own control semantics by sending custom events using Notification Service. This document will walk you through sending and receiving custom events.
+On behalf of [Notification Service](https://github.com/flink-extended/ai-flow/tree/master/lib/notification_service), AIFlow can send or receive messages to control the execution of jobs. More than that, users can also implement their own control semantics by sending custom events using Notification Service. This document will walk you through sending and receiving custom events.
 
 ## Event 
 

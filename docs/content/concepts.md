@@ -20,8 +20,7 @@ For example, we can have a project that consists workflows for a recommendation 
 workflows for risk controlling system.
 
 ## Workflow
-A workflow consists of [jobs](#job) and relationships([data dependencies](#data-dependency) 
-and [control dependencies](#control-dependency)) between jobs.
+A workflow consists of [jobs](#job) and relationships([data dependencies](#data-dependency) and [control dependencies](#control-dependency)) between jobs.
 
 A workflow can run regularly or be triggered by [events](#event).
 
