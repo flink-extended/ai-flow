@@ -25,8 +25,8 @@ You can report problems to request features in the [GitHub Issues](https://githu
 
 ## Contact Us
 
-For more information, you can join the **AIFlow Users Group** on [DingTalk](https://www.dingtalk.com) to contact us. The number of the DingTalk group is `35876083`. 
+For more information, we recommend you to join the **AIFlow Community Group** on the [Google Groups](https://groups.google.com) to contact us: **aiflow@googlegroups.com**.
 
-You can also join the group by scanning the QR code below:
+You can also join the group on the [DingTalk](https://www.dingtalk.com). The number of the DingTalk group is `35876083`, which group can also be joined by scanning the QR code below:
 
 ![](https://raw.githubusercontent.com/wiki/alibaba/flink-ai-extended/images/dingtalk_qr_code.png)
