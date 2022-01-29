@@ -175,7 +175,7 @@ On the other hand, `read_dataset()` and `train()` are of another type. We call t
 
 In AIFlow, `Channel` represents the output of AINodes. More vividly, `Channel` is one end of the `DataEdge`. The following picture shows the relation among `AINodes`, `DataEdges` and `Channels`:
 
-![Alt text](../../images/tutorial/channels.png)
+![Alt text](../images/tutorial/channels.png)
 
 In the example, AINode N0 has 3 outputs(i.e., 3 channels whose source node is N0). We can make N1 accepts the c0 and c1 channels and N2 accepts c1 and c2 channels. Accordingly, there are 4 DataEdges in all. With such design, we can manipulate the data dependencies more flexibly and reuse the data easier.
 
@@ -364,12 +364,12 @@ python workflows/tutorial_workflow/tutorial_workflow.py
 
 Once the bash command returns(it should take no longer than 1 minute), go to check the Airflow WebUI to see if the workflow is submitted successfully. If it is success, wait a minute(because we set the training job to be executed every 1 minute in the config file) then you can see the graph like this:
 
-![Alt text](../../images/tutorial/success_workflow.png)
+![Alt text](../images/tutorial/success_workflow.png)
 
 You can view the prediction output under in the file `examples/tutorial_project/workflows/tutorial_workflow/predict_result.csv` as well.
 
 If you find any job fails, you can go to check logs under directory like `examples/tutorial_project/temp/tutorial_workflow/$jobname/202107xxxxx/logs`. The log files will give you the error information in detail. Also, checking the log in the Airflow WebUI is also a good choice.
 
-## Conclusion
+## What's Next
 
-Congratulations! You have been equipped with necessary knowledge to write your own workflow. For further reading, you can check our [Overview](../../architecture/overview.md), [API](../../../reference/api/index.rst) and [Examples](https://github.com/flink-extended/ai-flow/tree/master/examples/). 
+Congratulations! You have been equipped with necessary knowledge to write your own workflow. At the point, you can check [Examples](./examples.md) for more examples or [Development](../development/index.md) to write your own worklfows.

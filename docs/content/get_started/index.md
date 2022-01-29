@@ -5,5 +5,4 @@
 
 about
 quickstart/index
-tutorial
 ```
