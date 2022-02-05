@@ -4,7 +4,7 @@ AIFlow provides rich command-line interfaces to manage workflows, e.g., submit w
 
 ## Submitting the Workflows
 
-A workflow can be periodically scheduled or manually triggered, but before that, you need to submit the code and configuration of the workflow to remote AIFlowServer. You could submit workflow by following command:
+A workflow can be periodically scheduled or manually triggered, but before that, you need to submit the code and configuration of the workflow to remote AIFlow server. You could submit workflow by following command:
 
 ```shell script
 # project_path is the root directory of the project contains the workflow

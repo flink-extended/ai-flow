@@ -1,31 +1,14 @@
 # Creating Workflows
 
-## Preparing the Structure
-
-All workflows of a project are organized in the `workflows` directory, the structure should be as follow:
-```yaml
-|- workflows/
-    |- first_workflow/
-         |- first_workflow.py
-         |- first_workflow.yaml
-    |- second_workflow/
-         |- second_workflow.py
-         |- second_workflow.yaml
-```
-
-A workflow is identified by a unique name, which is the name of the directory of workflow. For each workflow, it must contain a python file to define the logic of the workflow and a YAML file to configure the jobs.
-
-```{note}
-AIFlow uses the following convention to avoid redundant configurations, that is the names of the python files (e.g. first_workflow.py) and YAML files (e.g. first_workflow.yaml) must be same as the name of the parent directory(e.g. first_workflow).
-```
+Each workflow requires at least a Python file to define the workflow and a YAML configuration file. These files will be compiled to an executable workflow at client-side and submitted to AIFlow server to execute.
 
 ## Defining the Workflow
 
-We define [workflow](../concepts.md#workflow) in Python. The workflow can be described as a graph, [jobs](../concepts.md#Job) are represented as the nodes while the relationship between jobs are represented as the edge. 
+The workflow that defined in Python can be described as a graph, [jobs](../concepts.md#Job) are represented as the nodes while the [dependencies](../concepts.md) between jobs are represented as the edges. Users can follow below steps to define their own workflows.
 
 ### Initializing the Context
 
-Before defining the workflow, you need to initialize the context of the workflow as below:
+Before defining the workflow, you need to initialize the context and configuraion of the workflow as below:
 
 ```python
 import ai_flow as af
@@ -35,7 +18,7 @@ af.init_ai_flow_context()
 
 ### Defining Jobs
 
-You can define a simple job like below in the python file:
+A [job](../concepts.md#Job) may contains multiple processors but these operations must not have [control dependencies](../concepts.md#Control Dependency) among them. These processors should be defined in a single `with` statement.  For example,
 
 ```python
 import ai_flow as af
@@ -45,16 +28,18 @@ with af.job_config('job_1'):
     af.user_define_operation(processor=BashProcessor("sleep 5"))
 ```
 
-### Defining the Relationship 
+The `user_define_operation` is the basic operation to construct an AINode, which takes a user-defined `processor`. The `processor` is defined in every implementation of [Job Plugins](../plugins/job_plugin.md). In addition to `user_define_operation`, there are also some convenient functions like `train`, `transform`, and `predict` to help with machine learning workflow definition. Users can find all APIs about workflow definition in [ops.py](https://github.com/flink-extended/ai-flow/blob/master/ai_flow/api/ops.py).
 
-AIFlow mainly supports two functions to define the relationship between jobs.
+### Defining the Dependencies
+
+The dependencies here is only [control dependency](../concepts.md#Control Dependency) which define the relationships between jobs. AIFlow mainly provides two functions to define the dependencies between jobs.
 
 - action_on_job_status: this function is used to set the behavior of downstream jobs when the status of upstream jobs changes.
-- action_on_events: this function is used to set the behavior of a job when some events happened.
+- action_on_events: this function is used to set the behavior of a job when some events happened. The events could be sent from other jobs in the same workflow or external process.
 
 ## Configuring the workflow
 
-We set the properties of the workflow in a YAML file, includes the configurations of the workflow itself along with the configurations of jobs in the workflow.
+Workflow definition need to work with a configuration file. We set the properties of the workflow in a YAML file, includes the configurations of the workflow itself along with the configurations of jobs in the workflow.
 
 ### Configuring Jobs
 
@@ -69,12 +54,7 @@ job_1:
 
 ### Configuring the Workflow
 
-Except for job-related configurations, you can also do some configurations for the workflow. The workflow configuraions mainly includes two parts:
-
-- periodic configuration
-- custom properties
-
-E.g.
+Except for job-related configurations, you can also do some configurations for the workflow. The workflow configuraions mainly includes periodic configuration or other custom properties. For example,
 
 
 ```yaml
@@ -83,10 +63,9 @@ periodic_config:
 
 properties:
   owner: Bob
-
 ```
 
-### A Full Example
+## A Full Example
 
-For more comprehensive understanding, you can follow the [tutorial](../get_started/tutorial.md) to write a complete workflow step by step.
+For more comprehensive understanding, you can follow the [tutorial](../tutorial_and_examples/tutorial.md) to write a complete workflow step by step.
 
