@@ -16,5 +16,4 @@ As shown above, After receiving event_1 and event_2, Job_3 can run.
 After receiving event_3 and event_4, Job_5 can run.
 After receiving event_5, Job_6 can run.
 
-At present, the default scheduler is an [event-based scheduler](https://github.com/flink-extended/ai-flow/tree/master/lib/airflow),
-which is based on airflow.
+At present, the default scheduler is an [event-based scheduler](https://github.com/flink-extended/ai-flow/tree/master/lib/airflow), which is based on airflow.
