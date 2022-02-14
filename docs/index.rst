@@ -35,7 +35,7 @@ Welcome to AIFlow's Documentation!
    content/architecture/index
    content/deployment/index
    content/customize/index
-   content/how_to_guides
+   content/how_to_guides/index
 
 .. toctree::
    :maxdepth: 1
