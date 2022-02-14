@@ -16,81 +16,61 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
 import ai_flow as af
-from ai_flow.util.path_util import get_file_dir
 from ai_flow.model_center.entity.model_version_stage import ModelVersionEventType
 from tutorial_processors import DatasetReader, ModelTrainer, ValidateDatasetReader, ModelValidator, Source, Sink, \
     Predictor
 
+# Init project
+af.init_ai_flow_context()
 
-DATASET_URI = os.path.abspath(os.path.join(__file__, "../../../")) + '/resources/iris_{}.csv'
+# Training of model
+with af.job_config('train'):
+    # Register metadata of training data(dataset) and read dataset(i.e. training dataset)
+    train_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.train_dataset')
+    train_read_dataset = af.read_dataset(dataset_info=train_dataset,
+                                         read_dataset_processor=DatasetReader())
 
+    # Register model metadata and train model
+    train_model = af.get_model_by_name(model_name="tutorial_project.KNN")
+    train_channel = af.train(input=[train_read_dataset],
+                             training_processor=ModelTrainer(),
+                             model_info=train_model)
 
-def run_workflow():
-    # Init project
-    af.init_ai_flow_context()
+# Validation of model
+with af.job_config('validate'):
+    # Read validation dataset
+    validate_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.test')
+    # Validate model before it is used to predict
+    validate_read_dataset = af.read_dataset(dataset_info=validate_dataset,
+                                            read_dataset_processor=ValidateDatasetReader())
+    validate_artifact_name = 'tutorial_project.validate_artifact'
+    validate_artifact = af.get_artifact_by_name(artifact_name=validate_artifact_name)
+    validate_channel = af.model_validate(input=[validate_read_dataset],
+                                         model_info=train_model,
+                                         model_validation_processor=ModelValidator(validate_artifact_name))
 
-    artifact_prefix = af.current_project_config().get_project_name() + "."
-    # Training of model
-    with af.job_config('train'):
-        # Register metadata of training data(dataset) and read dataset(i.e. training dataset)
-        train_dataset = af.register_dataset(name=artifact_prefix + 'train_dataset',
-                                            uri=DATASET_URI.format('train'))
-        train_read_dataset = af.read_dataset(dataset_info=train_dataset,
-                                             read_dataset_processor=DatasetReader())
+# Prediction(Inference) using flink
+with af.job_config('predict'):
+    # Read test data and do prediction
+    predict_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.predict_dataset')
+    predict_read_dataset = af.read_dataset(dataset_info=predict_dataset,
+                                           read_dataset_processor=Source())
+    predict_channel = af.predict(input=[predict_read_dataset],
+                                 model_info=train_model,
+                                 prediction_processor=Predictor())
+    # Save prediction result
+    write_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.write_dataset')
+    af.write_dataset(input=predict_channel,
+                     dataset_info=write_dataset,
+                     write_dataset_processor=Sink())
 
-        # Register model metadata and train model
-        train_model = af.register_model(model_name=artifact_prefix + 'KNN',
-                                        model_desc='KNN model')
-        train_channel = af.train(input=[train_read_dataset],
-                                 training_processor=ModelTrainer(),
-                                 model_info=train_model)
-
-    # Validation of model
-    with af.job_config('validate'):
-        # Read validation dataset
-        validate_dataset = af.register_dataset(name=artifact_prefix + 'validate_dataset',
-                                               uri=DATASET_URI.format('test'))
-        # Validate model before it is used to predict
-        validate_read_dataset = af.read_dataset(dataset_info=validate_dataset,
-                                                read_dataset_processor=ValidateDatasetReader())
-        validate_artifact_name = artifact_prefix + 'validate_artifact'
-        validate_artifact = af.register_artifact(name=validate_artifact_name,
-                                                 uri=get_file_dir(__file__) + '/validate_result')
-        validate_channel = af.model_validate(input=[validate_read_dataset],
-                                             model_info=train_model,
-                                             model_validation_processor=ModelValidator(validate_artifact_name))
-
-    # Prediction(Inference) using flink
-    with af.job_config('predict'):
-        # Read test data and do prediction
-        predict_dataset = af.register_dataset(name=artifact_prefix + 'predict_dataset',
-                                              uri=DATASET_URI.format('test'))
-        predict_read_dataset = af.read_dataset(dataset_info=predict_dataset,
-                                               read_dataset_processor=Source())
-        predict_channel = af.predict(input=[predict_read_dataset],
-                                     model_info=train_model,
-                                     prediction_processor=Predictor())
-        # Save prediction result
-        write_dataset = af.register_dataset(name=artifact_prefix + 'write_dataset',
-                                            uri=get_file_dir(__file__) + '/predict_result.csv')
-        af.write_dataset(input=predict_channel,
-                         dataset_info=write_dataset,
-                         write_dataset_processor=Sink())
-
-    # Define relation graph connected by control edge: train -> validate -> predict
-    af.action_on_model_version_event(job_name='validate',
-                                     model_version_event_type=ModelVersionEventType.MODEL_GENERATED,
-                                     model_name=train_model.name)
-    af.action_on_model_version_event(job_name='predict',
-                                     model_version_event_type=ModelVersionEventType.MODEL_VALIDATED,
-                                     model_name=train_model.name)
-    # Submit workflow
-    af.workflow_operation.submit_workflow(af.current_workflow_config().workflow_name)
-    # Run workflow
-    af.workflow_operation.start_new_workflow_execution(af.current_workflow_config().workflow_name)
-
-
-if __name__ == '__main__':
-    run_workflow()
+# Define relation graph connected by control edge: train -> validate -> predict
+af.action_on_model_version_event(job_name='validate',
+                                 model_version_event_type=ModelVersionEventType.MODEL_GENERATED,
+                                 model_name=train_model.name,
+                                 namespace='tutorial_project')
+af.action_on_model_version_event(job_name='predict',
+                                 model_version_event_type=ModelVersionEventType.MODEL_VALIDATED,
+                                 model_name=train_model.name,
+                                 namespace='tutorial_project')
