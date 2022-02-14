@@ -1,4 +1,4 @@
-# Using the Event
+# Using Events
 
 On behalf of [Notification Service](https://github.com/flink-extended/ai-flow/tree/master/lib/notification_service), AIFlow can send or receive messages to control the execution of jobs. More than that, users can also implement their own control semantics by sending custom events using Notification Service. This document will walk you through sending and receiving custom events.
 
@@ -20,11 +20,11 @@ An event also has some metadata fields.
 
 ## Notification Client
 
-To send or receive events, you need a [Notification Client](https://github.com/flink-extended/ai-flow/blob/3b2a74e4d5579c9547dd24955b38ff83edd4dc6b/lib/notification_service/notification_service/client.py#L86). With the client, you can communicate with the notification server.
+To send or receive events, you need a [Notification Client](https://github.com/flink-extended/ai-flow/blob/3b2a74e4d5579c9547dd24955b38ff83edd4dc6b/lib/notification_service/notification_service/client.py#L86) to communicate with the notification server.
 
 ## Sending Events
 
-Notification Client has a method to send the event.
+Notification Client provides a method to send the event.
 
 ```python
 @abc.abstractmethod
@@ -116,6 +116,8 @@ You can continuously listen for a certain type of event by following method:
         """
         pass
 ```
+
+### Watcher
 
 After receiving the event you are interested in,  you may want to perform some associated processing logic, so an EventWatcher need to be passed. You need to create your own EventWatcher by implementing the `process` function. The `process` function takes a list of events and every batch of events would be processed with this function.
 
