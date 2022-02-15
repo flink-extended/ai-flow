@@ -32,7 +32,7 @@ def init():
     train_dataset = af.register_dataset(name=artifact_prefix + 'train_dataset',
                                         uri=DATASET_URI.format('train'))
     # Register test dataset
-    validate_dataset = af.register_dataset(name=artifact_prefix + 'test',
+    validate_dataset = af.register_dataset(name=artifact_prefix + 'test_dataset',
                                            uri=DATASET_URI.format('test'))
 
     # Save prediction result

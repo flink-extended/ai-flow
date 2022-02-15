@@ -36,7 +36,7 @@ If it is success, wait a minute(because we set the training job to be executed e
 
 You can view the prediction output under in the file `/tmp/tutorial_output/predict_result.csv` as well.
 
-If you want to view logs, you can go to check logs under directory like `/tmp/tutorial_workflow/workflow_tutorial_workflow_xxx/tutorial_project/temp/tutorial_workflow/$jobname/202107xxxxx/logs`. 
+If you want to view logs, you can go to check logs under directory like `${AIFLOW_HOME}/logs/tutorial_project/tutorial_workflow/`. 
 The log files will give you the information in detail. Also, checking the log in the Airflow WebUI is also a good choice.
 
 Now let's explain the above example.
@@ -128,7 +128,7 @@ def init():
     train_dataset = af.register_dataset(name=artifact_prefix + 'train_dataset',
                                         uri=DATASET_URI.format('train'))
     # Register test dataset
-    validate_dataset = af.register_dataset(name=artifact_prefix + 'test',
+    validate_dataset = af.register_dataset(name=artifact_prefix + 'test_dataset',
                                            uri=DATASET_URI.format('test'))
 
     # Save prediction result
@@ -260,7 +260,7 @@ Here we define the other two jobs of our workflow. They are pretty similar to wh
 # Validation of model
 with af.job_config('validate'):
     # Read validation dataset
-    validate_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.test')
+    validate_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.test_dataset')
     # Validate model before it is used to predict
     validate_read_dataset = af.read_dataset(dataset_info=validate_dataset,
                                             read_dataset_processor=ValidateDatasetReader())
@@ -273,7 +273,7 @@ with af.job_config('validate'):
 # Prediction(Inference) using flink
 with af.job_config('predict'):
     # Read test data and do prediction
-    predict_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.predict_dataset')
+    predict_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.test_dataset')
     predict_read_dataset = af.read_dataset(dataset_info=predict_dataset,
                                            read_dataset_processor=Source())
     predict_channel = af.predict(input=[predict_read_dataset],
