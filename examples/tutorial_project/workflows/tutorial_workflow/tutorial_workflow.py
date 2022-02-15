@@ -40,7 +40,7 @@ with af.job_config('train'):
 # Validation of model
 with af.job_config('validate'):
     # Read validation dataset
-    validate_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.test')
+    validate_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.test_dataset')
     # Validate model before it is used to predict
     validate_read_dataset = af.read_dataset(dataset_info=validate_dataset,
                                             read_dataset_processor=ValidateDatasetReader())
@@ -53,7 +53,7 @@ with af.job_config('validate'):
 # Prediction(Inference) using flink
 with af.job_config('predict'):
     # Read test data and do prediction
-    predict_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.predict_dataset')
+    predict_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.test_dataset')
     predict_read_dataset = af.read_dataset(dataset_info=predict_dataset,
                                            read_dataset_processor=Source())
     predict_channel = af.predict(input=[predict_read_dataset],
