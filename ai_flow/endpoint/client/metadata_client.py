@@ -476,7 +476,7 @@ class MetadataClient(BaseClient):
         model_version_meta = _unwrap_model_version_response(response)
         notification_client = get_notification_client()
         if notification_client is not None:
-            event_type = MODEL_VERSION_TO_EVENT_TYPE.get(model_version_meta.current_stage)
+            event_type = MODEL_VERSION_TO_EVENT_TYPE.get(ModelVersionStage.Value(model_version_meta.current_stage))
             model_meta = self.get_model_by_id(model_version_meta.model_id)
             model_version_detail = ModelVersionDetail(model_name=model_meta.name,
                                                       model_version=model_version_meta.version,
