@@ -67,7 +67,7 @@ aiflow db init
 notification db init
 ```
 
-## Configuration
+## Configuring
 
 Now you can modify the configurations about database connection to your mysql connection string of the following format
 

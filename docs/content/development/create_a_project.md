@@ -33,14 +33,14 @@ The `project.yaml` is the config file of the project, we will describe the detai
 
 ## Config project
 
-Each project has a file named `project.yaml` to takes configurations the project. The config file has following keys or  sections:
+Each project has a file named `project.yaml` to takes configurations the project. The config file has following configuration keys or  sections:
 
 * project_name: the project's name, which will be the default `namespace` of workflows in this project as well. 
 * server_uri: the URI that the AIFlow Server is running on, so that the workflows in project can communicate with.
 * notification_server_uri: the URI that the Notification Server is running on, so that the workflows in project can communicate with.
-* blob: this section specifies where the project codes would be uploaded so that the AIFlow Server and workers could download the codes to execute. 
+* blob: this section specifies where the project codes would be uploaded so that the AIFlow Server and workers could download the codes to execute. For more details about configuring blob, please refer to [Blob Manager Plugin](../plugins/blob_manager_plugin.md).
 
-A complete example of the project.yaml.
+A complete example of `project.yaml`.
 
 ```yaml
 project_name: aiflow-examples
@@ -52,4 +52,4 @@ blob:
     root_directory: /tmp/aiflow-examples/demo
 ```
 
-Here we choose `LocalBlobManager` and as the blob manager, so the AIFlow Server will download the workflow code locally. More types of blob manager, please refer to [Blob Manager](./blob_manager.md). 
+Here we choose `LocalBlobManager` and as the blob manager, so the AIFlow Server will download the workflow code locally. More types of blob manager, please refer to [Blob Manager Plugin](../plugins/blob_manager_plugin.md). 

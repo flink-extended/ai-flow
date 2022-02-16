@@ -1,4 +1,4 @@
-# Scheduler Plugin Interface
+# Scheduler Plugin
 
 By default, AIFlow server provides a modified version of AirFlow that supports event-based scheduling (EBS) to execute the workflows. Moreover, the scheduler also exposes the interface to manipulate the workflow and job executions. Although we are not aware of other schedulers capable of doing the same at this point, users can still create a custom scheduler for AIFlow if they want to.
 

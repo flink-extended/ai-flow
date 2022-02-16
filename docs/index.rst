@@ -31,10 +31,11 @@ Welcome to AIFlow's Documentation!
    content/get_started/index
    content/tutorial_and_examples/index
    content/concepts
+   content/installation
    content/development/index
    content/architecture/index
    content/deployment/index
-   content/customize/index
+   content/plugins/index
    content/how_to_guides/index
 
 .. toctree::
@@ -43,3 +44,4 @@ Welcome to AIFlow's Documentation!
 
    reference/cli/index
    reference/api/index
+   reference/extra_packages
