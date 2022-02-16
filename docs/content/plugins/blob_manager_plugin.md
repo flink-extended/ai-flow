@@ -98,7 +98,7 @@ blob:
 
 // TODO
 
-## Using Blob Manager in Workflow
+## Using Blob Manager in a Workflow
 
 The `Blob Manager` is not only be used by the AIFlow framework, users can also upload or download files with the `Blob Manager` if it has been configured in `project.yaml`.  E.g.
 
@@ -113,7 +113,7 @@ blob_manager = BlobManagerFactory.create_blob_manager(blob_config.blob_manager_c
 blob_manager.upload(local_file_path='/tmp/file')
 ```
 
-## Customized Blob Manager
+## Customizing Blob Manager
 
 You can also implement your own `Blob Manager` if the built-in ones do not meet your requirements. To create a blob manager plugin, one needs to implement a subclass of ``ai_flow.plugin_interface.blob_manager_interface.BlobManager`` to upload and download artifacts. To take configurations upon construction, the subclass should have a `__init__(self, config: Dict)` method. The configurations can be added when someone setup AIFlow to use the custom blob manager.
 

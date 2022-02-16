@@ -2,9 +2,6 @@
 
 ## Workflow Orchestration
 
-A machine learning workflow includes feature engineering, model training, model validation, model serving, 
-model inference, metric monitoring, etc.
-
 The figure below shows a common machine learning workflow:
 
 ![machine learning workflow](images/machine_learning_workflow.png)
@@ -15,14 +12,18 @@ The workflow consists of 4 stages: feature engineering, model training, model va
 3. Model validation validates the metrics of new models from the validation data. 
 4. If the new model's metrics meet the conditions, model inference will use the new model to do inference work from inference data.
 
+These stages could be described as jobs, and each job could be batched or streaming.
+
+### Workflow
+
+A workflow consists of [jobs](#job) and relationships([data dependencies](#data-dependency) and [control dependencies](#control-dependency)) between jobs. A workflow can run regularly or be triggered by [events](#event).
+
 ### Project
+
 A project contains multiple business related workflows.
 
 For example, we can have a project that consists workflows for a recommendation system and another project with 
 workflows for risk controlling system.
-
-### Workflow
-A workflow consists of [jobs](#job) and relationships([data dependencies](#data-dependency) and [control dependencies](#control-dependency)) between jobs. A workflow can run regularly or be triggered by [events](#event).
 
 ### Job
 A Job is the basic unit of execution in workflow. Jobs are arranged into a workflow, and they have dependencies between them in order to express the conditions on which they should run.

@@ -1,6 +1,6 @@
 # Creating Workflows
 
-Each workflow requires at least a Python file to define the workflow and a YAML configuration file. These files will be compiled to an executable workflow at client-side and submitted to AIFlow server to execute.
+Each workflow requires a Python file to define the workflow and a YAML configuration file. The Python file has the same name as the workflow directory, and it will be compiled to an executable workflow at client-side and submitted to AIFlow server to execute.
 
 ## Defining the Workflow
 
@@ -35,7 +35,24 @@ The `user_define_operation` is the basic operation to construct an AINode, which
 The dependencies here is only [control dependency](../concepts.md#Control Dependency) which define the relationships between jobs. AIFlow mainly provides two functions to define the dependencies between jobs.
 
 - action_on_job_status: this function is used to set the behavior of downstream jobs when the status of upstream jobs changes.
-- action_on_events: this function is used to set the behavior of a job when some events happened. The events could be sent from other jobs in the same workflow or external process.
+- action_on_event: this function is used to set the behavior of a job when specific event happened. The event could be sent from other jobs in the same workflow or external process.
+
+The below example shows that `job_1` would be **started** after `job_2` finished and `job_3` would be **restarted** once it receives the specific event.
+
+```python
+from ai_flow import ValueCondition, JobAction
+import ai_flow as af
+
+af.action_on_job_status('job_1', 'job_2')
+af.action_on_event(job_name='job_3',
+                   event_key='UNDEFINED',
+                   event_value="*",
+                   event_type='MODEL_GENERATED',
+                   action=JobAction.RESTART,
+                   value_condition=ValueCondition.EQUALS,
+                   namespace='default',
+                   sender='job_2')
+```
 
 ## Configuring the workflow
 
@@ -43,18 +60,34 @@ Workflow definition need to work with a configuration file. We set the propertie
 
 ### Configuring Jobs
 
-You can configure the type, run interval, or other custom configuration of the job in the YAML file. AIFlow would use the job plugin corresponding to the job type you configured to execute the job. The simplest job config is as follow:
+You can configure the following properties of jobs in the YAML file.
+
+- Job type: AIFlow would use the [job plugin](../plugins/job_plugin.md) corresponding to the job type you configured to execute the job.
+- Job plugin configurations: Each  [job plugin](../plugins/job_plugin.md) has some custom configurations, e.g. `flink_run_args` of `Flink Job Plugin`.
+- Periodicity: run interval of the job, please refer to [this page](./periodic_config.md) to get how to configure the periodicity of jobs.
+
+For instance,
 
 ```yaml
 job_1:
-  job_type: bash
+  job_type: flink
   periodic_config:
     cron: "0 * * * * * *"
+  properties:
+    run_mode: cluster
+    flink_run_args: #The flink run command args(-pym, -pyexec etc.). It's type is List.
+      - -pyexec
+      - /path/to/bin/python # path to your python3.7 executable path
 ```
 
 ### Configuring the Workflow
 
-Except for job-related configurations, you can also do some configurations for the workflow. The workflow configuraions mainly includes periodic configuration or other custom properties. For example,
+Except for job-related configurations, you can also do some configurations for the workflow. You can configure the following properties of the workflow in the YAML file.
+
+* Periodicity: run interval of the job, please refer to [this page](./periodic_config.md) to get how to configure the periodicity of workflows.
+* Custom config: custom configurations that is useful for workflow definition.
+
+For instance,
 
 
 ```yaml
