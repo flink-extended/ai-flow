@@ -33,7 +33,7 @@ from ai_flow.context.project_context import set_current_project_config
 from ai_flow.context.job_context import set_current_job_name, unset_current_job_name
 from ai_flow.client.notification_client import get_notification_client
 from ai_flow.meta.metric_meta import MetricType, MetricMeta, MetricSummary
-from ai_flow.model_center.entity.model_version_stage import ModelVersionStage
+from ai_flow.model_center.entity.model_version_stage import ModelVersionStage, ModelVersionEventType
 from ai_flow.protobuf.message_pb2 import RESOURCE_ALREADY_EXISTS
 from ai_flow.client.ai_flow_client import AIFlowClient
 from ai_flow.endpoint.server.exception import AIFlowException
@@ -427,6 +427,10 @@ class AIFlowClientTestCases(object):
         self.assertEqual(ModelVersionStage.GENERATED, json.loads(events[0].value)['current_stage'])
         self.assertEqual(ModelVersionStage.DEPLOYED, json.loads(events[1].value)['current_stage'])
         self.assertEqual(ModelVersionStage.GENERATED, json.loads(events[2].value)['current_stage'])
+
+        self.assertEqual(ModelVersionEventType.MODEL_GENERATED, events[0].event_type)
+        self.assertEqual(ModelVersionEventType.MODEL_DEPLOYED, events[1].event_type)
+        self.assertEqual(ModelVersionEventType.MODEL_GENERATED, events[2].event_type)
         unset_current_job_name()
 
     def test_get_latest_model_version(self):
