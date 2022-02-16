@@ -76,7 +76,7 @@ message ListMetricMetasResponse {
 message ListMetricSummariesRequest {
     google.protobuf.StringValue metric_name = 1;
     google.protobuf.StringValue metric_key = 2;
-    google.protobuf.StringValue model_version = 3;
+    google.protobuf.Int32Value model_version = 3;
     google.protobuf.Int64Value start_time = 4;
     google.protobuf.Int64Value end_time = 5;
 }

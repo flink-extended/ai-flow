@@ -30,7 +30,7 @@ public class MetricSummary {
     private String metricKey;
     private String metricValue;
     private long metricTimestamp;
-    private String modelVersion;
+    private int modelVersion;
     private String jobExecutionId;
 
     public MetricSummary(
@@ -39,7 +39,7 @@ public class MetricSummary {
             String metricKey,
             String metricValue,
             long metricTimestamp,
-            String modelVersion,
+            int modelVersion,
             String jobExecutionId) {
         this.uuid = uuid;
         this.metricName = metricName;
@@ -90,11 +90,11 @@ public class MetricSummary {
         this.metricTimestamp = metricTimestamp;
     }
 
-    public String getModelVersion() {
+    public int getModelVersion() {
         return modelVersion;
     }
 
-    public void setModelVersion(String modelVersion) {
+    public void setModelVersion(int modelVersion) {
         this.modelVersion = modelVersion;
     }
 

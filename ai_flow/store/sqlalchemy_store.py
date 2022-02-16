@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import datetime
 import logging
 import time
 
@@ -585,13 +586,7 @@ class SqlAlchemyStore(AbstractStore):
                     per_model.name = deleted_character + per_model.name + deleted_character + str(
                         deleted_model_relation_counts + 1)
                     for model_version in per_model.model_version_relation:
-                        deleted_model_version_relation_counts = session.query(SqlModelVersionRelation).filter(
-                            and_(SqlModelVersionRelation.version.like(
-                                deleted_character + model_version.version + deleted_character + '%'),
-                                SqlModelVersionRelation.is_deleted == TRUE)).count()
                         model_version.is_deleted = TRUE
-                        model_version.version = deleted_character + model_version.version + deleted_character + str(
-                            deleted_model_version_relation_counts + 1)
                     model_version_list += per_model.model_version_relation
                 session.add_all(
                     [project] + project.model_relation + model_version_list)
@@ -714,14 +709,7 @@ class SqlAlchemyStore(AbstractStore):
                 model.is_deleted = TRUE
                 model.name = deleted_character + model.name + deleted_character + str(deleted_model_counts + 1)
                 for model_version in model.model_version_relation:
-                    deleted_model_version_counts = session.query(SqlModelVersionRelation).filter(
-                        and_(
-                            SqlModelVersionRelation.version.like(
-                                deleted_character + model_version.version + deleted_character + '%')),
-                        SqlModelVersionRelation.is_deleted == TRUE).count()
                     model_version.is_deleted = TRUE
-                    model_version.version = deleted_character + model_version.version + deleted_character + str(
-                        deleted_model_version_counts + 1)
                 session.add_all([model] + model.model_version_relation)
                 session.flush()
                 return Status.OK
@@ -760,10 +748,18 @@ class SqlAlchemyStore(AbstractStore):
         """
         with self.ManagedSessionMaker() as session:
             try:
-                model_version = MetaToTable.model_version_relation_to_table(version=version,
-                                                                            model_id=model_id,
-                                                                            project_snapshot_id=project_snapshot_id)
-                session.add(model_version)
+                model_version = session.query(SqlModelVersionRelation).filter(
+                    SqlModelVersionRelation.version == version,
+                    SqlModelVersionRelation.model_id == model_id
+                ).first()
+                if model_version is None:
+                    model_version = MetaToTable.model_version_relation_to_table(version=version,
+                                                                                model_id=model_id,
+                                                                                project_snapshot_id=project_snapshot_id)
+                    session.add(model_version)
+                else:
+                    model_version.project_snapshot_id = project_snapshot_id
+                    model_version.is_deleted = "False"
                 session.flush()
                 model_version_meta = ModelVersionRelationMeta(version=version, model_id=model_id,
                                                               project_snapshot_id=project_snapshot_id)
@@ -809,12 +805,7 @@ class SqlAlchemyStore(AbstractStore):
                          SqlModelVersionRelation.is_deleted != TRUE)).first()
                 if model_version is None:
                     return Status.ERROR
-                deleted_model_version_counts = session.query(SqlModelVersionRelation).filter(
-                    and_(SqlModelVersionRelation.version.like(deleted_character + version + deleted_character + '%')),
-                    SqlModelVersionRelation.is_deleted == TRUE).count()
                 model_version.is_deleted = TRUE
-                model_version.version = deleted_character + model_version.version + deleted_character + str(
-                    deleted_model_version_counts + 1)
                 session.flush()
                 return Status.OK
             except sqlalchemy.exc.IntegrityError as e:
@@ -1594,6 +1585,15 @@ class SqlAlchemyStore(AbstractStore):
         return session.query(SqlModelVersion).filter(*conditions).all()
 
     @classmethod
+    def _max_model_version(cls, session, registered_model):
+        conditions = [
+            SqlModelVersion.model_name == registered_model.model_name
+        ]
+        version = session.query(SqlModelVersion).filter(*conditions)\
+            .order_by(SqlModelVersion.model_version.desc()).first()
+        return 1 if version is None else version.model_version+1
+
+    @classmethod
     def _delete_model_version_count(cls, session, model_version):
         model_name = model_version.model_name
         model_version = model_version.model_version
@@ -1622,12 +1622,6 @@ class SqlAlchemyStore(AbstractStore):
         :return: Object of :py:class:`ai_flow.model_center.entity.ModelVersion` created in Model Center.
         """
 
-        def next_version(current_version):
-            if current_version is None:
-                return "1"
-            else:
-                return str(current_version + 1)
-
         with self.ManagedSessionMaker() as session:
             for attempt in range(self.CREATE_RETRY_TIMES):
                 try:
@@ -1635,18 +1629,14 @@ class SqlAlchemyStore(AbstractStore):
                     if sql_registered_model is None:
                         return None
                     else:
-                        model_versions = self._list_sql_model_versions(session, sql_registered_model)
-                        if model_versions is None:
-                            version_num = 0
-                        else:
-                            version_num = len(model_versions)
-                        model_version = next_version(version_num)
+                        model_version = self._max_model_version(session, sql_registered_model)
                         sql_model_version = SqlModelVersion(model_name=model_name,
                                                             model_version=model_version,
                                                             model_path=model_path,
                                                             model_type=model_type,
                                                             version_desc=version_desc,
-                                                            current_stage=get_canonical_stage(current_stage))
+                                                            current_stage=get_canonical_stage(current_stage),
+                                                            create_time=time.time())
                         self._save_to_db(session, [sql_registered_model, sql_model_version])
                         session.flush()
                         return sql_model_version.to_meta_entity()
@@ -1654,7 +1644,7 @@ class SqlAlchemyStore(AbstractStore):
                     logging.info(model_version)
                     more_retries = self.CREATE_RETRY_TIMES - attempt - 1
                     _logger.warning(
-                        'Create model version (model_version=%s) error (model_name=%s). Retrying %s more time%s.',
+                        'Create model version (model_version=%d) error (model_name=%s). Retrying %s more time%s.',
                         model_version, model_name,
                         str(more_retries), 's' if more_retries > 1 else '')
         raise AIFlowException(
@@ -1924,6 +1914,8 @@ class SqlAlchemyStore(AbstractStore):
     def register_metric_summary(self, metric_name, metric_key, metric_value, metric_timestamp, model_version=None,
                                 job_execution_id=None) -> MetricSummary:
         with self.ManagedSessionMaker() as session:
+            if model_version == 0:
+                model_version = None
             try:
                 metric_summary_table = metric_summary_to_table(metric_name, metric_key, metric_value, metric_timestamp,
                                                                model_version, job_execution_id)
@@ -1941,6 +1933,8 @@ class SqlAlchemyStore(AbstractStore):
 
     def update_metric_summary(self, uuid, metric_name=None, metric_key=None, metric_value=None, metric_timestamp=None,
                               model_version=None, job_execution_id=None) -> MetricSummary:
+        if model_version == 0:
+            model_version = None
         with self.ManagedSessionMaker() as session:
             try:
                 metric_summary_table = session.query(SqlMetricSummary).filter(
@@ -1994,6 +1988,8 @@ class SqlAlchemyStore(AbstractStore):
 
     def list_metric_summaries(self, metric_name=None, metric_key=None, model_version=None, start_time=None,
                               end_time=None) -> Union[None, MetricSummary, List[MetricSummary]]:
+        if model_version == 0:
+            model_version = None
         with self.ManagedSessionMaker() as session:
             try:
                 conditions = [

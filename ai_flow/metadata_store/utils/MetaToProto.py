@@ -28,7 +28,7 @@ from ai_flow.protobuf.message_pb2 import DatasetProto, DataTypeProto, \
     SchemaProto, ProjectProto, \
     ModelRelationProto, ModelVersionRelationProto, ModelProto, ModelVersionProto, ArtifactProto, \
     ModelVersionStage, WorkflowMetaProto, WorkflowSnapshotProto
-from ai_flow.endpoint.server import stringValue, int64Value
+from ai_flow.endpoint.server import stringValue, int64Value, doubleValue, int32Value
 
 
 class MetaToProto:
@@ -178,7 +178,7 @@ class MetaToProto:
             return None
         else:
             return ModelVersionRelationProto(
-                version=stringValue(model_version_relation.version),
+                version=int32Value(model_version_relation.version),
                 model_id=int64Value(model_version_relation.model_id),
                 project_snapshot_id=int64Value(model_version_relation.project_snapshot_id))
 
@@ -203,13 +203,15 @@ class MetaToProto:
     def model_version_meta_to_proto(model_version_relation, model_center_detail) -> ModelVersionProto:
         if model_version_relation is not None and model_center_detail is not None:
             return ModelVersionProto(
-                version=stringValue(model_version_relation.version),
+                version=int32Value(model_version_relation.version),
                 model_id=int64Value(model_version_relation.model_id),
                 project_snapshot_id=int64Value(model_version_relation.project_snapshot_id),
                 model_path=stringValue(model_center_detail.model_path),
                 model_type=stringValue(model_center_detail.model_type),
                 version_desc=stringValue(model_center_detail.version_desc),
-                current_stage=model_center_detail.current_stage)
+                current_stage=model_center_detail.current_stage,
+                create_time=doubleValue(model_center_detail.create_time)
+            )
         else:
             return None
 
@@ -217,12 +219,14 @@ class MetaToProto:
     def model_version_store_to_proto(model_version_relation, model_center_detail) -> ModelVersionProto:
         if model_version_relation is not None and model_center_detail is not None:
             return ModelVersionProto(
-                version=stringValue(model_version_relation.version),
+                version=int32Value(model_version_relation.version),
                 model_id=int64Value(model_version_relation.model_id),
                 project_snapshot_id=int64Value(model_version_relation.project_snapshot_id),
                 model_path=stringValue(model_center_detail.model_path),
                 model_type=stringValue(model_center_detail.model_type),
                 version_desc=stringValue(model_center_detail.version_desc),
-                current_stage=ModelVersionStage.Value(model_center_detail.current_stage.upper()))
+                current_stage=ModelVersionStage.Value(model_center_detail.current_stage.upper()),
+                create_time=doubleValue(model_center_detail.create_time)
+            )
         else:
             return None

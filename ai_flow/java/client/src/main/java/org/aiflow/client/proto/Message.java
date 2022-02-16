@@ -7450,19 +7450,19 @@ public final class Message {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.google.protobuf.StringValue version = 1;</code>
+     * <code>.google.protobuf.Int32Value version = 1;</code>
      * @return Whether the version field is set.
      */
     boolean hasVersion();
     /**
-     * <code>.google.protobuf.StringValue version = 1;</code>
+     * <code>.google.protobuf.Int32Value version = 1;</code>
      * @return The version.
      */
-    com.google.protobuf.StringValue getVersion();
+    com.google.protobuf.Int32Value getVersion();
     /**
-     * <code>.google.protobuf.StringValue version = 1;</code>
+     * <code>.google.protobuf.Int32Value version = 1;</code>
      */
-    com.google.protobuf.StringValueOrBuilder getVersionOrBuilder();
+    com.google.protobuf.Int32ValueOrBuilder getVersionOrBuilder();
 
     /**
      * <code>.google.protobuf.Int64Value model_id = 2;</code>
@@ -7540,11 +7540,11 @@ public final class Message {
               done = true;
               break;
             case 10: {
-              com.google.protobuf.StringValue.Builder subBuilder = null;
+              com.google.protobuf.Int32Value.Builder subBuilder = null;
               if (version_ != null) {
                 subBuilder = version_.toBuilder();
               }
-              version_ = input.readMessage(com.google.protobuf.StringValue.parser(), extensionRegistry);
+              version_ = input.readMessage(com.google.protobuf.Int32Value.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(version_);
                 version_ = subBuilder.buildPartial();
@@ -7611,9 +7611,9 @@ public final class Message {
     }
 
     public static final int VERSION_FIELD_NUMBER = 1;
-    private com.google.protobuf.StringValue version_;
+    private com.google.protobuf.Int32Value version_;
     /**
-     * <code>.google.protobuf.StringValue version = 1;</code>
+     * <code>.google.protobuf.Int32Value version = 1;</code>
      * @return Whether the version field is set.
      */
     @java.lang.Override
@@ -7621,18 +7621,18 @@ public final class Message {
       return version_ != null;
     }
     /**
-     * <code>.google.protobuf.StringValue version = 1;</code>
+     * <code>.google.protobuf.Int32Value version = 1;</code>
      * @return The version.
      */
     @java.lang.Override
-    public com.google.protobuf.StringValue getVersion() {
-      return version_ == null ? com.google.protobuf.StringValue.getDefaultInstance() : version_;
+    public com.google.protobuf.Int32Value getVersion() {
+      return version_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : version_;
     }
     /**
-     * <code>.google.protobuf.StringValue version = 1;</code>
+     * <code>.google.protobuf.Int32Value version = 1;</code>
      */
     @java.lang.Override
-    public com.google.protobuf.StringValueOrBuilder getVersionOrBuilder() {
+    public com.google.protobuf.Int32ValueOrBuilder getVersionOrBuilder() {
       return getVersion();
     }
 
@@ -8063,31 +8063,31 @@ public final class Message {
         return this;
       }
 
-      private com.google.protobuf.StringValue version_;
+      private com.google.protobuf.Int32Value version_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder> versionBuilder_;
+          com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder> versionBuilder_;
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        * @return Whether the version field is set.
        */
       public boolean hasVersion() {
         return versionBuilder_ != null || version_ != null;
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        * @return The version.
        */
-      public com.google.protobuf.StringValue getVersion() {
+      public com.google.protobuf.Int32Value getVersion() {
         if (versionBuilder_ == null) {
-          return version_ == null ? com.google.protobuf.StringValue.getDefaultInstance() : version_;
+          return version_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : version_;
         } else {
           return versionBuilder_.getMessage();
         }
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
-      public Builder setVersion(com.google.protobuf.StringValue value) {
+      public Builder setVersion(com.google.protobuf.Int32Value value) {
         if (versionBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -8101,10 +8101,10 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
       public Builder setVersion(
-          com.google.protobuf.StringValue.Builder builderForValue) {
+          com.google.protobuf.Int32Value.Builder builderForValue) {
         if (versionBuilder_ == null) {
           version_ = builderForValue.build();
           onChanged();
@@ -8115,13 +8115,13 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
-      public Builder mergeVersion(com.google.protobuf.StringValue value) {
+      public Builder mergeVersion(com.google.protobuf.Int32Value value) {
         if (versionBuilder_ == null) {
           if (version_ != null) {
             version_ =
-              com.google.protobuf.StringValue.newBuilder(version_).mergeFrom(value).buildPartial();
+              com.google.protobuf.Int32Value.newBuilder(version_).mergeFrom(value).buildPartial();
           } else {
             version_ = value;
           }
@@ -8133,7 +8133,7 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
       public Builder clearVersion() {
         if (versionBuilder_ == null) {
@@ -8147,33 +8147,33 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
-      public com.google.protobuf.StringValue.Builder getVersionBuilder() {
+      public com.google.protobuf.Int32Value.Builder getVersionBuilder() {
         
         onChanged();
         return getVersionFieldBuilder().getBuilder();
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
-      public com.google.protobuf.StringValueOrBuilder getVersionOrBuilder() {
+      public com.google.protobuf.Int32ValueOrBuilder getVersionOrBuilder() {
         if (versionBuilder_ != null) {
           return versionBuilder_.getMessageOrBuilder();
         } else {
           return version_ == null ?
-              com.google.protobuf.StringValue.getDefaultInstance() : version_;
+              com.google.protobuf.Int32Value.getDefaultInstance() : version_;
         }
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder> 
+          com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder> 
           getVersionFieldBuilder() {
         if (versionBuilder_ == null) {
           versionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder>(
+              com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder>(
                   getVersion(),
                   getParentForChildren(),
                   isClean());
@@ -8477,19 +8477,19 @@ public final class Message {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>.google.protobuf.StringValue version = 1;</code>
+     * <code>.google.protobuf.Int32Value version = 1;</code>
      * @return Whether the version field is set.
      */
     boolean hasVersion();
     /**
-     * <code>.google.protobuf.StringValue version = 1;</code>
+     * <code>.google.protobuf.Int32Value version = 1;</code>
      * @return The version.
      */
-    com.google.protobuf.StringValue getVersion();
+    com.google.protobuf.Int32Value getVersion();
     /**
-     * <code>.google.protobuf.StringValue version = 1;</code>
+     * <code>.google.protobuf.Int32Value version = 1;</code>
      */
-    com.google.protobuf.StringValueOrBuilder getVersionOrBuilder();
+    com.google.protobuf.Int32ValueOrBuilder getVersionOrBuilder();
 
     /**
      * <code>.google.protobuf.Int64Value model_id = 2;</code>
@@ -8576,6 +8576,21 @@ public final class Message {
      * @return The currentStage.
      */
     org.aiflow.client.proto.Message.ModelVersionStage getCurrentStage();
+
+    /**
+     * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+     * @return Whether the createTime field is set.
+     */
+    boolean hasCreateTime();
+    /**
+     * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+     * @return The createTime.
+     */
+    com.google.protobuf.DoubleValue getCreateTime();
+    /**
+     * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+     */
+    com.google.protobuf.DoubleValueOrBuilder getCreateTimeOrBuilder();
   }
   /**
    * Protobuf type {@code ai_flow.ModelVersionProto}
@@ -8624,11 +8639,11 @@ public final class Message {
               done = true;
               break;
             case 10: {
-              com.google.protobuf.StringValue.Builder subBuilder = null;
+              com.google.protobuf.Int32Value.Builder subBuilder = null;
               if (version_ != null) {
                 subBuilder = version_.toBuilder();
               }
-              version_ = input.readMessage(com.google.protobuf.StringValue.parser(), extensionRegistry);
+              version_ = input.readMessage(com.google.protobuf.Int32Value.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(version_);
                 version_ = subBuilder.buildPartial();
@@ -8707,6 +8722,19 @@ public final class Message {
               currentStage_ = rawValue;
               break;
             }
+            case 74: {
+              com.google.protobuf.DoubleValue.Builder subBuilder = null;
+              if (createTime_ != null) {
+                subBuilder = createTime_.toBuilder();
+              }
+              createTime_ = input.readMessage(com.google.protobuf.DoubleValue.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(createTime_);
+                createTime_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -8740,9 +8768,9 @@ public final class Message {
     }
 
     public static final int VERSION_FIELD_NUMBER = 1;
-    private com.google.protobuf.StringValue version_;
+    private com.google.protobuf.Int32Value version_;
     /**
-     * <code>.google.protobuf.StringValue version = 1;</code>
+     * <code>.google.protobuf.Int32Value version = 1;</code>
      * @return Whether the version field is set.
      */
     @java.lang.Override
@@ -8750,18 +8778,18 @@ public final class Message {
       return version_ != null;
     }
     /**
-     * <code>.google.protobuf.StringValue version = 1;</code>
+     * <code>.google.protobuf.Int32Value version = 1;</code>
      * @return The version.
      */
     @java.lang.Override
-    public com.google.protobuf.StringValue getVersion() {
-      return version_ == null ? com.google.protobuf.StringValue.getDefaultInstance() : version_;
+    public com.google.protobuf.Int32Value getVersion() {
+      return version_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : version_;
     }
     /**
-     * <code>.google.protobuf.StringValue version = 1;</code>
+     * <code>.google.protobuf.Int32Value version = 1;</code>
      */
     @java.lang.Override
-    public com.google.protobuf.StringValueOrBuilder getVersionOrBuilder() {
+    public com.google.protobuf.Int32ValueOrBuilder getVersionOrBuilder() {
       return getVersion();
     }
 
@@ -8914,6 +8942,32 @@ public final class Message {
       return result == null ? org.aiflow.client.proto.Message.ModelVersionStage.UNRECOGNIZED : result;
     }
 
+    public static final int CREATE_TIME_FIELD_NUMBER = 9;
+    private com.google.protobuf.DoubleValue createTime_;
+    /**
+     * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+     * @return Whether the createTime field is set.
+     */
+    @java.lang.Override
+    public boolean hasCreateTime() {
+      return createTime_ != null;
+    }
+    /**
+     * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+     * @return The createTime.
+     */
+    @java.lang.Override
+    public com.google.protobuf.DoubleValue getCreateTime() {
+      return createTime_ == null ? com.google.protobuf.DoubleValue.getDefaultInstance() : createTime_;
+    }
+    /**
+     * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+     */
+    @java.lang.Override
+    public com.google.protobuf.DoubleValueOrBuilder getCreateTimeOrBuilder() {
+      return getCreateTime();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -8948,6 +9002,9 @@ public final class Message {
       }
       if (currentStage_ != org.aiflow.client.proto.Message.ModelVersionStage.GENERATED.getNumber()) {
         output.writeEnum(8, currentStage_);
+      }
+      if (createTime_ != null) {
+        output.writeMessage(9, getCreateTime());
       }
       unknownFields.writeTo(output);
     }
@@ -8985,6 +9042,10 @@ public final class Message {
       if (currentStage_ != org.aiflow.client.proto.Message.ModelVersionStage.GENERATED.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(8, currentStage_);
+      }
+      if (createTime_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(9, getCreateTime());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -9032,6 +9093,11 @@ public final class Message {
             .equals(other.getVersionDesc())) return false;
       }
       if (currentStage_ != other.currentStage_) return false;
+      if (hasCreateTime() != other.hasCreateTime()) return false;
+      if (hasCreateTime()) {
+        if (!getCreateTime()
+            .equals(other.getCreateTime())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -9069,6 +9135,10 @@ public final class Message {
       }
       hash = (37 * hash) + CURRENT_STAGE_FIELD_NUMBER;
       hash = (53 * hash) + currentStage_;
+      if (hasCreateTime()) {
+        hash = (37 * hash) + CREATE_TIME_FIELD_NUMBER;
+        hash = (53 * hash) + getCreateTime().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -9240,6 +9310,12 @@ public final class Message {
         }
         currentStage_ = 0;
 
+        if (createTimeBuilder_ == null) {
+          createTime_ = null;
+        } else {
+          createTime_ = null;
+          createTimeBuilder_ = null;
+        }
         return this;
       }
 
@@ -9297,6 +9373,11 @@ public final class Message {
           result.versionDesc_ = versionDescBuilder_.build();
         }
         result.currentStage_ = currentStage_;
+        if (createTimeBuilder_ == null) {
+          result.createTime_ = createTime_;
+        } else {
+          result.createTime_ = createTimeBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -9366,6 +9447,9 @@ public final class Message {
         if (other.currentStage_ != 0) {
           setCurrentStageValue(other.getCurrentStageValue());
         }
+        if (other.hasCreateTime()) {
+          mergeCreateTime(other.getCreateTime());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -9395,31 +9479,31 @@ public final class Message {
         return this;
       }
 
-      private com.google.protobuf.StringValue version_;
+      private com.google.protobuf.Int32Value version_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder> versionBuilder_;
+          com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder> versionBuilder_;
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        * @return Whether the version field is set.
        */
       public boolean hasVersion() {
         return versionBuilder_ != null || version_ != null;
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        * @return The version.
        */
-      public com.google.protobuf.StringValue getVersion() {
+      public com.google.protobuf.Int32Value getVersion() {
         if (versionBuilder_ == null) {
-          return version_ == null ? com.google.protobuf.StringValue.getDefaultInstance() : version_;
+          return version_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : version_;
         } else {
           return versionBuilder_.getMessage();
         }
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
-      public Builder setVersion(com.google.protobuf.StringValue value) {
+      public Builder setVersion(com.google.protobuf.Int32Value value) {
         if (versionBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -9433,10 +9517,10 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
       public Builder setVersion(
-          com.google.protobuf.StringValue.Builder builderForValue) {
+          com.google.protobuf.Int32Value.Builder builderForValue) {
         if (versionBuilder_ == null) {
           version_ = builderForValue.build();
           onChanged();
@@ -9447,13 +9531,13 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
-      public Builder mergeVersion(com.google.protobuf.StringValue value) {
+      public Builder mergeVersion(com.google.protobuf.Int32Value value) {
         if (versionBuilder_ == null) {
           if (version_ != null) {
             version_ =
-              com.google.protobuf.StringValue.newBuilder(version_).mergeFrom(value).buildPartial();
+              com.google.protobuf.Int32Value.newBuilder(version_).mergeFrom(value).buildPartial();
           } else {
             version_ = value;
           }
@@ -9465,7 +9549,7 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
       public Builder clearVersion() {
         if (versionBuilder_ == null) {
@@ -9479,33 +9563,33 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
-      public com.google.protobuf.StringValue.Builder getVersionBuilder() {
+      public com.google.protobuf.Int32Value.Builder getVersionBuilder() {
         
         onChanged();
         return getVersionFieldBuilder().getBuilder();
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
-      public com.google.protobuf.StringValueOrBuilder getVersionOrBuilder() {
+      public com.google.protobuf.Int32ValueOrBuilder getVersionOrBuilder() {
         if (versionBuilder_ != null) {
           return versionBuilder_.getMessageOrBuilder();
         } else {
           return version_ == null ?
-              com.google.protobuf.StringValue.getDefaultInstance() : version_;
+              com.google.protobuf.Int32Value.getDefaultInstance() : version_;
         }
       }
       /**
-       * <code>.google.protobuf.StringValue version = 1;</code>
+       * <code>.google.protobuf.Int32Value version = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder> 
+          com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder> 
           getVersionFieldBuilder() {
         if (versionBuilder_ == null) {
           versionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder>(
+              com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder>(
                   getVersion(),
                   getParentForChildren(),
                   isClean());
@@ -10161,6 +10245,125 @@ public final class Message {
         currentStage_ = 0;
         onChanged();
         return this;
+      }
+
+      private com.google.protobuf.DoubleValue createTime_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.google.protobuf.DoubleValue, com.google.protobuf.DoubleValue.Builder, com.google.protobuf.DoubleValueOrBuilder> createTimeBuilder_;
+      /**
+       * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+       * @return Whether the createTime field is set.
+       */
+      public boolean hasCreateTime() {
+        return createTimeBuilder_ != null || createTime_ != null;
+      }
+      /**
+       * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+       * @return The createTime.
+       */
+      public com.google.protobuf.DoubleValue getCreateTime() {
+        if (createTimeBuilder_ == null) {
+          return createTime_ == null ? com.google.protobuf.DoubleValue.getDefaultInstance() : createTime_;
+        } else {
+          return createTimeBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+       */
+      public Builder setCreateTime(com.google.protobuf.DoubleValue value) {
+        if (createTimeBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          createTime_ = value;
+          onChanged();
+        } else {
+          createTimeBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+       */
+      public Builder setCreateTime(
+          com.google.protobuf.DoubleValue.Builder builderForValue) {
+        if (createTimeBuilder_ == null) {
+          createTime_ = builderForValue.build();
+          onChanged();
+        } else {
+          createTimeBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+       */
+      public Builder mergeCreateTime(com.google.protobuf.DoubleValue value) {
+        if (createTimeBuilder_ == null) {
+          if (createTime_ != null) {
+            createTime_ =
+              com.google.protobuf.DoubleValue.newBuilder(createTime_).mergeFrom(value).buildPartial();
+          } else {
+            createTime_ = value;
+          }
+          onChanged();
+        } else {
+          createTimeBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+       */
+      public Builder clearCreateTime() {
+        if (createTimeBuilder_ == null) {
+          createTime_ = null;
+          onChanged();
+        } else {
+          createTime_ = null;
+          createTimeBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+       */
+      public com.google.protobuf.DoubleValue.Builder getCreateTimeBuilder() {
+        
+        onChanged();
+        return getCreateTimeFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+       */
+      public com.google.protobuf.DoubleValueOrBuilder getCreateTimeOrBuilder() {
+        if (createTimeBuilder_ != null) {
+          return createTimeBuilder_.getMessageOrBuilder();
+        } else {
+          return createTime_ == null ?
+              com.google.protobuf.DoubleValue.getDefaultInstance() : createTime_;
+        }
+      }
+      /**
+       * <code>.google.protobuf.DoubleValue create_time = 9;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.google.protobuf.DoubleValue, com.google.protobuf.DoubleValue.Builder, com.google.protobuf.DoubleValueOrBuilder> 
+          getCreateTimeFieldBuilder() {
+        if (createTimeBuilder_ == null) {
+          createTimeBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.google.protobuf.DoubleValue, com.google.protobuf.DoubleValue.Builder, com.google.protobuf.DoubleValueOrBuilder>(
+                  getCreateTime(),
+                  getParentForChildren(),
+                  isClean());
+          createTime_ = null;
+        }
+        return createTimeBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -25317,19 +25520,19 @@ public final class Message {
     com.google.protobuf.StringValueOrBuilder getModelNameOrBuilder();
 
     /**
-     * <code>.google.protobuf.StringValue model_version = 2;</code>
+     * <code>.google.protobuf.Int32Value model_version = 2;</code>
      * @return Whether the modelVersion field is set.
      */
     boolean hasModelVersion();
     /**
-     * <code>.google.protobuf.StringValue model_version = 2;</code>
+     * <code>.google.protobuf.Int32Value model_version = 2;</code>
      * @return The modelVersion.
      */
-    com.google.protobuf.StringValue getModelVersion();
+    com.google.protobuf.Int32Value getModelVersion();
     /**
-     * <code>.google.protobuf.StringValue model_version = 2;</code>
+     * <code>.google.protobuf.Int32Value model_version = 2;</code>
      */
-    com.google.protobuf.StringValueOrBuilder getModelVersionOrBuilder();
+    com.google.protobuf.Int32ValueOrBuilder getModelVersionOrBuilder();
   }
   /**
    * Protobuf type {@code ai_flow.ModelMetaParam}
@@ -25390,11 +25593,11 @@ public final class Message {
               break;
             }
             case 18: {
-              com.google.protobuf.StringValue.Builder subBuilder = null;
+              com.google.protobuf.Int32Value.Builder subBuilder = null;
               if (modelVersion_ != null) {
                 subBuilder = modelVersion_.toBuilder();
               }
-              modelVersion_ = input.readMessage(com.google.protobuf.StringValue.parser(), extensionRegistry);
+              modelVersion_ = input.readMessage(com.google.protobuf.Int32Value.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(modelVersion_);
                 modelVersion_ = subBuilder.buildPartial();
@@ -25461,9 +25664,9 @@ public final class Message {
     }
 
     public static final int MODEL_VERSION_FIELD_NUMBER = 2;
-    private com.google.protobuf.StringValue modelVersion_;
+    private com.google.protobuf.Int32Value modelVersion_;
     /**
-     * <code>.google.protobuf.StringValue model_version = 2;</code>
+     * <code>.google.protobuf.Int32Value model_version = 2;</code>
      * @return Whether the modelVersion field is set.
      */
     @java.lang.Override
@@ -25471,18 +25674,18 @@ public final class Message {
       return modelVersion_ != null;
     }
     /**
-     * <code>.google.protobuf.StringValue model_version = 2;</code>
+     * <code>.google.protobuf.Int32Value model_version = 2;</code>
      * @return The modelVersion.
      */
     @java.lang.Override
-    public com.google.protobuf.StringValue getModelVersion() {
-      return modelVersion_ == null ? com.google.protobuf.StringValue.getDefaultInstance() : modelVersion_;
+    public com.google.protobuf.Int32Value getModelVersion() {
+      return modelVersion_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : modelVersion_;
     }
     /**
-     * <code>.google.protobuf.StringValue model_version = 2;</code>
+     * <code>.google.protobuf.Int32Value model_version = 2;</code>
      */
     @java.lang.Override
-    public com.google.protobuf.StringValueOrBuilder getModelVersionOrBuilder() {
+    public com.google.protobuf.Int32ValueOrBuilder getModelVersionOrBuilder() {
       return getModelVersion();
     }
 
@@ -25950,31 +26153,31 @@ public final class Message {
         return modelNameBuilder_;
       }
 
-      private com.google.protobuf.StringValue modelVersion_;
+      private com.google.protobuf.Int32Value modelVersion_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder> modelVersionBuilder_;
+          com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder> modelVersionBuilder_;
       /**
-       * <code>.google.protobuf.StringValue model_version = 2;</code>
+       * <code>.google.protobuf.Int32Value model_version = 2;</code>
        * @return Whether the modelVersion field is set.
        */
       public boolean hasModelVersion() {
         return modelVersionBuilder_ != null || modelVersion_ != null;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 2;</code>
+       * <code>.google.protobuf.Int32Value model_version = 2;</code>
        * @return The modelVersion.
        */
-      public com.google.protobuf.StringValue getModelVersion() {
+      public com.google.protobuf.Int32Value getModelVersion() {
         if (modelVersionBuilder_ == null) {
-          return modelVersion_ == null ? com.google.protobuf.StringValue.getDefaultInstance() : modelVersion_;
+          return modelVersion_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : modelVersion_;
         } else {
           return modelVersionBuilder_.getMessage();
         }
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 2;</code>
+       * <code>.google.protobuf.Int32Value model_version = 2;</code>
        */
-      public Builder setModelVersion(com.google.protobuf.StringValue value) {
+      public Builder setModelVersion(com.google.protobuf.Int32Value value) {
         if (modelVersionBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -25988,10 +26191,10 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 2;</code>
+       * <code>.google.protobuf.Int32Value model_version = 2;</code>
        */
       public Builder setModelVersion(
-          com.google.protobuf.StringValue.Builder builderForValue) {
+          com.google.protobuf.Int32Value.Builder builderForValue) {
         if (modelVersionBuilder_ == null) {
           modelVersion_ = builderForValue.build();
           onChanged();
@@ -26002,13 +26205,13 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 2;</code>
+       * <code>.google.protobuf.Int32Value model_version = 2;</code>
        */
-      public Builder mergeModelVersion(com.google.protobuf.StringValue value) {
+      public Builder mergeModelVersion(com.google.protobuf.Int32Value value) {
         if (modelVersionBuilder_ == null) {
           if (modelVersion_ != null) {
             modelVersion_ =
-              com.google.protobuf.StringValue.newBuilder(modelVersion_).mergeFrom(value).buildPartial();
+              com.google.protobuf.Int32Value.newBuilder(modelVersion_).mergeFrom(value).buildPartial();
           } else {
             modelVersion_ = value;
           }
@@ -26020,7 +26223,7 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 2;</code>
+       * <code>.google.protobuf.Int32Value model_version = 2;</code>
        */
       public Builder clearModelVersion() {
         if (modelVersionBuilder_ == null) {
@@ -26034,33 +26237,33 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 2;</code>
+       * <code>.google.protobuf.Int32Value model_version = 2;</code>
        */
-      public com.google.protobuf.StringValue.Builder getModelVersionBuilder() {
+      public com.google.protobuf.Int32Value.Builder getModelVersionBuilder() {
         
         onChanged();
         return getModelVersionFieldBuilder().getBuilder();
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 2;</code>
+       * <code>.google.protobuf.Int32Value model_version = 2;</code>
        */
-      public com.google.protobuf.StringValueOrBuilder getModelVersionOrBuilder() {
+      public com.google.protobuf.Int32ValueOrBuilder getModelVersionOrBuilder() {
         if (modelVersionBuilder_ != null) {
           return modelVersionBuilder_.getMessageOrBuilder();
         } else {
           return modelVersion_ == null ?
-              com.google.protobuf.StringValue.getDefaultInstance() : modelVersion_;
+              com.google.protobuf.Int32Value.getDefaultInstance() : modelVersion_;
         }
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 2;</code>
+       * <code>.google.protobuf.Int32Value model_version = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder> 
+          com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder> 
           getModelVersionFieldBuilder() {
         if (modelVersionBuilder_ == null) {
           modelVersionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder>(
+              com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder>(
                   getModelVersion(),
                   getParentForChildren(),
                   isClean());
@@ -27777,16 +27980,10 @@ public final class Message {
         getModelNameBytes();
 
     /**
-     * <code>string model_version = 2;</code>
+     * <code>int32 model_version = 2;</code>
      * @return The modelVersion.
      */
-    java.lang.String getModelVersion();
-    /**
-     * <code>string model_version = 2;</code>
-     * @return The bytes for modelVersion.
-     */
-    com.google.protobuf.ByteString
-        getModelVersionBytes();
+    int getModelVersion();
 
     /**
      * <code>.google.protobuf.StringValue model_path = 3;</code>
@@ -27854,6 +28051,12 @@ public final class Message {
      * @return The currentStage.
      */
     org.aiflow.client.proto.Message.ModelVersionStage getCurrentStage();
+
+    /**
+     * <code>double create_time = 9;</code>
+     * @return The createTime.
+     */
+    double getCreateTime();
   }
   /**
    * Protobuf type {@code ai_flow.ModelVersionMeta}
@@ -27869,7 +28072,6 @@ public final class Message {
     }
     private ModelVersionMeta() {
       modelName_ = "";
-      modelVersion_ = "";
       versionStatus_ = 0;
       currentStage_ = 0;
     }
@@ -27910,10 +28112,9 @@ public final class Message {
               modelName_ = s;
               break;
             }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 16: {
 
-              modelVersion_ = s;
+              modelVersion_ = input.readInt32();
               break;
             }
             case 26: {
@@ -27965,6 +28166,11 @@ public final class Message {
               int rawValue = input.readEnum();
 
               currentStage_ = rawValue;
+              break;
+            }
+            case 73: {
+
+              createTime_ = input.readDouble();
               break;
             }
             default: {
@@ -28038,41 +28244,14 @@ public final class Message {
     }
 
     public static final int MODEL_VERSION_FIELD_NUMBER = 2;
-    private volatile java.lang.Object modelVersion_;
+    private int modelVersion_;
     /**
-     * <code>string model_version = 2;</code>
+     * <code>int32 model_version = 2;</code>
      * @return The modelVersion.
      */
     @java.lang.Override
-    public java.lang.String getModelVersion() {
-      java.lang.Object ref = modelVersion_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        modelVersion_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string model_version = 2;</code>
-     * @return The bytes for modelVersion.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getModelVersionBytes() {
-      java.lang.Object ref = modelVersion_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        modelVersion_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public int getModelVersion() {
+      return modelVersion_;
     }
 
     public static final int MODEL_PATH_FIELD_NUMBER = 3;
@@ -28191,6 +28370,17 @@ public final class Message {
       return result == null ? org.aiflow.client.proto.Message.ModelVersionStage.UNRECOGNIZED : result;
     }
 
+    public static final int CREATE_TIME_FIELD_NUMBER = 9;
+    private double createTime_;
+    /**
+     * <code>double create_time = 9;</code>
+     * @return The createTime.
+     */
+    @java.lang.Override
+    public double getCreateTime() {
+      return createTime_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -28208,8 +28398,8 @@ public final class Message {
       if (!getModelNameBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, modelName_);
       }
-      if (!getModelVersionBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, modelVersion_);
+      if (modelVersion_ != 0) {
+        output.writeInt32(2, modelVersion_);
       }
       if (modelPath_ != null) {
         output.writeMessage(3, getModelPath());
@@ -28226,6 +28416,9 @@ public final class Message {
       if (currentStage_ != org.aiflow.client.proto.Message.ModelVersionStage.GENERATED.getNumber()) {
         output.writeEnum(8, currentStage_);
       }
+      if (createTime_ != 0D) {
+        output.writeDouble(9, createTime_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -28238,8 +28431,9 @@ public final class Message {
       if (!getModelNameBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, modelName_);
       }
-      if (!getModelVersionBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, modelVersion_);
+      if (modelVersion_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, modelVersion_);
       }
       if (modelPath_ != null) {
         size += com.google.protobuf.CodedOutputStream
@@ -28261,6 +28455,10 @@ public final class Message {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(8, currentStage_);
       }
+      if (createTime_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(9, createTime_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -28278,8 +28476,8 @@ public final class Message {
 
       if (!getModelName()
           .equals(other.getModelName())) return false;
-      if (!getModelVersion()
-          .equals(other.getModelVersion())) return false;
+      if (getModelVersion()
+          != other.getModelVersion()) return false;
       if (hasModelPath() != other.hasModelPath()) return false;
       if (hasModelPath()) {
         if (!getModelPath()
@@ -28297,6 +28495,9 @@ public final class Message {
       }
       if (versionStatus_ != other.versionStatus_) return false;
       if (currentStage_ != other.currentStage_) return false;
+      if (java.lang.Double.doubleToLongBits(getCreateTime())
+          != java.lang.Double.doubleToLongBits(
+              other.getCreateTime())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -28311,7 +28512,7 @@ public final class Message {
       hash = (37 * hash) + MODEL_NAME_FIELD_NUMBER;
       hash = (53 * hash) + getModelName().hashCode();
       hash = (37 * hash) + MODEL_VERSION_FIELD_NUMBER;
-      hash = (53 * hash) + getModelVersion().hashCode();
+      hash = (53 * hash) + getModelVersion();
       if (hasModelPath()) {
         hash = (37 * hash) + MODEL_PATH_FIELD_NUMBER;
         hash = (53 * hash) + getModelPath().hashCode();
@@ -28328,6 +28529,9 @@ public final class Message {
       hash = (53 * hash) + versionStatus_;
       hash = (37 * hash) + CURRENT_STAGE_FIELD_NUMBER;
       hash = (53 * hash) + currentStage_;
+      hash = (37 * hash) + CREATE_TIME_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getCreateTime()));
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -28463,7 +28667,7 @@ public final class Message {
         super.clear();
         modelName_ = "";
 
-        modelVersion_ = "";
+        modelVersion_ = 0;
 
         if (modelPathBuilder_ == null) {
           modelPath_ = null;
@@ -28486,6 +28690,8 @@ public final class Message {
         versionStatus_ = 0;
 
         currentStage_ = 0;
+
+        createTime_ = 0D;
 
         return this;
       }
@@ -28532,6 +28738,7 @@ public final class Message {
         }
         result.versionStatus_ = versionStatus_;
         result.currentStage_ = currentStage_;
+        result.createTime_ = createTime_;
         onBuilt();
         return result;
       }
@@ -28584,9 +28791,8 @@ public final class Message {
           modelName_ = other.modelName_;
           onChanged();
         }
-        if (!other.getModelVersion().isEmpty()) {
-          modelVersion_ = other.modelVersion_;
-          onChanged();
+        if (other.getModelVersion() != 0) {
+          setModelVersion(other.getModelVersion());
         }
         if (other.hasModelPath()) {
           mergeModelPath(other.getModelPath());
@@ -28602,6 +28808,9 @@ public final class Message {
         }
         if (other.currentStage_ != 0) {
           setCurrentStageValue(other.getCurrentStageValue());
+        }
+        if (other.getCreateTime() != 0D) {
+          setCreateTime(other.getCreateTime());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -28708,78 +28917,33 @@ public final class Message {
         return this;
       }
 
-      private java.lang.Object modelVersion_ = "";
+      private int modelVersion_ ;
       /**
-       * <code>string model_version = 2;</code>
+       * <code>int32 model_version = 2;</code>
        * @return The modelVersion.
        */
-      public java.lang.String getModelVersion() {
-        java.lang.Object ref = modelVersion_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          modelVersion_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public int getModelVersion() {
+        return modelVersion_;
       }
       /**
-       * <code>string model_version = 2;</code>
-       * @return The bytes for modelVersion.
-       */
-      public com.google.protobuf.ByteString
-          getModelVersionBytes() {
-        java.lang.Object ref = modelVersion_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          modelVersion_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string model_version = 2;</code>
+       * <code>int32 model_version = 2;</code>
        * @param value The modelVersion to set.
        * @return This builder for chaining.
        */
-      public Builder setModelVersion(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setModelVersion(int value) {
+        
         modelVersion_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string model_version = 2;</code>
+       * <code>int32 model_version = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearModelVersion() {
         
-        modelVersion_ = getDefaultInstance().getModelVersion();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string model_version = 2;</code>
-       * @param value The bytes for modelVersion to set.
-       * @return This builder for chaining.
-       */
-      public Builder setModelVersionBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        modelVersion_ = value;
+        modelVersion_ = 0;
         onChanged();
         return this;
       }
@@ -29245,6 +29409,37 @@ public final class Message {
       public Builder clearCurrentStage() {
         
         currentStage_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double createTime_ ;
+      /**
+       * <code>double create_time = 9;</code>
+       * @return The createTime.
+       */
+      @java.lang.Override
+      public double getCreateTime() {
+        return createTime_;
+      }
+      /**
+       * <code>double create_time = 9;</code>
+       * @param value The createTime to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCreateTime(double value) {
+        
+        createTime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double create_time = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCreateTime() {
+        
+        createTime_ = 0D;
         onChanged();
         return this;
       }
@@ -34539,19 +34734,19 @@ public final class Message {
     com.google.protobuf.Int64ValueOrBuilder getMetricTimestampOrBuilder();
 
     /**
-     * <code>.google.protobuf.StringValue model_version = 6;</code>
+     * <code>.google.protobuf.Int32Value model_version = 6;</code>
      * @return Whether the modelVersion field is set.
      */
     boolean hasModelVersion();
     /**
-     * <code>.google.protobuf.StringValue model_version = 6;</code>
+     * <code>.google.protobuf.Int32Value model_version = 6;</code>
      * @return The modelVersion.
      */
-    com.google.protobuf.StringValue getModelVersion();
+    com.google.protobuf.Int32Value getModelVersion();
     /**
-     * <code>.google.protobuf.StringValue model_version = 6;</code>
+     * <code>.google.protobuf.Int32Value model_version = 6;</code>
      */
-    com.google.protobuf.StringValueOrBuilder getModelVersionOrBuilder();
+    com.google.protobuf.Int32ValueOrBuilder getModelVersionOrBuilder();
 
     /**
      * <code>.google.protobuf.StringValue job_execution_id = 7;</code>
@@ -34671,11 +34866,11 @@ public final class Message {
               break;
             }
             case 50: {
-              com.google.protobuf.StringValue.Builder subBuilder = null;
+              com.google.protobuf.Int32Value.Builder subBuilder = null;
               if (modelVersion_ != null) {
                 subBuilder = modelVersion_.toBuilder();
               }
-              modelVersion_ = input.readMessage(com.google.protobuf.StringValue.parser(), extensionRegistry);
+              modelVersion_ = input.readMessage(com.google.protobuf.Int32Value.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(modelVersion_);
                 modelVersion_ = subBuilder.buildPartial();
@@ -34844,9 +35039,9 @@ public final class Message {
     }
 
     public static final int MODEL_VERSION_FIELD_NUMBER = 6;
-    private com.google.protobuf.StringValue modelVersion_;
+    private com.google.protobuf.Int32Value modelVersion_;
     /**
-     * <code>.google.protobuf.StringValue model_version = 6;</code>
+     * <code>.google.protobuf.Int32Value model_version = 6;</code>
      * @return Whether the modelVersion field is set.
      */
     @java.lang.Override
@@ -34854,18 +35049,18 @@ public final class Message {
       return modelVersion_ != null;
     }
     /**
-     * <code>.google.protobuf.StringValue model_version = 6;</code>
+     * <code>.google.protobuf.Int32Value model_version = 6;</code>
      * @return The modelVersion.
      */
     @java.lang.Override
-    public com.google.protobuf.StringValue getModelVersion() {
-      return modelVersion_ == null ? com.google.protobuf.StringValue.getDefaultInstance() : modelVersion_;
+    public com.google.protobuf.Int32Value getModelVersion() {
+      return modelVersion_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : modelVersion_;
     }
     /**
-     * <code>.google.protobuf.StringValue model_version = 6;</code>
+     * <code>.google.protobuf.Int32Value model_version = 6;</code>
      */
     @java.lang.Override
-    public com.google.protobuf.StringValueOrBuilder getModelVersionOrBuilder() {
+    public com.google.protobuf.Int32ValueOrBuilder getModelVersionOrBuilder() {
       return getModelVersion();
     }
 
@@ -35885,31 +36080,31 @@ public final class Message {
         return metricTimestampBuilder_;
       }
 
-      private com.google.protobuf.StringValue modelVersion_;
+      private com.google.protobuf.Int32Value modelVersion_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder> modelVersionBuilder_;
+          com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder> modelVersionBuilder_;
       /**
-       * <code>.google.protobuf.StringValue model_version = 6;</code>
+       * <code>.google.protobuf.Int32Value model_version = 6;</code>
        * @return Whether the modelVersion field is set.
        */
       public boolean hasModelVersion() {
         return modelVersionBuilder_ != null || modelVersion_ != null;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 6;</code>
+       * <code>.google.protobuf.Int32Value model_version = 6;</code>
        * @return The modelVersion.
        */
-      public com.google.protobuf.StringValue getModelVersion() {
+      public com.google.protobuf.Int32Value getModelVersion() {
         if (modelVersionBuilder_ == null) {
-          return modelVersion_ == null ? com.google.protobuf.StringValue.getDefaultInstance() : modelVersion_;
+          return modelVersion_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : modelVersion_;
         } else {
           return modelVersionBuilder_.getMessage();
         }
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 6;</code>
+       * <code>.google.protobuf.Int32Value model_version = 6;</code>
        */
-      public Builder setModelVersion(com.google.protobuf.StringValue value) {
+      public Builder setModelVersion(com.google.protobuf.Int32Value value) {
         if (modelVersionBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -35923,10 +36118,10 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 6;</code>
+       * <code>.google.protobuf.Int32Value model_version = 6;</code>
        */
       public Builder setModelVersion(
-          com.google.protobuf.StringValue.Builder builderForValue) {
+          com.google.protobuf.Int32Value.Builder builderForValue) {
         if (modelVersionBuilder_ == null) {
           modelVersion_ = builderForValue.build();
           onChanged();
@@ -35937,13 +36132,13 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 6;</code>
+       * <code>.google.protobuf.Int32Value model_version = 6;</code>
        */
-      public Builder mergeModelVersion(com.google.protobuf.StringValue value) {
+      public Builder mergeModelVersion(com.google.protobuf.Int32Value value) {
         if (modelVersionBuilder_ == null) {
           if (modelVersion_ != null) {
             modelVersion_ =
-              com.google.protobuf.StringValue.newBuilder(modelVersion_).mergeFrom(value).buildPartial();
+              com.google.protobuf.Int32Value.newBuilder(modelVersion_).mergeFrom(value).buildPartial();
           } else {
             modelVersion_ = value;
           }
@@ -35955,7 +36150,7 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 6;</code>
+       * <code>.google.protobuf.Int32Value model_version = 6;</code>
        */
       public Builder clearModelVersion() {
         if (modelVersionBuilder_ == null) {
@@ -35969,33 +36164,33 @@ public final class Message {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 6;</code>
+       * <code>.google.protobuf.Int32Value model_version = 6;</code>
        */
-      public com.google.protobuf.StringValue.Builder getModelVersionBuilder() {
+      public com.google.protobuf.Int32Value.Builder getModelVersionBuilder() {
         
         onChanged();
         return getModelVersionFieldBuilder().getBuilder();
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 6;</code>
+       * <code>.google.protobuf.Int32Value model_version = 6;</code>
        */
-      public com.google.protobuf.StringValueOrBuilder getModelVersionOrBuilder() {
+      public com.google.protobuf.Int32ValueOrBuilder getModelVersionOrBuilder() {
         if (modelVersionBuilder_ != null) {
           return modelVersionBuilder_.getMessageOrBuilder();
         } else {
           return modelVersion_ == null ?
-              com.google.protobuf.StringValue.getDefaultInstance() : modelVersion_;
+              com.google.protobuf.Int32Value.getDefaultInstance() : modelVersion_;
         }
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 6;</code>
+       * <code>.google.protobuf.Int32Value model_version = 6;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder> 
+          com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder> 
           getModelVersionFieldBuilder() {
         if (modelVersionBuilder_ == null) {
           modelVersionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder>(
+              com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder>(
                   getModelVersion(),
                   getParentForChildren(),
                   isClean());
@@ -36371,175 +36566,176 @@ public final class Message {
       "\022\014\n\004uuid\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\022/\n\nproject_" +
       "id\030\003 \001(\0132\033.google.protobuf.Int64Value\0220\n" +
       "\nmodel_desc\030\004 \001(\0132\034.google.protobuf.Stri" +
-      "ngValue\"\263\001\n\031ModelVersionRelationProto\022-\n" +
-      "\007version\030\001 \001(\0132\034.google.protobuf.StringV" +
-      "alue\022-\n\010model_id\030\002 \001(\0132\033.google.protobuf" +
-      ".Int64Value\0228\n\023project_snapshot_id\030\003 \001(\013" +
-      "2\033.google.protobuf.Int64Value\"\366\002\n\021ModelV" +
-      "ersionProto\022-\n\007version\030\001 \001(\0132\034.google.pr" +
-      "otobuf.StringValue\022-\n\010model_id\030\002 \001(\0132\033.g" +
-      "oogle.protobuf.Int64Value\0228\n\023project_sna" +
-      "pshot_id\030\003 \001(\0132\033.google.protobuf.Int64Va" +
-      "lue\0220\n\nmodel_path\030\004 \001(\0132\034.google.protobu" +
-      "f.StringValue\0220\n\nmodel_type\030\006 \001(\0132\034.goog" +
-      "le.protobuf.StringValue\0222\n\014version_desc\030" +
-      "\007 \001(\0132\034.google.protobuf.StringValue\0221\n\rc" +
-      "urrent_stage\030\010 \001(\0162\032.ai_flow.ModelVersio" +
-      "nStage\"\326\004\n\010JobProto\022\014\n\004uuid\030\001 \001(\003\022\014\n\004nam" +
-      "e\030\002 \001(\t\022:\n\025workflow_execution_id\030\003 \001(\0132\033" +
-      ".google.protobuf.Int64Value\022&\n\tjob_state" +
-      "\030\004 \001(\0162\023.ai_flow.StateProto\0225\n\npropertie" +
-      "s\030\005 \003(\0132!.ai_flow.JobProto.PropertiesEnt" +
-      "ry\022,\n\006job_id\030\006 \001(\0132\034.google.protobuf.Str" +
-      "ingValue\022/\n\nstart_time\030\007 \001(\0132\033.google.pr" +
-      "otobuf.Int64Value\022-\n\010end_time\030\010 \001(\0132\033.go" +
-      "ogle.protobuf.Int64Value\022-\n\007log_uri\030\t \001(" +
-      "\0132\034.google.protobuf.StringValue\022/\n\tsigna" +
-      "ture\030\n \001(\0132\034.google.protobuf.StringValue" +
-      "\022;\n\022workflow_execution\030\013 \001(\0132\037.ai_flow.W" +
-      "orkflowExecutionProto\0225\n\017execution_label" +
-      "\030\014 \001(\0132\034.google.protobuf.StringValue\0321\n\017" +
-      "PropertiesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 " +
-      "\001(\t:\0028\001\"\342\001\n\rWorkflowProto\022\014\n\004uuid\030\001 \001(\003\022" +
-      "\014\n\004name\030\002 \001(\t\0223\n\rworkflow_json\030\003 \001(\0132\034.g" +
-      "oogle.protobuf.StringValue\022:\n\nproperties" +
-      "\030\004 \003(\0132&.ai_flow.WorkflowProto.Propertie" +
-      "sEntry\022\021\n\tnamespace\030\005 \001(\t\0321\n\017PropertiesE" +
-      "ntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\357\004\n" +
-      "\026WorkflowExecutionProto\022\014\n\004uuid\030\001 \001(\003\022\014\n" +
-      "\004name\030\002 \001(\t\022/\n\nproject_id\030\003 \001(\0132\033.google" +
-      ".protobuf.Int64Value\022,\n\017execution_state\030" +
-      "\004 \001(\0162\023.ai_flow.StateProto\022C\n\nproperties" +
-      "\030\005 \003(\0132/.ai_flow.WorkflowExecutionProto." +
-      "PropertiesEntry\022/\n\nstart_time\030\006 \001(\0132\033.go" +
-      "ogle.protobuf.Int64Value\022-\n\010end_time\030\007 \001" +
-      "(\0132\033.google.protobuf.Int64Value\022-\n\007log_u" +
-      "ri\030\010 \001(\0132\034.google.protobuf.StringValue\0223" +
-      "\n\rworkflow_json\030\t \001(\0132\034.google.protobuf." +
-      "StringValue\022/\n\tsignature\030\n \001(\0132\034.google." +
-      "protobuf.StringValue\022\024\n\014execution_id\030\013 \001" +
-      "(\t\022(\n\010workflow\030\014 \001(\0132\026.ai_flow.WorkflowP" +
-      "roto\022-\n\007context\030\r \001(\0132\034.google.protobuf." +
-      "StringValue\0321\n\017PropertiesEntry\022\013\n\003key\030\001 " +
-      "\001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\303\001\n\014ProjectProto\022" +
-      "\014\n\004uuid\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\0229\n\npropertie" +
-      "s\030\003 \003(\0132%.ai_flow.ProjectProto.Propertie" +
-      "sEntry\022)\n\003uri\030\004 \001(\0132\034.google.protobuf.St" +
-      "ringValue\0321\n\017PropertiesEntry\022\013\n\003key\030\001 \001(" +
-      "\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\210\003\n\021WorkflowMetaPro" +
-      "to\022\014\n\004uuid\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\022/\n\nprojec" +
-      "t_id\030\003 \001(\0132\033.google.protobuf.Int64Value\022" +
-      ">\n\nproperties\030\004 \003(\0132*.ai_flow.WorkflowMe" +
-      "taProto.PropertiesEntry\0220\n\013create_time\030\005" +
-      " \001(\0132\033.google.protobuf.Int64Value\0220\n\013upd" +
-      "ate_time\030\006 \001(\0132\033.google.protobuf.Int64Va" +
-      "lue\022\"\n\032context_extractor_in_bytes\030\007 \001(\014\022" +
-      "+\n\005graph\030\010 \001(\0132\034.google.protobuf.StringV" +
-      "alue\0321\n\017PropertiesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005" +
-      "value\030\002 \001(\t:\0028\001\"\345\001\n\025WorkflowSnapshotProt" +
-      "o\022\014\n\004uuid\030\001 \001(\003\0220\n\013workflow_id\030\002 \001(\0132\033.g" +
-      "oogle.protobuf.Int64Value\022)\n\003uri\030\003 \001(\0132\034" +
-      ".google.protobuf.StringValue\022/\n\tsignatur" +
-      "e\030\004 \001(\0132\034.google.protobuf.StringValue\0220\n" +
-      "\013create_time\030\005 \001(\0132\033.google.protobuf.Int" +
-      "64Value\"\221\003\n\rArtifactProto\022\014\n\004uuid\030\001 \001(\003\022" +
-      "\014\n\004name\030\002 \001(\t\022:\n\nproperties\030\003 \003(\0132&.ai_f" +
-      "low.ArtifactProto.PropertiesEntry\0223\n\rart" +
-      "ifact_type\030\004 \001(\0132\034.google.protobuf.Strin" +
-      "gValue\022)\n\003uri\030\005 \001(\0132\034.google.protobuf.St" +
-      "ringValue\0221\n\013description\030\006 \001(\0132\034.google." +
-      "protobuf.StringValue\0220\n\013create_time\030\007 \001(" +
-      "\0132\033.google.protobuf.Int64Value\0220\n\013update" +
-      "_time\030\010 \001(\0132\033.google.protobuf.Int64Value" +
-      "\0321\n\017PropertiesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005valu" +
-      "e\030\002 \001(\t:\0028\001\"z\n\024RegisteredModelParam\0220\n\nm" +
-      "odel_name\030\001 \001(\0132\034.google.protobuf.String" +
-      "Value\0220\n\nmodel_desc\030\002 \001(\0132\034.google.proto" +
-      "buf.StringValue\"\336\001\n\021ModelVersionParam\0220\n" +
-      "\nmodel_path\030\001 \001(\0132\034.google.protobuf.Stri" +
-      "ngValue\0220\n\nmodel_type\030\002 \001(\0132\034.google.pro" +
-      "tobuf.StringValue\0222\n\014version_desc\030\003 \001(\0132" +
-      "\034.google.protobuf.StringValue\0221\n\rcurrent" +
-      "_stage\030\004 \001(\0162\032.ai_flow.ModelVersionStage" +
-      "\"w\n\016ModelMetaParam\0220\n\nmodel_name\030\001 \001(\0132\034" +
-      ".google.protobuf.StringValue\0223\n\rmodel_ve" +
-      "rsion\030\002 \001(\0132\034.google.protobuf.StringValu" +
-      "e\"A\n\010Response\022\023\n\013return_code\030\001 \001(\t\022\022\n\nre" +
-      "turn_msg\030\002 \001(\t\022\014\n\004data\030\003 \001(\t\"[\n\023Register" +
-      "edModelMeta\022\022\n\nmodel_name\030\001 \001(\t\0220\n\nmodel" +
-      "_desc\030\002 \001(\0132\034.google.protobuf.StringValu" +
-      "e\"\275\002\n\020ModelVersionMeta\022\022\n\nmodel_name\030\001 \001" +
-      "(\t\022\025\n\rmodel_version\030\002 \001(\t\0220\n\nmodel_path\030" +
-      "\003 \001(\0132\034.google.protobuf.StringValue\0220\n\nm" +
-      "odel_type\030\005 \001(\0132\034.google.protobuf.String" +
-      "Value\0222\n\014version_desc\030\006 \001(\0132\034.google.pro" +
-      "tobuf.StringValue\0223\n\016version_status\030\007 \001(" +
-      "\0162\033.ai_flow.ModelVersionStatus\0221\n\rcurren" +
-      "t_stage\030\010 \001(\0162\032.ai_flow.ModelVersionStag" +
-      "e\"\210\001\n\025RegisteredModelDetail\0226\n\020registere" +
-      "d_model\030\001 \001(\0132\034.ai_flow.RegisteredModelM" +
-      "eta\0227\n\024latest_model_version\030\002 \001(\0132\031.ai_f" +
-      "low.ModelVersionMeta\"O\n\024RegisteredModelM" +
-      "etas\0227\n\021registered_models\030\001 \003(\0132\034.ai_flo" +
-      "w.RegisteredModelMeta\"J\n\013ResultProto\022$\n\006" +
-      "status\030\001 \001(\0162\024.ai_flow.StatusProto\022\025\n\rer" +
-      "ror_message\030\002 \001(\t\"\230\005\n\017MetricMetaProto\0221\n" +
-      "\013metric_name\030\001 \001(\0132\034.google.protobuf.Str" +
-      "ingValue\022-\n\013metric_type\030\002 \001(\0162\030.ai_flow." +
-      "MetricTypeProto\0221\n\013metric_desc\030\003 \001(\0132\034.g" +
-      "oogle.protobuf.StringValue\0222\n\014project_na" +
-      "me\030\004 \001(\0132\034.google.protobuf.StringValue\0222" +
-      "\n\014dataset_name\030\005 \001(\0132\034.google.protobuf.S" +
-      "tringValue\0220\n\nmodel_name\030\006 \001(\0132\034.google." +
-      "protobuf.StringValue\022.\n\010job_name\030\007 \001(\0132\034" +
-      ".google.protobuf.StringValue\022/\n\nstart_ti" +
-      "me\030\010 \001(\0132\033.google.protobuf.Int64Value\022-\n" +
-      "\010end_time\030\t \001(\0132\033.google.protobuf.Int64V" +
-      "alue\022)\n\003uri\030\n \001(\0132\034.google.protobuf.Stri" +
-      "ngValue\022*\n\004tags\030\013 \001(\0132\034.google.protobuf." +
-      "StringValue\022<\n\nproperties\030\014 \003(\0132(.ai_flo" +
-      "w.MetricMetaProto.PropertiesEntry\0321\n\017Pro" +
-      "pertiesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t" +
-      ":\0028\001\"\337\002\n\022MetricSummaryProto\022\014\n\004uuid\030\001 \001(" +
-      "\003\0221\n\013metric_name\030\002 \001(\0132\034.google.protobuf" +
-      ".StringValue\0220\n\nmetric_key\030\003 \001(\0132\034.googl" +
-      "e.protobuf.StringValue\0222\n\014metric_value\030\004" +
-      " \001(\0132\034.google.protobuf.StringValue\0225\n\020me" +
-      "tric_timestamp\030\005 \001(\0132\033.google.protobuf.I" +
-      "nt64Value\0223\n\rmodel_version\030\006 \001(\0132\034.googl" +
-      "e.protobuf.StringValue\0226\n\020job_execution_" +
-      "id\030\007 \001(\0132\034.google.protobuf.StringValue*\300" +
-      "\003\n\nReturnCode\022\013\n\007SUCCESS\020\000\022\022\n\016INTERNAL_E" +
-      "RROR\020\001\022\033\n\027TEMPORARILY_UNAVAILABLE\020\002\022\014\n\010I" +
-      "O_ERROR\020\003\022\017\n\013BAD_REQUEST\020\004\022\034\n\027INVALID_PA" +
-      "RAMETER_VALUE\020\350\007\022\027\n\022ENDPOINT_NOT_FOUND\020\351" +
-      "\007\022\026\n\021MALFORMED_REQUEST\020\352\007\022\022\n\rINVALID_STA" +
-      "TE\020\353\007\022\026\n\021PERMISSION_DENIED\020\354\007\022\025\n\020FEATURE" +
-      "_DISABLED\020\355\007\022\032\n\025CUSTOMER_UNAUTHORIZED\020\356\007" +
-      "\022\033\n\026REQUEST_LIMIT_EXCEEDED\020\357\007\022\034\n\027RESOURC" +
-      "E_ALREADY_EXISTS\020\321\017\022\034\n\027RESOURCE_DOES_NOT" +
-      "_EXIST\020\322\017\022\023\n\016QUOTA_EXCEEDED\020\271\027\022\034\n\027MAX_BL" +
-      "OCK_SIZE_EXCEEDED\020\272\027\022\033\n\026MAX_READ_SIZE_EX" +
-      "CEEDED\020\273\027* \n\013StatusProto\022\006\n\002OK\020\000\022\t\n\005ERRO" +
-      "R\020\001*\326\001\n\rDataTypeProto\022\031\n\025DATA_TYPE_UNSPE" +
-      "CIFIED\020\000\022\t\n\005INT32\020\001\022\t\n\005INT64\020\002\022\013\n\007FLOAT3" +
-      "2\020\003\022\013\n\007FLOAT64\020\004\022\n\n\006STRING\020\005\022\016\n\nINT32ARR" +
-      "AY\020\006\022\016\n\nINT64ARRAY\020\007\022\020\n\014FlOAT32ARRAY\020\010\022\020" +
-      "\n\014FLOAT64ARRAY\020\t\022\017\n\013STRINGARRAY\020\n\022\t\n\005BYT" +
-      "ES\020\013\022\016\n\nBYTESARRAY\020\014*{\n\nStateProto\022\025\n\021ST" +
-      "ATE_UNSPECIFIED\020\000\022\010\n\004INIT\020\001\022\014\n\010STARTING\020" +
-      "\002\022\013\n\007RUNNING\020\003\022\014\n\010FINISHED\020\004\022\n\n\006FAILED\020\005" +
-      "\022\013\n\007KILLING\020\006\022\n\n\006KILLED\020\007*F\n\rExecutionMo" +
-      "de\022\036\n\032EXECUTION_MODE_UNSPECIFIED\020\000\022\t\n\005BA" +
-      "TCH\020\001\022\n\n\006STREAM\020\002*}\n\022ModelVersionStatus\022" +
-      "\030\n\024PENDING_REGISTRATION\020\000\022\027\n\023FAILED_REGI" +
-      "STRATION\020\001\022\t\n\005READY\020\003\022\024\n\020PENDING_DELETIO" +
-      "N\020\004\022\023\n\017FAILED_DELETION\020\005*\\\n\021ModelVersion" +
-      "Stage\022\r\n\tGENERATED\020\000\022\r\n\tVALIDATED\020\001\022\014\n\010D" +
-      "EPLOYED\020\002\022\016\n\nDEPRECATED\020\003\022\013\n\007DELETED\020\004*)" +
-      "\n\017MetricTypeProto\022\013\n\007DATASET\020\000\022\t\n\005MODEL\020" +
-      "\001B)\n\027org.aiflow.client.protoZ\010/ai_flow\210\001" +
-      "\001\220\001\001b\006proto3"
+      "ngValue\"\262\001\n\031ModelVersionRelationProto\022,\n" +
+      "\007version\030\001 \001(\0132\033.google.protobuf.Int32Va" +
+      "lue\022-\n\010model_id\030\002 \001(\0132\033.google.protobuf." +
+      "Int64Value\0228\n\023project_snapshot_id\030\003 \001(\0132" +
+      "\033.google.protobuf.Int64Value\"\250\003\n\021ModelVe" +
+      "rsionProto\022,\n\007version\030\001 \001(\0132\033.google.pro" +
+      "tobuf.Int32Value\022-\n\010model_id\030\002 \001(\0132\033.goo" +
+      "gle.protobuf.Int64Value\0228\n\023project_snaps" +
+      "hot_id\030\003 \001(\0132\033.google.protobuf.Int64Valu" +
+      "e\0220\n\nmodel_path\030\004 \001(\0132\034.google.protobuf." +
+      "StringValue\0220\n\nmodel_type\030\006 \001(\0132\034.google" +
+      ".protobuf.StringValue\0222\n\014version_desc\030\007 " +
+      "\001(\0132\034.google.protobuf.StringValue\0221\n\rcur" +
+      "rent_stage\030\010 \001(\0162\032.ai_flow.ModelVersionS" +
+      "tage\0221\n\013create_time\030\t \001(\0132\034.google.proto" +
+      "buf.DoubleValue\"\326\004\n\010JobProto\022\014\n\004uuid\030\001 \001" +
+      "(\003\022\014\n\004name\030\002 \001(\t\022:\n\025workflow_execution_i" +
+      "d\030\003 \001(\0132\033.google.protobuf.Int64Value\022&\n\t" +
+      "job_state\030\004 \001(\0162\023.ai_flow.StateProto\0225\n\n" +
+      "properties\030\005 \003(\0132!.ai_flow.JobProto.Prop" +
+      "ertiesEntry\022,\n\006job_id\030\006 \001(\0132\034.google.pro" +
+      "tobuf.StringValue\022/\n\nstart_time\030\007 \001(\0132\033." +
+      "google.protobuf.Int64Value\022-\n\010end_time\030\010" +
+      " \001(\0132\033.google.protobuf.Int64Value\022-\n\007log" +
+      "_uri\030\t \001(\0132\034.google.protobuf.StringValue" +
+      "\022/\n\tsignature\030\n \001(\0132\034.google.protobuf.St" +
+      "ringValue\022;\n\022workflow_execution\030\013 \001(\0132\037." +
+      "ai_flow.WorkflowExecutionProto\0225\n\017execut" +
+      "ion_label\030\014 \001(\0132\034.google.protobuf.String" +
+      "Value\0321\n\017PropertiesEntry\022\013\n\003key\030\001 \001(\t\022\r\n" +
+      "\005value\030\002 \001(\t:\0028\001\"\342\001\n\rWorkflowProto\022\014\n\004uu" +
+      "id\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\0223\n\rworkflow_json\030" +
+      "\003 \001(\0132\034.google.protobuf.StringValue\022:\n\np" +
+      "roperties\030\004 \003(\0132&.ai_flow.WorkflowProto." +
+      "PropertiesEntry\022\021\n\tnamespace\030\005 \001(\t\0321\n\017Pr" +
+      "opertiesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(" +
+      "\t:\0028\001\"\357\004\n\026WorkflowExecutionProto\022\014\n\004uuid" +
+      "\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\022/\n\nproject_id\030\003 \001(\013" +
+      "2\033.google.protobuf.Int64Value\022,\n\017executi" +
+      "on_state\030\004 \001(\0162\023.ai_flow.StateProto\022C\n\np" +
+      "roperties\030\005 \003(\0132/.ai_flow.WorkflowExecut" +
+      "ionProto.PropertiesEntry\022/\n\nstart_time\030\006" +
+      " \001(\0132\033.google.protobuf.Int64Value\022-\n\010end" +
+      "_time\030\007 \001(\0132\033.google.protobuf.Int64Value" +
+      "\022-\n\007log_uri\030\010 \001(\0132\034.google.protobuf.Stri" +
+      "ngValue\0223\n\rworkflow_json\030\t \001(\0132\034.google." +
+      "protobuf.StringValue\022/\n\tsignature\030\n \001(\0132" +
+      "\034.google.protobuf.StringValue\022\024\n\014executi" +
+      "on_id\030\013 \001(\t\022(\n\010workflow\030\014 \001(\0132\026.ai_flow." +
+      "WorkflowProto\022-\n\007context\030\r \001(\0132\034.google." +
+      "protobuf.StringValue\0321\n\017PropertiesEntry\022" +
+      "\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\303\001\n\014Proj" +
+      "ectProto\022\014\n\004uuid\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\0229\n\n" +
+      "properties\030\003 \003(\0132%.ai_flow.ProjectProto." +
+      "PropertiesEntry\022)\n\003uri\030\004 \001(\0132\034.google.pr" +
+      "otobuf.StringValue\0321\n\017PropertiesEntry\022\013\n" +
+      "\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\210\003\n\021Workfl" +
+      "owMetaProto\022\014\n\004uuid\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\022" +
+      "/\n\nproject_id\030\003 \001(\0132\033.google.protobuf.In" +
+      "t64Value\022>\n\nproperties\030\004 \003(\0132*.ai_flow.W" +
+      "orkflowMetaProto.PropertiesEntry\0220\n\013crea" +
+      "te_time\030\005 \001(\0132\033.google.protobuf.Int64Val" +
+      "ue\0220\n\013update_time\030\006 \001(\0132\033.google.protobu" +
+      "f.Int64Value\022\"\n\032context_extractor_in_byt" +
+      "es\030\007 \001(\014\022+\n\005graph\030\010 \001(\0132\034.google.protobu" +
+      "f.StringValue\0321\n\017PropertiesEntry\022\013\n\003key\030" +
+      "\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\345\001\n\025WorkflowSna" +
+      "pshotProto\022\014\n\004uuid\030\001 \001(\003\0220\n\013workflow_id\030" +
+      "\002 \001(\0132\033.google.protobuf.Int64Value\022)\n\003ur" +
+      "i\030\003 \001(\0132\034.google.protobuf.StringValue\022/\n" +
+      "\tsignature\030\004 \001(\0132\034.google.protobuf.Strin" +
+      "gValue\0220\n\013create_time\030\005 \001(\0132\033.google.pro" +
+      "tobuf.Int64Value\"\221\003\n\rArtifactProto\022\014\n\004uu" +
+      "id\030\001 \001(\003\022\014\n\004name\030\002 \001(\t\022:\n\nproperties\030\003 \003" +
+      "(\0132&.ai_flow.ArtifactProto.PropertiesEnt" +
+      "ry\0223\n\rartifact_type\030\004 \001(\0132\034.google.proto" +
+      "buf.StringValue\022)\n\003uri\030\005 \001(\0132\034.google.pr" +
+      "otobuf.StringValue\0221\n\013description\030\006 \001(\0132" +
+      "\034.google.protobuf.StringValue\0220\n\013create_" +
+      "time\030\007 \001(\0132\033.google.protobuf.Int64Value\022" +
+      "0\n\013update_time\030\010 \001(\0132\033.google.protobuf.I" +
+      "nt64Value\0321\n\017PropertiesEntry\022\013\n\003key\030\001 \001(" +
+      "\t\022\r\n\005value\030\002 \001(\t:\0028\001\"z\n\024RegisteredModelP" +
+      "aram\0220\n\nmodel_name\030\001 \001(\0132\034.google.protob" +
+      "uf.StringValue\0220\n\nmodel_desc\030\002 \001(\0132\034.goo" +
+      "gle.protobuf.StringValue\"\336\001\n\021ModelVersio" +
+      "nParam\0220\n\nmodel_path\030\001 \001(\0132\034.google.prot" +
+      "obuf.StringValue\0220\n\nmodel_type\030\002 \001(\0132\034.g" +
+      "oogle.protobuf.StringValue\0222\n\014version_de" +
+      "sc\030\003 \001(\0132\034.google.protobuf.StringValue\0221" +
+      "\n\rcurrent_stage\030\004 \001(\0162\032.ai_flow.ModelVer" +
+      "sionStage\"v\n\016ModelMetaParam\0220\n\nmodel_nam" +
+      "e\030\001 \001(\0132\034.google.protobuf.StringValue\0222\n" +
+      "\rmodel_version\030\002 \001(\0132\033.google.protobuf.I" +
+      "nt32Value\"A\n\010Response\022\023\n\013return_code\030\001 \001" +
+      "(\t\022\022\n\nreturn_msg\030\002 \001(\t\022\014\n\004data\030\003 \001(\t\"[\n\023" +
+      "RegisteredModelMeta\022\022\n\nmodel_name\030\001 \001(\t\022" +
+      "0\n\nmodel_desc\030\002 \001(\0132\034.google.protobuf.St" +
+      "ringValue\"\322\002\n\020ModelVersionMeta\022\022\n\nmodel_" +
+      "name\030\001 \001(\t\022\025\n\rmodel_version\030\002 \001(\005\0220\n\nmod" +
+      "el_path\030\003 \001(\0132\034.google.protobuf.StringVa" +
+      "lue\0220\n\nmodel_type\030\005 \001(\0132\034.google.protobu" +
+      "f.StringValue\0222\n\014version_desc\030\006 \001(\0132\034.go" +
+      "ogle.protobuf.StringValue\0223\n\016version_sta" +
+      "tus\030\007 \001(\0162\033.ai_flow.ModelVersionStatus\0221" +
+      "\n\rcurrent_stage\030\010 \001(\0162\032.ai_flow.ModelVer" +
+      "sionStage\022\023\n\013create_time\030\t \001(\001\"\210\001\n\025Regis" +
+      "teredModelDetail\0226\n\020registered_model\030\001 \001" +
+      "(\0132\034.ai_flow.RegisteredModelMeta\0227\n\024late" +
+      "st_model_version\030\002 \001(\0132\031.ai_flow.ModelVe" +
+      "rsionMeta\"O\n\024RegisteredModelMetas\0227\n\021reg" +
+      "istered_models\030\001 \003(\0132\034.ai_flow.Registere" +
+      "dModelMeta\"J\n\013ResultProto\022$\n\006status\030\001 \001(" +
+      "\0162\024.ai_flow.StatusProto\022\025\n\rerror_message" +
+      "\030\002 \001(\t\"\230\005\n\017MetricMetaProto\0221\n\013metric_nam" +
+      "e\030\001 \001(\0132\034.google.protobuf.StringValue\022-\n" +
+      "\013metric_type\030\002 \001(\0162\030.ai_flow.MetricTypeP" +
+      "roto\0221\n\013metric_desc\030\003 \001(\0132\034.google.proto" +
+      "buf.StringValue\0222\n\014project_name\030\004 \001(\0132\034." +
+      "google.protobuf.StringValue\0222\n\014dataset_n" +
+      "ame\030\005 \001(\0132\034.google.protobuf.StringValue\022" +
+      "0\n\nmodel_name\030\006 \001(\0132\034.google.protobuf.St" +
+      "ringValue\022.\n\010job_name\030\007 \001(\0132\034.google.pro" +
+      "tobuf.StringValue\022/\n\nstart_time\030\010 \001(\0132\033." +
+      "google.protobuf.Int64Value\022-\n\010end_time\030\t" +
+      " \001(\0132\033.google.protobuf.Int64Value\022)\n\003uri" +
+      "\030\n \001(\0132\034.google.protobuf.StringValue\022*\n\004" +
+      "tags\030\013 \001(\0132\034.google.protobuf.StringValue" +
+      "\022<\n\nproperties\030\014 \003(\0132(.ai_flow.MetricMet" +
+      "aProto.PropertiesEntry\0321\n\017PropertiesEntr" +
+      "y\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\336\002\n\022Me" +
+      "tricSummaryProto\022\014\n\004uuid\030\001 \001(\003\0221\n\013metric" +
+      "_name\030\002 \001(\0132\034.google.protobuf.StringValu" +
+      "e\0220\n\nmetric_key\030\003 \001(\0132\034.google.protobuf." +
+      "StringValue\0222\n\014metric_value\030\004 \001(\0132\034.goog" +
+      "le.protobuf.StringValue\0225\n\020metric_timest" +
+      "amp\030\005 \001(\0132\033.google.protobuf.Int64Value\0222" +
+      "\n\rmodel_version\030\006 \001(\0132\033.google.protobuf." +
+      "Int32Value\0226\n\020job_execution_id\030\007 \001(\0132\034.g" +
+      "oogle.protobuf.StringValue*\300\003\n\nReturnCod" +
+      "e\022\013\n\007SUCCESS\020\000\022\022\n\016INTERNAL_ERROR\020\001\022\033\n\027TE" +
+      "MPORARILY_UNAVAILABLE\020\002\022\014\n\010IO_ERROR\020\003\022\017\n" +
+      "\013BAD_REQUEST\020\004\022\034\n\027INVALID_PARAMETER_VALU" +
+      "E\020\350\007\022\027\n\022ENDPOINT_NOT_FOUND\020\351\007\022\026\n\021MALFORM" +
+      "ED_REQUEST\020\352\007\022\022\n\rINVALID_STATE\020\353\007\022\026\n\021PER" +
+      "MISSION_DENIED\020\354\007\022\025\n\020FEATURE_DISABLED\020\355\007" +
+      "\022\032\n\025CUSTOMER_UNAUTHORIZED\020\356\007\022\033\n\026REQUEST_" +
+      "LIMIT_EXCEEDED\020\357\007\022\034\n\027RESOURCE_ALREADY_EX" +
+      "ISTS\020\321\017\022\034\n\027RESOURCE_DOES_NOT_EXIST\020\322\017\022\023\n" +
+      "\016QUOTA_EXCEEDED\020\271\027\022\034\n\027MAX_BLOCK_SIZE_EXC" +
+      "EEDED\020\272\027\022\033\n\026MAX_READ_SIZE_EXCEEDED\020\273\027* \n" +
+      "\013StatusProto\022\006\n\002OK\020\000\022\t\n\005ERROR\020\001*\326\001\n\rData" +
+      "TypeProto\022\031\n\025DATA_TYPE_UNSPECIFIED\020\000\022\t\n\005" +
+      "INT32\020\001\022\t\n\005INT64\020\002\022\013\n\007FLOAT32\020\003\022\013\n\007FLOAT" +
+      "64\020\004\022\n\n\006STRING\020\005\022\016\n\nINT32ARRAY\020\006\022\016\n\nINT6" +
+      "4ARRAY\020\007\022\020\n\014FlOAT32ARRAY\020\010\022\020\n\014FLOAT64ARR" +
+      "AY\020\t\022\017\n\013STRINGARRAY\020\n\022\t\n\005BYTES\020\013\022\016\n\nBYTE" +
+      "SARRAY\020\014*{\n\nStateProto\022\025\n\021STATE_UNSPECIF" +
+      "IED\020\000\022\010\n\004INIT\020\001\022\014\n\010STARTING\020\002\022\013\n\007RUNNING" +
+      "\020\003\022\014\n\010FINISHED\020\004\022\n\n\006FAILED\020\005\022\013\n\007KILLING\020" +
+      "\006\022\n\n\006KILLED\020\007*F\n\rExecutionMode\022\036\n\032EXECUT" +
+      "ION_MODE_UNSPECIFIED\020\000\022\t\n\005BATCH\020\001\022\n\n\006STR" +
+      "EAM\020\002*}\n\022ModelVersionStatus\022\030\n\024PENDING_R" +
+      "EGISTRATION\020\000\022\027\n\023FAILED_REGISTRATION\020\001\022\t" +
+      "\n\005READY\020\003\022\024\n\020PENDING_DELETION\020\004\022\023\n\017FAILE" +
+      "D_DELETION\020\005*\\\n\021ModelVersionStage\022\r\n\tGEN" +
+      "ERATED\020\000\022\r\n\tVALIDATED\020\001\022\014\n\010DEPLOYED\020\002\022\016\n" +
+      "\nDEPRECATED\020\003\022\013\n\007DELETED\020\004*)\n\017MetricType" +
+      "Proto\022\013\n\007DATASET\020\000\022\t\n\005MODEL\020\001B)\n\027org.aif" +
+      "low.client.protoZ\010/ai_flow\210\001\001\220\001\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -36587,7 +36783,7 @@ public final class Message {
     internal_static_ai_flow_ModelVersionProto_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_flow_ModelVersionProto_descriptor,
-        new java.lang.String[] { "Version", "ModelId", "ProjectSnapshotId", "ModelPath", "ModelType", "VersionDesc", "CurrentStage", });
+        new java.lang.String[] { "Version", "ModelId", "ProjectSnapshotId", "ModelPath", "ModelType", "VersionDesc", "CurrentStage", "CreateTime", });
     internal_static_ai_flow_JobProto_descriptor =
       getDescriptor().getMessageTypes().get(6);
     internal_static_ai_flow_JobProto_fieldAccessorTable = new
@@ -36701,7 +36897,7 @@ public final class Message {
     internal_static_ai_flow_ModelVersionMeta_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ai_flow_ModelVersionMeta_descriptor,
-        new java.lang.String[] { "ModelName", "ModelVersion", "ModelPath", "ModelType", "VersionDesc", "VersionStatus", "CurrentStage", });
+        new java.lang.String[] { "ModelName", "ModelVersion", "ModelPath", "ModelType", "VersionDesc", "VersionStatus", "CurrentStage", "CreateTime", });
     internal_static_ai_flow_RegisteredModelDetail_descriptor =
       getDescriptor().getMessageTypes().get(19);
     internal_static_ai_flow_RegisteredModelDetail_fieldAccessorTable = new
