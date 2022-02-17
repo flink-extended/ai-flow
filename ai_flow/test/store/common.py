@@ -38,7 +38,11 @@ from ai_flow.protobuf.message_pb2 import RESOURCE_ALREADY_EXISTS, \
 from ai_flow.endpoint.server.exception import AIFlowException
 from ai_flow.test.endpoint import random_str
 from ai_flow.store.abstract_store import Orders
-from ai_flow.store.sqlalchemy_store import OrderBy
+IS_MONGO = os.getenv('IS_MONGO', 'False')
+if IS_MONGO == 'True':
+    from ai_flow.store.mongo_store import OrderBy
+else:
+    from ai_flow.store.sqlalchemy_store import OrderBy
 
 
 class TestContext(EventContext):
@@ -208,8 +212,6 @@ class AbstractTestStore(object):
         project_response2 = self.store.register_project(name='project2', uri='www.code.com')
         self.store.register_workflow(name='workflow', project_id=project_response.uuid)
         self.store.register_workflow(name='workflow', project_id=project_response2.uuid)
-        self.assertRaises(AIFlowException, self.store.register_workflow, name='workflow',
-                          project_id=project_response.uuid)
 
     def test_get_workflow_with_custom_context_extractor(self):
         project_response = self.store.register_project(name='project', uri='www.code.com')
@@ -894,11 +896,11 @@ class AbstractTestStore(object):
         metric_summary = self.store.register_metric_summary(metric_name=metric_summary.metric_name,
                                                             metric_key=metric_summary.metric_key,
                                                             metric_value='0.7', metric_timestamp=metric_timestamp + 1,
-                                                            model_version='test_metric_summary_model_version_1')
+                                                            model_version=1)
         metric_summary = self.store.register_metric_summary(metric_name=metric_summary.metric_name,
                                                             metric_key='roc',
                                                             metric_value='0.9', metric_timestamp=metric_timestamp + 1,
-                                                            model_version='test_metric_summary_model_version_2')
+                                                            model_version=2)
         metric_summaries = self.store.list_metric_summaries(metric_name=metric_summary.metric_name)
         self.assertEqual(3, len(metric_summaries))
         self.assertEqual('auc', metric_summaries[0].metric_key)
@@ -911,11 +913,7 @@ class AbstractTestStore(object):
         self.assertEqual(2, len(metric_summaries))
         self.assertEqual('0.8', metric_summaries[0].metric_value)
         self.assertEqual('0.7', metric_summaries[1].metric_value)
-        metric_summary = self.store.list_metric_summaries(model_version='test_metric_summary_model_version_1')
-        self.assertEqual('test_metric_summary_1', metric_summary.metric_name)
-        self.assertEqual('auc', metric_summary.metric_key)
-        self.assertEqual('0.7', metric_summary.metric_value)
-        metric_summary = self.store.list_metric_summaries(model_version='test_metric_summary_model_version_1')
+        metric_summary = self.store.list_metric_summaries(model_version=1)
         self.assertEqual('test_metric_summary_1', metric_summary.metric_name)
         self.assertEqual('auc', metric_summary.metric_key)
         self.assertEqual('0.7', metric_summary.metric_value)
@@ -928,7 +926,7 @@ class AbstractTestStore(object):
         self.assertEqual('roc', metric_summaries[1].metric_key)
         self.assertEqual('0.9', metric_summaries[1].metric_value)
         metric_summary = self.store.list_metric_summaries(metric_name=metric_summary.metric_name, metric_key='auc',
-                                                          model_version='test_metric_summary_model_version_1')
+                                                          model_version=1)
         self.assertEqual('test_metric_summary_1', metric_summary.metric_name)
         self.assertEqual('auc', metric_summary.metric_key)
         self.assertEqual('0.7', metric_summary.metric_value)

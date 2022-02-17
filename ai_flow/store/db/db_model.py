@@ -433,7 +433,7 @@ class MongoModelVersionRelation(Document):
     Document of model version relation in metadata backend storage.
     """
 
-    version = IntField(required=True, unique=True)
+    version = IntField(required=True)
     model_id = IntField()
     project_snapshot_id = IntField()
     version_model_id_unique = StringField(max_length=1000, required=True, unique=True)
@@ -526,8 +526,9 @@ class MongoWorkflow(Document):
     """
 
     uuid = SequenceField(db_alias=MONGO_DB_ALIAS_META_SERVICE)
-    name = StringField(max_length=255, required=True, unique=True)
-    project_id = IntField()
+    name = StringField(max_length=255, required=True)
+    project_id = IntField(default=0)
+    project_id_name_unique = StringField(max_length=500, required=True, unique=True)
     properties = StringField(max_length=1000)
     create_time = LongField()
     update_time = LongField()

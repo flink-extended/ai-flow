@@ -325,7 +325,7 @@ class MongoStore(AbstractStore):
         :return: List of :py:class:`ai_flow.meta.dataset_meta.DatasetMeta` objects,
                  return None if no datasets to be listed.
         """
-        query = {'is_deleted': 'False'}
+        query = {'is_deleted': False}
         if filters:
             query = filters.apply_all(MongoDataset, query)
         dataset_result = MongoDataset.objects(**query)
@@ -349,7 +349,7 @@ class MongoStore(AbstractStore):
         :param filters: A Filter class that contains all filters to apply.
         :return: Count of :py:class:`ai_flow.meta.dataset_meta.DatasetMeta` objects.
         """
-        query = {'is_deleted': 'False'}
+        query = {'is_deleted': False}
         if filters:
             query = filters.apply_all(MongoDataset, query)
         return MongoDataset.objects(**query).count()
@@ -456,7 +456,7 @@ class MongoStore(AbstractStore):
         :return: List of :py:class:`ai_flow.meta.project_meta.ProjectMeta` objects,
                  return None if no projects to be listed.
         """
-        query = {'is_deleted': 'False'}
+        query = {'is_deleted': False}
         if filters:
             query = filters.apply_all(MongoProject, query)
         project_result = MongoProject.objects(**query)
@@ -480,7 +480,7 @@ class MongoStore(AbstractStore):
         :param filters: A Filter class that contains all filters to apply.
         :return: Count of :py:class:`ai_flow.meta.project_meta.ProjectMeta` objects.
         """
-        query = {'is_deleted': 'False'}
+        query = {'is_deleted': False}
         if filters:
             query = filters.apply_all(MongoProject, query)
         return MongoProject.objects(**query).count()
@@ -537,12 +537,7 @@ class MongoStore(AbstractStore):
                 per_model.name = deleted_character + per_model.name + deleted_character + str(
                     deleted_model_relation_counts + 1)
                 for model_version in per_model.model_version_relation:
-                    deleted_model_version_relation_counts = MongoModelVersionRelation.objects(
-                        version__startswith=deleted_character + model_version.version + deleted_character,
-                        is_deleted=TRUE).count()
                     model_version.is_deleted = TRUE
-                    model_version.version = deleted_character + model_version.version + deleted_character + str(
-                        deleted_model_version_relation_counts + 1)
                     # update for unqine constraint
                     model_version.version_model_id_unique = f'{model_version.version}-{model_version.model_id}'
                     model_version.version_workflow_execution_id_unique = f'{model_version.version}-{model_version.project_snapshot_id}'
@@ -676,15 +671,24 @@ class MongoStore(AbstractStore):
         """
         update_time = create_time = int(time.time() * 1000)
         try:
-            workflow = MetaToTable.workflow_to_table(name=name,
-                                                     project_id=project_id,
-                                                     properties=properties,
-                                                     create_time=create_time,
-                                                     update_time=update_time,
-                                                     context_extractor_in_bytes=context_extractor_in_bytes,
-                                                     graph=graph,
-                                                     store_type=type(self).__name__)
-            workflow.save()
+            workflow = MongoWorkflow.objects(project_id=project_id, name=name).first()
+            if workflow is None:
+                workflow = MetaToTable.workflow_to_table(name=name,
+                                                         project_id=project_id,
+                                                         properties=properties,
+                                                         create_time=create_time,
+                                                         update_time=update_time,
+                                                         context_extractor_in_bytes=context_extractor_in_bytes,
+                                                         graph=graph,
+                                                         store_type=type(self).__name__)
+                workflow.project_id_name_unique = f'{project_id}-{name}'
+                workflow.save()
+            else:
+                workflow.update(context_extractor_in_bytes=context_extractor_in_bytes,
+                                properties=properties,
+                                graph=graph,
+                                update_time=update_time,
+                                is_deleted=False)
             return WorkflowMeta(uuid=workflow.uuid, name=name,
                                 project_id=project_id, properties=properties,
                                 create_time=create_time, update_time=update_time,
@@ -733,7 +737,7 @@ class MongoStore(AbstractStore):
         :return: List of :py:class:`ai_flow.meta.workflow_meta.WorkflowMeta` objects,
                  return None if no workflows to be listed.
         """
-        query = {'is_deleted': 'False'}
+        query = {'is_deleted': False}
         if project_name:
             project = self.get_project_by_name(project_name)
             if not project:
@@ -764,7 +768,7 @@ class MongoStore(AbstractStore):
         :param filters: A Filter class that contains all filters to apply.
         :return: Count of :py:class:`ai_flow.meta.workflow_meta.WorkflowMeta` objects.
         """
-        query = {'is_deleted': 'False'}
+        query = {'is_deleted': False}
         if project_name:
             project = self.get_project_by_name(project_name)
             if not project:
@@ -800,12 +804,7 @@ class MongoStore(AbstractStore):
             workflow = MongoWorkflow.objects(uuid=workflow_id, is_deleted__ne=TRUE).first()
             if workflow is None:
                 return Status.ERROR
-            deleted_workflow_counts = MongoWorkflow.objects(
-                project_id=workflow.project_id,
-                name__startswith=deleted_character + workflow.name + deleted_character,
-                is_deleted=TRUE).count()
             workflow.is_deleted = TRUE
-            workflow.name = deleted_character + workflow.name + deleted_character + str(deleted_workflow_counts + 1)
             workflow.save()
             return Status.OK
         except mongoengine.OperationError as e:
@@ -1026,12 +1025,7 @@ class MongoStore(AbstractStore):
             model.is_deleted = TRUE
             model.name = deleted_character + model.name + deleted_character + str(deleted_model_counts + 1)
             for model_version in model.model_version_relation:
-                deleted_model_version_counts = MongoModelVersionRelation.objects(
-                    version__startswith=deleted_character + model_version.version + deleted_character,
-                    is_deleted=TRUE).count()
                 model_version.is_deleted = TRUE
-                model_version.version = deleted_character + model_version.version + deleted_character + str(
-                    deleted_model_version_counts + 1)
                 # update for unqine constraint
                 model_version.version_model_id_unique = f'{model_version.version}-{model_version.model_id}'
                 model_version.version_workflow_execution_id_unique = f'{model_version.version}-{model_version.project_snapshot_id}'
@@ -1069,11 +1063,16 @@ class MongoStore(AbstractStore):
         :return: A single :py:class:`ai_flow.meta.model_relation_meta.ModelVersionRelationMeta` object.
         """
         try:
-            model_version_relation = MetaToTable.model_version_relation_to_table(version=version,
-                                                                                 model_id=model_id,
-                                                                                 project_snapshot_id=project_snapshot_id,
-                                                                                 store_type=type(self).__name__)
-            model_version_relation.save()
+
+            model_version_relation = MongoModelVersionRelation.objects(version=version, model_id=model_id).first()
+            if model_version_relation is None:
+                model_version_relation = MetaToTable.model_version_relation_to_table(version=version,
+                                                                                     model_id=model_id,
+                                                                                     project_snapshot_id=project_snapshot_id,
+                                                                                     store_type=type(self).__name__)
+                model_version_relation.save()
+            else:
+                model_version_relation.update(is_deleted=False, project_snapshot_id=project_snapshot_id)
             # update reference field
             if model_id is not None:
                 model_relation = MongoModelRelation.objects(uuid=model_id).first()
@@ -1131,12 +1130,7 @@ class MongoStore(AbstractStore):
                                                               is_deleted__ne=TRUE).first()
             if model_version is None:
                 return Status.ERROR
-            deleted_model_version_counts = MongoModelVersionRelation.objects(
-                version__startswith=deleted_character + version + deleted_character,
-                is_deleted=TRUE).count()
             model_version.is_deleted = TRUE
-            model_version.version = deleted_character + model_version.version + deleted_character + str(
-                deleted_model_version_counts + 1)
             # update for unqine constraint
             model_version.version_model_id_unique = f'{model_version.version}-{model_version.model_id}'
             model_version.version_workflow_execution_id_unique = f'{model_version.version}-{model_version.project_snapshot_id}'
@@ -1249,7 +1243,7 @@ class MongoStore(AbstractStore):
         :return: List of :py:class:`ai_flow.meta.artifact_meta.py.ArtifactMeta` objects,
                  return None if no artifacts to be listed.
         """
-        query = {'is_deleted': 'False'}
+        query = {'is_deleted': False}
         if filters:
             query = filters.apply_all(MongoArtifact, query)
         artifact_result = MongoArtifact.objects(**query)
@@ -1273,7 +1267,7 @@ class MongoStore(AbstractStore):
         :param filters: A Filter class that contains all filters to apply.
         :return: Count of :py:class:`ai_flow.meta.artifact_meta.py.ArtifactMeta` objects.
         """
-        query = {'is_deleted': 'False'}
+        query = {'is_deleted': False}
         if filters:
             query = filters.apply_all(MongoArtifact, query)
         return MongoArtifact.objects(**query).count()
@@ -1499,7 +1493,7 @@ class MongoStore(AbstractStore):
         if model_name is None:
             raise AIFlowException('Registered model name cannot be empty.', INVALID_PARAMETER_VALUE)
 
-        return MongoModelVersion.objects(model_name=model_name, current_stage__ne=STAGE_DELETED)
+        return MongoModelVersion.objects(model_name=model_name)
 
     @classmethod
     def _count_deleted_model_version(cls, model_version):
@@ -1530,9 +1524,9 @@ class MongoStore(AbstractStore):
 
         def next_version(current_version):
             if current_version is None:
-                return "1"
+                return 1
             else:
-                return str(current_version + 1)
+                return current_version + 1
 
         for attempt in range(self.CREATE_RETRY_TIMES):
             try:
@@ -1737,20 +1731,12 @@ class MongoStore(AbstractStore):
             metric_meta = MongoMetricMeta.objects(metric_name=metric_name, is_deleted__ne=TRUE).first()
             if metric_meta is None:
                 return Status.ERROR
-            deleted_metric_meta_counts = MongoMetricMeta.objects(
-                metric_name__startswith=deleted_character + metric_meta.metric_name + deleted_character,
-                is_deleted=TRUE).count()
             metric_meta.is_deleted = TRUE
-            metric_meta.metric_name = deleted_character + metric_meta.metric_name + deleted_character + str(
-                deleted_metric_meta_counts + 1)
-            for metric_summary in metric_meta.metric_summary:
-                deleted_metric_summary_counts = MongoMetricSummary.objects(
-                    metric_name__startswith=deleted_character + metric_summary.metric_name + deleted_character,
-                    is_deleted=TRUE).count()
+            metric_summaries = MongoMetricSummary.objects(metric_name=metric_name, is_deleted=False)
+            for metric_summary in metric_summaries:
                 metric_summary.is_deleted = TRUE
-                metric_summary.metric_name = deleted_character + metric_summary.metric_name + deleted_character + str(
-                    deleted_metric_summary_counts + 1)
-            self._save_all([metric_meta] + metric_meta.metric_summary)
+            metric_summaries.delete()
+            metric_meta.save()
             return Status.OK
         except Exception as e:
             raise AIFlowException('Delete metric meta failed! Error: {}.'.format(str(e)))
@@ -1818,7 +1804,7 @@ class MongoStore(AbstractStore):
                                 job_execution_id=None) -> MetricSummary:
         try:
             metric_summary_table = metric_summary_to_table(metric_name, metric_key, metric_value, metric_timestamp,
-                                                           model_version, job_execution_id)
+                                                           model_version, job_execution_id, 'MongoStore')
             metric_summary_table.save()
             return MetricSummary(uuid=metric_summary_table.uuid,
                                  metric_name=metric_name,
@@ -1862,7 +1848,7 @@ class MongoStore(AbstractStore):
     def get_metric_summary(self, uuid) -> Union[None, MetricSummary]:
         try:
             metric_summary_table = MongoMetricSummary.objects(uuid=uuid,
-                                                              is_deleted__ne=TRUE)
+                                                              is_deleted__ne=TRUE).first()
             if metric_summary_table is None:
                 return None
             else:
@@ -1873,22 +1859,25 @@ class MongoStore(AbstractStore):
     def list_metric_summaries(self, metric_name=None, metric_key=None, model_version=None, start_time=None,
                               end_time=None) -> Union[None, MetricSummary, List[MetricSummary]]:
         try:
-            metric_summary_tables = MongoMetricSummary.objects(is_deleted__ne=TRUE)
+            conditions = {
+                'is_deleted': False
+            }
             if metric_name is not None:
-                metric_summary_tables = MongoMetricSummary.objects(metric_name=metric_name,
-                                                                   is_deleted__ne=TRUE)
+                conditions['metric_name'] = metric_name
             if metric_key is not None:
-                metric_summary_tables = MongoMetricSummary.objects(metric_key=metric_key,
-                                                                   is_deleted__ne=TRUE)
+                conditions['metric_key'] = metric_key
+
             if model_version is not None:
-                metric_summary_tables = MongoMetricSummary.objects(model_version=model_version,
-                                                                   is_deleted__ne=TRUE)
+                conditions['model_version'] = model_version
+
             if start_time is not None:
-                metric_summary_tables = MongoMetricSummary.objects(start_time__ge=start_time,
-                                                                   is_deleted__ne=TRUE)
+                conditions['metric_timestamp__gte'] = start_time
+
             if end_time is not None:
-                metric_summary_tables = MongoMetricSummary.objects(start_time__le=end_time,
-                                                                   is_deleted__ne=TRUE)
+                conditions['metric_timestamp__lte'] = end_time
+
+            metric_summary_tables = MongoMetricSummary.objects(**conditions)
+
             if len(metric_summary_tables) == 0:
                 return None
             elif len(metric_summary_tables) == 1:
