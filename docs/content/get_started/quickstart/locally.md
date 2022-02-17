@@ -3,19 +3,7 @@
 This section will show you how to install and start AIFlow on your local workstation.
 
 ## Installing AIFlow
-You can install AIFlow by running:
-```shell script
-pip install ai-flow
-```
-
-```{note}
-Currently AIFlow only supports python3.7, please make sure your python version meets the requirement.
-Meanwhile, we strongly recommend using [virtualenv](https://virtualenv.pypa.io/en/latest/index.html) or other similar tools for an isolated Python environment.
-```shell
-pip install virtualenv
-virtualenv venv_for_aiflow --python=python3.7
-source venv_for_aiflow/bin/activate
-```
+Please make sure that you have installed AIFlow refer to [installation guide](../../installation.md).
 
 
 ## Starting AIFlow 
@@ -30,7 +18,6 @@ start-all-aiflow-services.sh
 It will take a few minutes to start all servers for the first time. Once all servers have started, you will get the output like:
 
 ```text
-Starting Notification Server
 ...
 ...
 All services have been started!
@@ -50,21 +37,28 @@ with the default username(admin) and password(admin) to view the execution of wo
 
 ![airflow login ui](../../images/airflow_login_ui.png)
 
-## Run An Example
-
-Now you can run following commands to download and run a machine learning project with AIFlow.
+## Downloading the Quickstart
+Download the quickstart code by cloning AIFlow via 
 
 ```shell
-curl -Lf https://github.com/flink-extended/ai-flow/releases/download/release-0.3.0/examples.tar.gz -o /tmp/ai-flow-examples.tar.gz
-tar -zxvf /tmp/ai-flow-examples.tar.gz -C /tmp
-python /tmp/examples/sklearn_examples/workflows/batch_train_stream_predict/batch_train_stream_predict.py
+git clone https://github.com/flink-extended/ai-flow.git
 ```
 
-```{note}
-You can also cloning [repository](https://github.com/flink-extended/ai-flow/tree/master/examples) with git if download failed.
+and cd into the `examples` subdirectory of the repository. We’ll use this working directory for running the quickstart.
+
+## Running the Quickstart
+
+Now you can run following commands to submit a machine learning project to AIFlow server.
+
+```shell
+# Submit workflow to AIFlow Server
+aiflow workflow submit sklearn_examples batch_train_stream_predict
+
+## Force start an execution
+aiflow workflow start-execution sklearn_examples batch_train_stream_predict
 ```
 
-The example shows how to define an entire machine learning workflow through AIFlow. You can view the workflow definition in batch_train_stream_predict.py. The workflow contains four jobs, including sklearn model batch training, batch validation, model pushing and streaming prediction.
+The example shows how to define an entire machine learning workflow through AIFlow. You can view the workflow definition in [batch_train_stream_predict.py](https://github.com/flink-extended/ai-flow/tree/master/examples/sklearn_examples/workflows/batch_train_stream_predict). The workflow contains four jobs, including sklearn model batch training, batch validation, model pushing and streaming prediction.
 
 You can see the workflow metadata, and the graph of the workflow on the AIFlow web frontend: [http://127.0.0.1:8000](http://127.0.0.1:8000).
 

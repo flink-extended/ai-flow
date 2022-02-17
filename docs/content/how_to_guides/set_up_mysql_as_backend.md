@@ -14,7 +14,7 @@ You need ensure that you have MySQL client libraries installed. You can check if
 mysql_config --version
 ```
 
-If you are getting `mysql_config: command not found` error, please following below commands to install MySQL client, otherwise you can skip this section.
+AIFlow is tested with **MySQL 5.7+**, if you are getting a lower version or `mysql_config: command not found` error, please following below commands to install MySQL client, otherwise you can skip this section.
 
 #### macOS(Homebrew)
 
