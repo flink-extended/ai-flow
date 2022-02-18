@@ -516,7 +516,8 @@ def action_on_model_version_event(job_name: Text,
                                   model_name: Text,
                                   model_version_event_type: Text,
                                   namespace: Text = DEFAULT_NAMESPACE,
-                                  action: JobAction = JobAction.RESTART):
+                                  action: JobAction = JobAction.RESTART,
+                                  sender: Text = ANY_CONDITION):
     """
     Adds the model version control dependency. It means the job will take given action when the type of model version
     event is updated to the specified  type.
@@ -528,6 +529,7 @@ def action_on_model_version_event(job_name: Text,
     :param namespace: The namespace of the event which uses the name of the project.
     :param action: The :class:`~ai_flow.workflow.control_edge.JobAction` acts on the source channel whose value includes
                              START, RESTART, STOP and NONE.
+    :param sender: The name of job that send the event.
     """
     action_on_event(job_name=job_name,
                     event_key=model_name,
@@ -536,31 +538,7 @@ def action_on_model_version_event(job_name: Text,
                     action=action,
                     value_condition=ValueCondition.UPDATED,
                     namespace=namespace,
-                    sender=ANY_CONDITION)
-
-
-def action_on_dataset_event(job_name: Text,
-                            dataset_name: Text,
-                            namespace: Text = DEFAULT_NAMESPACE,
-                            action: JobAction = JobAction.START):
-    """
-    Adds the dataset control dependency. It means the job will take given action when only a new dataset of the
-    specified dataset is updated in notification service.
-
-    :param job_name: The name of the job triggered.
-    :param dataset_name: The name of the dataset refer to a specified dataset.
-    :param namespace: The namespace of the event which uses the name of the project.
-    :param action: The :class:`~ai_flow.workflow.control_edge.JobAction` acts on the source channel whose value includes
-                             START, RESTART, STOP and NONE.
-    """
-    action_on_event(job_name=job_name,
-                    event_key=dataset_name,
-                    event_value="created",
-                    event_type=AIFlowInternalEventType.DATASET_CHANGED,
-                    action=action,
-                    namespace=namespace,
-                    sender=ANY_CONDITION
-                    )
+                    sender=sender)
 
 
 def action_on_job_status(job_name: Text,
