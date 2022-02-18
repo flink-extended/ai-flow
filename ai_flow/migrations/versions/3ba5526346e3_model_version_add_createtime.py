@@ -36,7 +36,7 @@ depends_on = None
 def upgrade():
     with op.batch_alter_table('model_version') as batch_op:
         batch_op.alter_column('model_version', type_=sa.Integer())
-        batch_op.add_column(sa.Column('create_time', sa.FLOAT()))
+        batch_op.add_column(sa.Column('create_time', sa.BigInteger(), nullable=True))
     with op.batch_alter_table('model_version_relation') as batch_op:
         batch_op.alter_column('version', type_=sa.Integer())
     with op.batch_alter_table('metric_summary') as batch_op:

@@ -1636,7 +1636,7 @@ class SqlAlchemyStore(AbstractStore):
                                                             model_type=model_type,
                                                             version_desc=version_desc,
                                                             current_stage=get_canonical_stage(current_stage),
-                                                            create_time=time.time())
+                                                            create_time=int(time.time()*1000))
                         self._save_to_db(session, [sql_registered_model, sql_model_version])
                         session.flush()
                         return sql_model_version.to_meta_entity()

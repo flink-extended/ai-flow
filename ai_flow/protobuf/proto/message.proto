@@ -190,7 +190,7 @@ message ModelVersionMeta {
     google.protobuf.StringValue version_desc = 6;
     ModelVersionStatus version_status = 7;
     ModelVersionStage current_stage = 8;
-    double create_time = 9;
+    int64 create_time = 9;
 }
 
 message RegisteredModelDetail {

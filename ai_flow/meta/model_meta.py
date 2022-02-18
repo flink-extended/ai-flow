@@ -31,7 +31,7 @@ class ModelVersionMeta(Jsonable):
                  project_snapshot_id: int = None,
                  version_desc: Text = None,
                  current_stage: Text = None,
-                 create_time: float = None
+                 create_time: int = None
                  ) -> None:
         self.version = version
         self.model_id = model_id
@@ -52,7 +52,7 @@ def create_model_version(version: int,
                          current_stage: Text = None):
     return ModelVersionMeta(version=version, model_id=model_id, model_path=model_path,
                             model_type=model_type, project_snapshot_id=project_snapshot_id,
-                            version_desc=version_desc, current_stage=current_stage, create_time=time.time())
+                            version_desc=version_desc, current_stage=current_stage, create_time=int(time.time() * 1000))
 
 
 class ModelMeta(Jsonable):

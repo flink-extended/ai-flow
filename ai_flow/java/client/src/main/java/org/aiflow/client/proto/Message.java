@@ -28053,10 +28053,10 @@ public final class Message {
     org.aiflow.client.proto.Message.ModelVersionStage getCurrentStage();
 
     /**
-     * <code>double create_time = 9;</code>
+     * <code>int64 create_time = 9;</code>
      * @return The createTime.
      */
-    double getCreateTime();
+    long getCreateTime();
   }
   /**
    * Protobuf type {@code ai_flow.ModelVersionMeta}
@@ -28168,9 +28168,9 @@ public final class Message {
               currentStage_ = rawValue;
               break;
             }
-            case 73: {
+            case 72: {
 
-              createTime_ = input.readDouble();
+              createTime_ = input.readInt64();
               break;
             }
             default: {
@@ -28371,13 +28371,13 @@ public final class Message {
     }
 
     public static final int CREATE_TIME_FIELD_NUMBER = 9;
-    private double createTime_;
+    private long createTime_;
     /**
-     * <code>double create_time = 9;</code>
+     * <code>int64 create_time = 9;</code>
      * @return The createTime.
      */
     @java.lang.Override
-    public double getCreateTime() {
+    public long getCreateTime() {
       return createTime_;
     }
 
@@ -28416,8 +28416,8 @@ public final class Message {
       if (currentStage_ != org.aiflow.client.proto.Message.ModelVersionStage.GENERATED.getNumber()) {
         output.writeEnum(8, currentStage_);
       }
-      if (createTime_ != 0D) {
-        output.writeDouble(9, createTime_);
+      if (createTime_ != 0L) {
+        output.writeInt64(9, createTime_);
       }
       unknownFields.writeTo(output);
     }
@@ -28455,9 +28455,9 @@ public final class Message {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(8, currentStage_);
       }
-      if (createTime_ != 0D) {
+      if (createTime_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(9, createTime_);
+          .computeInt64Size(9, createTime_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -28495,9 +28495,8 @@ public final class Message {
       }
       if (versionStatus_ != other.versionStatus_) return false;
       if (currentStage_ != other.currentStage_) return false;
-      if (java.lang.Double.doubleToLongBits(getCreateTime())
-          != java.lang.Double.doubleToLongBits(
-              other.getCreateTime())) return false;
+      if (getCreateTime()
+          != other.getCreateTime()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -28531,7 +28530,7 @@ public final class Message {
       hash = (53 * hash) + currentStage_;
       hash = (37 * hash) + CREATE_TIME_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          java.lang.Double.doubleToLongBits(getCreateTime()));
+          getCreateTime());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -28691,7 +28690,7 @@ public final class Message {
 
         currentStage_ = 0;
 
-        createTime_ = 0D;
+        createTime_ = 0L;
 
         return this;
       }
@@ -28809,7 +28808,7 @@ public final class Message {
         if (other.currentStage_ != 0) {
           setCurrentStageValue(other.getCurrentStageValue());
         }
-        if (other.getCreateTime() != 0D) {
+        if (other.getCreateTime() != 0L) {
           setCreateTime(other.getCreateTime());
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -29413,33 +29412,33 @@ public final class Message {
         return this;
       }
 
-      private double createTime_ ;
+      private long createTime_ ;
       /**
-       * <code>double create_time = 9;</code>
+       * <code>int64 create_time = 9;</code>
        * @return The createTime.
        */
       @java.lang.Override
-      public double getCreateTime() {
+      public long getCreateTime() {
         return createTime_;
       }
       /**
-       * <code>double create_time = 9;</code>
+       * <code>int64 create_time = 9;</code>
        * @param value The createTime to set.
        * @return This builder for chaining.
        */
-      public Builder setCreateTime(double value) {
+      public Builder setCreateTime(long value) {
         
         createTime_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>double create_time = 9;</code>
+       * <code>int64 create_time = 9;</code>
        * @return This builder for chaining.
        */
       public Builder clearCreateTime() {
         
-        createTime_ = 0D;
+        createTime_ = 0L;
         onChanged();
         return this;
       }
@@ -36672,7 +36671,7 @@ public final class Message {
       "ogle.protobuf.StringValue\0223\n\016version_sta" +
       "tus\030\007 \001(\0162\033.ai_flow.ModelVersionStatus\0221" +
       "\n\rcurrent_stage\030\010 \001(\0162\032.ai_flow.ModelVer" +
-      "sionStage\022\023\n\013create_time\030\t \001(\001\"\210\001\n\025Regis" +
+      "sionStage\022\023\n\013create_time\030\t \001(\003\"\210\001\n\025Regis" +
       "teredModelDetail\0226\n\020registered_model\030\001 \001" +
       "(\0132\034.ai_flow.RegisteredModelMeta\0227\n\024late" +
       "st_model_version\030\002 \001(\0132\031.ai_flow.ModelVe" +

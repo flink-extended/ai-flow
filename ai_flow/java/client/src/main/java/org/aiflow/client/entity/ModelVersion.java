@@ -34,7 +34,7 @@ public class ModelVersion {
     private String versionDesc;
     private ModelVersionStatus versionStatus;
     private ModelStage currentStage;
-    private double createTime;
+    private Long createTime;
 
     public ModelVersion() {}
 
@@ -51,7 +51,7 @@ public class ModelVersion {
             String versionDesc,
             ModelVersionStatus versionStatus,
             ModelStage currentStage,
-            double createTime) {
+            Long createTime) {
         this.modelName = modelName;
         this.modelVersion = modelVersion;
         this.modelPath = modelPath;
@@ -118,11 +118,11 @@ public class ModelVersion {
         this.currentStage = currentStage;
     }
 
-    public double getCreateTime() {
+    public long getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(double createTime) {
+    public void setCreateTime(long createTime) {
         this.createTime = createTime;
     }
 

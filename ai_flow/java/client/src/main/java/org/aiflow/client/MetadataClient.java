@@ -696,7 +696,7 @@ public class MetadataClient {
                             modelVersionMeta.getVersionDesc(),
                             Message.ModelVersionStatus.READY,
                             ModelStage.getModelStage(currentStage),
-                            System.currentTimeMillis() / 1000.0);
+                            System.currentTimeMillis());
             this.notificationClient.sendEvent(
                     modelVersion.getModelName(),
                     modelVersion.toJsonString(),

@@ -256,7 +256,7 @@ class SqlModelVersion(base):
     version_status = Column(String(20),
                             default=ModelVersionStatus.to_string(ModelVersionStatus.READY))
     current_stage = Column(String(20), default=STAGE_GENERATED)
-    create_time = Column(Float, default=time.time())
+    create_time = Column(BigInteger, default=int(time.time()*1000))
 
     # linked entities
     registered_model = relationship('SqlRegisteredModel', backref=backref('model_version', cascade='all'))
@@ -266,16 +266,16 @@ class SqlModelVersion(base):
     )
 
     def __repr__(self):
-        return '<SqlModelVersion ({}, {}, {}, {}, {}, {}, {})>'.format(self.model_name, self.model_version,
-                                                                       self.model_path, self.model_type,
-                                                                       self.version_desc, self.version_status,
-                                                                       self.current_stage)
+        return '<SqlModelVersion ({}, {}, {}, {}, {}, {}, {}, {})>'.format(self.model_name, self.model_version,
+                                                                           self.model_path, self.model_type,
+                                                                           self.version_desc, self.version_status,
+                                                                           self.current_stage, self.create_time)
 
     # entity mappers
     def to_meta_entity(self):
         return ModelVersionDetail(self.model_name, self.model_version,
                                   self.model_path, self.model_type, self.version_desc,
-                                  self.version_status, self.current_stage)
+                                  self.version_status, self.current_stage, self.create_time)
 
 
 class SqlEvent(base):
@@ -589,7 +589,7 @@ class MongoModelVersion(Document):
                                  default=ModelVersionStatus.to_string(ModelVersionStatus.READY))
     current_stage = StringField(max_length=20, default=STAGE_GENERATED)
     name_version_current_stage_unique = StringField(max_length=1000, required=True, unique=True)
-    create_time = FloatField(default=None)
+    create_time = LongField(default=None)
 
     meta = {'db_alias': MONGO_DB_ALIAS_META_SERVICE}
 
@@ -609,7 +609,8 @@ class MongoModelVersion(Document):
             self.model_type,
             self.version_desc,
             self.version_status,
-            self.current_stage)
+            self.current_stage,
+            self.create_time)
 
     def to_meta_entity(self):
         return ModelVersionDetail(self.model_name,

@@ -1545,7 +1545,8 @@ class MongoStore(AbstractStore):
                                                           model_path=model_path,
                                                           model_type=model_type,
                                                           version_desc=version_desc,
-                                                          current_stage=get_canonical_stage(current_stage))
+                                                          current_stage=get_canonical_stage(current_stage),
+                                                          create_time=int(time.time()*1000))
                     doc_model_version.save()
                     # update reference field
                     if model_name is not None:

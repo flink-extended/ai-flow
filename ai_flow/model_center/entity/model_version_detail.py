@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from ai_flow.endpoint.server import stringValue, doubleValue
+from ai_flow.endpoint.server import stringValue, int64Value
 from ai_flow.model_center.entity.model_version import ModelVersion
 from ai_flow.model_center.entity.model_version_stage import ModelVersionStage
 from ai_flow.model_center.entity.model_version_status import ModelVersionStatus
@@ -68,4 +68,4 @@ class ModelVersionDetail(ModelVersion):
                                 version_desc=stringValue(self.version_desc),
                                 version_status=ModelVersionStatus.from_string(self.version_status),
                                 current_stage=ModelVersionStage.from_string(self.current_stage.upper()),
-                                create_time=doubleValue(self.create_time))
+                                create_time=self.create_time)
