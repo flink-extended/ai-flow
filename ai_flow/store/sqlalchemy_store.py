@@ -1585,7 +1585,7 @@ class SqlAlchemyStore(AbstractStore):
         return session.query(SqlModelVersion).filter(*conditions).all()
 
     @classmethod
-    def _max_model_version(cls, session, registered_model):
+    def _next_model_version(cls, session, registered_model):
         conditions = [
             SqlModelVersion.model_name == registered_model.model_name
         ]
@@ -1629,7 +1629,7 @@ class SqlAlchemyStore(AbstractStore):
                     if sql_registered_model is None:
                         return None
                     else:
-                        model_version = self._max_model_version(session, sql_registered_model)
+                        model_version = self._next_model_version(session, sql_registered_model)
                         sql_model_version = SqlModelVersion(model_name=model_name,
                                                             model_version=model_version,
                                                             model_path=model_path,
