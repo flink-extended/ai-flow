@@ -19,15 +19,13 @@
 import time
 import unittest
 
-from notification_service.event_storage import MemoryEventStorage
-from notification_service.server import NotificationServer
-from notification_service.service import NotificationService
 
 from ai_flow.client.ai_flow_client import AIFlowClient
 from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.store.db.base_model import base
 from ai_flow.store.sqlalchemy_store import SqlAlchemyStore
 from ai_flow.util import sqlalchemy_db
+from ai_flow.test.util.notification_service_utils import start_notification_server, stop_notification_server
 
 _SQLITE_DB_FILE = 'aiflow.db'
 _SQLITE_DB_URI = '%s%s' % ('sqlite:///', _SQLITE_DB_FILE)
@@ -56,8 +54,7 @@ class TestHighAvailableAIFlowServer(unittest.TestCase):
 
     def setUp(self) -> None:
         SqlAlchemyStore(_SQLITE_DB_URI)
-        self.notification = NotificationServer(service=NotificationService(storage=MemoryEventStorage()), port=30031)
-        self.notification.run()
+        self.ns_server = start_notification_server()
         self.server1 = AIFlowServer(
             store_uri=_SQLITE_DB_URI, port=50051, enabled_ha=True, start_scheduler_service=False,
             ha_server_uri='localhost:50051', notification_server_uri='localhost:30031')
@@ -75,9 +72,10 @@ class TestHighAvailableAIFlowServer(unittest.TestCase):
             self.server2.stop()
         if self.server3 is not None:
             self.server3.stop()
-        if self.notification is not None:
-            self.notification.stop()
+
         sqlalchemy_db.clear_db(_SQLITE_DB_URI, base.metadata)
+        stop_notification_server(self.ns_server)
+        self.ns_server.storage.clean_up()
 
     def test_server_change(self) -> None:
         self.client.register_project("test_project")
