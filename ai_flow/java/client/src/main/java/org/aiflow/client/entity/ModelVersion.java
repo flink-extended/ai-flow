@@ -28,28 +28,30 @@ import com.google.gson.JsonObject;
 public class ModelVersion {
 
     private String modelName;
-    private String modelVersion;
+    private int modelVersion;
     private String modelPath;
     private String modelType;
     private String versionDesc;
     private ModelVersionStatus versionStatus;
     private ModelStage currentStage;
+    private Long createTime;
 
     public ModelVersion() {}
 
-    public ModelVersion(String modelName, String modelVersion) {
+    public ModelVersion(String modelName, int modelVersion) {
         this.modelName = modelName;
         this.modelVersion = modelVersion;
     }
 
     public ModelVersion(
             String modelName,
-            String modelVersion,
+            int modelVersion,
             String modelPath,
             String modelType,
             String versionDesc,
             ModelVersionStatus versionStatus,
-            ModelStage currentStage) {
+            ModelStage currentStage,
+            Long createTime) {
         this.modelName = modelName;
         this.modelVersion = modelVersion;
         this.modelPath = modelPath;
@@ -57,6 +59,7 @@ public class ModelVersion {
         this.versionDesc = versionDesc;
         this.versionStatus = versionStatus;
         this.currentStage = currentStage;
+        this.createTime = createTime;
     }
 
     public String getModelName() {
@@ -67,11 +70,11 @@ public class ModelVersion {
         this.modelName = modelName;
     }
 
-    public String getModelVersion() {
+    public int getModelVersion() {
         return modelVersion;
     }
 
-    public void setModelVersion(String modelVersion) {
+    public void setModelVersion(int modelVersion) {
         this.modelVersion = modelVersion;
     }
 
@@ -115,6 +118,14 @@ public class ModelVersion {
         this.currentStage = currentStage;
     }
 
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
     public String toJsonString() {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("model_name", this.modelName);
@@ -124,6 +135,7 @@ public class ModelVersion {
         jsonObject.addProperty("version_desc", this.versionDesc);
         jsonObject.addProperty("version_status", this.versionStatus.getNumber());
         jsonObject.addProperty("current_stage", this.currentStage.getModelStage().getNumber());
+        jsonObject.addProperty("create_time", this.createTime);
         return jsonObject.toString();
     }
 
@@ -149,6 +161,8 @@ public class ModelVersion {
                 + versionStatus
                 + ", currentStage="
                 + currentStage
+                + ", createTime="
+                + createTime
                 + '}';
     }
 
@@ -170,6 +184,7 @@ public class ModelVersion {
                         modelVersionMeta.getModelType().getValue(),
                         modelVersionMeta.getVersionDesc().getValue(),
                         modelVersionMeta.getVersionStatus(),
-                        ModelStage.getModelStage(modelVersionMeta.getCurrentStage()));
+                        ModelStage.getModelStage(modelVersionMeta.getCurrentStage()),
+                        modelVersionMeta.getCreateTime());
     }
 }

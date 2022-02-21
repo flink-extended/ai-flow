@@ -37,7 +37,7 @@ from ai_flow.protobuf.model_center_service_pb2 import CreateRegisteredModelReque
     UpdateRegisteredModelRequest, DeleteRegisteredModelRequest, ListRegisteredModelsRequest, \
     GetRegisteredModelDetailRequest, CreateModelVersionRequest, UpdateModelVersionRequest, DeleteModelVersionRequest, \
     GetModelVersionDetailRequest
-from ai_flow.endpoint.server import stringValue
+from ai_flow.endpoint.server import stringValue, int32Value
 from ai_flow.endpoint.client.base_client import BaseClient
 from ai_flow.endpoint.server.util import _parse_response
 
@@ -166,7 +166,7 @@ class ModelCenterClient(BaseClient):
         :return: A single updated :py:class:`ai_flow.model_center.entity.ModelVersionDetail` object.
         """
         request = UpdateModelVersionRequest(
-            model_meta=ModelMetaParam(model_name=stringValue(model_name), model_version=stringValue(model_version)),
+            model_meta=ModelMetaParam(model_name=stringValue(model_name), model_version=int32Value(model_version)),
             model_version=ModelVersionParam(model_path=stringValue(model_path),
                                             model_type=stringValue(model_type),
                                             version_desc=stringValue(version_desc),
@@ -191,7 +191,7 @@ class ModelCenterClient(BaseClient):
         :return: A single :py:class:`ai_flow.entities.model_registry.ModelVersion` object.
         """
         request = DeleteModelVersionRequest(model_meta=ModelMetaParam(model_name=stringValue(model_name),
-                                                                      model_version=stringValue(model_version)))
+                                                                      model_version=int32Value(model_version)))
         response = self.model_center_stub.deleteModelVersion(request)
         model_version_meta = ModelVersion.from_resp_proto(_parse_response(response, ModelMetaParam()))
         event_type = ModelVersionEventType.MODEL_DELETED
@@ -212,6 +212,6 @@ class ModelCenterClient(BaseClient):
         :return: A single :py:class:`ai_flow.entities.model_registry.ModelVersionDetail` object.
         """
         request = GetModelVersionDetailRequest(model_meta=ModelMetaParam(model_name=stringValue(model_name),
-                                                                         model_version=stringValue(model_version)))
+                                                                         model_version=int32Value(model_version)))
         response = self.model_center_stub.getModelVersionDetail(request)
         return ModelVersionDetail.from_proto(_parse_response(response, ModelVersionMeta()))

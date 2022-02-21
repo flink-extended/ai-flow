@@ -251,7 +251,10 @@ class ProtoToMeta:
                 'project_snapshot_id') else None,
             version_desc=model_version_proto.version_desc.value if model_version_proto.HasField(
                 'version_desc') else None,
-            current_stage=ModelVersionStage.Name(model_version_proto.current_stage))
+            current_stage=ModelVersionStage.Name(model_version_proto.current_stage),
+            create_time=model_version_proto.create_time if model_version_proto.HasField(
+                'create_time') else None
+        )
 
     @staticmethod
     def proto_to_model_version_meta_list(model_version_proto_list: List[ModelVersionProto]) -> List[ModelVersionMeta]:

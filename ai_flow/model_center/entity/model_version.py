@@ -30,7 +30,7 @@ class ModelVersion(_ModelRepoEntity):
         Construct a :py:class:`ai_flow.model_center.entity.ModelVersion` instance
 
         :param model_name: Unique name for this registered model within Model Registry.
-        :param model_version: String user-defined model version
+        :param model_version: Int, the model version.
         """
         super(ModelVersion, self).__init__()
         self.model_name = model_name

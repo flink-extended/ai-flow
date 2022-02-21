@@ -423,7 +423,7 @@ message ModelRelationListProto {
 
 //model version
 message ModelVersionNameRequest {
-    string name = 1;
+    int32 name = 1;
     int64 model_id = 2;
 }
 

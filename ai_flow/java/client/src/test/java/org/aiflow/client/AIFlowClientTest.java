@@ -657,7 +657,7 @@ public class AIFlowClientTest {
         String modelDesc = "model_description";
         ModelMeta model = client.registerModel(modelName, modelDesc, project.getUuid());
 
-        Assertions.assertNull(client.getModelVersionByVersion("1", model.getUuid()));
+        Assertions.assertNull(client.getModelVersionByVersion(1, model.getUuid()));
         String modelPath = "fs://source1.pkl";
         String modelType = "model_type";
         String versionDesc = "this is a good version";
@@ -669,7 +669,7 @@ public class AIFlowClientTest {
                         model.getUuid(),
                         Message.ModelVersionStage.GENERATED,
                         null);
-        Assertions.assertEquals("1", response.getVersion());
+        Assertions.assertEquals(1, response.getVersion());
 
         ModelVersionMeta modelVersion =
                 client.getModelVersionByVersion(response.getVersion(), model.getUuid());
@@ -696,13 +696,13 @@ public class AIFlowClientTest {
                         model.getUuid(),
                         Message.ModelVersionStage.GENERATED,
                         null);
-        Assertions.assertEquals("2", response2.getVersion());
+        Assertions.assertEquals(2, response2.getVersion());
 
         List<ModelVersionRelationMeta> modelVersionRelationList =
                 client.listModelVersionRelation(model.getUuid(), 5L, 0L);
         Assertions.assertEquals(2, modelVersionRelationList.size());
 
-        client.deleteModelVersionByVersion("2", model.getUuid());
+        client.deleteModelVersionByVersion(2, model.getUuid());
         List<ModelVersionRelationMeta> modelVersionRelationList2 =
                 client.listModelVersionRelation(model.getUuid(), 5L, 0L);
         Assertions.assertEquals(1, modelVersionRelationList2.size());
@@ -715,7 +715,7 @@ public class AIFlowClientTest {
                         model.getUuid(),
                         Message.ModelVersionStage.GENERATED,
                         null);
-        Assertions.assertEquals("2", response3.getVersion());
+        Assertions.assertEquals(3, response3.getVersion());
 
         List<EventMeta> eventMetas = nsClient.listAllEvents(0, 0, Integer.MAX_VALUE);
         Assertions.assertEquals(5, eventMetas.size());
@@ -735,8 +735,8 @@ public class AIFlowClientTest {
 
         String modelName = "model";
         ModelRelationMeta model = client.registerModelRelation(modelName, project.getUuid());
-        client.registerModelVersionRelation("1", model.getUuid(), null);
-        client.registerModelVersionRelation("2", model.getUuid(), null);
+        client.registerModelVersionRelation(1, model.getUuid(), null);
+        client.registerModelVersionRelation(2, model.getUuid(), null);
         Assertions.assertEquals(2, client.listModelVersionRelation(model.getUuid(), 5L, 0L).size());
     }
 
@@ -748,10 +748,10 @@ public class AIFlowClientTest {
 
         String modelName = "model";
         ModelRelationMeta model = client.registerModelRelation(modelName, project.getUuid());
-        client.registerModelVersionRelation("1", model.getUuid(), null);
-        Assertions.assertNotNull(client.getModelVersionRelationByVersion("1", model.getUuid()));
-        client.deleteModelVersionByVersion("1", model.getUuid());
-        Assertions.assertNull(client.getModelVersionRelationByVersion("1", model.getUuid()));
+        client.registerModelVersionRelation(1, model.getUuid(), null);
+        Assertions.assertNotNull(client.getModelVersionRelationByVersion(1, model.getUuid()));
+        client.deleteModelVersionByVersion(1, model.getUuid());
+        Assertions.assertNull(client.getModelVersionRelationByVersion(1, model.getUuid()));
     }
 
     // test artifact
@@ -892,12 +892,12 @@ public class AIFlowClientTest {
 
         ModelVersion modelVersion =
                 client.createModelVersion(modelName, modelPath1, modelType, versionDesc);
-        Assertions.assertEquals("1", modelVersion.getModelVersion());
+        Assertions.assertEquals(1, modelVersion.getModelVersion());
 
         RegisteredModel model = client.getRegisteredModelDetail(modelName);
         Assertions.assertEquals(modelDesc, model.getModelDesc());
         modelVersion = model.getLatestModelVersion();
-        Assertions.assertEquals("1", modelVersion.getModelVersion());
+        Assertions.assertEquals(1, modelVersion.getModelVersion());
         Assertions.assertEquals(modelPath1, modelVersion.getModelPath());
         Assertions.assertEquals(modelType, modelVersion.getModelType());
         Assertions.assertEquals(versionDesc, modelVersion.getVersionDesc());
@@ -905,11 +905,11 @@ public class AIFlowClientTest {
         String modelPath2 = "fs://source1.pkl.2";
         ModelVersion modelVersion2 =
                 client.createModelVersion(modelName, modelPath2, modelType, versionDesc);
-        Assertions.assertEquals("2", modelVersion2.getModelVersion());
+        Assertions.assertEquals(2, modelVersion2.getModelVersion());
         RegisteredModel model2 = client.getRegisteredModelDetail(modelName);
         Assertions.assertEquals(modelDesc, model2.getModelDesc());
         modelVersion2 = model2.getLatestModelVersion();
-        Assertions.assertEquals("2", modelVersion2.getModelVersion());
+        Assertions.assertEquals(2, modelVersion2.getModelVersion());
         Assertions.assertEquals(modelPath2, modelVersion2.getModelPath());
         List<EventMeta> eventMetas = nsClient.listAllEvents(0, 0, Integer.MAX_VALUE);
         Assertions.assertEquals(2, eventMetas.size());
@@ -935,13 +935,13 @@ public class AIFlowClientTest {
 
         ModelVersion modelVersion =
                 client.createModelVersion(modelName, modelPath1, modelType, versionDesc);
-        Assertions.assertEquals("1", modelVersion.getModelVersion());
+        Assertions.assertEquals(1, modelVersion.getModelVersion());
 
         String modelPath2 = "fs://source1.pkl.2";
         ModelVersion response =
                 client.updateModelVersion(
-                        modelName, "1", modelPath2, modelType, modelDesc, ModelStage.VALIDATED);
-        Assertions.assertEquals("1", response.getModelVersion());
+                        modelName, 1, modelPath2, modelType, modelDesc, ModelStage.VALIDATED);
+        Assertions.assertEquals(1, response.getModelVersion());
         Assertions.assertEquals(modelPath2, response.getModelPath());
         Assertions.assertEquals(ModelStage.VALIDATED, response.getCurrentStage());
         List<EventMeta> eventMetas = nsClient.listAllEvents(0, 0, Integer.MAX_VALUE);
@@ -968,14 +968,14 @@ public class AIFlowClientTest {
 
         ModelVersion modelVersion =
                 client.createModelVersion(modelName, modelPath, modelType, versionDesc);
-        Assertions.assertEquals("1", modelVersion.getModelVersion());
+        Assertions.assertEquals(1, modelVersion.getModelVersion());
 
-        ModelVersion detail = client.getModelVersionDetail(modelName, "1");
+        ModelVersion detail = client.getModelVersionDetail(modelName, 1);
         Assertions.assertEquals(modelName, detail.getModelName());
         Assertions.assertEquals(modelPath, detail.getModelPath());
-        Assertions.assertEquals("1", detail.getModelVersion());
-        client.deleteModelVersion(modelName, "1");
-        Assertions.assertNull(client.getModelVersionDetail(modelName, "1"));
+        Assertions.assertEquals(1, detail.getModelVersion());
+        client.deleteModelVersion(modelName, 1);
+        Assertions.assertNull(client.getModelVersionDetail(modelName, 1));
         List<EventMeta> eventMetas = nsClient.listAllEvents(0, 0, Integer.MAX_VALUE);
         Assertions.assertEquals(2, eventMetas.size());
         client.setNotificationClient(null);
@@ -1123,7 +1123,7 @@ public class AIFlowClientTest {
         String metricName = "test_metric_summary_1";
         String metricKey = "auc";
         String metricValue = "0.6";
-        String modelVersion = "version1";
+        Integer modelVersion = 0;
 
         MetricSummary metricSummary =
                 client.registerMetricSummary(
@@ -1148,7 +1148,7 @@ public class AIFlowClientTest {
         Assertions.assertEquals("job_1", metricSummary.getJobExecutionId());
 
         String newMetricKey = metricKey + "_new";
-        String newModelVersion = modelVersion + "_new";
+        int newModelVersion = 2;
         String newMetricValue = metricValue + "_new";
         MetricSummary metricSummary2 =
                 client.registerMetricSummary(
@@ -1162,15 +1162,14 @@ public class AIFlowClientTest {
                         newModelVersion,
                         null);
         List<MetricSummary> metricSummaryList =
-                client.listMetricSummaries(metricName, null, null, Long.MIN_VALUE, Long.MAX_VALUE);
+                client.listMetricSummaries(metricName, null, 0, Long.MIN_VALUE, Long.MAX_VALUE);
         Assertions.assertEquals(3, metricSummaryList.size());
         Assertions.assertEquals(metricKey, metricSummaryList.get(0).getMetricKey());
         Assertions.assertEquals(newMetricKey, metricSummaryList.get(1).getMetricKey());
         Assertions.assertEquals(newMetricKey, metricSummaryList.get(2).getMetricKey());
 
         metricSummaryList =
-                client.listMetricSummaries(
-                        null, newMetricKey, null, Long.MIN_VALUE, Long.MAX_VALUE);
+                client.listMetricSummaries(null, newMetricKey, 0, Long.MIN_VALUE, Long.MAX_VALUE);
         Assertions.assertEquals(2, metricSummaryList.size());
         Assertions.assertEquals(modelVersion, metricSummaryList.get(0).getModelVersion());
         Assertions.assertEquals(newModelVersion, metricSummaryList.get(1).getModelVersion());
@@ -1184,7 +1183,7 @@ public class AIFlowClientTest {
 
         Assertions.assertTrue(client.deleteMetricSummary(metricSummary2.getUuid()));
         metricSummaryList =
-                client.listMetricSummaries(metricName, null, null, Long.MIN_VALUE, Long.MAX_VALUE);
+                client.listMetricSummaries(metricName, null, 0, Long.MIN_VALUE, Long.MAX_VALUE);
         Assertions.assertEquals(2, metricSummaryList.size());
         Assertions.assertEquals(metricKey, metricSummaryList.get(0).getMetricKey());
         Assertions.assertEquals(metricValue, metricSummaryList.get(0).getMetricValue());
