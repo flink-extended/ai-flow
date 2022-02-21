@@ -33,6 +33,10 @@ Follow these steps to install AIFlow from source code:
    cd ai-flow
    sh install_aiflow.sh
    ```
+## Coding style and best practices
+### Code Comments
+We use [sphinx](https://www.sphinx-doc.org/en/master/) to generate documentation automatically. It requires developers to follow [reStructuredText](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html) grammar to add comments,
+otherwise the comments you added may be not parsed correctly.
 
 ## Run Tests
 
