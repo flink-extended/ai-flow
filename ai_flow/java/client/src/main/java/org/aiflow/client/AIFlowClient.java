@@ -370,7 +370,7 @@ public class AIFlowClient {
      * @return Single ModelVersionRelationMeta object if model relation exists, otherwise returns
      *     None if model relation does not exist.
      */
-    public ModelVersionRelationMeta getModelVersionRelationByVersion(String version, Long modelId)
+    public ModelVersionRelationMeta getModelVersionRelationByVersion(int version, Long modelId)
             throws Exception {
         return this.metadataClient.getModelVersionRelationByVersion(version, modelId);
     }
@@ -384,7 +384,7 @@ public class AIFlowClient {
      * @return Single ModelVersionRelationMeta object registered in Metadata Store.
      */
     public ModelVersionRelationMeta registerModelVersionRelation(
-            String version, Long modelId, Long projectSnapshotId) throws Exception {
+            int version, Long modelId, Long projectSnapshotId) throws Exception {
         return this.metadataClient.registerModelVersionRelation(
                 version, modelId, projectSnapshotId);
     }
@@ -410,8 +410,7 @@ public class AIFlowClient {
      * @return Status.OK if model version relation is successfully deleted, Status.ERROR if model
      *     version relation does not exist otherwise.
      */
-    public Status deleteModelVersionRelationByVersion(String version, Long modelId)
-            throws Exception {
+    public Status deleteModelVersionRelationByVersion(int version, Long modelId) throws Exception {
         return this.metadataClient.deleteModelVersionRelationByVersion(version, modelId);
     }
 
@@ -423,8 +422,7 @@ public class AIFlowClient {
      * @return Single ModelVersionMeta object if model relation exists, otherwise returns None if
      *     model relation does not exist.
      */
-    public ModelVersionMeta getModelVersionByVersion(String version, Long modelId)
-            throws Exception {
+    public ModelVersionMeta getModelVersionByVersion(int version, Long modelId) throws Exception {
         return this.metadataClient.getModelVersionByVersion(version, modelId);
     }
 
@@ -458,7 +456,7 @@ public class AIFlowClient {
      * @return Status.OK if model version is successfully deleted, Status.ERROR if model version
      *     does not exist otherwise.
      */
-    public Status deleteModelVersionByVersion(String version, Long modelId) throws Exception {
+    public Status deleteModelVersionByVersion(int version, Long modelId) throws Exception {
         return this.metadataClient.deleteModelVersionByVersion(version, modelId);
     }
 
@@ -883,7 +881,7 @@ public class AIFlowClient {
      */
     public ModelVersion updateModelVersion(
             String modelName,
-            String modelVersion,
+            int modelVersion,
             String modelPath,
             String modelType,
             String versionDesc,
@@ -901,7 +899,7 @@ public class AIFlowClient {
      * @param modelVersion User-defined version of registered model.
      * @return Object of ModelVersion deleted in Model Center.
      */
-    public ModelVersion deleteModelVersion(String modelName, String modelVersion) throws Exception {
+    public ModelVersion deleteModelVersion(String modelName, int modelVersion) throws Exception {
         return this.modelCenterClient.deleteModelVersion(modelName, modelVersion);
     }
 
@@ -913,8 +911,7 @@ public class AIFlowClient {
      * @param modelVersion User-defined version of registered model.
      * @return Object of ModelVersion created in Model Center.
      */
-    public ModelVersion getModelVersionDetail(String modelName, String modelVersion)
-            throws Exception {
+    public ModelVersion getModelVersionDetail(String modelName, int modelVersion) throws Exception {
         return this.modelCenterClient.getModelVersionDetail(modelName, modelVersion);
     }
 
@@ -1076,7 +1073,7 @@ public class AIFlowClient {
             String metricKey,
             String metricValue,
             long metricTimestamp,
-            String modelVersion,
+            Integer modelVersion,
             String jobExecutionId)
             throws AIFlowException {
         return this.metricClient.registerMetricSummary(
@@ -1103,7 +1100,7 @@ public class AIFlowClient {
             String metricKey,
             String metricValue,
             long metricTimestamp,
-            String modelVersion,
+            Integer modelVersion,
             String jobExecutionId)
             throws AIFlowException {
         return this.metricClient.updateMetricSummary(
@@ -1150,7 +1147,7 @@ public class AIFlowClient {
      * @throws AIFlowException
      */
     public List<MetricSummary> listMetricSummaries(
-            String metricName, String metricKey, String modelVersion, long startTime, long endTime)
+            String metricName, String metricKey, Integer modelVersion, long startTime, long endTime)
             throws AIFlowException {
         return this.metricClient.listMetricSummaries(
                 metricName, metricKey, modelVersion, startTime, endTime);

@@ -19,7 +19,7 @@
 import ast
 from typing import Text, Optional, Union, List
 from ai_flow.common.properties import Properties
-from ai_flow.endpoint.server import stringValue, int64Value
+from ai_flow.endpoint.server import stringValue, int64Value, int32Value
 from ai_flow.meta.metric_meta import MetricMeta, MetricType, MetricSummary
 from ai_flow.protobuf.message_pb2 import MetricMetaProto, MetricSummaryProto, MetricTypeProto, ReturnCode, \
     RESOURCE_DOES_NOT_EXIST, SUCCESS
@@ -133,7 +133,7 @@ def metric_summary_to_proto(metric_summary: MetricSummary) -> MetricSummaryProto
                               metric_key=stringValue(metric_summary.metric_key),
                               metric_value=stringValue(metric_summary.metric_value),
                               metric_timestamp=int64Value(metric_summary.metric_timestamp),
-                              model_version=stringValue(metric_summary.model_version),
+                              model_version=int32Value(metric_summary.model_version),
                               job_execution_id=stringValue(metric_summary.job_execution_id))
 
 

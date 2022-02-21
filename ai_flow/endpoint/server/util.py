@@ -483,4 +483,7 @@ def transform_model_version_meta(model_version_proto):
                             model_type=model_version_proto.model_type.value if model_version_proto.HasField(
                                 "model_type") else None,
                             version_desc=model_version_proto.version_desc.value if model_version_proto.HasField(
-                                "version_desc") else None)
+                                "version_desc") else None,
+                            create_time=model_version_proto.create_time.value if model_version_proto.HasField(
+                                "create_time") else None
+                            )

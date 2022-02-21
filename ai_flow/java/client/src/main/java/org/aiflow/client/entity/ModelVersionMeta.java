@@ -22,7 +22,7 @@ import org.aiflow.client.proto.Message.ModelVersionProto;
 
 public class ModelVersionMeta {
 
-    private String version;
+    private int version;
     private String modelPath;
     private String modelType;
     private String versionDesc;
@@ -32,7 +32,7 @@ public class ModelVersionMeta {
     public ModelVersionMeta() {}
 
     public ModelVersionMeta(
-            String version,
+            int version,
             String modelPath,
             String modelType,
             String versionDesc,
@@ -46,11 +46,11 @@ public class ModelVersionMeta {
         this.projectSnapshotId = projectSnapshotId;
     }
 
-    public String getVersion() {
+    public int getVersion() {
         return version;
     }
 
-    public void setVersion(String version) {
+    public void setVersion(int version) {
         this.version = version;
     }
 

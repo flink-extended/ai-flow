@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import time
 from enum import Enum
 from typing import Text
 from ai_flow.util.json_utils import Jsonable
@@ -23,13 +24,14 @@ from ai_flow.util.json_utils import Jsonable
 
 class ModelVersionMeta(Jsonable):
     def __init__(self,
-                 version: Text,
+                 version: int,
                  model_id: int,
                  model_path: Text = None,
                  model_type: Text = None,
                  project_snapshot_id: int = None,
                  version_desc: Text = None,
-                 current_stage: Text = None
+                 current_stage: Text = None,
+                 create_time: int = None
                  ) -> None:
         self.version = version
         self.model_id = model_id
@@ -38,9 +40,10 @@ class ModelVersionMeta(Jsonable):
         self.project_snapshot_id = project_snapshot_id
         self.version_desc = version_desc
         self.current_stage = current_stage
+        self.create_time = create_time
 
 
-def create_model_version(version: Text,
+def create_model_version(version: int,
                          model_id: int,
                          model_path: Text = None,
                          model_type: Text = None,
@@ -49,7 +52,7 @@ def create_model_version(version: Text,
                          current_stage: Text = None):
     return ModelVersionMeta(version=version, model_id=model_id, model_path=model_path,
                             model_type=model_type, project_snapshot_id=project_snapshot_id,
-                            version_desc=version_desc, current_stage=current_stage)
+                            version_desc=version_desc, current_stage=current_stage, create_time=int(time.time() * 1000))
 
 
 class ModelMeta(Jsonable):
