@@ -16,6 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from ai_flow.protobuf.message_pb2 import ModelVersionStage
 
 from ai_flow.common.status import Status
 from ai_flow.endpoint.client.model_center_client import ModelCenterClient
@@ -29,6 +30,7 @@ from ai_flow.endpoint.server.util import _wrap_meta_response, transform_dataset_
 from ai_flow.meta.dataset_meta import DataType
 from ai_flow.metadata_store.utils.MetaToProto import MetaToProto
 from ai_flow.metadata_store.utils.ProtoToMeta import ProtoToMeta
+from ai_flow.model_center.entity.model_version import ModelVersion
 from ai_flow.protobuf import metadata_service_pb2_grpc
 from ai_flow.protobuf.message_pb2 import DataTypeProto
 from ai_flow.store.db.db_util import create_db_store
@@ -246,17 +248,18 @@ class MetadataService(metadata_service_pb2_grpc.MetadataServiceServicer):
     def registerModelVersion(self, request, context):
         model_version = transform_model_version_meta(request.model_version)
         model_relation = self.store.get_model_relation_by_id(model_version.model_id)
-        model_version_detail = self.model_center_client.create_model_version(model_relation.name,
-                                                                             model_version.model_path,
-                                                                             model_version.model_type,
-                                                                             model_version.version_desc,
-                                                                             request.model_version.current_stage)
+        model_version_detail = self.store.create_model_version(model_name=model_relation.name,
+                                                               model_path=model_version.model_path,
+                                                               model_type=model_version.model_type,
+                                                               version_desc=model_version.version_desc,
+                                                               current_stage=ModelVersionStage.Name(request.model_version.current_stage)
+                                                               )
         model_version_relation = self.store.register_model_version_relation(version=model_version_detail.model_version,
                                                                             model_id=model_version.model_id,
                                                                             project_snapshot_id=
                                                                             model_version.project_snapshot_id)
         return _wrap_meta_response(
-            MetaToProto.model_version_meta_to_proto(model_version_relation, model_version_detail))
+            MetaToProto.model_version_store_to_proto(model_version_relation, model_version_detail))
 
     @catch_exception
     def deleteModelVersionByVersion(self, request, context):
@@ -267,7 +270,8 @@ class MetadataService(metadata_service_pb2_grpc.MetadataServiceServicer):
             model_version__status = self.store.delete_model_version_relation_by_version(request.name, request.model_id)
             model_relation = self.store.get_model_relation_by_id(model_version_relation.model_id)
             if model_relation is not None:
-                self.model_center_client.delete_model_version(model_relation.name, request.name)
+                self.store.delete_model_version(ModelVersion(model_name=model_relation.name,
+                                                             model_version=request.name))
             return _wrap_delete_response(model_version__status)
 
     @catch_exception

@@ -16,6 +16,12 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import json
+
+from ai_flow.model_center.entity.model_version import ModelVersion
+from ai_flow.model_center.entity.model_version_detail import ModelVersionDetail
+from notification_service.base_notification import BaseEvent
+
 from ai_flow.api.context_extractor import ContextExtractor, BroadcastAllContextExtractor
 from ai_flow.meta.workflow_meta import WorkflowMeta
 from typing import Optional, Text, List
@@ -23,6 +29,7 @@ from typing import Optional, Text, List
 import grpc
 import cloudpickle
 from ai_flow.common.status import Status
+from ai_flow.client.notification_client import get_notification_client
 from ai_flow.meta.artifact_meta import ArtifactMeta
 from ai_flow.meta.dataset_meta import DatasetMeta, Properties, DataType
 from ai_flow.meta.model_meta import ModelMeta, ModelVersionMeta
@@ -30,6 +37,7 @@ from ai_flow.meta.model_relation_meta import ModelRelationMeta, ModelVersionRela
 from ai_flow.meta.project_meta import ProjectMeta
 from ai_flow.meta.workflow_snapshot_meta import WorkflowSnapshotMeta
 from ai_flow.metadata_store.utils.MetaToProto import MetaToProto
+from ai_flow.model_center.entity.model_version_stage import MODEL_VERSION_TO_EVENT_TYPE, ModelVersionEventType
 from ai_flow.protobuf import metadata_service_pb2_grpc, metadata_service_pb2
 from ai_flow.protobuf.message_pb2 import DatasetProto, SchemaProto, ModelRelationProto, ModelProto, \
     ModelVersionRelationProto, ModelVersionProto, ProjectProto, \
@@ -465,7 +473,22 @@ class MetadataClient(BaseClient):
                                           current_stage=current_stage)
         request = metadata_service_pb2.RegisterModelVersionRequest(model_version=model_version)
         response = self.metadata_store_stub.registerModelVersion(request)
-        return _unwrap_model_version_response(response)
+        model_version_meta = _unwrap_model_version_response(response)
+        notification_client = get_notification_client()
+        if notification_client is not None:
+            event_type = MODEL_VERSION_TO_EVENT_TYPE.get(model_version_meta.current_stage)
+            model_meta = self.get_model_by_id(model_version_meta.model_id)
+            model_version_detail = ModelVersionDetail(model_name=model_meta.name,
+                                                      model_version=model_version_meta.version,
+                                                      model_path=model_version_meta.model_path,
+                                                      model_type=model_version_meta.model_type,
+                                                      version_desc=model_version_meta.version_desc,
+                                                      current_stage=ModelVersionStage.Value(model_version_meta.current_stage)
+                                                      )
+            notification_client.send_event(BaseEvent(model_version_detail.model_name,
+                                                     json.dumps(model_version_detail.__dict__),
+                                                     event_type))
+        return model_version_meta
 
     def delete_model_version_by_version(self, version, model_id) -> Status:
         """
@@ -478,6 +501,14 @@ class MetadataClient(BaseClient):
         """
         request = metadata_service_pb2.ModelVersionNameRequest(name=version, model_id=model_id)
         response = self.metadata_store_stub.deleteModelVersionByVersion(request)
+        notification_client = get_notification_client()
+        if notification_client is not None:
+            model_meta = self.get_model_by_id(model_id)
+            model_version = ModelVersion(model_name=model_meta.name,
+                                         model_version=version)
+            notification_client.send_event(BaseEvent(model_meta.name,
+                                                     json.dumps(model_version.__dict__),
+                                                     ModelVersionEventType.MODEL_DELETED))
         return _unwrap_delete_response(response)
 
     def get_deployed_model_version(self, model_name) -> ModelVersionMeta:

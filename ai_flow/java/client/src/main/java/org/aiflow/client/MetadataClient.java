@@ -19,16 +19,10 @@
 package org.aiflow.client;
 
 import org.aiflow.client.common.DataType;
+import org.aiflow.client.common.ModelStage;
 import org.aiflow.client.common.Status;
-import org.aiflow.client.entity.ArtifactMeta;
-import org.aiflow.client.entity.DatasetMeta;
-import org.aiflow.client.entity.ModelMeta;
-import org.aiflow.client.entity.ModelRelationMeta;
-import org.aiflow.client.entity.ModelVersionMeta;
-import org.aiflow.client.entity.ModelVersionRelationMeta;
-import org.aiflow.client.entity.ProjectMeta;
-import org.aiflow.client.entity.WorkflowMeta;
-import org.aiflow.client.entity.WorkflowSnapshotMeta;
+import org.aiflow.client.entity.*;
+import org.aiflow.client.proto.Message;
 import org.aiflow.client.proto.Message.ArtifactProto;
 import org.aiflow.client.proto.Message.DatasetProto;
 import org.aiflow.client.proto.Message.ModelProto;
@@ -73,6 +67,9 @@ import org.aiflow.client.proto.MetadataServiceOuterClass.UpdateWorkflowRequest;
 import org.aiflow.client.proto.MetadataServiceOuterClass.WorkflowListProto;
 import org.aiflow.client.proto.MetadataServiceOuterClass.WorkflowNameRequest;
 
+import org.aiflow.notification.client.NotificationClient;
+
+import com.google.gson.JsonObject;
 import com.google.protobuf.util.JsonFormat.Parser;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
@@ -83,6 +80,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.protobuf.util.JsonFormat.parser;
+import static org.aiflow.client.ModelCenterClient.modelStageToEventTypeMap;
 import static org.aiflow.client.common.Constant.SERVER_URI;
 import static org.aiflow.client.entity.ArtifactMeta.buildArtifactMeta;
 import static org.aiflow.client.entity.ArtifactMeta.buildArtifactMetas;
@@ -113,6 +111,7 @@ public class MetadataClient {
     private final MetadataServiceGrpc.MetadataServiceBlockingStub metadataServiceStub;
 
     private final Parser parser = parser().ignoringUnknownFields();
+    private NotificationClient notificationClient = null;
 
     public MetadataClient() {
         this(SERVER_URI);
@@ -124,6 +123,15 @@ public class MetadataClient {
 
     public MetadataClient(Channel channel) {
         this.metadataServiceStub = MetadataServiceGrpc.newBlockingStub(channel);
+    }
+
+    /**
+     * Set the notification client.
+     *
+     * @param client NotificationClient.
+     */
+    public void setNotificationClient(NotificationClient client) {
+        this.notificationClient = client;
     }
 
     /**
@@ -679,9 +687,28 @@ public class MetadataClient {
                 RegisterModelVersionRequest.newBuilder().setModelVersion(modelVersionProto).build();
         Response response = metadataServiceStub.registerModelVersion(request);
         ModelVersionProto.Builder builder = ModelVersionProto.newBuilder();
-        return StringUtils.isEmpty(metadataDetailResponse(response, this.parser, builder))
-                ? null
-                : buildModelVersionMeta(builder.build());
+        ModelVersionMeta modelVersionMeta =
+                StringUtils.isEmpty(metadataDetailResponse(response, this.parser, builder))
+                        ? null
+                        : buildModelVersionMeta(builder.build());
+        if (null != modelVersionMeta && null != this.notificationClient) {
+            ModelMeta modelMeta = this.getModelById(modelVersionMeta.getModelId());
+            ModelVersion modelVersion =
+                    new ModelVersion(
+                            modelMeta.getName(),
+                            modelVersionMeta.getVersion(),
+                            modelVersionMeta.getModelPath(),
+                            modelVersionMeta.getModelType(),
+                            modelVersionMeta.getVersionDesc(),
+                            Message.ModelVersionStatus.READY,
+                            ModelStage.getModelStage(currentStage));
+            this.notificationClient.sendEvent(
+                    modelVersion.getModelName(),
+                    modelVersion.toJsonString(),
+                    modelStageToEventTypeMap.get(modelVersion.getCurrentStage()),
+                    "");
+        }
+        return modelVersionMeta;
     }
 
     /**
@@ -696,7 +723,19 @@ public class MetadataClient {
         ModelVersionNameRequest request =
                 ModelVersionNameRequest.newBuilder().setName(version).setModelId(modelId).build();
         Response response = metadataServiceStub.deleteModelVersionByVersion(request);
-        return metadataDeleteResponse(response);
+        Status status = metadataDeleteResponse(response);
+        if (Status.OK == status && null != this.notificationClient) {
+            ModelMeta modelMeta = this.getModelById(modelId);
+            JsonObject value = new JsonObject();
+            value.addProperty("model_name", modelMeta.getName());
+            value.addProperty("model_version", version);
+            this.notificationClient.sendEvent(
+                    modelMeta.getName(),
+                    value.toString(),
+                    modelStageToEventTypeMap.get(ModelStage.DELETED),
+                    "");
+        }
+        return status;
     }
 
     /**

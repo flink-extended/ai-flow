@@ -34,18 +34,8 @@ from notification_service.client import NotificationClient
 
 class ModelCenterService(model_center_service_pb2_grpc.ModelCenterServiceServicer):
 
-    def __init__(self, store_uri, notification_server_uri=None):
+    def __init__(self, store_uri):
         self.model_repo_store = create_db_store(store_uri)
-        self._notification_server_uri = notification_server_uri
-        self._notification_client = None
-
-    @property
-    def notification_client(self) -> NotificationClient:
-        if self._notification_server_uri is None:
-            return None
-        elif self._notification_client is None:
-            self._notification_client = NotificationClient(self._notification_server_uri, default_namespace=DEFAULT_NAMESPACE)
-        return self._notification_client
 
     @catch_exception
     def createRegisteredModel(self, request, context):
@@ -92,11 +82,6 @@ class ModelCenterService(model_center_service_pb2_grpc.ModelCenterServiceService
                                                                         model_version_param.model_type,
                                                                         model_version_param.version_desc,
                                                                         model_version_param.current_stage)
-        event_type = MODEL_VERSION_TO_EVENT_TYPE.get(ModelVersionStage.from_string(model_version_param.current_stage))
-        if self.notification_client is not None:
-            self.notification_client.send_event(BaseEvent(model_version_meta.model_name,
-                                                          json.dumps(model_version_meta.__dict__),
-                                                          event_type))
         return _wrap_response(model_version_meta.to_meta_proto())
 
     @catch_exception
@@ -108,23 +93,12 @@ class ModelCenterService(model_center_service_pb2_grpc.ModelCenterServiceService
                                                                         model_version_param.model_type,
                                                                         model_version_param.version_desc,
                                                                         model_version_param.current_stage)
-        if model_version_param.current_stage is not None:
-            event_type = MODEL_VERSION_TO_EVENT_TYPE.get(
-                ModelVersionStage.from_string(model_version_param.current_stage))
-            if self.notification_client is not None:
-                self.notification_client.send_event(BaseEvent(model_version_meta.model_name,
-                                                              json.dumps(model_version_meta.__dict__),
-                                                              event_type))
         return _wrap_response(None if model_version_meta is None else model_version_meta.to_meta_proto())
 
     @catch_exception
     def deleteModelVersion(self, request, context):
         model_meta_param = ModelVersion.from_proto(request)
         self.model_repo_store.delete_model_version(model_meta_param)
-        if self.notification_client is not None:
-            self.notification_client.send_event(BaseEvent(model_meta_param.model_name,
-                                                          json.dumps(model_meta_param.__dict__),
-                                                          ModelVersionEventType.MODEL_DELETED))
         return _wrap_response(request.model_meta)
 
     @catch_exception

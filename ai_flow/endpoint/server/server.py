@@ -89,9 +89,7 @@ class AIFlowServer(object):
             logging.info("start model center service.")
 
             model_center_service_pb2_grpc.add_ModelCenterServiceServicer_to_server(
-                ModelCenterService(store_uri=store_uri,
-                                   notification_server_uri=notification_server_uri),
-                self.server)
+                ModelCenterService(store_uri=store_uri), self.server)
         if start_meta_service:
             logging.info("start meta service.")
             metadata_service_pb2_grpc.add_MetadataServiceServicer_to_server(

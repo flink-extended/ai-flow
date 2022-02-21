@@ -41,12 +41,17 @@ import org.aiflow.client.proto.ModelCenterServiceOuterClass.ListRegisteredModels
 import org.aiflow.client.proto.ModelCenterServiceOuterClass.UpdateModelVersionRequest;
 import org.aiflow.client.proto.ModelCenterServiceOuterClass.UpdateRegisteredModelRequest;
 
+import org.aiflow.notification.client.NotificationClient;
+
+import com.google.gson.JsonObject;
 import com.google.protobuf.util.JsonFormat.Parser;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.protobuf.util.JsonFormat.parser;
 import static org.aiflow.client.common.Constant.SERVER_URI;
@@ -61,7 +66,20 @@ public class ModelCenterClient {
 
     private final ModelCenterServiceBlockingStub modelCenterServiceStub;
 
+    private NotificationClient notificationClient = null;
+
     private final Parser parser = parser().ignoringUnknownFields();
+
+    public static Map<ModelStage, String> modelStageToEventTypeMap =
+            new HashMap<ModelStage, String>() {
+                {
+                    put(ModelStage.GENERATED, "MODEL_GENERATED");
+                    put(ModelStage.VALIDATED, "MODEL_VALIDATED");
+                    put(ModelStage.DEPLOYED, "MODEL_DEPLOYED");
+                    put(ModelStage.DEPRECATED, "MODEL_DEPRECATED");
+                    put(ModelStage.DELETED, "MODEL_DELETED");
+                }
+            };
 
     public ModelCenterClient() {
         this(SERVER_URI);
@@ -73,6 +91,15 @@ public class ModelCenterClient {
 
     public ModelCenterClient(Channel channel) {
         this.modelCenterServiceStub = ModelCenterServiceGrpc.newBlockingStub(channel);
+    }
+
+    /**
+     * Set the notification client.
+     *
+     * @param client NotificationClient.
+     */
+    public void setNotificationClient(NotificationClient client) {
+        this.notificationClient = client;
     }
 
     /**
@@ -208,9 +235,18 @@ public class ModelCenterClient {
                         .build();
         Response response = this.modelCenterServiceStub.createModelVersion(request);
         ModelVersionMeta.Builder builder = ModelVersionMeta.newBuilder();
-        return StringUtils.isEmpty(buildResponse(response, this.parser, builder))
-                ? null
-                : buildModelVersion(builder.build());
+        ModelVersion modelVersion =
+                StringUtils.isEmpty(buildResponse(response, this.parser, builder))
+                        ? null
+                        : buildModelVersion(builder.build());
+        if (null != modelVersion && null != this.notificationClient) {
+            this.notificationClient.sendEvent(
+                    modelVersion.getModelName(),
+                    modelVersion.toJsonString(),
+                    modelStageToEventTypeMap.get(modelVersion.getCurrentStage()),
+                    "");
+        }
+        return modelVersion;
     }
 
     /**
@@ -253,9 +289,19 @@ public class ModelCenterClient {
                         .build();
         Response response = this.modelCenterServiceStub.updateModelVersion(request);
         ModelVersionMeta.Builder builder = ModelVersionMeta.newBuilder();
-        return StringUtils.isEmpty(buildResponse(response, this.parser, builder))
-                ? null
-                : buildModelVersion(builder.build());
+        ModelVersion modelVersionResult =
+                StringUtils.isEmpty(buildResponse(response, this.parser, builder))
+                        ? null
+                        : buildModelVersion(builder.build());
+
+        if (null != modelVersionResult && null != this.notificationClient) {
+            this.notificationClient.sendEvent(
+                    modelVersionResult.getModelName(),
+                    modelVersionResult.toJsonString(),
+                    modelStageToEventTypeMap.get(modelVersionResult.getCurrentStage()),
+                    "");
+        }
+        return modelVersionResult;
     }
 
     /**
@@ -276,9 +322,21 @@ public class ModelCenterClient {
                         .build();
         Response response = this.modelCenterServiceStub.deleteModelVersion(request);
         ModelMetaParam.Builder builder = ModelMetaParam.newBuilder();
-        return StringUtils.isEmpty(buildResponse(response, this.parser, builder))
-                ? null
-                : buildModelVersion(builder.build());
+        ModelVersion modelVersionResult =
+                StringUtils.isEmpty(buildResponse(response, this.parser, builder))
+                        ? null
+                        : buildModelVersion(builder.build());
+        if (null != modelVersionResult && null != this.notificationClient) {
+            JsonObject value = new JsonObject();
+            value.addProperty("model_name", modelVersionResult.getModelName());
+            value.addProperty("model_version", modelVersionResult.getModelVersion());
+            this.notificationClient.sendEvent(
+                    modelVersionResult.getModelName(),
+                    value.toString(),
+                    modelStageToEventTypeMap.get(ModelStage.DELETED),
+                    "");
+        }
+        return modelVersionResult;
     }
 
     /**

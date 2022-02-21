@@ -38,6 +38,8 @@ import org.aiflow.client.entity.WorkflowSnapshotMeta;
 import org.aiflow.client.exception.AIFlowException;
 import org.aiflow.client.proto.Message;
 
+import org.aiflow.notification.client.NotificationClient;
+
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 
@@ -50,6 +52,7 @@ public class AIFlowClient {
     private final MetadataClient metadataClient;
     private final ModelCenterClient modelCenterClient;
     private final MetricClient metricClient;
+    private NotificationClient notificationClient = null;
 
     public AIFlowClient(String target) throws Exception {
         this(ManagedChannelBuilder.forTarget(target).usePlaintext().build());
@@ -59,6 +62,17 @@ public class AIFlowClient {
         this.metadataClient = new MetadataClient(channel);
         this.modelCenterClient = new ModelCenterClient(channel);
         this.metricClient = new MetricClient(channel);
+    }
+
+    /**
+     * Set the notification client.
+     *
+     * @param client NotificationClient.
+     */
+    public void setNotificationClient(NotificationClient client) {
+        this.notificationClient = client;
+        this.modelCenterClient.setNotificationClient(client);
+        this.metadataClient.setNotificationClient(client);
     }
 
     /**
