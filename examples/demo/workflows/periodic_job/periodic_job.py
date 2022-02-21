@@ -13,21 +13,18 @@ with af.job_config('job_3'):
     af.user_define_operation(processor=BashProcessor("echo job_3"))
 with af.job_config('job_4'):
     af.user_define_operation(processor=BashProcessor("echo job_4"))
-with af.job_config('job_5'):
-    af.user_define_operation(processor=BashProcessor("echo job_5"))
 
 # Workflow topology:#
 #
-#        |-> job_2 -> job_4
-# job_1->|
-#        |-> job_3 -> job_5
+# job_1 -> job_3
 #
-# Since we configured job_2 and job_3 to runs periodically,
-# the job_4 and job_5 will also be triggered multiple times as long as upstream jobs finished.
-af.action_on_job_status(job_name='job_2', upstream_job_name='job_1')
+# job_2 -> job_4
+#
+# Since we configured job_1 and job_2 to runs periodically,
+# the job_3 and job_4 will also be triggered multiple times as long as upstream jobs finished.
+
 af.action_on_job_status(job_name='job_3', upstream_job_name='job_1')
-af.action_on_job_status(job_name='job_4', upstream_job_name='job_2')
-af.action_on_job_status(job_name='job_5', upstream_job_name='job_3')
+af.action_on_job_status(job_name='job_4', upstream_job_name='2')
 
 
 

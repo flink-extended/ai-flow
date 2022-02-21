@@ -34,10 +34,3 @@ aiflow workflow start-execution ${project_path} ${workflow_name}
 
 [job_scheduling_on_status](workflows/job_scheduling_on_status)
 
-[job_scheduling_on_events](workflows/job_scheduling_on_events)
-
-[model_training](workflows/model_training)
-
-[read_only_job](workflows/read_only_job)
-
-[workflow_scheduling_on_events](workflows/workflow_scheduling_on_events)

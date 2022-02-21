@@ -1,8 +1,5 @@
 job_1:
   job_type: bash
-
-job_2:
-  job_type: bash
   # The job with periodic config will be executed periodically as configured.
   # You can set the `cron` to express the execution date of a job.
   #
@@ -12,7 +9,7 @@ job_2:
   periodic_config:
     cron: "0 */1 * * * * *"
 
-job_3:
+job_2:
   job_type: bash
   # You can also set the `interval` to express the execution interval of a job.
   #
@@ -22,8 +19,8 @@ job_3:
   periodic_config:
     interval: "0,0,1,0"
 
-job_4:
+job_3:
   job_type: bash
 
-job_5:
+job_4:
   job_type: bash
