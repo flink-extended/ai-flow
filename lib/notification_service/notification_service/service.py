@@ -23,7 +23,6 @@ import traceback
 from notification_service.base_notification import BaseEvent
 from notification_service.event_storage import BaseEventStorage, DbEventStorage
 from notification_service.high_availability import NotificationServerHaManager
-from notification_service.mongo_event_storage import MongoEventStorage
 from notification_service.proto import notification_service_pb2_grpc, notification_service_pb2
 from notification_service.util.utils import event_to_proto, event_list_to_proto, member_to_proto, event_proto_to_event, \
     proto_to_member, count_list_to_proto
@@ -48,6 +47,7 @@ class NotificationService(notification_service_pb2_grpc.NotificationServiceServi
         """
         db_engine = extract_db_engine_from_uri(storage_uri)
         if DBType.value_of(db_engine) == DBType.MONGODB:
+            from notification_service.mongo_event_storage import MongoEventStorage
             username, password, host, port, db = parse_mongo_uri(storage_uri)
             storage = MongoEventStorage(host=host,
                                         port=int(port),
