@@ -25,7 +25,7 @@ workdir=$docs
 tmpdir="$workdir"/__tmp
 
 cd "$workdir"
-generated_source="$workdir"/content/api/python/source_rst
+generated_source="$workdir"/reference/api/python/source_rst
 [ -e "${generated_source}" ] && rm -r "${generated_source}"
 mkdir "${generated_source}"
 

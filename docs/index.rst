@@ -25,13 +25,23 @@ Welcome to AIFlow's Documentation!
 =========================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents
 
    content/get_started/index
+   content/tutorial_and_examples/index
+   content/concepts
+   content/installation
+   content/development/index
    content/architecture/index
-   content/workflow_development/index
    content/deployment/index
-   content/customize/index
-   content/cli/index
-   content/api/index
+   content/plugins/index
+   content/how_to_guides/index
+
+.. toctree::
+   :maxdepth: 1
+   :caption: References
+
+   reference/cli/index
+   reference/api/index
+   reference/extra_packages

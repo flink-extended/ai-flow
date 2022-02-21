@@ -243,4 +243,4 @@ lib/airflow/log.txt*
 
 # docs generated
 docs/_build
-*.rst
+docs/reference/api/python/source_rst
