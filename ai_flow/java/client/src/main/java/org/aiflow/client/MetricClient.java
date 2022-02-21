@@ -37,8 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.aiflow.client.common.Constant.SERVER_URI;
-import static org.aiflow.client.util.Transform.int64Value;
-import static org.aiflow.client.util.Transform.stringValue;
+import static org.aiflow.client.util.Transform.*;
 
 public class MetricClient {
 
@@ -284,7 +283,7 @@ public class MetricClient {
             String metricKey,
             String metricValue,
             long metricTimestamp,
-            String modelVersion,
+            Integer modelVersion,
             String jobExecutionId)
             throws AIFlowException {
         Message.MetricSummaryProto metricSummaryProto =
@@ -293,7 +292,7 @@ public class MetricClient {
                         .setMetricKey(stringValue(metricKey))
                         .setMetricValue(stringValue(metricValue))
                         .setMetricTimestamp(int64Value(metricTimestamp))
-                        .setModelVersion(stringValue(modelVersion))
+                        .setModelVersion(int32Value(modelVersion))
                         .setJobExecutionId(stringValue(jobExecutionId))
                         .build();
         MetricSummaryRequest request =
@@ -329,7 +328,7 @@ public class MetricClient {
             String metricKey,
             String metricValue,
             long metricTimestamp,
-            String modelVersion,
+            Integer modelVersion,
             String jobExecutionId)
             throws AIFlowException {
         Message.MetricSummaryProto metricSummaryProto =
@@ -339,7 +338,7 @@ public class MetricClient {
                         .setMetricKey(stringValue(metricKey))
                         .setMetricValue(stringValue(metricValue))
                         .setMetricTimestamp(int64Value(metricTimestamp))
-                        .setModelVersion(stringValue(modelVersion))
+                        .setModelVersion(int32Value(modelVersion))
                         .setJobExecutionId(stringValue(jobExecutionId))
                         .build();
         MetricSummaryRequest request =
@@ -405,7 +404,7 @@ public class MetricClient {
      * @throws AIFlowException
      */
     public List<MetricSummary> listMetricSummaries(
-            String metricName, String metricKey, String modelVersion, long startTime, long endTime)
+            String metricName, String metricKey, Integer modelVersion, long startTime, long endTime)
             throws AIFlowException {
         MetricServiceOuterClass.ListMetricSummariesRequest.Builder builder =
                 MetricServiceOuterClass.ListMetricSummariesRequest.newBuilder();
@@ -416,8 +415,9 @@ public class MetricClient {
             builder.setMetricKey(stringValue(metricKey));
         }
         if (modelVersion != null) {
-            builder.setModelVersion(stringValue(modelVersion));
+            builder.setModelVersion(int32Value(modelVersion));
         }
+
         MetricServiceOuterClass.ListMetricSummariesRequest request =
                 builder.setStartTime(int64Value(startTime)).setEndTime(int64Value(endTime)).build();
         MetricServiceOuterClass.ListMetricSummariesResponse response =

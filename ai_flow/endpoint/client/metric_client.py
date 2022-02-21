@@ -22,7 +22,7 @@ import grpc
 
 from ai_flow.common.properties import Properties
 from ai_flow.endpoint.client.base_client import BaseClient
-from ai_flow.endpoint.server import int64Value, stringValue
+from ai_flow.endpoint.server import int64Value, stringValue, int32Value
 from ai_flow.meta.metric_meta import MetricMeta, MetricSummary, MetricType
 from ai_flow.metric.utils import proto_to_metric_meta, proto_to_metric_summary
 from ai_flow.protobuf import metric_service_pb2_grpc
@@ -257,7 +257,7 @@ class MetricClient(BaseClient):
                 metric_key=stringValue(metric_key),
                 metric_value=stringValue(metric_value),
                 metric_timestamp=int64Value(metric_timestamp),
-                model_version=stringValue(model_version),
+                model_version=int32Value(model_version),
                 job_execution_id=stringValue(job_execution_id))
         )
         response = self.metric_stub.registerMetricSummary(request)
@@ -356,7 +356,7 @@ class MetricClient(BaseClient):
         :return: List of :py:class:`ai_flow.meta.metric_meta.MetricSummary` objects.
         """
         request = ListMetricSummariesRequest(metric_name=stringValue(metric_name), metric_key=stringValue(metric_key),
-                                             model_version=stringValue(model_version),
+                                             model_version=int32Value(model_version),
                                              start_time=int64Value(start_time), end_time=int64Value(end_time))
         response = self.metric_stub.listMetricSummaries(request)
 

@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from ai_flow.endpoint.server import stringValue
+from ai_flow.endpoint.server import stringValue, int64Value
 from ai_flow.model_center.entity.model_version import ModelVersion
 from ai_flow.model_center.entity.model_version_stage import ModelVersionStage
 from ai_flow.model_center.entity.model_version_status import ModelVersionStatus
@@ -32,7 +32,7 @@ class ModelVersionDetail(ModelVersion):
 
     def __init__(self, model_name, model_version, model_path=None,
                  model_type=None, version_desc=None,
-                 version_status=None, current_stage=None):
+                 version_status=None, current_stage=None, create_time=None):
         # Constructor is called only from within the system by various backend stores.
         super(ModelVersionDetail, self).__init__(model_name=model_name,
                                                  model_version=model_version)
@@ -41,6 +41,7 @@ class ModelVersionDetail(ModelVersion):
         self.version_desc = version_desc
         self.version_status = version_status
         self.current_stage = current_stage
+        self.create_time = create_time
 
     @classmethod
     def _properties(cls):
@@ -57,7 +58,8 @@ class ModelVersionDetail(ModelVersion):
                        proto.model_path.value if proto.HasField("model_path") else None,
                        proto.model_type.value if proto.HasField("model_type") else None,
                        proto.version_desc.value if proto.HasField("version_desc") else None,
-                       proto.version_status, proto.current_stage)
+                       proto.version_status, proto.current_stage,
+                       proto.create_time)
 
     def to_meta_proto(self):
         return ModelVersionMeta(model_name=self.model_name, model_version=self.model_version,
@@ -65,4 +67,5 @@ class ModelVersionDetail(ModelVersion):
                                 model_type=stringValue(self.model_type),
                                 version_desc=stringValue(self.version_desc),
                                 version_status=ModelVersionStatus.from_string(self.version_status),
-                                current_stage=ModelVersionStage.from_string(self.current_stage.upper()))
+                                current_stage=ModelVersionStage.from_string(self.current_stage.upper()),
+                                create_time=self.create_time)

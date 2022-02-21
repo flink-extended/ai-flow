@@ -38,7 +38,11 @@ from ai_flow.protobuf.message_pb2 import RESOURCE_ALREADY_EXISTS, \
 from ai_flow.endpoint.server.exception import AIFlowException
 from ai_flow.test.endpoint import random_str
 from ai_flow.store.abstract_store import Orders
-from ai_flow.store.sqlalchemy_store import OrderBy
+IS_MONGO = os.getenv('IS_MONGO', 'False')
+if IS_MONGO == 'True':
+    from ai_flow.store.mongo_store import OrderBy
+else:
+    from ai_flow.store.sqlalchemy_store import OrderBy
 
 
 class TestContext(EventContext):
@@ -208,8 +212,6 @@ class AbstractTestStore(object):
         project_response2 = self.store.register_project(name='project2', uri='www.code.com')
         self.store.register_workflow(name='workflow', project_id=project_response.uuid)
         self.store.register_workflow(name='workflow', project_id=project_response2.uuid)
-        self.assertRaises(AIFlowException, self.store.register_workflow, name='workflow',
-                          project_id=project_response.uuid)
 
     def test_get_workflow_with_custom_context_extractor(self):
         project_response = self.store.register_project(name='project', uri='www.code.com')
@@ -411,36 +413,36 @@ class AbstractTestStore(object):
     def test_delete_project_by_id(self):
         self.store.register_project(name='project', uri='www.code.com')
         self.store.register_model_relation(name='model', project_id=1)
-        self.store.register_model_version_relation(version='1', model_id=1,
+        self.store.register_model_version_relation(version=1, model_id=1,
                                                    project_snapshot_id=None)
         self.assertEqual(self.store.get_project_by_id(1).name, 'project')
         self.assertEqual(self.store.get_model_relation_by_id(1).name, 'model')
-        self.assertEqual(self.store.get_model_version_relation_by_version('1', '1').version, '1')
+        self.assertEqual(self.store.get_model_version_relation_by_version(1, 1).version, 1)
         self.assertEqual(Status.OK, self.store.delete_project_by_id(1))
         self.assertIsNone(self.store.get_project_by_id(1))
         self.assertIsNone(self.store.get_model_relation_by_id(1))
-        self.assertIsNone(self.store.get_model_version_relation_by_version('1', '1'))
+        self.assertIsNone(self.store.get_model_version_relation_by_version(1, 1))
         self.assertIsNone(self.store.list_projects(1, 0))
         self.assertIsNone(self.store.list_model_relation(1, 0))
         self.assertIsNone(self.store.list_model_version_relation(1, 1, 0))
         self.store.register_project(name='project', uri='www.code.com')
         self.store.register_model_relation(name='model', project_id=2)
-        self.store.register_model_version_relation(version='1', model_id=2,
+        self.store.register_model_version_relation(version=1, model_id=2,
                                                    project_snapshot_id=None)
         self.assertEqual(Status.OK, self.store.delete_project_by_id(2))
 
     def test_delete_project_by_name(self):
         self.store.register_project(name='project', uri='www.code.com')
         self.store.register_model_relation(name='model', project_id=1)
-        self.store.register_model_version_relation(version='1', model_id=1,
+        self.store.register_model_version_relation(version=1, model_id=1,
                                                    project_snapshot_id=None)
         self.assertEqual(self.store.get_project_by_id(1).name, 'project')
         self.assertEqual(self.store.get_model_relation_by_id(1).name, 'model')
-        self.assertEqual(self.store.get_model_version_relation_by_version('1', '1').version, '1')
+        self.assertEqual(self.store.get_model_version_relation_by_version(1, 1).version, 1)
         self.assertEqual(Status.OK, self.store.delete_project_by_name('project'))
         self.assertIsNone(self.store.get_project_by_id(1))
         self.assertIsNone(self.store.get_model_relation_by_id(1))
-        self.assertIsNone(self.store.get_model_version_relation_by_version('1', '1'))
+        self.assertIsNone(self.store.get_model_version_relation_by_version(1, 1))
         self.assertIsNone(self.store.list_projects(1, 0))
         self.assertIsNone(self.store.list_model_relation(1, 0))
         self.assertIsNone(self.store.list_model_version_relation(1, 1, 0))
@@ -477,29 +479,29 @@ class AbstractTestStore(object):
     def test_delete_model_by_id(self):
         self.store.register_project(name='project', uri='www.code.com')
         self.store.register_model_relation(name='model', project_id=1)
-        response = self.store.register_model_version_relation(version='1', model_id=1, project_snapshot_id=None)
-        self.assertEqual(response.version, '1')
-        self.assertEqual(self.store.get_model_version_relation_by_version('1', 1).version, '1')
+        response = self.store.register_model_version_relation(version=1, model_id=1, project_snapshot_id=None)
+        self.assertEqual(response.version, 1)
+        self.assertEqual(self.store.get_model_version_relation_by_version(1, 1).version, 1)
         self.assertEqual(self.store.get_model_relation_by_name('model').name, 'model')
         self.assertEqual(Status.OK, self.store.delete_model_relation_by_id(1))
-        self.assertIsNone(self.store.get_model_version_relation_by_version('1', '1'))
+        self.assertIsNone(self.store.get_model_version_relation_by_version(1, 1))
         self.assertIsNone(self.store.get_model_relation_by_name('model'))
         self.store.register_model_relation(name='model', project_id=1)
-        self.store.register_model_version_relation(version='1', model_id=2, project_snapshot_id=None)
+        self.store.register_model_version_relation(version=1, model_id=2, project_snapshot_id=None)
         self.assertEqual(Status.OK, self.store.delete_model_relation_by_id(2))
 
     def test_delete_model_by_name(self):
         self.store.register_project(name='project', uri='www.code.com')
         self.store.register_model_relation(name='model', project_id=1)
-        response = self.store.register_model_version_relation(version='1', model_id=1, project_snapshot_id=None)
-        self.assertEqual(response.version, '1')
-        self.assertEqual(self.store.get_model_version_relation_by_version('1', '1').version, '1')
+        response = self.store.register_model_version_relation(version=1, model_id=1, project_snapshot_id=None)
+        self.assertEqual(response.version, 1)
+        self.assertEqual(self.store.get_model_version_relation_by_version(1, 1).version, 1)
         self.assertEqual(self.store.get_model_relation_by_name('model').name, 'model')
         self.assertEqual(Status.OK, self.store.delete_model_relation_by_name('model'))
-        self.assertIsNone(self.store.get_model_version_relation_by_version('1', '1'))
+        self.assertIsNone(self.store.get_model_version_relation_by_version(1, 1))
         self.assertIsNone(self.store.get_model_relation_by_name('model'))
         self.store.register_model_relation(name='model', project_id=1)
-        self.store.register_model_version_relation(version='1', model_id=2, project_snapshot_id=None)
+        self.store.register_model_version_relation(version=1, model_id=2, project_snapshot_id=None)
         self.assertEqual(Status.OK, self.store.delete_model_relation_by_name('model'))
 
     def test_double_register_model_relation(self):
@@ -513,28 +515,28 @@ class AbstractTestStore(object):
     def test_save_model_version_get_by_version(self):
         self.store.register_project(name='project', uri='www.code.com')
         self.store.register_model_relation(name='model', project_id=1)
-        response = self.store.register_model_version_relation(version='1', model_id=1, project_snapshot_id=None)
-        self.assertEqual(response.version, '1')
-        self.assertEqual(self.store.get_model_version_relation_by_version(version_name='1', model_id=1).version, '1')
+        response = self.store.register_model_version_relation(version=1, model_id=1, project_snapshot_id=None)
+        self.assertEqual(response.version, 1)
+        self.assertEqual(self.store.get_model_version_relation_by_version(version_name=1, model_id=1).version, 1)
 
     def test_list_model_version(self):
         self.store.register_project(name='project', uri='www.code.com')
         self.store.register_model_relation(name='model', project_id=1)
-        self.store.register_model_version_relation(version='1', model_id=1, project_snapshot_id=None)
-        self.store.register_model_version_relation(version='2', model_id=1, project_snapshot_id=None)
+        self.store.register_model_version_relation(version=1, model_id=1, project_snapshot_id=None)
+        self.store.register_model_version_relation(version=2, model_id=1, project_snapshot_id=None)
         self.assertEqual(len(self.store.list_model_version_relation(1, 2, 0)), 2)
-        self.assertEqual(self.store.list_model_version_relation(1, 2, 0)[0].version, '1')
-        self.assertEqual(self.store.list_model_version_relation(1, 2, 0)[1].version, '2')
+        self.assertEqual(self.store.list_model_version_relation(1, 2, 0)[0].version, 1)
+        self.assertEqual(self.store.list_model_version_relation(1, 2, 0)[1].version, 2)
 
     def test_delete_model_version_by_version(self):
         self.store.register_project(name='project', uri='www.code.com')
         self.store.register_model_relation(name='model', project_id=1)
-        self.store.register_model_version_relation(version='1', model_id=1, project_snapshot_id=None)
-        self.assertEqual(self.store.get_model_version_relation_by_version('1', 1).version, '1')
-        self.assertEqual(Status.OK, self.store.delete_model_version_relation_by_version('1', 1))
-        self.assertIsNone(self.store.get_model_version_relation_by_version('1', 1))
-        self.store.register_model_version_relation(version='1', model_id=1, project_snapshot_id=None)
-        self.assertEqual(Status.OK, self.store.delete_model_version_relation_by_version('1', 1))
+        self.store.register_model_version_relation(version=1, model_id=1, project_snapshot_id=None)
+        self.assertEqual(self.store.get_model_version_relation_by_version(1, 1).version, 1)
+        self.assertEqual(Status.OK, self.store.delete_model_version_relation_by_version(1, 1))
+        self.assertIsNone(self.store.get_model_version_relation_by_version(1, 1))
+        self.store.register_model_version_relation(version=1, model_id=1, project_snapshot_id=None)
+        self.assertEqual(Status.OK, self.store.delete_model_version_relation_by_version(1, 1))
 
     """test artifact"""
 
@@ -691,30 +693,30 @@ class AbstractTestStore(object):
             mock_time.return_value = 456778
             model_version1 = self._create_model_version(model_name)
             self.assertEqual(model_version1.model_name, model_name)
-            self.assertEqual(model_version1.model_version, '1')
+            self.assertEqual(model_version1.model_version, 1)
 
         model_version_detail1 = self.store.get_model_version_detail(model_version1)
         self.assertEqual(model_version_detail1.model_name, model_name)
-        self.assertEqual(model_version_detail1.model_version, '1')
+        self.assertEqual(model_version_detail1.model_version, 1)
         self.assertEqual(model_version_detail1.model_path, 'path/to/source')
         self.assertEqual(model_version_detail1.version_desc, 'model version desc')
         self.assertEqual(model_version_detail1.version_status, 'READY')
         self.assertEqual(model_version_detail1.current_stage, 'Generated')
         self.store.update_model_version(model_version1, current_stage='Validated')
-        self.assertEqual(self.store.get_latest_validated_model_version(model_name).model_version, '1')
+        self.assertEqual(self.store.get_latest_validated_model_version(model_name).model_version, 1)
         self.store.update_model_version(model_version1, current_stage='Deployed')
-        self.assertEqual(self.store.get_deployed_model_version(model_name).model_version, '1')
+        self.assertEqual(self.store.get_deployed_model_version(model_name).model_version, 1)
 
         # new model versions for same name autoincrement versions
         model_version2 = self._create_model_version(model_name)
         model_version_detail2 = self.store.get_model_version_detail(model_version2)
-        self.assertEqual(model_version2.model_version, '2')
-        self.assertEqual(model_version_detail2.model_version, '2')
+        self.assertEqual(model_version2.model_version, 2)
+        self.assertEqual(model_version_detail2.model_version, 2)
 
         model_version3 = self._create_model_version(model_name)
         model_version_detail3 = self.store.get_model_version_detail(model_version3)
-        self.assertEqual(model_version3.model_version, '3')
-        self.assertEqual(model_version_detail3.model_version, '3')
+        self.assertEqual(model_version3.model_version, 3)
+        self.assertEqual(model_version_detail3.model_version, 3)
 
     def test_get_deployed_model_version(self):
         model_name = 'test_for_create_model_version'
@@ -761,14 +763,14 @@ class AbstractTestStore(object):
         model_version1 = self._create_model_version(model_name)
         model_version_detail1 = self.store.get_model_version_detail(model_version1)
         self.assertEqual(model_version_detail1.model_name, model_name)
-        self.assertEqual(model_version_detail1.model_version, '1')
+        self.assertEqual(model_version_detail1.model_version, 1)
         self.assertEqual(model_version_detail1.current_stage, 'Generated')
 
         # update current stage
         self.store.update_model_version(model_version1, current_stage='Generated')
         model_version_detail2 = self.store.get_model_version_detail(model_version1)
         self.assertEqual(model_version_detail2.model_name, model_name)
-        self.assertEqual(model_version_detail2.model_version, '1')
+        self.assertEqual(model_version_detail2.model_version, 1)
         self.assertEqual(model_version_detail2.current_stage, 'Generated')
         self.assertEqual(model_version_detail2.version_desc, 'model version desc')
 
@@ -776,7 +778,7 @@ class AbstractTestStore(object):
         self.store.update_model_version(model_version1, version_desc='test model version')
         model_version_detail3 = self.store.get_model_version_detail(model_version1)
         self.assertEqual(model_version_detail3.model_name, model_name)
-        self.assertEqual(model_version_detail3.model_version, '1')
+        self.assertEqual(model_version_detail3.model_version, 1)
         self.assertEqual(model_version_detail3.current_stage, 'Generated')
         self.assertEqual(model_version_detail3.version_desc, 'test model version')
 
@@ -784,7 +786,7 @@ class AbstractTestStore(object):
         self.store.update_model_version(model_version1, current_stage='Validated', version_desc='test version desc')
         model_version_detail4 = self.store.get_model_version_detail(model_version1)
         self.assertEqual(model_version_detail4.model_name, model_name)
-        self.assertEqual(model_version_detail4.model_version, '1')
+        self.assertEqual(model_version_detail4.model_version, 1)
         self.assertEqual(model_version_detail4.current_stage, 'Validated')
         self.assertEqual(model_version_detail4.version_desc, 'test version desc')
 
@@ -894,11 +896,11 @@ class AbstractTestStore(object):
         metric_summary = self.store.register_metric_summary(metric_name=metric_summary.metric_name,
                                                             metric_key=metric_summary.metric_key,
                                                             metric_value='0.7', metric_timestamp=metric_timestamp + 1,
-                                                            model_version='test_metric_summary_model_version_1')
+                                                            model_version=1)
         metric_summary = self.store.register_metric_summary(metric_name=metric_summary.metric_name,
                                                             metric_key='roc',
                                                             metric_value='0.9', metric_timestamp=metric_timestamp + 1,
-                                                            model_version='test_metric_summary_model_version_2')
+                                                            model_version=2)
         metric_summaries = self.store.list_metric_summaries(metric_name=metric_summary.metric_name)
         self.assertEqual(3, len(metric_summaries))
         self.assertEqual('auc', metric_summaries[0].metric_key)
@@ -911,11 +913,7 @@ class AbstractTestStore(object):
         self.assertEqual(2, len(metric_summaries))
         self.assertEqual('0.8', metric_summaries[0].metric_value)
         self.assertEqual('0.7', metric_summaries[1].metric_value)
-        metric_summary = self.store.list_metric_summaries(model_version='test_metric_summary_model_version_1')
-        self.assertEqual('test_metric_summary_1', metric_summary.metric_name)
-        self.assertEqual('auc', metric_summary.metric_key)
-        self.assertEqual('0.7', metric_summary.metric_value)
-        metric_summary = self.store.list_metric_summaries(model_version='test_metric_summary_model_version_1')
+        metric_summary = self.store.list_metric_summaries(model_version=1)
         self.assertEqual('test_metric_summary_1', metric_summary.metric_name)
         self.assertEqual('auc', metric_summary.metric_key)
         self.assertEqual('0.7', metric_summary.metric_value)
@@ -928,7 +926,7 @@ class AbstractTestStore(object):
         self.assertEqual('roc', metric_summaries[1].metric_key)
         self.assertEqual('0.9', metric_summaries[1].metric_value)
         metric_summary = self.store.list_metric_summaries(metric_name=metric_summary.metric_name, metric_key='auc',
-                                                          model_version='test_metric_summary_model_version_1')
+                                                          model_version=1)
         self.assertEqual('test_metric_summary_1', metric_summary.metric_name)
         self.assertEqual('auc', metric_summary.metric_key)
         self.assertEqual('0.7', metric_summary.metric_value)

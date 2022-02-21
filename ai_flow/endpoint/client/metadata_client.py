@@ -43,7 +43,7 @@ from ai_flow.protobuf.message_pb2 import DatasetProto, SchemaProto, ModelRelatio
     ModelVersionRelationProto, ModelVersionProto, ProjectProto, \
     ArtifactProto, ModelVersionStage, WorkflowMetaProto, WorkflowSnapshotProto
 from ai_flow.protobuf.metadata_service_pb2 import ModelNameRequest
-from ai_flow.endpoint.server import stringValue, int64Value
+from ai_flow.endpoint.server import stringValue, int64Value, int32Value
 from ai_flow.endpoint.client.base_client import BaseClient
 from ai_flow.endpoint.server.util import _unwrap_dataset_response, \
     transform_dataset_type_list_to_proto, _unwrap_dataset_list_response, _unwrap_delete_response, \
@@ -394,7 +394,7 @@ class MetadataClient(BaseClient):
         :param project_snapshot_id: the project snapshot id corresponded to the model version
         :return: A single :py:class:`ai_flow.meta.model_relation_meta.ModelVersionRelationMeta` object.
         """
-        model_version = ModelVersionRelationProto(version=stringValue(version), model_id=int64Value(model_id),
+        model_version = ModelVersionRelationProto(version=int32Value(version), model_id=int64Value(model_id),
                                                   project_snapshot_id=int64Value(project_snapshot_id))
         request = metadata_service_pb2.RegisterModelVersionRelationRequest(model_version_relation=model_version)
         response = self.metadata_store_stub.registerModelVersionRelation(request)

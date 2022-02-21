@@ -99,11 +99,7 @@ import static org.aiflow.client.entity.WorkflowMeta.buildWorkflowMeta;
 import static org.aiflow.client.entity.WorkflowMeta.buildWorkflowMetas;
 import static org.aiflow.client.entity.WorkflowSnapshotMeta.buildWorkflowSnapshotMeta;
 import static org.aiflow.client.entity.WorkflowSnapshotMeta.buildWorkflowSnapshotMetas;
-import static org.aiflow.client.util.Transform.dataTypeList;
-import static org.aiflow.client.util.Transform.int64Value;
-import static org.aiflow.client.util.Transform.metadataDeleteResponse;
-import static org.aiflow.client.util.Transform.metadataDetailResponse;
-import static org.aiflow.client.util.Transform.stringValue;
+import static org.aiflow.client.util.Transform.*;
 
 /** Client of AIFlow Rest Endpoint that provides Metadata Store function service. */
 public class MetadataClient {
@@ -560,7 +556,7 @@ public class MetadataClient {
      * @return Single ModelVersionRelationMeta object if model relation exists, otherwise returns
      *     None if model relation does not exist.
      */
-    public ModelVersionRelationMeta getModelVersionRelationByVersion(String version, Long modelId)
+    public ModelVersionRelationMeta getModelVersionRelationByVersion(int version, Long modelId)
             throws Exception {
         ModelVersionNameRequest request =
                 ModelVersionNameRequest.newBuilder().setName(version).setModelId(modelId).build();
@@ -580,10 +576,10 @@ public class MetadataClient {
      * @return Single ModelVersionRelationMeta object registered in Metadata Store.
      */
     public ModelVersionRelationMeta registerModelVersionRelation(
-            String version, Long modelId, Long projectSnapshotId) throws Exception {
+            int version, Long modelId, Long projectSnapshotId) throws Exception {
         ModelVersionRelationProto modelVersionRelationProto =
                 ModelVersionRelationProto.newBuilder()
-                        .setVersion(stringValue(version))
+                        .setVersion(int32Value(version))
                         .setModelId(int64Value(modelId))
                         .setProjectSnapshotId(int64Value(projectSnapshotId))
                         .build();
@@ -629,8 +625,7 @@ public class MetadataClient {
      * @return Status.OK if model version relation is successfully deleted, Status.ERROR if model
      *     version relation does not exist otherwise.
      */
-    public Status deleteModelVersionRelationByVersion(String version, Long modelId)
-            throws Exception {
+    public Status deleteModelVersionRelationByVersion(int version, Long modelId) throws Exception {
         ModelVersionNameRequest request =
                 ModelVersionNameRequest.newBuilder().setName(version).setModelId(modelId).build();
         Response response = metadataServiceStub.deleteModelVersionRelationByVersion(request);
@@ -645,8 +640,7 @@ public class MetadataClient {
      * @return Single ModelVersionMeta object if model relation exists, otherwise returns None if
      *     model relation does not exist.
      */
-    public ModelVersionMeta getModelVersionByVersion(String version, Long modelId)
-            throws Exception {
+    public ModelVersionMeta getModelVersionByVersion(int version, Long modelId) throws Exception {
         ModelVersionNameRequest request =
                 ModelVersionNameRequest.newBuilder().setName(version).setModelId(modelId).build();
         Response response = metadataServiceStub.getModelVersionByVersion(request);
@@ -701,7 +695,8 @@ public class MetadataClient {
                             modelVersionMeta.getModelType(),
                             modelVersionMeta.getVersionDesc(),
                             Message.ModelVersionStatus.READY,
-                            ModelStage.getModelStage(currentStage));
+                            ModelStage.getModelStage(currentStage),
+                            System.currentTimeMillis());
             this.notificationClient.sendEvent(
                     modelVersion.getModelName(),
                     modelVersion.toJsonString(),
@@ -719,7 +714,7 @@ public class MetadataClient {
      * @return Status.OK if model version is successfully deleted, Status.ERROR if model version
      *     does not exist otherwise.
      */
-    public Status deleteModelVersionByVersion(String version, Long modelId) throws Exception {
+    public Status deleteModelVersionByVersion(int version, Long modelId) throws Exception {
         ModelVersionNameRequest request =
                 ModelVersionNameRequest.newBuilder().setName(version).setModelId(modelId).build();
         Response response = metadataServiceStub.deleteModelVersionByVersion(request);

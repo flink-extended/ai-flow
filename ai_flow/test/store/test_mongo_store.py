@@ -28,6 +28,7 @@ from ai_flow.store.mongo_store import MongoStore, MongoStoreConnManager
 from ai_flow.store.db.db_util import parse_mongo_uri
 from ai_flow.endpoint.server.exception import AIFlowException
 from ai_flow.test.test_util import get_mongodb_server_url
+os.environ['IS_MONGO'] = 'True'
 from ai_flow.test.store.common import AbstractTestStore
 
 

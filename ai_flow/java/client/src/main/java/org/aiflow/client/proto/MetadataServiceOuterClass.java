@@ -9805,16 +9805,10 @@ public final class MetadataServiceOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string name = 1;</code>
+     * <code>int32 name = 1;</code>
      * @return The name.
      */
-    java.lang.String getName();
-    /**
-     * <code>string name = 1;</code>
-     * @return The bytes for name.
-     */
-    com.google.protobuf.ByteString
-        getNameBytes();
+    int getName();
 
     /**
      * <code>int64 model_id = 2;</code>
@@ -9839,7 +9833,6 @@ public final class MetadataServiceOuterClass {
       super(builder);
     }
     private ModelVersionNameRequest() {
-      name_ = "";
     }
 
     @java.lang.Override
@@ -9872,10 +9865,9 @@ public final class MetadataServiceOuterClass {
             case 0:
               done = true;
               break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 8: {
 
-              name_ = s;
+              name_ = input.readInt32();
               break;
             }
             case 16: {
@@ -9916,41 +9908,14 @@ public final class MetadataServiceOuterClass {
     }
 
     public static final int NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object name_;
+    private int name_;
     /**
-     * <code>string name = 1;</code>
+     * <code>int32 name = 1;</code>
      * @return The name.
      */
     @java.lang.Override
-    public java.lang.String getName() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        name_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string name = 1;</code>
-     * @return The bytes for name.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getNameBytes() {
-      java.lang.Object ref = name_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        name_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public int getName() {
+      return name_;
     }
 
     public static final int MODEL_ID_FIELD_NUMBER = 2;
@@ -9978,8 +9943,8 @@ public final class MetadataServiceOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      if (name_ != 0) {
+        output.writeInt32(1, name_);
       }
       if (modelId_ != 0L) {
         output.writeInt64(2, modelId_);
@@ -9993,8 +9958,9 @@ public final class MetadataServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!getNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+      if (name_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, name_);
       }
       if (modelId_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
@@ -10015,8 +9981,8 @@ public final class MetadataServiceOuterClass {
       }
       org.aiflow.client.proto.MetadataServiceOuterClass.ModelVersionNameRequest other = (org.aiflow.client.proto.MetadataServiceOuterClass.ModelVersionNameRequest) obj;
 
-      if (!getName()
-          .equals(other.getName())) return false;
+      if (getName()
+          != other.getName()) return false;
       if (getModelId()
           != other.getModelId()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -10031,7 +9997,7 @@ public final class MetadataServiceOuterClass {
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + NAME_FIELD_NUMBER;
-      hash = (53 * hash) + getName().hashCode();
+      hash = (53 * hash) + getName();
       hash = (37 * hash) + MODEL_ID_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getModelId());
@@ -10172,7 +10138,7 @@ public final class MetadataServiceOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        name_ = "";
+        name_ = 0;
 
         modelId_ = 0L;
 
@@ -10252,9 +10218,8 @@ public final class MetadataServiceOuterClass {
 
       public Builder mergeFrom(org.aiflow.client.proto.MetadataServiceOuterClass.ModelVersionNameRequest other) {
         if (other == org.aiflow.client.proto.MetadataServiceOuterClass.ModelVersionNameRequest.getDefaultInstance()) return this;
-        if (!other.getName().isEmpty()) {
-          name_ = other.name_;
-          onChanged();
+        if (other.getName() != 0) {
+          setName(other.getName());
         }
         if (other.getModelId() != 0L) {
           setModelId(other.getModelId());
@@ -10288,78 +10253,33 @@ public final class MetadataServiceOuterClass {
         return this;
       }
 
-      private java.lang.Object name_ = "";
+      private int name_ ;
       /**
-       * <code>string name = 1;</code>
+       * <code>int32 name = 1;</code>
        * @return The name.
        */
-      public java.lang.String getName() {
-        java.lang.Object ref = name_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          name_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public int getName() {
+        return name_;
       }
       /**
-       * <code>string name = 1;</code>
-       * @return The bytes for name.
-       */
-      public com.google.protobuf.ByteString
-          getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          name_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string name = 1;</code>
+       * <code>int32 name = 1;</code>
        * @param value The name to set.
        * @return This builder for chaining.
        */
-      public Builder setName(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setName(int value) {
+        
         name_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string name = 1;</code>
+       * <code>int32 name = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearName() {
         
-        name_ = getDefaultInstance().getName();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string name = 1;</code>
-       * @param value The bytes for name to set.
-       * @return This builder for chaining.
-       */
-      public Builder setNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        name_ = value;
+        name_ = 0;
         onChanged();
         return this;
       }
@@ -31482,7 +31402,7 @@ public final class MetadataServiceOuterClass {
       "\001(\0132\023.ai_flow.ModelProto\"N\n\026ModelRelatio" +
       "nListProto\0224\n\017model_relations\030\001 \003(\0132\033.ai" +
       "_flow.ModelRelationProto\"9\n\027ModelVersion" +
-      "NameRequest\022\014\n\004name\030\001 \001(\t\022\020\n\010model_id\030\002 " +
+      "NameRequest\022\014\n\004name\030\001 \001(\005\022\020\n\010model_id\030\002 " +
       "\001(\003\"i\n#RegisterModelVersionRelationReque" +
       "st\022B\n\026model_version_relation\030\001 \001(\0132\".ai_" +
       "flow.ModelVersionRelationProto\"P\n\033Regist" +

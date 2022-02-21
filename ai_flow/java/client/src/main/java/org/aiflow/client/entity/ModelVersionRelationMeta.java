@@ -26,23 +26,23 @@ import java.util.List;
 
 public class ModelVersionRelationMeta {
 
-    private String version;
+    private int version;
     private Long modelId;
     private Long projectSnapshotId;
 
     public ModelVersionRelationMeta() {}
 
-    public ModelVersionRelationMeta(String version, Long modelId, Long projectSnapshotId) {
+    public ModelVersionRelationMeta(int version, Long modelId, Long projectSnapshotId) {
         this.version = version;
         this.modelId = modelId;
         this.projectSnapshotId = projectSnapshotId;
     }
 
-    public String getVersion() {
+    public int getVersion() {
         return version;
     }
 
-    public void setVersion(String version) {
+    public void setVersion(int version) {
         this.version = version;
     }
 

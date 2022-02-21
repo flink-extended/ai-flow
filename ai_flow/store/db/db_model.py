@@ -16,15 +16,17 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import time
+
 import cloudpickle
 
 from notification_service.base_notification import BaseEvent
 from sqlalchemy import (
     Column, String, ForeignKey, Integer, PrimaryKeyConstraint, BigInteger, UniqueConstraint, LargeBinary, Boolean, Text,
-    PickleType)
+    PickleType, Float)
 from sqlalchemy.orm import relationship, backref
 from mongoengine import (Document, StringField, IntField, LongField, ReferenceField,
-                         BooleanField, ListField, ObjectIdField, SequenceField, BinaryField)
+                         BooleanField, ListField, ObjectIdField, SequenceField, BinaryField, FloatField)
 
 from ai_flow.meta.metric_meta import MetricType
 from ai_flow.model_center.entity.model_version_detail import ModelVersionDetail
@@ -174,7 +176,7 @@ class SqlModelVersionRelation(base):
     """
     __tablename__ = 'model_version_relation'
 
-    version = Column(String(255), primary_key=True)
+    version = Column(Integer, primary_key=True)
     model_id = Column(BigInteger, ForeignKey('model_relation.uuid', onupdate='cascade'), primary_key=True)
     project_snapshot_id = Column(BigInteger, ForeignKey('project_snapshot.uuid', onupdate='cascade'))
     is_deleted = Column(String(256), default='False')
@@ -247,13 +249,14 @@ class SqlModelVersion(base):
     __tablename__ = 'model_version'
 
     model_name = Column(String(255), ForeignKey('registered_model.model_name', onupdate='cascade', ondelete='cascade'))
-    model_version = Column(String(10), nullable=False)
+    model_version = Column(Integer(), nullable=False)
     model_path = Column(String(500), nullable=True, default=None)
     model_type = Column(String(500), nullable=True, default=None)
     version_desc = Column(String(1000), nullable=True)
     version_status = Column(String(20),
                             default=ModelVersionStatus.to_string(ModelVersionStatus.READY))
     current_stage = Column(String(20), default=STAGE_GENERATED)
+    create_time = Column(BigInteger, default=int(time.time()*1000))
 
     # linked entities
     registered_model = relationship('SqlRegisteredModel', backref=backref('model_version', cascade='all'))
@@ -263,16 +266,16 @@ class SqlModelVersion(base):
     )
 
     def __repr__(self):
-        return '<SqlModelVersion ({}, {}, {}, {}, {}, {}, {})>'.format(self.model_name, self.model_version,
-                                                                       self.model_path, self.model_type,
-                                                                       self.version_desc, self.version_status,
-                                                                       self.current_stage)
+        return '<SqlModelVersion ({}, {}, {}, {}, {}, {}, {}, {})>'.format(self.model_name, self.model_version,
+                                                                           self.model_path, self.model_type,
+                                                                           self.version_desc, self.version_status,
+                                                                           self.current_stage, self.create_time)
 
     # entity mappers
     def to_meta_entity(self):
         return ModelVersionDetail(self.model_name, self.model_version,
                                   self.model_path, self.model_type, self.version_desc,
-                                  self.version_status, self.current_stage)
+                                  self.version_status, self.current_stage, self.create_time)
 
 
 class SqlEvent(base):
@@ -336,7 +339,7 @@ class SqlMetricSummary(base, Base):
     metric_key = Column(String(256), nullable=False)
     metric_value = Column(String(2048), nullable=False)
     metric_timestamp = Column(BigInteger, nullable=False)
-    model_version = Column(String(256))
+    model_version = Column(Integer())
     job_execution_id = Column(String(256))
     is_deleted = Column(String(128), default='False')
 
@@ -430,7 +433,7 @@ class MongoModelVersionRelation(Document):
     Document of model version relation in metadata backend storage.
     """
 
-    version = StringField(max_length=255, required=True, unique=True)
+    version = IntField(required=True)
     model_id = IntField()
     project_snapshot_id = IntField()
     version_model_id_unique = StringField(max_length=1000, required=True, unique=True)
@@ -523,8 +526,9 @@ class MongoWorkflow(Document):
     """
 
     uuid = SequenceField(db_alias=MONGO_DB_ALIAS_META_SERVICE)
-    name = StringField(max_length=255, required=True, unique=True)
-    project_id = IntField()
+    name = StringField(max_length=255, required=True)
+    project_id = IntField(default=0)
+    project_id_name_unique = StringField(max_length=500, required=True, unique=True)
     properties = StringField(max_length=1000)
     create_time = LongField()
     update_time = LongField()
@@ -577,7 +581,7 @@ class MongoModelVersion(Document):
     """
 
     model_name = StringField(max_length=255, required=True)
-    model_version = StringField(max_length=10, required=True)
+    model_version = IntField(required=True)
     model_path = StringField(max_length=500, default=None)
     model_type = StringField(max_length=500, default=None)
     version_desc = StringField(max_length=1000)
@@ -585,6 +589,7 @@ class MongoModelVersion(Document):
                                  default=ModelVersionStatus.to_string(ModelVersionStatus.READY))
     current_stage = StringField(max_length=20, default=STAGE_GENERATED)
     name_version_current_stage_unique = StringField(max_length=1000, required=True, unique=True)
+    create_time = LongField(default=None)
 
     meta = {'db_alias': MONGO_DB_ALIAS_META_SERVICE}
 
@@ -604,7 +609,8 @@ class MongoModelVersion(Document):
             self.model_type,
             self.version_desc,
             self.version_status,
-            self.current_stage)
+            self.current_stage,
+            self.create_time)
 
     def to_meta_entity(self):
         return ModelVersionDetail(self.model_name,
@@ -613,7 +619,8 @@ class MongoModelVersion(Document):
                                   self.model_type,
                                   self.version_desc,
                                   self.version_status,
-                                  self.current_stage)
+                                  self.current_stage,
+                                  self.create_time)
 
 
 class MongoRegisteredModel(Document):
@@ -714,7 +721,7 @@ class MongoMetricSummary(Document):
     metric_key = StringField(max_length=256, required=True)
     metric_value = StringField(max_length=2048, required=True)
     metric_timestamp = LongField()
-    model_version = StringField(max_length=256)
+    model_version = IntField()
     job_execution_id = StringField(max_length=256)
     is_deleted = BooleanField(default=False)
 

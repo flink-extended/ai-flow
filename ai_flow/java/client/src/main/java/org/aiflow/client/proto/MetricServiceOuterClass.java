@@ -6606,19 +6606,19 @@ public final class MetricServiceOuterClass {
     com.google.protobuf.StringValueOrBuilder getMetricKeyOrBuilder();
 
     /**
-     * <code>.google.protobuf.StringValue model_version = 3;</code>
+     * <code>.google.protobuf.Int32Value model_version = 3;</code>
      * @return Whether the modelVersion field is set.
      */
     boolean hasModelVersion();
     /**
-     * <code>.google.protobuf.StringValue model_version = 3;</code>
+     * <code>.google.protobuf.Int32Value model_version = 3;</code>
      * @return The modelVersion.
      */
-    com.google.protobuf.StringValue getModelVersion();
+    com.google.protobuf.Int32Value getModelVersion();
     /**
-     * <code>.google.protobuf.StringValue model_version = 3;</code>
+     * <code>.google.protobuf.Int32Value model_version = 3;</code>
      */
-    com.google.protobuf.StringValueOrBuilder getModelVersionOrBuilder();
+    com.google.protobuf.Int32ValueOrBuilder getModelVersionOrBuilder();
 
     /**
      * <code>.google.protobuf.Int64Value start_time = 4;</code>
@@ -6722,11 +6722,11 @@ public final class MetricServiceOuterClass {
               break;
             }
             case 26: {
-              com.google.protobuf.StringValue.Builder subBuilder = null;
+              com.google.protobuf.Int32Value.Builder subBuilder = null;
               if (modelVersion_ != null) {
                 subBuilder = modelVersion_.toBuilder();
               }
-              modelVersion_ = input.readMessage(com.google.protobuf.StringValue.parser(), extensionRegistry);
+              modelVersion_ = input.readMessage(com.google.protobuf.Int32Value.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(modelVersion_);
                 modelVersion_ = subBuilder.buildPartial();
@@ -6845,9 +6845,9 @@ public final class MetricServiceOuterClass {
     }
 
     public static final int MODEL_VERSION_FIELD_NUMBER = 3;
-    private com.google.protobuf.StringValue modelVersion_;
+    private com.google.protobuf.Int32Value modelVersion_;
     /**
-     * <code>.google.protobuf.StringValue model_version = 3;</code>
+     * <code>.google.protobuf.Int32Value model_version = 3;</code>
      * @return Whether the modelVersion field is set.
      */
     @java.lang.Override
@@ -6855,18 +6855,18 @@ public final class MetricServiceOuterClass {
       return modelVersion_ != null;
     }
     /**
-     * <code>.google.protobuf.StringValue model_version = 3;</code>
+     * <code>.google.protobuf.Int32Value model_version = 3;</code>
      * @return The modelVersion.
      */
     @java.lang.Override
-    public com.google.protobuf.StringValue getModelVersion() {
-      return modelVersion_ == null ? com.google.protobuf.StringValue.getDefaultInstance() : modelVersion_;
+    public com.google.protobuf.Int32Value getModelVersion() {
+      return modelVersion_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : modelVersion_;
     }
     /**
-     * <code>.google.protobuf.StringValue model_version = 3;</code>
+     * <code>.google.protobuf.Int32Value model_version = 3;</code>
      */
     @java.lang.Override
-    public com.google.protobuf.StringValueOrBuilder getModelVersionOrBuilder() {
+    public com.google.protobuf.Int32ValueOrBuilder getModelVersionOrBuilder() {
       return getModelVersion();
     }
 
@@ -7595,31 +7595,31 @@ public final class MetricServiceOuterClass {
         return metricKeyBuilder_;
       }
 
-      private com.google.protobuf.StringValue modelVersion_;
+      private com.google.protobuf.Int32Value modelVersion_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder> modelVersionBuilder_;
+          com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder> modelVersionBuilder_;
       /**
-       * <code>.google.protobuf.StringValue model_version = 3;</code>
+       * <code>.google.protobuf.Int32Value model_version = 3;</code>
        * @return Whether the modelVersion field is set.
        */
       public boolean hasModelVersion() {
         return modelVersionBuilder_ != null || modelVersion_ != null;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 3;</code>
+       * <code>.google.protobuf.Int32Value model_version = 3;</code>
        * @return The modelVersion.
        */
-      public com.google.protobuf.StringValue getModelVersion() {
+      public com.google.protobuf.Int32Value getModelVersion() {
         if (modelVersionBuilder_ == null) {
-          return modelVersion_ == null ? com.google.protobuf.StringValue.getDefaultInstance() : modelVersion_;
+          return modelVersion_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : modelVersion_;
         } else {
           return modelVersionBuilder_.getMessage();
         }
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 3;</code>
+       * <code>.google.protobuf.Int32Value model_version = 3;</code>
        */
-      public Builder setModelVersion(com.google.protobuf.StringValue value) {
+      public Builder setModelVersion(com.google.protobuf.Int32Value value) {
         if (modelVersionBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -7633,10 +7633,10 @@ public final class MetricServiceOuterClass {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 3;</code>
+       * <code>.google.protobuf.Int32Value model_version = 3;</code>
        */
       public Builder setModelVersion(
-          com.google.protobuf.StringValue.Builder builderForValue) {
+          com.google.protobuf.Int32Value.Builder builderForValue) {
         if (modelVersionBuilder_ == null) {
           modelVersion_ = builderForValue.build();
           onChanged();
@@ -7647,13 +7647,13 @@ public final class MetricServiceOuterClass {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 3;</code>
+       * <code>.google.protobuf.Int32Value model_version = 3;</code>
        */
-      public Builder mergeModelVersion(com.google.protobuf.StringValue value) {
+      public Builder mergeModelVersion(com.google.protobuf.Int32Value value) {
         if (modelVersionBuilder_ == null) {
           if (modelVersion_ != null) {
             modelVersion_ =
-              com.google.protobuf.StringValue.newBuilder(modelVersion_).mergeFrom(value).buildPartial();
+              com.google.protobuf.Int32Value.newBuilder(modelVersion_).mergeFrom(value).buildPartial();
           } else {
             modelVersion_ = value;
           }
@@ -7665,7 +7665,7 @@ public final class MetricServiceOuterClass {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 3;</code>
+       * <code>.google.protobuf.Int32Value model_version = 3;</code>
        */
       public Builder clearModelVersion() {
         if (modelVersionBuilder_ == null) {
@@ -7679,33 +7679,33 @@ public final class MetricServiceOuterClass {
         return this;
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 3;</code>
+       * <code>.google.protobuf.Int32Value model_version = 3;</code>
        */
-      public com.google.protobuf.StringValue.Builder getModelVersionBuilder() {
+      public com.google.protobuf.Int32Value.Builder getModelVersionBuilder() {
         
         onChanged();
         return getModelVersionFieldBuilder().getBuilder();
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 3;</code>
+       * <code>.google.protobuf.Int32Value model_version = 3;</code>
        */
-      public com.google.protobuf.StringValueOrBuilder getModelVersionOrBuilder() {
+      public com.google.protobuf.Int32ValueOrBuilder getModelVersionOrBuilder() {
         if (modelVersionBuilder_ != null) {
           return modelVersionBuilder_.getMessageOrBuilder();
         } else {
           return modelVersion_ == null ?
-              com.google.protobuf.StringValue.getDefaultInstance() : modelVersion_;
+              com.google.protobuf.Int32Value.getDefaultInstance() : modelVersion_;
         }
       }
       /**
-       * <code>.google.protobuf.StringValue model_version = 3;</code>
+       * <code>.google.protobuf.Int32Value model_version = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder> 
+          com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder> 
           getModelVersionFieldBuilder() {
         if (modelVersionBuilder_ == null) {
           modelVersionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              com.google.protobuf.StringValue, com.google.protobuf.StringValue.Builder, com.google.protobuf.StringValueOrBuilder>(
+              com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder>(
                   getModelVersion(),
                   getParentForChildren(),
                   isClean());
@@ -10046,54 +10046,54 @@ public final class MetricServiceOuterClass {
       "lue\"r\n\027ListMetricMetasResponse\022\023\n\013return" +
       "_code\030\001 \001(\003\022\022\n\nreturn_msg\030\002 \001(\t\022.\n\014metri" +
       "c_metas\030\003 \003(\0132\030.ai_flow.MetricMetaProto\"" +
-      "\226\002\n\032ListMetricSummariesRequest\0221\n\013metric" +
+      "\225\002\n\032ListMetricSummariesRequest\0221\n\013metric" +
       "_name\030\001 \001(\0132\034.google.protobuf.StringValu" +
       "e\0220\n\nmetric_key\030\002 \001(\0132\034.google.protobuf." +
-      "StringValue\0223\n\rmodel_version\030\003 \001(\0132\034.goo" +
-      "gle.protobuf.StringValue\022/\n\nstart_time\030\004" +
-      " \001(\0132\033.google.protobuf.Int64Value\022-\n\010end" +
-      "_time\030\005 \001(\0132\033.google.protobuf.Int64Value" +
-      "\"}\n\033ListMetricSummariesResponse\022\023\n\013retur" +
-      "n_code\030\001 \001(\003\022\022\n\nreturn_msg\030\002 \001(\t\0225\n\020metr" +
-      "ic_summaries\030\003 \003(\0132\033.ai_flow.MetricSumma" +
-      "ryProto2\227\013\n\rMetricService\022{\n\022registerMet" +
-      "ricMeta\022\032.ai_flow.MetricMetaRequest\032\033.ai" +
-      "_flow.MetricMetaResponse\",\202\323\344\223\002&\"!/aiflo" +
-      "w/metric/metric_meta/create:\001*\022y\n\020update" +
-      "MetricMeta\022\032.ai_flow.MetricMetaRequest\032\033" +
-      ".ai_flow.MetricMetaResponse\",\202\323\344\223\002&\"!/ai" +
-      "flow/metric/metric_meta/update:\001*\022o\n\020del" +
-      "eteMetricMeta\022\032.ai_flow.MetricNameReques" +
-      "t\032\021.ai_flow.Response\",\202\323\344\223\002&\"!/aiflow/me" +
-      "tric/metric_meta/delete:\001*\022p\n\rgetMetricM" +
-      "eta\022\032.ai_flow.MetricNameRequest\032\033.ai_flo" +
-      "w.MetricMetaResponse\"&\202\323\344\223\002 \022\036/aiflow/me" +
-      "tric/metric_meta/get\022\223\001\n\026listDatasetMetr" +
-      "icMetas\022&.ai_flow.ListDatasetMetricMetas" +
-      "Request\032 .ai_flow.ListMetricMetasRespons" +
-      "e\"/\202\323\344\223\002)\022\'/aiflow/metric/metric_meta/da" +
-      "taset/list\022\215\001\n\024listModelMetricMetas\022$.ai" +
-      "_flow.ListModelMetricMetasRequest\032 .ai_f" +
-      "low.ListMetricMetasResponse\"-\202\323\344\223\002\'\022%/ai" +
-      "flow/metric/metric_meta/model/list\022\207\001\n\025r" +
-      "egisterMetricSummary\022\035.ai_flow.MetricSum" +
-      "maryRequest\032\036.ai_flow.MetricSummaryRespo" +
-      "nse\"/\202\323\344\223\002)\"$/aiflow/metric/metric_summa" +
-      "ry/create:\001*\022\205\001\n\023updateMetricSummary\022\035.a" +
-      "i_flow.MetricSummaryRequest\032\036.ai_flow.Me" +
-      "tricSummaryResponse\"/\202\323\344\223\002)\"$/aiflow/met" +
-      "ric/metric_summary/update:\001*\022o\n\023deleteMe" +
-      "tricSummary\022\024.ai_flow.UuidRequest\032\021.ai_f" +
-      "low.Response\"/\202\323\344\223\002)\"$/aiflow/metric/met" +
-      "ric_summary/delete:\001*\022s\n\020getMetricSummar" +
-      "y\022\024.ai_flow.UuidRequest\032\036.ai_flow.Metric" +
-      "SummaryResponse\")\202\323\344\223\002#\022!/aiflow/metric/" +
-      "metric_summary/get\022\214\001\n\023listMetricSummari" +
-      "es\022#.ai_flow.ListMetricSummariesRequest\032" +
-      "$.ai_flow.ListMetricSummariesResponse\"*\202" +
-      "\323\344\223\002$\022\"/aiflow/metric/metric_summary/lis" +
-      "tB)\n\027org.aiflow.client.protoZ\010/ai_flow\210\001" +
-      "\001\220\001\001b\006proto3"
+      "StringValue\0222\n\rmodel_version\030\003 \001(\0132\033.goo" +
+      "gle.protobuf.Int32Value\022/\n\nstart_time\030\004 " +
+      "\001(\0132\033.google.protobuf.Int64Value\022-\n\010end_" +
+      "time\030\005 \001(\0132\033.google.protobuf.Int64Value\"" +
+      "}\n\033ListMetricSummariesResponse\022\023\n\013return" +
+      "_code\030\001 \001(\003\022\022\n\nreturn_msg\030\002 \001(\t\0225\n\020metri" +
+      "c_summaries\030\003 \003(\0132\033.ai_flow.MetricSummar" +
+      "yProto2\227\013\n\rMetricService\022{\n\022registerMetr" +
+      "icMeta\022\032.ai_flow.MetricMetaRequest\032\033.ai_" +
+      "flow.MetricMetaResponse\",\202\323\344\223\002&\"!/aiflow" +
+      "/metric/metric_meta/create:\001*\022y\n\020updateM" +
+      "etricMeta\022\032.ai_flow.MetricMetaRequest\032\033." +
+      "ai_flow.MetricMetaResponse\",\202\323\344\223\002&\"!/aif" +
+      "low/metric/metric_meta/update:\001*\022o\n\020dele" +
+      "teMetricMeta\022\032.ai_flow.MetricNameRequest" +
+      "\032\021.ai_flow.Response\",\202\323\344\223\002&\"!/aiflow/met" +
+      "ric/metric_meta/delete:\001*\022p\n\rgetMetricMe" +
+      "ta\022\032.ai_flow.MetricNameRequest\032\033.ai_flow" +
+      ".MetricMetaResponse\"&\202\323\344\223\002 \022\036/aiflow/met" +
+      "ric/metric_meta/get\022\223\001\n\026listDatasetMetri" +
+      "cMetas\022&.ai_flow.ListDatasetMetricMetasR" +
+      "equest\032 .ai_flow.ListMetricMetasResponse" +
+      "\"/\202\323\344\223\002)\022\'/aiflow/metric/metric_meta/dat" +
+      "aset/list\022\215\001\n\024listModelMetricMetas\022$.ai_" +
+      "flow.ListModelMetricMetasRequest\032 .ai_fl" +
+      "ow.ListMetricMetasResponse\"-\202\323\344\223\002\'\022%/aif" +
+      "low/metric/metric_meta/model/list\022\207\001\n\025re" +
+      "gisterMetricSummary\022\035.ai_flow.MetricSumm" +
+      "aryRequest\032\036.ai_flow.MetricSummaryRespon" +
+      "se\"/\202\323\344\223\002)\"$/aiflow/metric/metric_summar" +
+      "y/create:\001*\022\205\001\n\023updateMetricSummary\022\035.ai" +
+      "_flow.MetricSummaryRequest\032\036.ai_flow.Met" +
+      "ricSummaryResponse\"/\202\323\344\223\002)\"$/aiflow/metr" +
+      "ic/metric_summary/update:\001*\022o\n\023deleteMet" +
+      "ricSummary\022\024.ai_flow.UuidRequest\032\021.ai_fl" +
+      "ow.Response\"/\202\323\344\223\002)\"$/aiflow/metric/metr" +
+      "ic_summary/delete:\001*\022s\n\020getMetricSummary" +
+      "\022\024.ai_flow.UuidRequest\032\036.ai_flow.MetricS" +
+      "ummaryResponse\")\202\323\344\223\002#\022!/aiflow/metric/m" +
+      "etric_summary/get\022\214\001\n\023listMetricSummarie" +
+      "s\022#.ai_flow.ListMetricSummariesRequest\032$" +
+      ".ai_flow.ListMetricSummariesResponse\"*\202\323" +
+      "\344\223\002$\022\"/aiflow/metric/metric_summary/list" +
+      "B)\n\027org.aiflow.client.protoZ\010/ai_flow\210\001\001" +
+      "\220\001\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

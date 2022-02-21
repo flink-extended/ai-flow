@@ -62,19 +62,20 @@ message ModelProto {
 }
 
 message ModelVersionRelationProto {
-    google.protobuf.StringValue version = 1;
+    google.protobuf.Int32Value version = 1;
     google.protobuf.Int64Value model_id = 2;
     google.protobuf.Int64Value project_snapshot_id = 3;
 }
 
 message ModelVersionProto {
-    google.protobuf.StringValue version = 1;
+    google.protobuf.Int32Value version = 1;
     google.protobuf.Int64Value model_id = 2;
     google.protobuf.Int64Value project_snapshot_id = 3;
     google.protobuf.StringValue model_path = 4;
     google.protobuf.StringValue model_type = 6;
     google.protobuf.StringValue version_desc = 7;
     ModelVersionStage current_stage = 8;
+    google.protobuf.DoubleValue create_time = 9;
 }
 
 message JobProto {
@@ -167,7 +168,7 @@ message ModelVersionParam {
 
 message ModelMetaParam {
     google.protobuf.StringValue model_name = 1;
-    google.protobuf.StringValue model_version = 2;
+    google.protobuf.Int32Value model_version = 2;
 }
 
 message Response {
@@ -183,12 +184,13 @@ message RegisteredModelMeta {
 
 message ModelVersionMeta {
     string model_name = 1;
-    string model_version = 2;
+    int32 model_version = 2;
     google.protobuf.StringValue model_path = 3;
     google.protobuf.StringValue model_type = 5;
     google.protobuf.StringValue version_desc = 6;
     ModelVersionStatus version_status = 7;
     ModelVersionStage current_stage = 8;
+    int64 create_time = 9;
 }
 
 message RegisteredModelDetail {
@@ -336,6 +338,6 @@ message MetricSummaryProto {
     google.protobuf.StringValue metric_key = 3;
     google.protobuf.StringValue metric_value = 4;
     google.protobuf.Int64Value metric_timestamp = 5;
-    google.protobuf.StringValue model_version = 6;
+    google.protobuf.Int32Value model_version = 6;
     google.protobuf.StringValue job_execution_id = 7;
 }

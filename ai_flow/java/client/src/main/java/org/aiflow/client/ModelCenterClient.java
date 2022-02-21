@@ -58,8 +58,7 @@ import static org.aiflow.client.common.Constant.SERVER_URI;
 import static org.aiflow.client.entity.ModelVersion.buildModelVersion;
 import static org.aiflow.client.entity.RegisteredModel.buildRegisteredModel;
 import static org.aiflow.client.entity.RegisteredModel.buildRegisteredModels;
-import static org.aiflow.client.util.Transform.buildResponse;
-import static org.aiflow.client.util.Transform.stringValue;
+import static org.aiflow.client.util.Transform.*;
 
 /** Client of AIFlow Rest Endpoint that provides Model Center function service. */
 public class ModelCenterClient {
@@ -265,7 +264,7 @@ public class ModelCenterClient {
      */
     public ModelVersion updateModelVersion(
             String modelName,
-            String modelVersion,
+            int modelVersion,
             String modelPath,
             String modelType,
             String versionDesc,
@@ -284,7 +283,7 @@ public class ModelCenterClient {
                         .setModelMeta(
                                 ModelMetaParam.newBuilder()
                                         .setModelName(stringValue(modelName))
-                                        .setModelVersion(stringValue(modelVersion)))
+                                        .setModelVersion(int32Value(modelVersion)))
                         .setModelVersion(param)
                         .build();
         Response response = this.modelCenterServiceStub.updateModelVersion(request);
@@ -312,13 +311,13 @@ public class ModelCenterClient {
      * @param modelVersion User-defined version of registered model.
      * @return Object of ModelVersion deleted in Model Center.
      */
-    public ModelVersion deleteModelVersion(String modelName, String modelVersion) throws Exception {
+    public ModelVersion deleteModelVersion(String modelName, int modelVersion) throws Exception {
         DeleteModelVersionRequest request =
                 DeleteModelVersionRequest.newBuilder()
                         .setModelMeta(
                                 ModelMetaParam.newBuilder()
                                         .setModelName(stringValue(modelName))
-                                        .setModelVersion(stringValue(modelVersion)))
+                                        .setModelVersion(int32Value(modelVersion)))
                         .build();
         Response response = this.modelCenterServiceStub.deleteModelVersion(request);
         ModelMetaParam.Builder builder = ModelMetaParam.newBuilder();
@@ -347,14 +346,13 @@ public class ModelCenterClient {
      * @param modelVersion User-defined version of registered model.
      * @return Object of ModelVersion created in Model Center.
      */
-    public ModelVersion getModelVersionDetail(String modelName, String modelVersion)
-            throws Exception {
+    public ModelVersion getModelVersionDetail(String modelName, int modelVersion) throws Exception {
         GetModelVersionDetailRequest request =
                 GetModelVersionDetailRequest.newBuilder()
                         .setModelMeta(
                                 ModelMetaParam.newBuilder()
                                         .setModelName(stringValue(modelName))
-                                        .setModelVersion(stringValue(modelVersion)))
+                                        .setModelVersion(int32Value(modelVersion)))
                         .build();
         Response response = this.modelCenterServiceStub.getModelVersionDetail(request);
         ModelVersionMeta.Builder builder = ModelVersionMeta.newBuilder();
