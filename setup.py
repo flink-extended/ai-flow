@@ -55,6 +55,7 @@ mongo = [
     'mongoengine~=0.22.1',
 ]
 example_requires = [
+    'joblib==1.0.1',
     'numpy==1.18.1',
     'pandas==0.24.2',
     'scikit-learn==0.21.2',
