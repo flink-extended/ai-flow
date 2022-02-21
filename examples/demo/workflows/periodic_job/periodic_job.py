@@ -24,7 +24,7 @@ with af.job_config('job_4'):
 # the job_3 and job_4 will also be triggered multiple times as long as upstream jobs finished.
 
 af.action_on_job_status(job_name='job_3', upstream_job_name='job_1')
-af.action_on_job_status(job_name='job_4', upstream_job_name='2')
+af.action_on_job_status(job_name='job_4', upstream_job_name='job_2')
 
 
 
