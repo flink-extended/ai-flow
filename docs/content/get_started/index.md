@@ -4,6 +4,5 @@
 :maxdepth: 2
 
 about
-quickstart
-concepts
+quickstart/index
 ```
