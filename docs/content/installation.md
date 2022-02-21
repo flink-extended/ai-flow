@@ -13,7 +13,7 @@ AIFlow is tested with:
 
 ## Installing AIFlow
 
-To avoid dependencies conflict, we strongly recommend using [virtualenv](https://virtualenv.pypa.io/en/latest/index.html) or other similar tools for an isolated Python environment like below:
+[Optional] To avoid dependencies conflict, we strongly recommend using [virtualenv](https://virtualenv.pypa.io/en/latest/index.html) or other similar tools for an isolated Python environment like below:
 
 ```shell
 python -m pip install virtualenv
@@ -21,13 +21,13 @@ virtualenv venv_for_aiflow --python=python3.7
 source venv_for_aiflow/bin/activate
 ```
 
-You can install AIFlow by running:
+Now you can install AIFlow by running:
 
 ```shell script
 python -m pip install ai-flow
 ```
 
-Now you are ready to run AIFlow and try core features following the [quickstart](./get_started/quickstart/locally.md).
+Congrats, you are ready to run AIFlow and try core features following the [quickstart](./get_started/quickstart/locally.md).
 
 ## Extra Dependencies
 
