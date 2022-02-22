@@ -88,10 +88,6 @@ class ModelTrainer(PythonProcessor):
         model_meta: af.ModelMeta = execution_context.config.get('model_info')
         model_version = af.register_model_version(model=model_meta, model_path=model_path)
         print("Done for {}".format(self.__class__.__name__))
-        notification_client = NotificationClient(server_uri=self.notification_server_uri, default_namespace='default',
-                                                 sender=execution_context.job_execution_info.job_name)
-        notification_client.send_event(BaseEvent(key=model_meta.name, value=model_version.version,
-                                                 event_type=ModelVersionEventType.MODEL_GENERATED))
         return []
 
 
@@ -143,11 +139,7 @@ class ModelValidator(PythonProcessor):
             af.update_model_version(model_name=self.model_name,
                                     model_version=self.model_version,
                                     current_stage=ModelVersionStage.VALIDATED)
-            notification_client = NotificationClient(server_uri=self.notification_server_uri,
-                                                     default_namespace='default',
-                                                     sender=execution_context.job_execution_info.job_name)
-            notification_client.send_event(BaseEvent(key=self.model_name, value=self.model_version,
-                                                     event_type=ModelVersionEventType.MODEL_VALIDATED))
+
         else:
             deployed_clf = load(deployed_model_version.model_path)
             deployed_scores = cross_val_score(deployed_clf, x_validate, y_validate, scoring='precision_macro')
@@ -187,12 +179,8 @@ class ModelPusher(PythonProcessor):
         af.update_model_version(model_name=model_name,
                                 model_version=validated_model.version,
                                 current_stage=ModelVersionStage.DEPLOYED)
-        notification_client = NotificationClient(server_uri=self.notification_server_uri, default_namespace='default',
-                                                 sender=execution_context.job_execution_info.job_name)
-        notification_client.send_event(BaseEvent(key=model_name, value=validated_model.version,
-                                                 event_type=ModelVersionEventType.MODEL_DEPLOYED))
 
-        af.get_notification_client().send_event(BaseEvent(key='START_PREDICTION', value=validated_model.version))
+        af.get_notification_client().send_event(BaseEvent(key='START_PREDICTION', value=str(validated_model.version)))
         print(validated_model.version)
 
         # Copy deployed model to deploy_model_dir
