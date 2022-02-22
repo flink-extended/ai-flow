@@ -73,7 +73,7 @@ EXTRAS_REQUIREMENTS: Dict[str, List[str]] = {
     'hdfs': hdfs,
     'oss': oss,
     'mongo': mongo,
-    'example-requires': example_requires,
+    'example_requires': example_requires,
 }
 
 
