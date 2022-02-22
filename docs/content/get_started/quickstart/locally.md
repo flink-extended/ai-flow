@@ -43,6 +43,7 @@ Download the quickstart code by cloning AIFlow via
 ```shell
 git clone https://github.com/flink-extended/ai-flow.git
 ```
+Now cd into the `examples` subdirectory of the repository. We’ll use this working directory for running the quickstart.
 
 ## Installing Extra Dependencies
 To run the quickstart and other examples, we need to install some extra dependencies by following command:
@@ -52,8 +53,11 @@ pip install 'ai-flow[example_requires]'
 
 ## Running the Quickstart
 
-Now cd into the `examples` subdirectory of the repository. **We’ll use this working directory** for running the quickstart.
-You can run following commands to submit a machine learning project to AIFlow server.
+Now you can run following commands to submit a machine learning project to AIFlow server.
+
+```{note}
+AIFlow will search the project in current directory when submit workflow, so before running following commands, please make sure you are in the `examples` directory of the repository you just cloned.
+```
 
 ```shell
 # Submit workflow to AIFlow Server
