@@ -50,11 +50,10 @@ To run the quickstart and other examples, we need to install some extra dependen
 pip install 'ai-flow[example_requires]'
 ```
 
-and cd into the `examples` subdirectory of the repository. We’ll use this working directory for running the quickstart.
-
 ## Running the Quickstart
 
-Now you can run following commands to submit a machine learning project to AIFlow server.
+Now cd into the `examples` subdirectory of the repository. **We’ll use this working directory** for running the quickstart.
+You can run following commands to submit a machine learning project to AIFlow server.
 
 ```shell
 # Submit workflow to AIFlow Server
