@@ -27,7 +27,7 @@ jobs:
         pip install -e ./lib/notification_service
         pip install -e ./lib/airflow
         pip install -e .
-        pip install -e ".[devel]"
+        pip install -e ".[test]"
     - name: Install java client
       run: |
         cd ./lib/notification_service/java

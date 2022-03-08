@@ -53,6 +53,7 @@ COPY --from=builder /tmp/dist /tmp/dist
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends default-libmysqlclient-dev curl git ssh vim unzip gcc \
     && pip install --no-cache-dir /tmp/dist/* \
+    && pip install 'ai-flow[docker]' \
     && apt-get purge --auto-remove -yqq gcc \
     && apt-get autoremove -yqq --purge \
     && apt-get clean
