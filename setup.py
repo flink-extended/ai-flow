@@ -64,7 +64,8 @@ flink = [
     'apache-flink==1.12.5',
 ]
 
-devel = devel + mongo + mysql + oss + s3 + hdfs + flink
+test = devel + mongo + mysql + oss + s3 + hdfs + flink
+docker = mysql + hdfs + flink + celery
 
 EXTRAS_REQUIREMENTS: Dict[str, List[str]] = {
     'devel': devel,
@@ -74,6 +75,8 @@ EXTRAS_REQUIREMENTS: Dict[str, List[str]] = {
     'oss': oss,
     'mongo': mongo,
     'example_requires': example_requires,
+    'test': test,
+    'docker': docker,
 }
 
 

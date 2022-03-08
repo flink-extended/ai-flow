@@ -104,9 +104,9 @@ This file contains several service definitions:
 * AIFlow servers - AIFlow Server, Notification Server and Scheduler deployed in one container.
 * Workers - The workers who execute the tasks given by the Scheduler.
 * Redis - The broker that forwards messages from Scheduler to worker.
-* Flower -  The [flower app](https://flower.readthedocs.io/en/latest/) for monitoring the environment. It is available at http://localhost:5555.
+* Flower -  The [flower app](https://flower.readthedocs.io/en/latest/) for monitoring the environment. It is available at [http://localhost:5555](http://localhost:5555).
 * MySQL - The database. Only MySQL is supported in distributed mode for now.
-* HDFS - The hadoop dfs which is used to store the source code or any resources of your projects.
+* HDFS - The hadoop dfs which is used to store the source code or any resources that need to be shared among hosts.
 
 ##### Initializing Environment
 
