@@ -46,6 +46,9 @@ Those are extras that install one ore more extras as a bundle.
 | ----------- | ---------------------------- | ----------------------------------------------- |
 | example_requires | pip install 'ai-flow[example_requires]'| Should be installed when running provided AIFlow examples  |
 | devel      | pip install 'ai-flow[devel]'| Minimum development dependencies, including flake8, pytest, coverage, etc.       |
+| test      | pip install 'ai-flow[test]'| Should be installed when you are running unittests of AIFlow    |
+| docker      | pip install 'ai-flow[docker]'| Dependencies for docker compose       |
+
 
 
 
