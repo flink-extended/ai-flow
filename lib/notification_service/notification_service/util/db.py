@@ -406,6 +406,17 @@ class EventModel(Base):
 
     @staticmethod
     @provide_session
+    def timestamp_to_version(timestamp, session=None):
+        e = session.query(EventModel).filter(EventModel.create_time >= timestamp) \
+            .order_by(EventModel.version.asc()) \
+            .limit(1).first()
+        if e is None:
+            return None
+        else:
+            return e.version
+
+    @staticmethod
+    @provide_session
     def get_event_by_uuid(uuid, session=None):
         conditions = [
             EventModel.uuid == uuid

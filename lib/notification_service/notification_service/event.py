@@ -15,16 +15,19 @@
 # specific language governing permissions and limitations
 # under the License.
 """Definition of event."""
+from typing import Optional
+
+
 UNDEFINED_EVENT_TYPE = "UNDEFINED"
 DEFAULT_NAMESPACE = "DEFAULT"
 
 
 class EventKey(object):
     def __init__(self,
-                 name: str,
-                 event_type: str = UNDEFINED_EVENT_TYPE,
-                 namespace: str = DEFAULT_NAMESPACE,
-                 sender: str = None):
+                 name: Optional[str],
+                 event_type: Optional[str] = UNDEFINED_EVENT_TYPE,
+                 namespace: Optional[str] = DEFAULT_NAMESPACE,
+                 sender: Optional[str] = None):
         """
         EventKey represents a type of event.
         :param name: The event's name.
@@ -53,7 +56,7 @@ class EventKey(object):
 class Event(object):
     def __init__(self,
                  event_key: EventKey,
-                 message: str,
+                 message: Optional[str],
                  ):
         """
         Event represents an event.
@@ -65,6 +68,30 @@ class Event(object):
         self._create_time = None
         self._offset = None
         self._context = None
+
+    @property
+    def context(self):
+        return self._context
+
+    @context.setter
+    def context(self, value):
+        self._context = value
+
+    @property
+    def create_time(self):
+        return self._create_time
+
+    @create_time.setter
+    def create_time(self, value):
+        self._create_time = value
+
+    @property
+    def offset(self):
+        return self._offset
+
+    @offset.setter
+    def offset(self, value):
+        self._offset = value
 
     def __str__(self) -> str:
         return 'event_key:{0}, message:{1}, create_time:{2}, offset:{3}, context: {4}' \

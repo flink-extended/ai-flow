@@ -114,6 +114,14 @@ service NotificationService {
             body: "*"
         };
     }
+
+    // Get the event offset by timestamp
+    rpc timestampToEventOffset(TimeToOffsetRequest) returns (TimeToOffsetResponse) {
+        option (google.api.http) = {
+            post: "/aiflow/notification-service/timestamp_to_event_offset"
+            body: "*"
+        };
+    }
 }
 message EventProto {
     string key = 1;
@@ -257,4 +265,13 @@ message isClientExistsResponse {
     ReturnStatus return_code = 1;
     string return_msg = 2;
     bool is_exists = 3;
+}
+
+message TimeToOffsetRequest {
+    int64 timestamp = 1;
+}
+
+message TimeToOffsetResponse {
+    ReturnStatus return_code = 1;
+    int64 offset = 2;
 }

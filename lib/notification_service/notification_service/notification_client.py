@@ -16,15 +16,19 @@
 # under the License.
 import abc
 from datetime import datetime
-from typing import List, Callable
+from typing import List
 
 from notification_service.event import Event, EventKey
-from notification_service.util.utils import import_string
 
 
 class ListenerRegistrationId(object):
     def __init__(self, id: str):
         self.id = id
+
+
+class ListenerProcessor(object):
+    def process(self, events: List[Event]):
+        pass
 
 
 class NotificationClient(metaclass=abc.ABCMeta):
@@ -46,14 +50,14 @@ class NotificationClient(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def register_listener(self,
-                          func: Callable[[List[Event]], None],
+                          listener_processor: ListenerProcessor,
                           event_keys: List[EventKey] = None,
                           offset: int = None
                           ) -> ListenerRegistrationId:
         """
         Register a listener to listen events from Notification Server
 
-        :param func: Events handling method.
+        :param listener_processor: The processor of the listener.
         :param event_keys: EventKeys of notification for listening. If not set, it will listen all events.
         :param offset: The offset of the events to start listening.
         :return: The `ListenerRegistrationId` used to stop the listening.
@@ -84,24 +88,9 @@ class NotificationClient(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def time_to_offset(self, timestamp: datetime) -> int:
+    def time_to_offset(self, time: datetime) -> int:
         """
         Look up the offset for the given timestamp
         :return: The offset corresponding to the timestamp.
         """
         pass
-
-
-def get_notification_client(class_name: str, **config) -> NotificationClient:
-    """
-    Get a notification client to send or receive events.
-    :param class_name: The NotificationClient's class name.
-    :param config: The client-side configuration.
-    :return: A NotificationClient.
-    """
-    class_obj = import_string(class_name)
-    client = class_obj(**config)
-    if isinstance(client, NotificationClient):
-        return client
-    else:
-        raise Exception('{} is not a subclass of NotificationClient'.format(class_name))

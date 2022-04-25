@@ -361,6 +361,18 @@ class NotificationService(notification_service_pb2_grpc.NotificationServiceServi
             return_msg='',
             is_exists=is_exists)
 
+    def timestampToEventOffset(self, request, context):
+        timestamp = request.timestamp
+        offset = self.storage.timestamp_to_event_offset(timestamp)
+        if offset is not None:
+            return notification_service_pb2.TimeToOffsetResponse(
+                return_code=notification_service_pb2.ReturnStatus.SUCCESS,
+                offset=offset)
+        else:
+            return notification_service_pb2.TimeToOffsetResponse(
+                return_code=notification_service_pb2.ReturnStatus.ERROR,
+                offset=0)
+
 
 class HighAvailableNotificationService(NotificationService):
 
