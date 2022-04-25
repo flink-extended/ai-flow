@@ -289,7 +289,7 @@ class GrpcNotificationClient(NotificationClient):
             raise Exception(response.return_msg)
 
     def time_to_offset(self, time: datetime) -> int:
-        timestamp = time.timestamp()
+        timestamp = int(time.timestamp() * 1000)
         request = TimeToOffsetRequest(timestamp=timestamp)
         response = self.notification_stub.timestampToEventOffset(request)
         if response.return_code == ReturnStatus.SUCCESS:

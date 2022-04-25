@@ -19,6 +19,7 @@ import os
 import time
 import unittest
 from typing import List
+from datetime import datetime
 
 from notification_service.event_storage import DbEventStorage
 from notification_service.notification_client import ListenerProcessor
@@ -125,14 +126,14 @@ class TestGrpcNotificationClient(unittest.TestCase):
         self.assertEqual(2, processor.counter)
 
     def test_timestamp_to_event_offset(self):
-        t1 = int(time.time()*1000)
+        t1 = datetime.now()
         for i in range(5):
             if i == 3:
-                t2 = int(time.time() * 1000)
+                t2 = datetime.now()
             event = self.client.send_event(Event(event_key=EventKey(name='name_{}'.format(i)),
                                                  message='message_{}'.format(i)))
         time.sleep(1)
-        t3 = int(time.time()*1000)
+        t3 = datetime.now()
         offset = self.client.time_to_offset(t1)
         self.assertEqual(1, offset)
         offset = self.client.time_to_offset(t2)
