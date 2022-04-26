@@ -28,7 +28,7 @@ from notification_service.service import NotificationService
 from notification_service.util import db
 from notification_service.util.db import SQL_ALCHEMY_DB_FILE
 from notification_service.event import Event, EventKey
-from notification_service.grpc_notification_client import GrpcNotificationClient
+from notification_service.embedded_notification_client import EmbeddedNotificationClient
 
 
 class TestGrpcNotificationClient(unittest.TestCase):
@@ -38,7 +38,7 @@ class TestGrpcNotificationClient(unittest.TestCase):
         last_exception = None
         for i in range(60):
             try:
-                return GrpcNotificationClient(server_uri=server_uri, namespace='default', sender='sender')
+                return EmbeddedNotificationClient(server_uri=server_uri, namespace='default', sender='sender')
             except Exception as e:
                 time.sleep(2)
                 last_exception = e
@@ -61,9 +61,9 @@ class TestGrpcNotificationClient(unittest.TestCase):
     def setUp(self):
         db.prepare_db()
         self.storage.clean_up()
-        self.client = GrpcNotificationClient(server_uri="localhost:50051",
-                                             namespace='default',
-                                             sender='sender')
+        self.client = EmbeddedNotificationClient(server_uri="localhost:50051",
+                                                 namespace='default',
+                                                 sender='sender')
 
     def tearDown(self):
         db.clear_engine_and_session()

@@ -77,7 +77,7 @@ def filter_events(event_keys: List[EventKey], events: List[Event]) -> List[Event
     return results
 
 
-class GrpcNotificationClient(NotificationClient):
+class EmbeddedNotificationClient(NotificationClient):
     def __init__(self,
                  server_uri: str,
                  namespace: str,
