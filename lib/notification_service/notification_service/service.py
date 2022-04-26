@@ -371,7 +371,7 @@ class NotificationService(notification_service_pb2_grpc.NotificationServiceServi
         else:
             return notification_service_pb2.TimeToOffsetResponse(
                 return_code=notification_service_pb2.ReturnStatus.ERROR,
-                offset=0)
+                offset=-1)
 
 
 class HighAvailableNotificationService(NotificationService):
