@@ -84,6 +84,9 @@ class BaseEventStorage(ABC):
     def get_event_by_uuid(self, uuid: str):
         pass
 
+    def timestamp_to_event_offset(self, timestamp: int) -> int:
+        pass
+
 
 class MemoryEventStorage(BaseEventStorage):
 
@@ -208,6 +211,12 @@ class MemoryEventStorage(BaseEventStorage):
     def get_event_by_uuid(self, uuid: str):
         return self.store_with_uuid.get(uuid)
 
+    def timestamp_to_event_offset(self, timestamp: int) -> int:
+        for e in self.store:
+            if e.create_time >= timestamp:
+                return e.version
+        return None
+
     def clean_up(self):
         self.store.clear()
         self.clients.clear()
@@ -263,6 +272,9 @@ class DbEventStorage(BaseEventStorage):
 
     def get_event_by_uuid(self, uuid: str):
         return EventModel.get_event_by_uuid(uuid)
+
+    def timestamp_to_event_offset(self, timestamp: int) -> int:
+        return EventModel.timestamp_to_version(timestamp)
 
     def clean_up(self):
         tables = set(db.engine.table_names())

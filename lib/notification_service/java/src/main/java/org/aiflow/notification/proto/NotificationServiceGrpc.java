@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.aiflow.notification.proto;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
@@ -392,6 +393,37 @@ public final class NotificationServiceGrpc {
     return getIsClientExistsMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetRequest,
+      org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetResponse> getTimestampToEventOffsetMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "timestampToEventOffset",
+      requestType = org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetRequest.class,
+      responseType = org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetRequest,
+      org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetResponse> getTimestampToEventOffsetMethod() {
+    io.grpc.MethodDescriptor<org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetRequest, org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetResponse> getTimestampToEventOffsetMethod;
+    if ((getTimestampToEventOffsetMethod = NotificationServiceGrpc.getTimestampToEventOffsetMethod) == null) {
+      synchronized (NotificationServiceGrpc.class) {
+        if ((getTimestampToEventOffsetMethod = NotificationServiceGrpc.getTimestampToEventOffsetMethod) == null) {
+          NotificationServiceGrpc.getTimestampToEventOffsetMethod = getTimestampToEventOffsetMethod =
+              io.grpc.MethodDescriptor.<org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetRequest, org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "timestampToEventOffset"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new NotificationServiceMethodDescriptorSupplier("timestampToEventOffset"))
+              .build();
+        }
+      }
+    }
+    return getTimestampToEventOffsetMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -556,6 +588,16 @@ public final class NotificationServiceGrpc {
       asyncUnimplementedUnaryCall(getIsClientExistsMethod(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * Get the event offset by timestamp
+     * </pre>
+     */
+    public void timestampToEventOffset(org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetRequest request,
+        io.grpc.stub.StreamObserver<org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getTimestampToEventOffsetMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -635,6 +677,13 @@ public final class NotificationServiceGrpc {
                 org.aiflow.notification.proto.NotificationServiceOuterClass.ClientIdRequest,
                 org.aiflow.notification.proto.NotificationServiceOuterClass.isClientExistsResponse>(
                   this, METHODID_IS_CLIENT_EXISTS)))
+          .addMethod(
+            getTimestampToEventOffsetMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetRequest,
+                org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetResponse>(
+                  this, METHODID_TIMESTAMP_TO_EVENT_OFFSET)))
           .build();
     }
   }
@@ -779,6 +828,17 @@ public final class NotificationServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getIsClientExistsMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Get the event offset by timestamp
+     * </pre>
+     */
+    public void timestampToEventOffset(org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetRequest request,
+        io.grpc.stub.StreamObserver<org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getTimestampToEventOffsetMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -909,6 +969,16 @@ public final class NotificationServiceGrpc {
     public org.aiflow.notification.proto.NotificationServiceOuterClass.isClientExistsResponse isClientExists(org.aiflow.notification.proto.NotificationServiceOuterClass.ClientIdRequest request) {
       return blockingUnaryCall(
           getChannel(), getIsClientExistsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the event offset by timestamp
+     * </pre>
+     */
+    public org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetResponse timestampToEventOffset(org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getTimestampToEventOffsetMethod(), getCallOptions(), request);
     }
   }
 
@@ -1052,6 +1122,17 @@ public final class NotificationServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getIsClientExistsMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Get the event offset by timestamp
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetResponse> timestampToEventOffset(
+        org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getTimestampToEventOffsetMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_SEND_EVENT = 0;
@@ -1065,6 +1146,7 @@ public final class NotificationServiceGrpc {
   private static final int METHODID_REGISTER_CLIENT = 8;
   private static final int METHODID_DELETE_CLIENT = 9;
   private static final int METHODID_IS_CLIENT_EXISTS = 10;
+  private static final int METHODID_TIMESTAMP_TO_EVENT_OFFSET = 11;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1126,6 +1208,10 @@ public final class NotificationServiceGrpc {
         case METHODID_IS_CLIENT_EXISTS:
           serviceImpl.isClientExists((org.aiflow.notification.proto.NotificationServiceOuterClass.ClientIdRequest) request,
               (io.grpc.stub.StreamObserver<org.aiflow.notification.proto.NotificationServiceOuterClass.isClientExistsResponse>) responseObserver);
+          break;
+        case METHODID_TIMESTAMP_TO_EVENT_OFFSET:
+          serviceImpl.timestampToEventOffset((org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetRequest) request,
+              (io.grpc.stub.StreamObserver<org.aiflow.notification.proto.NotificationServiceOuterClass.TimeToOffsetResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -1199,6 +1285,7 @@ public final class NotificationServiceGrpc {
               .addMethod(getRegisterClientMethod())
               .addMethod(getDeleteClientMethod())
               .addMethod(getIsClientExistsMethod())
+              .addMethod(getTimestampToEventOffsetMethod())
               .build();
         }
       }

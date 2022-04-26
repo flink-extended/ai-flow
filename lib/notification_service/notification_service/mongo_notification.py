@@ -150,6 +150,12 @@ class MongoEvent(Document):
         cls.objects(server_ip=server_ip).delete()
 
     @classmethod
+    def timestamp_to_event_offset(cls, timestamp: int):
+        conditions = dict()
+        conditions['create_time__gte'] = timestamp
+        return cls.objects(**conditions).order_by('-version')[0:1]
+
+    @classmethod
     def get_event_by_uuid(cls, uuid):
         event = cls.objects(uuid=uuid).first()
         return event.to_base_event()

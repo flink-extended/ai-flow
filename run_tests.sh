@@ -19,17 +19,7 @@
 ##
 set -e
 
-coverage run -m unittest discover -v ai_flow/test
-
-coverage run -m unittest discover -v ai_flow_plugins/tests
-
 coverage run -m unittest discover -v lib/notification_service/tests
-
-coverage run -m unittest discover -v ai_flow_plugins/tests/job_plugins/ut_workflows/workflows/test_flink
-
-airflow db reset -y
-export PYTHONPATH="./lib/airflow/"
-coverage run -m unittest discover -v lib/airflow/tests/contrib/jobs
 
 coverage combine
 coverage report
