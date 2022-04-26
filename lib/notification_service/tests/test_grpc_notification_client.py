@@ -55,8 +55,8 @@ class TestGrpcNotificationClient(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.master.stop()
-        current_path = os.path.abspath('.')
-        os.remove(os.path.join(current_path, SQL_ALCHEMY_DB_FILE))
+        if os.path.exists(SQL_ALCHEMY_DB_FILE):
+            os.remove(SQL_ALCHEMY_DB_FILE)
 
     def setUp(self):
         db.prepare_db()
