@@ -45,7 +45,7 @@ class TestGrpcNotificationClient(unittest.TestCase):
         raise Exception("The server %s is unavailable." % server_uri) from last_exception
 
     @classmethod
-    def set_up_class(cls):
+    def setUpClass(cls):
         db.create_all_tables()
         cls.storage = DbEventStorage()
         cls.master = NotificationServer(NotificationService(cls.storage))
@@ -53,13 +53,10 @@ class TestGrpcNotificationClient(unittest.TestCase):
         cls.wait_for_master_started("localhost:50051")
 
     @classmethod
-    def setUpClass(cls):
-        cls.set_up_class()
-
-    @classmethod
     def tearDownClass(cls):
         cls.master.stop()
-        os.remove(SQL_ALCHEMY_DB_FILE)
+        current_path = os.path.abspath('.')
+        os.remove(os.path.join(current_path, SQL_ALCHEMY_DB_FILE))
 
     def setUp(self):
         db.prepare_db()
