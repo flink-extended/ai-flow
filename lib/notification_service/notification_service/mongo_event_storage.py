@@ -143,6 +143,12 @@ class MongoEventStorage(BaseEventStorage):
     def get_event_by_uuid(self, uuid: str):
         return MongoEvent.get_event_by_uuid(uuid)
 
+    def timestamp_to_event_offset(self, timestamp: int) -> int:
+        mongo_events = MongoEvent.timestamp_to_event_offset(timestamp=timestamp)
+        if not mongo_events:
+            return None
+        return mongo_events[0].version
+
     def clean_up(self):
         MongoEvent.delete_by_client(self.server_ip)
         if self.db is not None:
