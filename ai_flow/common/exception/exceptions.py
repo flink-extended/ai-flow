@@ -16,7 +16,19 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from ai_flow.common.properties import Properties, ExecuteProperties
 
-Args = Properties
-ExecuteArgs = ExecuteProperties
+
+class AIFlowException(Exception):
+    """Base exception of AIFlow"""
+
+
+class AIFlowConfigException(AIFlowException):
+    """Raise when there is configuration problem"""
+
+
+class AIFlowDBException(AIFlowException):
+    """Raise when there is database problem"""
+
+
+class AIFlowYAMLException(AIFlowException):
+    """Raise when there is yaml handling problem"""

@@ -14,9 +14,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from enum import Enum
 from typing import Text
 
-from ai_flow.common.status import Status
+
+class Status(Enum):
+    OK = 0,
+    ERROR = 1,
 
 
 class BaseResult(object):

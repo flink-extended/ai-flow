@@ -16,16 +16,3 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
-
-
-def get_file_dir(file):
-    return os.path.dirname(os.path.abspath(file))
-
-
-def get_parent_dir(path):
-    return os.path.dirname(path)
-
-
-def get_module_name(main_file):
-    return os.path.basename(main_file)[:-3]
