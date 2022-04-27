@@ -15,7 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# address of AIFlow server
 server_address: localhost:50051
+
+# configurations about blob manager
 blob_manager:
   blob_manager_class: ai_flow_plugins.blob_manager_plugins.local_blob_manager.LocalBlobManager
   blob_manager_config:

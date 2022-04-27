@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# directory of AIFlow logs
 log_dir : {AIFLOW_HOME}/logs
 
 # address of AIFlow rpc server
