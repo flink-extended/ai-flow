@@ -23,27 +23,39 @@ from ai_flow.model.status import TaskStatus
 
 
 class Operator(object):
-    """Operator is a template that defines a task."""
+    """
+    Operator is a template that defines a task. It is the abstract base class for all operators.
+    Since operators create objects that become tasks in the Workflow.To derive this class, you are expected to override
+    the constructor method.
+    This class is abstract and shouldn't be instantiated. Instantiating a class derived from this one results in
+    the creation of a task object, which ultimately becomes a task in Workflow objects.
+    """
     def __init__(self,
                  name: str,
                  inputs: list = None,
                  outputs: list = None,
+                 workflow=None,
                  **kwargs,
                  ):
         """
         :param name: The operator's name.
         :param inputs: Operator input parameters.
         :param outputs: Operator output parameters.
+        :param workflow： The workflow to which the operator belongs.
         :param kwargs: Operator's extended parameters.
         """
         self.name: str = name
         self.config: dict = kwargs
         self.inputs = inputs
         self.outputs = outputs
+        self.workflow = workflow
 
 
 class AIFlowOperator(Operator):
-    """AIFlowOperator is a template that defines a task, it uses AIFlow's native Operator interface."""
+    """
+    AIFlowOperator is a template that defines a task, it defines AIFlow's native Operator interface.
+    To derive this class, you are expected to override the constructor as well as abstract methods.
+    """
 
     def __init__(self,
                  task_name: str,

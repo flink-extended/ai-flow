@@ -18,6 +18,13 @@ from enum import Enum
 
 
 class WorkflowStatus(str, Enum):
+    """
+    Enumeration of WorkflowExecution's status.
+    INIT: The initial status of WorkflowExecution.
+    RUNNING: The WorkflowExecution is running.
+    SUCCESS: The WorkflowExecution finished running without errors.
+    FAILED: The WorkflowExecution had errors during execution and failed to run.
+    """
     INIT = 'INIT'
     RUNNING = 'RUNNING'
     SUCCESS = 'SUCCESS'
@@ -25,6 +32,18 @@ class WorkflowStatus(str, Enum):
 
 
 class TaskStatus(str, Enum):
+    """
+    Enumeration of TaskExecution's status.
+    INIT: The initial status of TaskExecution.
+    QUEUED: The TaskExecution has been assigned to an executor.
+    RESTARTING: The TaskExecution was requested to restart when it was running
+    RUNNING: The TaskExecution is running.
+    SUCCESS: The TaskExecution finished running without errors.
+    FAILED: The TaskExecution had errors during execution and failed to run.
+    KILLING: The TaskExecution was externally requested to shut down when it was running.
+    KILLED: The TaskExecution was externally shut down.
+    RETRYING: The TaskExecution failed, but has retry attempts left and will be rescheduled.
+    """
     INIT = 'INIT'
     QUEUED = 'QUEUED'
     RESTARTING = 'RESTARTING'

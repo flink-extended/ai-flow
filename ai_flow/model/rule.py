@@ -29,13 +29,20 @@ class TaskRule(object):
                  condition: Condition,
                  action: TaskAction):
         """
-        :param condition:
-        :param action:
+        :param condition: Trigger condition of the rule.
+        :param action: The execution commands for scheduled tasks.
         """
         self.condition = condition
         self.acton = action
 
     def trigger(self, event: Event, context: Context) -> Optional[TaskAction]:
+        """
+        Determine whether to trigger task scheduling behavior.
+        :param event: The currently processed event.
+        :param context: The context in which the rule is executed.
+        :return None: Does not trigger task scheduling behavior.
+                Not None: Execution command for scheduling the task.
+        """
         if self.condition.is_met(event, context):
             return self.acton
         else:
@@ -48,11 +55,17 @@ class WorkflowRule(object):
     def __init__(self,
                  condition: Condition):
         """
-        :param condition:
+        :param condition: Trigger condition of the rule.
         """
         self.condition = condition
 
     def trigger(self, event: Event, context: Context) -> bool:
+        """
+        Determine whether to trigger workflow running.
+        :param event: The currently processed event.
+        :param context: The context in which the rule is executed.
+        :return True:Start a WorkflowExecution. False: Do not start a WorkflowExecution.
+        """
         if self.condition.is_met(event, context):
             return True
         else:

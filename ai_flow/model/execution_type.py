@@ -14,28 +14,16 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from typing import Dict, List
-
-from ai_flow.model.operator import Operator
-from ai_flow.model.rule import TaskRule
+from enum import Enum
 
 
-class Workflow(object):
+class ExecutionType(str, Enum):
     """
-    Workflow is a collection of tasks and trigger rules.
-    A Workflow can be scheduled by events, manual or schedule.
-    For each execution, the workflow needs to run
-    its individual tasks when their triggering rules are met.
-    Workflows essentially act as namespaces for tasks. A task_id can only be
-    added once to a Workflow.
+    Enumeration of execution of workflow and task.
+    MANUAL: Manually trigger execution.
+    EVENT_TRIGGERED: Event triggered execution.
+    PERIODIC: Periodic triggered execution.
     """
-    def __init__(self,
-                 name: str,
-                 **kwargs):
-        """
-        :param name: The name of the workflow.
-        """
-        self.name: str = name
-        self.config: dict = kwargs
-        self.tasks: Dict[str, Operator] = {}
-        self.rules: Dict[str, List[TaskRule]] = {}
+    MANUAL = "MANUAL"
+    EVENT = "EVENT"
+    PERIODIC = "PERIODIC"
