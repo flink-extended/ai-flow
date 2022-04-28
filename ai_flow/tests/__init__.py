@@ -16,16 +16,3 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from typing import Text, Dict
-
-
-class BaseRegistry(object):
-    def __init__(self) -> None:
-        super().__init__()
-        self.object_dict: Dict = {}
-
-    def register(self, key: object, value: object):
-        self.object_dict[key] = value
-
-    def get_object(self, key: object)->object:
-        return self.object_dict[key]

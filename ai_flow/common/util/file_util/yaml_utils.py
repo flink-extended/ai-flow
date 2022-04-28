@@ -16,15 +16,39 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import logging
+
 import yaml
 from typing import Dict
 
+from ai_flow.common.exception.exceptions import AIFlowYAMLException
+
+logger = logging.getLogger(__name__)
+
 
 def load_yaml_file(file_path) -> Dict:
-    with open(file_path, 'r') as f:
-        return yaml.load(f, Loader=yaml.FullLoader)
+    try:
+        with open(file_path, "rb") as fd:
+            return yaml.safe_load(fd)
+    except (IOError, yaml.YAMLError) as exc:
+        logger.exception(exc)
+        raise AIFlowYAMLException("Failed to load yaml file: {}".format(file_path))
+
+
+def load_yaml_string(yaml_string) -> Dict:
+    try:
+        return yaml.safe_load(yaml_string)
+    except (IOError, yaml.YAMLError) as exc:
+        logger.exception(exc)
+        raise AIFlowYAMLException("Failed to load yaml string: {}".format(yaml_string))
 
 
 def dump_yaml_file(data: Dict, file_path):
-    with open(file_path, 'w') as f:
-        return yaml.dump(data=data, stream=f, sort_keys=True)
+    try:
+        with open(file_path, 'w') as fd:
+            return yaml.dump(data=data, stream=fd, sort_keys=True)
+    except (IOError, yaml.YAMLError) as exc:
+        logger.exception(exc)
+        raise AIFlowYAMLException("Failed to dump yaml file: {}".format(file_path))
+
+
