@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,32 +14,16 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
 from enum import Enum
 
 
-class ExecutionMode(str, Enum):
+class ExecutionType(str, Enum):
     """
-    Execution mode of the specific job. Batch or Stream.
+    Enumeration of execution of workflow and task.
+    MANUAL: Manually trigger execution.
+    EVENT: Event triggered execution.
+    PERIODIC: Periodic triggered execution.
     """
-    BATCH = 'BATCH'
-    STREAM = 'STREAM'
-
-    @staticmethod
-    def value_of(exec_type):
-        if exec_type in ('BATCH', 'batch'):
-            return ExecutionMode.BATCH
-        elif exec_type in ('STREAM', 'stream'):
-            return ExecutionMode.STREAM
-        else:
-            raise NotImplementedError
-
-
-class State(str, Enum):
-    INIT = 'INIT'
-    STARTING = 'STARTING'
-    RUNNING = 'RUNNING'
-    FINISHED = 'FINISHED'
-    FAILED = 'FAILED'
-    KILLING = 'KILLING'
-    KILLED = 'KILLED'
+    MANUAL = "MANUAL"
+    EVENT = "EVENT"
+    PERIODIC = "PERIODIC"

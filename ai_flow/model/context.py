@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,4 +14,15 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
+from ai_flow.model.state import StateDescriptor, State
+
+
+class Context(object):
+    """The context in which custom logic is executed."""
+    def get_state(self, state_descriptor: StateDescriptor) -> State:
+        """
+        Get the State object.
+        :param state_descriptor: Description of the State object.
+        :return The State object.
+        """
+        pass
