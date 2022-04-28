@@ -34,21 +34,19 @@ class Operator(object):
                  name: str,
                  inputs: list = None,
                  outputs: list = None,
-                 workflow=None,
                  **kwargs,
                  ):
         """
         :param name: The operator's name.
         :param inputs: Operator input parameters.
         :param outputs: Operator output parameters.
-        :param workflow： The workflow to which the operator belongs.
         :param kwargs: Operator's extended parameters.
         """
         self.name: str = name
         self.config: dict = kwargs
         self.inputs = inputs
         self.outputs = outputs
-        self.workflow = workflow
+        self.workflow = None  # The workflow to which the operator belongs.
 
 
 class AIFlowOperator(Operator):

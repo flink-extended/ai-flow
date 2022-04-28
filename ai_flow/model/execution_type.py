@@ -21,7 +21,7 @@ class ExecutionType(str, Enum):
     """
     Enumeration of execution of workflow and task.
     MANUAL: Manually trigger execution.
-    EVENT_TRIGGERED: Event triggered execution.
+    EVENT: Event triggered execution.
     PERIODIC: Periodic triggered execution.
     """
     MANUAL = "MANUAL"
