@@ -22,7 +22,8 @@ from unittest import mock
 from tempfile import TemporaryDirectory
 
 from ai_flow.common.configuration.configuration import Configuration, get_server_configuration, get_client_configuration
-from ai_flow.common.configuration.helpers import get_aiflow_home, expand_env_var, parameterized_config
+from ai_flow.common.configuration.helpers import get_aiflow_home, expand_env_var, parameterized_config, \
+    write_default_config
 from ai_flow.common.exception.exceptions import AIFlowConfigException
 from ai_flow.common.util.file_util import yaml_utils
 
@@ -30,13 +31,7 @@ from ai_flow.common.util.file_util import yaml_utils
 AIFLOW_HOME = '/path/to/aiflow'
 
 
-class TestCore(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
+class TestConfiguration(unittest.TestCase):
 
     def test_home_dir(self):
         with unittest.mock.patch.dict('os.environ'):
@@ -129,9 +124,12 @@ class TestCore(unittest.TestCase):
     def test_get_default_configuration(self):
         with TemporaryDirectory(prefix='test_config') as tmp_dir:
             with unittest.mock.patch.dict('os.environ', AIFLOW_HOME=tmp_dir):
+
+                write_default_config('aiflow_server.yaml')
                 server_conf = get_server_configuration()
                 self.assertEqual(server_conf.get_str('log_dir'), expand_env_var('~/aiflow/logs'))
 
+                write_default_config('aiflow_client.yaml')
                 client_conf = get_client_configuration()
                 self.assertEqual(client_conf.get_str('server_address'), expand_env_var('localhost:50051'))
                 self.assertEqual(client_conf.get('blob_manager').get('blob_manager_config'), {'root_directory': '/tmp'})

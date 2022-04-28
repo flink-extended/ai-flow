@@ -115,7 +115,8 @@ def get_client_configuration():
     client_config_file_name = 'aiflow_client.yaml'
     config_path = os.path.join(get_aiflow_home(), client_config_file_name)
     if not os.path.isfile(config_path):
-        write_default_config(client_config_file_name)
+        logger.warning("Client configuration file not found in {}, using default.".format(config_path))
+        config_path = os.path.join(os.path.dirname(__file__), 'config_templates', client_config_file_name)
     config = Configuration(config_path)
     return config
 
@@ -124,6 +125,7 @@ def get_server_configuration():
     server_config_file_name = 'aiflow_server.yaml'
     config_path = os.path.join(get_aiflow_home(), server_config_file_name)
     if not os.path.isfile(config_path):
-        write_default_config(server_config_file_name)
+        logger.warning("Server configuration file not found in {}, using default.".format(config_path))
+        config_path = os.path.join(os.path.dirname(__file__), 'config_templates', server_config_file_name)
     config = Configuration(config_path)
     return config

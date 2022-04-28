@@ -31,13 +31,9 @@ REST_PORT = SERVER_CONF.get_int('rest_port', fallback=8000)
 
 METADATA_BACKEND_URI = SERVER_CONF.get_str('metadata_backend_uri')
 
-HISTORY_RETENTION = SERVER_CONF.get_str('history_retention')
+HISTORY_RETENTION = SERVER_CONF.get_str('history_retention', fallback='30d')
 
-NOTIFICATION_SERVER_URI = SERVER_CONF.get_str('notification_server_uri')
-
-STATE_BACKEND_URI = SERVER_CONF.get_str('state_backend_uri')
-
-SQLALCHEMY_DB_URI = SERVER_CONF.get_str('sql_alchemy_db_uri')
+NOTIFICATION_SERVER_URI = SERVER_CONF.get_str('notification_server_uri', fallback='127.0.0.1:50052')
 
 TASK_EXECUTOR = SERVER_CONF.get_str('task_executor', fallback='local')
 
@@ -49,7 +45,7 @@ SQLALCHEMY_MAX_OVERFLOW = SERVER_CONF.get_int('sql_alchemy_max_overflow', fallba
 
 # Client Config
 
-SERVER_ADDRESS = CLIENT_CONF.get_str('server_address')
+SERVER_ADDRESS = CLIENT_CONF.get_str('server_address', fallback='127.0.0.1:50051')
 
 BLOB_MANAGER_CLASS = CLIENT_CONF.get('blob_manager').get('blob_manager_class')
 

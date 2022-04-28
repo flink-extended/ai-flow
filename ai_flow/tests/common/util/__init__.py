@@ -1,3 +1,4 @@
+#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -14,32 +15,4 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from enum import Enum
-from typing import Text
-
-
-class ReturnCode(Enum):
-    OK = 0,
-    ERROR = 1,
-
-
-class BaseResult(object):
-    def __init__(self, status: ReturnCode = ReturnCode.OK, error_message: Text = None):
-        self._status = status
-        self._error_message = error_message
-
-    @property
-    def error_message(self):
-        return self._error_message
-
-    @error_message.setter
-    def error_message(self, value):
-        self._error_message = value
-
-    @property
-    def status(self):
-        return self._status
-
-    @status.setter
-    def status(self, value):
-        self._status = value
+#

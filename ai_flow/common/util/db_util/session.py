@@ -16,6 +16,7 @@
 # under the License.
 import contextlib
 import logging
+from functools import wraps
 
 import sqlalchemy
 import sqlalchemy.orm
@@ -47,7 +48,7 @@ def _get_managed_session_maker(SessionMaker):
             raise
         except Exception as e:
             session.rollback()
-            raise AIFlowDBException(error_msg=e)
+            raise AIFlowDBException(e)
         finally:
             session.close()
 
@@ -59,18 +60,45 @@ def create_sqlalchemy_engine(db_uri):
     Create SQLAlchemy engine with specified database URI to support AIFlow entities backend storage.
     """
     enable_pool = config_constants.SQLALCHEMY_POOL_ENABLED
-    pool_size = config_constants.SQLALCHEMY_POOL_SIZE
-    pool_max_overflow = config_constants.SQLALCHEMY_MAX_OVERFLOW
     pool_kwargs = {}
-    if enable_pool:
-        pool_kwargs['pool_size'] = int(pool_size)
-        pool_kwargs['max_overflow'] = int(pool_max_overflow)
+    if enable_pool and 'sqlite' not in db_uri:
+        pool_kwargs['pool_size'] = config_constants.SQLALCHEMY_POOL_SIZE
+        pool_kwargs['max_overflow'] = config_constants.SQLALCHEMY_MAX_OVERFLOW
         logger.info("Create SQLAlchemy engine with pool options %s", pool_kwargs)
     return sqlalchemy.create_engine(db_uri, pool_pre_ping=True, **pool_kwargs)
 
 
-def create_session():
-    db_uri = config_constants.SQLALCHEMY_DB_URI
+def create_session(db_uri=None):
+    if db_uri is None:
+        db_uri = config_constants.METADATA_BACKEND_URI
     db_engine = create_sqlalchemy_engine(db_uri)
     SessionMaker = sqlalchemy.orm.sessionmaker(bind=db_engine)
-    return _get_managed_session_maker(SessionMaker)
+    session_factory = _get_managed_session_maker(SessionMaker)
+    return session_factory()
+
+
+def provide_session(func):
+    """
+    Function decorator that provides a session if it isn't provided.
+    If you want to reuse a session or run the function as part of a
+    database transaction, you pass it to the function, if not this wrapper
+    will create one and close it for you.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        arg_session = 'session'
+
+        func_params = func.__code__.co_varnames
+        session_in_args = arg_session in func_params and \
+                          func_params.index(arg_session) < len(args)
+        session_in_kwargs = arg_session in kwargs
+
+        if session_in_kwargs or session_in_args:
+            return func(*args, **kwargs)
+        else:
+            with create_session() as session:
+                kwargs[arg_session] = session
+                return func(*args, **kwargs)
+
+    return wrapper
