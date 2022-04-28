@@ -16,16 +16,19 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
 
 
-def get_file_dir(file):
-    return os.path.dirname(os.path.abspath(file))
+class AIFlowException(Exception):
+    """Base exception of AIFlow"""
 
 
-def get_parent_dir(path):
-    return os.path.dirname(path)
+class AIFlowConfigException(AIFlowException):
+    """Raise when there is configuration problem"""
 
 
-def get_module_name(main_file):
-    return os.path.basename(main_file)[:-3]
+class AIFlowDBException(AIFlowException):
+    """Raise when there is database problem"""
+
+
+class AIFlowYAMLException(AIFlowException):
+    """Raise when there is yaml handling problem"""
