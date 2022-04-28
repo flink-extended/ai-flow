@@ -16,17 +16,3 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import yaml
-from typing import Dict, Text
-
-
-class AIFlowConfiguration(Dict[Text, Text]):
-
-    def load_from_file(self, file_path):
-        with open(file_path, 'r') as f:
-            yaml_config = yaml.load(f, Loader=yaml.FullLoader)
-            self.update(yaml_config.items())
-
-    def dump_to_file(self, file_path):
-        with open(file_path, 'w') as f:
-            return yaml.dump(data=dict(self), stream=f)
