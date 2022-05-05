@@ -23,13 +23,13 @@ SERVER_CONF = get_server_configuration()
 
 # Server Config
 
-LOG_DIR = SERVER_CONF.get_str('log_dir')
+LOG_DIR = SERVER_CONF.get_str('log_dir', fallback='/tmp')
 
 SERVER_RPC_PORT = SERVER_CONF.get_str('server_rpc_port', fallback=50051)
 
 REST_PORT = SERVER_CONF.get_int('rest_port', fallback=8000)
 
-METADATA_BACKEND_URI = SERVER_CONF.get_str('metadata_backend_uri')
+METADATA_BACKEND_URI = SERVER_CONF.get_str('metadata_backend_uri', fallback='sqlite:///aiflow.db')
 
 HISTORY_RETENTION = SERVER_CONF.get_str('history_retention', fallback='30d')
 
