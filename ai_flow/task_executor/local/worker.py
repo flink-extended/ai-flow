@@ -22,6 +22,7 @@ from abc import abstractmethod
 from multiprocessing import Process
 from typing import List
 from setproctitle import setproctitle
+from queue import Queue
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.model.status import TaskStatus
@@ -57,10 +58,8 @@ class Worker(Process):
 
         logger.info("Running %s", command)
         if config_constants.EXECUTE_TASKS_IN_NEW_INTERPRETER:
-            print('execute in subprocess')
             status = self._execute_in_subprocess(command)
         else:
-            print('execute in fork')
             status = self._execute_in_fork(command)
 
         self.result_queue.put((key, status))

@@ -19,6 +19,7 @@ import logging
 from multiprocessing import Manager
 from multiprocessing.managers import SyncManager
 from typing import Optional, Tuple
+from queue import Queue
 
 from ai_flow.common.configuration.config_constants import LOCAL_TASK_EXECUTOR_PARALLELISM
 from ai_flow.common.exception.exceptions import AIFlowException
