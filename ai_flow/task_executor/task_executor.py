@@ -1,0 +1,133 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+import logging
+import time
+from abc import ABC, abstractmethod
+from datetime import datetime
+
+from typing import List
+
+from ai_flow.common.exception.exceptions import AIFlowDBException
+from ai_flow.model.action import TaskAction
+from ai_flow.model.status import TaskStatus
+from ai_flow.common.util.db_util.session import create_session
+from ai_flow.model.execution_type import ExecutionType
+from ai_flow.model.task_execution import TaskExecution, TaskExecutionKey
+
+logger = logging.getLogger(__name__)
+
+
+class ScheduleTaskCommand(object):
+    def __init__(self,
+                 task_execution: TaskExecutionKey,
+                 action: TaskAction):
+        self.task_execution = task_execution
+        self.action = action
+
+    def __str__(self):
+        return "task_execution: {0} action: {1}".format(self.task_execution, self.action)
+
+
+class BaseTaskExecutor(ABC):
+
+    def __init__(self):
+        pass
+
+    def schedule_task(self, command: ScheduleTaskCommand):
+        if command.action == TaskAction.START:
+            self.start_task_execution(command.task_execution)
+        elif command.action == TaskAction.STOP:
+            self.stop_task_execution(command.task_execution)
+        elif command.action == TaskAction.RESTART:
+            self.stop_task_execution(command.task_execution)
+            self.start_task_execution(command.task_execution)
+
+    def start_task_execution(self, key: TaskExecutionKey) -> str:
+        """
+        Start the task execution on worker.
+
+        :param key: Id of the task execution
+        :return: The handle of the submitted task execution, which can be used to stop the task execution
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def stop_task_execution(self, key: TaskExecutionKey, handle: str):
+        """
+        Stop the task execution of specified execution key.
+
+        :param key: Id of the task execution
+        :param handle: The handle to identify the task execution process
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def start(self):
+        """
+        Do some initialization, e.g. start a new thread to observe the status
+        of all task executions and update the status to metadata backend.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def stop(self):
+        """
+        Do some cleanup operations, e.g. stop the observer thread.
+        """
+        raise NotImplementedError()
+
+    @staticmethod
+    def _generate_command(key: TaskExecutionKey,
+                          pool: str = 'default') -> List[str]:
+        """
+        Generates the shell command to execute this task execution.
+
+        :param key: key of task execution
+        :param file_path: path to the workflow file
+        :param pool: the pool that the task should run in
+
+        :return: shell command that can be used to run the task execution
+        """
+        cmd = ["aiflow", "task-execution", "run", str(key.workflow_execution_id), str(key.task_name), str(key.seq_num)]
+        # if pool:
+        #     cmd.extend(["--pool", pool])
+        return cmd
+
+    def _wait_for_stopping_task(
+        self,
+        key: TaskExecutionKey,
+        check_interval: int,
+        max_check_num: int,
+    ) -> bool:
+        """
+        Wait check_interval * max_check_num seconds for task to be killed successfully
+        :param key: the task instance key
+        :type key: TaskInstanceKey
+        :param check_interval: interval between checking state
+        :type check_interval: int
+        :param max_check_num: max times of checking state
+        :type max_check_num: int
+        """
+        check_num = 0
+        while check_num < max_check_num and check_interval > 0:
+            check_num = check_num + 1
+            te = self._get_task_execution(key)
+            if te and te.state == TaskStatus.KILLED:
+                return True
+            else:
+                time.sleep(check_interval)
+        return False
