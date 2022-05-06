@@ -38,16 +38,18 @@ TaskExecutionStatusType = Tuple[TaskExecutionKey, TaskStatus]
 
 class LocalTaskExecutor(BaseTaskExecutor):
 
-    def __init__(self,
-                 parallelism: int = LOCAL_TASK_EXECUTOR_PARALLELISM):
+    def __init__(self):
         self.manager: Optional[SyncManager] = None
         self.task_queue: Optional['Queue[TaskExecutionCommandType]'] = None
         self.result_queue: Optional['Queue[TaskExecutionStatusType]'] = None
-        self.parallelism = parallelism
+        self.parallelism = LOCAL_TASK_EXECUTOR_PARALLELISM
         self.workers = []
 
     def start_task_execution(self, key: TaskExecutionKey) -> str:
-        command = self._generate_command(key)
+        command = ["aiflow", "task-execution", "run",
+                   str(key.workflow_execution_id),
+                   str(key.task_name),
+                   str(key.seq_num)]
         if not self.task_queue or not self.result_queue:
             raise AIFlowException('LocalTaskExecutor not started.')
         self.task_queue.put((key, command))

@@ -90,23 +90,6 @@ class BaseTaskExecutor(ABC):
         """
         raise NotImplementedError()
 
-    @staticmethod
-    def _generate_command(key: TaskExecutionKey,
-                          pool: str = 'default') -> List[str]:
-        """
-        Generates the shell command to execute this task execution.
-
-        :param key: key of task execution
-        :param file_path: path to the workflow file
-        :param pool: the pool that the task should run in
-
-        :return: shell command that can be used to run the task execution
-        """
-        cmd = ["aiflow", "task-execution", "run", str(key.workflow_execution_id), str(key.task_name), str(key.seq_num)]
-        # if pool:
-        #     cmd.extend(["--pool", pool])
-        return cmd
-
     def _wait_for_stopping_task(
         self,
         key: TaskExecutionKey,
