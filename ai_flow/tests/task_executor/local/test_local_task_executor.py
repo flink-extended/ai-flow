@@ -19,6 +19,7 @@ import unittest
 from unittest import mock
 
 from ai_flow.common.configuration import config_constants
+from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.action import TaskAction
 from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecutionKey
@@ -54,6 +55,16 @@ class TestLocalExecutor(unittest.TestCase):
         self.assertEqual(TaskStatus.SUCCESS, status)
 
         executor.stop()
+
+    def test_negative_parallelism(self):
+        with self.assertRaises(AIFlowException) as context:
+            executor = LocalTaskExecutor(0)
+            executor.start()
+            self.assertTrue('Parallelism of LocalTaskExecutor should be a positive integer' in context.exception)
+        with self.assertRaises(AIFlowException) as context:
+            executor = LocalTaskExecutor(-1)
+            executor.start()
+            self.assertTrue('Parallelism of LocalTaskExecutor should be a positive integer' in context.exception)
 
 
 if __name__ == '__main__':

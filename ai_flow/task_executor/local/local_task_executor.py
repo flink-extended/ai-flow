@@ -20,6 +20,7 @@ from multiprocessing import Manager
 from multiprocessing.managers import SyncManager
 from typing import Optional, Tuple
 
+from ai_flow.common.configuration.config_constants import LOCAL_TASK_EXECUTOR_PARALLELISM
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.status import TaskStatus
 from ai_flow.common.util.process_utils import stop_process
@@ -37,7 +38,7 @@ TaskExecutionStatusType = Tuple[TaskExecutionKey, TaskStatus]
 class LocalTaskExecutor(BaseTaskExecutor):
 
     def __init__(self,
-                 parallelism: int):
+                 parallelism: int = LOCAL_TASK_EXECUTOR_PARALLELISM):
         self.manager: Optional[SyncManager] = None
         self.task_queue: Optional['Queue[TaskExecutionCommandType]'] = None
         self.result_queue: Optional['Queue[TaskExecutionStatusType]'] = None
@@ -72,6 +73,8 @@ class LocalTaskExecutor(BaseTaskExecutor):
         self.task_queue = self.manager.Queue()
         self.result_queue = self.manager.Queue()
 
+        if self.parallelism <= 0:
+            raise AIFlowException("Parallelism of LocalTaskExecutor should be a positive integer.")
         self.workers = [
             Worker(self.task_queue, self.result_queue)
             for _ in range(self.parallelism)

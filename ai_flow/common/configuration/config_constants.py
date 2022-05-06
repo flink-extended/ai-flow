@@ -41,6 +41,8 @@ TASK_EXECUTOR = SERVER_CONF.get_str('task_executor', fallback='local')
 
 EXECUTE_TASKS_IN_NEW_INTERPRETER = SERVER_CONF.get_bool('execute_tasks_in_new_interpreter', fallback=False)
 
+LOCAL_TASK_EXECUTOR_PARALLELISM = SERVER_CONF.get_int('local_executor_parallelism', fallback=10)
+
 SQLALCHEMY_POOL_ENABLED = SERVER_CONF.get_bool('sql_alchemy_pool_enabled', fallback=True)
 
 SQLALCHEMY_POOL_SIZE = SERVER_CONF.get_int('sql_alchemy_pool_size', fallback=5)
