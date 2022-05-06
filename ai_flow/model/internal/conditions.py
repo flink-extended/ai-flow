@@ -20,6 +20,7 @@ from typing import List
 from ai_flow.model.condition import Condition
 from ai_flow.model.context import Context
 from ai_flow.model.internal.events import TaskStatusChangedEventKey
+from ai_flow.model.state import ValueState, ValueStateDescriptor
 from ai_flow.model.status import TaskStatus
 
 
@@ -36,13 +37,35 @@ class SingleEventCondition(Condition):
         return True
 
 
+def is_match_event(event_key: EventKey, event: Event) -> bool:
+    if event_key.namespace is not None and event_key.namespace != event.event_key.namespace:
+        return False
+    if event_key.name is not None and event_key.name != event.event_key.name:
+        return False
+    if event_key.event_type is not None and event_key.event_type != event.event_key.event_type:
+        return False
+    if event_key.sender is not None and event_key.sender != event.event_key.sender:
+        return False
+    return True
+
+
+def is_match_events(event_keys: List[EventKey], event: Event) -> bool:
+    for ek in event_keys:
+        if is_match_event(event_key=ek, event=event):
+            return True
+    return False
+
+
 class MeetAllCondition(Condition):
     """
     MeetAllCondition is a condition that contains multiple conditions,
     and it is satisfied when all of them are satisfied.
     """
-    def __init__(self, conditions: List[Condition]):
+    def __init__(self,
+                 name: str,
+                 conditions: List[Condition]):
         """
+        :param name: The name of the MeetAllCondition, which is used to create State.
         :param conditions: The conditions that this condition contains.
         """
         events = []
@@ -50,10 +73,20 @@ class MeetAllCondition(Condition):
             events.extend(c.expect_events)
         super().__init__(expect_events=events)
         self.conditions = conditions
+        self.name = name
 
     def is_met(self, event: Event, context: Context) -> bool:
-        for condition in self.conditions:
-            if not condition.is_met(event, context):
+        state: ValueState = context.get_state(ValueStateDescriptor(name=self.name))
+        state_value = state.value()
+        if state_value is None:
+            state_value = [False] * len(self.conditions)
+        for i in range(len(self.conditions)):
+            if is_match_events(event_keys=self.conditions[i].expect_events, event=event) \
+                    and self.conditions[i].is_met(event, context):
+                state_value[i] = True
+        state.update(state_value)
+        for v in state_value:
+            if not v:
                 return False
         return True
 
@@ -75,7 +108,7 @@ class MeetAnyCondition(Condition):
 
     def is_met(self, event: Event, context: Context) -> bool:
         for condition in self.conditions:
-            if condition.is_met(event, context):
+            if is_match_events(event_keys=condition.expect_events, event=event) and condition.is_met(event, context):
                 return True
         return False
 

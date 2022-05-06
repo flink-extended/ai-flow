@@ -16,11 +16,12 @@
 # under the License.
 from typing import Dict, List, Optional
 
-from notification_service.event import EventKey
+from notification_service.event import EventKey, Event
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
-from ai_flow.model.internal.conditions import SingleEventCondition, TaskStatusCondition, MeetAllCondition
+from ai_flow.model.context import Context
+from ai_flow.model.internal.conditions import SingleEventCondition, TaskStatusCondition
 from ai_flow.model.operator import Operator
 from ai_flow.model.rule import TaskRule
 from ai_flow.model.status import TaskStatus
@@ -78,9 +79,28 @@ class Workflow(object):
                                                   workflow_name=self.name,
                                                   task_name=k.name,
                                                   expect_status=v))
+
+        class TaskStatusAllMetCondition(Condition):
+
+            def __init__(self, condition_list: List[Condition]):
+                """
+                :param condition_list: The conditions that this condition contains.
+                """
+                events = []
+                for c in condition_list:
+                    events.extend(c.expect_events)
+                super().__init__(expect_events=events)
+                self.condition_list = condition_list
+
+            def is_met(self, event: Event, context: Context) -> bool:
+                for c in self.condition_list:
+                    if not c.is_met(event=event, context=context):
+                        return False
+                return True
+
         self.action_on_condition(task_name=task_name,
                                  action=action,
-                                 condition=MeetAllCondition(conditions=conditions))
+                                 condition=TaskStatusAllMetCondition(condition_list=conditions))
 
 
 class WorkflowContext(object):

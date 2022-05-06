@@ -22,7 +22,6 @@ from notification_service.event import Event, EventKey
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
 from ai_flow.model.context import Context
-from ai_flow.model.internal.conditions import MeetAllCondition
 from ai_flow.model.operator import Operator
 from ai_flow.model.status import TaskStatus
 from ai_flow.model.workflow import Workflow
@@ -75,8 +74,7 @@ class TestWorkflow(unittest.TestCase):
                                                                     task_2: TaskStatus.FAILED})
         self.assertEqual(3, len(workflow.tasks))
         self.assertEqual(1, len(workflow.rules['task_3']))
-        self.assertTrue(isinstance(workflow.rules['task_3'][0].condition, MeetAllCondition))
-        self.assertEqual(2, len(workflow.rules['task_3'][0].condition.conditions))
+        self.assertEqual(2, len(workflow.rules['task_3'][0].condition.condition_list))
 
 
 if __name__ == '__main__':
