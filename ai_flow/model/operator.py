@@ -18,6 +18,10 @@ from abc import abstractmethod
 
 from typing import Dict, Optional
 
+from notification_service.event import EventKey
+
+from ai_flow.model.action import TaskAction
+from ai_flow.model.condition import Condition
 from ai_flow.model.context import Context
 from ai_flow.model.status import TaskStatus
 
@@ -42,11 +46,41 @@ class Operator(object):
         :param outputs: Operator output parameters.
         :param kwargs: Operator's extended parameters.
         """
+        from ai_flow.model.workflow import WorkflowContext
         self.name: str = name
         self.config: dict = kwargs
         self.inputs = inputs
         self.outputs = outputs
-        self.workflow = None  # The workflow to which the operator belongs.
+        self.workflow = WorkflowContext.get_current_workflow()  # The workflow to which the operator belongs.
+        self.workflow.tasks[self.name] = self
+
+    def action_on_condition(self, action: TaskAction, condition: Condition):
+        """
+        Schedule the task based on a specified condition.
+        :param action: The action for scheduling the task.
+        :param condition: The condition for scheduling the task to depend on.
+        """
+        self.workflow.action_on_condition(task_name=self.name, action=action, condition=condition)
+
+    def action_on_event_received(self, event_key: EventKey, action: TaskAction):
+        """
+        When the specified event is received, the task is scheduled.
+        :param event_key: The event for scheduling the task to depend on.
+        :param action: The action for scheduling the task.
+        """
+        self.workflow.action_on_event_received(task_name=self.name, event_key=event_key,  action=action)
+
+    def action_on_task_status(self,
+                              action: TaskAction,
+                              upstream_task_status_dict: Dict['Operator', TaskStatus]):
+        """
+        Schedule the task based on the status of upstream tasks.
+        :param action: The action for scheduling the task.
+        :param upstream_task_status_dict: The upstream task status for scheduling the task to depend on.
+        """
+        self.workflow.action_on_task_status(task_name=self.name,
+                                            action=action,
+                                            upstream_task_status_dict=upstream_task_status_dict)
 
 
 class AIFlowOperator(Operator):

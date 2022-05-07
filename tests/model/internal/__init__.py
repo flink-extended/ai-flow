@@ -14,24 +14,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from ai_flow.model.state import StateDescriptor, State
-from ai_flow.model.status import TaskStatus
-
-
-class Context(object):
-    """The context in which custom logic is executed."""
-
-    def get_state(self, state_descriptor: StateDescriptor) -> State:
-        """
-        Get the State object.
-        :param state_descriptor: Description of the State object.
-        :return The State object.
-        """
-        pass
-
-    def get_task_status(self, task_name) -> TaskStatus:
-        """
-        Get the task status by task name.
-        :param task_name: The name of the task.
-        """
-        pass
