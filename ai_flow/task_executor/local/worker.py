@@ -27,6 +27,7 @@ from queue import Queue
 from ai_flow.common.configuration import config_constants
 from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecutionKey
+from ai_flow.task_executor.local.local_task_executor import TaskExecutionCommandType, TaskExecutionStatusType
 
 CommandType = List[str]
 logger = logging.getLogger(__name__)
