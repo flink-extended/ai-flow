@@ -37,7 +37,7 @@ class SingleEventCondition(Condition):
         return True
 
 
-def is_match_event(event_key: EventKey, event: Event) -> bool:
+def match_event(event_key: EventKey, event: Event) -> bool:
     if event_key.namespace is not None and event_key.namespace != event.event_key.namespace:
         return False
     if event_key.name is not None and event_key.name != event.event_key.name:
@@ -49,9 +49,9 @@ def is_match_event(event_key: EventKey, event: Event) -> bool:
     return True
 
 
-def is_match_events(event_keys: List[EventKey], event: Event) -> bool:
+def match_events(event_keys: List[EventKey], event: Event) -> bool:
     for ek in event_keys:
-        if is_match_event(event_key=ek, event=event):
+        if match_event(event_key=ek, event=event):
             return True
     return False
 
@@ -65,7 +65,8 @@ class MeetAllCondition(Condition):
                  name: str,
                  conditions: List[Condition]):
         """
-        :param name: The name of the MeetAllCondition, which is used to create State.
+        :param name: The name of the MeetAllCondition.
+                     It is used to create state and must be unique within the same workflow.
         :param conditions: The conditions that this condition contains.
         """
         events = []
@@ -81,9 +82,11 @@ class MeetAllCondition(Condition):
         if state_value is None:
             state_value = [False] * len(self.conditions)
         for i in range(len(self.conditions)):
-            if is_match_events(event_keys=self.conditions[i].expect_events, event=event) \
-                    and self.conditions[i].is_met(event, context):
-                state_value[i] = True
+            if match_events(event_keys=self.conditions[i].expect_events, event=event):
+                if self.conditions[i].is_met(event, context):
+                    state_value[i] = True
+                else:
+                    state_value[i] = False
         state.update(state_value)
         for v in state_value:
             if not v:
@@ -108,7 +111,7 @@ class MeetAnyCondition(Condition):
 
     def is_met(self, event: Event, context: Context) -> bool:
         for condition in self.conditions:
-            if is_match_events(event_keys=condition.expect_events, event=event) and condition.is_met(event, context):
+            if match_events(event_keys=condition.expect_events, event=event) and condition.is_met(event, context):
                 return True
         return False
 
@@ -134,6 +137,8 @@ class TaskStatusCondition(Condition):
                                                     namespace=namespace)])
         self.expect_status = expect_status
 
+    # todo: To judge whether to trigger or not,
+    #  it is necessary to consider the inconsistency between the task status and the events.
     def is_met(self, event: Event, context: Context) -> bool:
         status = context.get_task_status(task_name=self.expect_events[0].sender)
         if self.expect_status == status:

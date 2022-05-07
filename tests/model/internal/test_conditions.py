@@ -35,6 +35,19 @@ class MockCondition(Condition):
         return self.flag
 
 
+class MockCondition2(Condition):
+    def __init__(self, name: str):
+        super().__init__([EventKey(name=name)])
+        self.count = 0
+
+    def is_met(self, event: Event, context: Context) -> bool:
+        self.count += 1
+        if 1 == self.count % 2:
+            return True
+        else:
+            return False
+
+
 class MockValueState(ValueState):
     def __init__(self):
         self.obj = None
@@ -51,6 +64,9 @@ class MockValueState(ValueState):
 
 class MockContext(Context):
     state = MockValueState()
+
+    def clear(self):
+        self.state.clear()
 
     def get_state(self, state_descriptor: StateDescriptor) -> State:
         return self.state
@@ -90,6 +106,15 @@ class TestConditions(unittest.TestCase):
             event=Event(event_key=EventKey(name='1'), message=None), context=context))
         self.assertTrue(condition.is_met(
             event=Event(event_key=EventKey(name='2'), message=None), context=context))
+        context.clear()
+        c_3 = MockCondition2(name='1')
+        condition = MeetAllCondition(name='c', conditions=[c_2, c_3])
+        self.assertFalse(condition.is_met(
+            event=Event(event_key=EventKey(name='2'), message=None), context=context))
+        self.assertTrue(condition.is_met(
+            event=Event(event_key=EventKey(name='1'), message=None), context=context))
+        self.assertFalse(condition.is_met(
+            event=Event(event_key=EventKey(name='1'), message=None), context=context))
 
 
 if __name__ == '__main__':
