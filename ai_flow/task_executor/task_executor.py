@@ -89,28 +89,3 @@ class BaseTaskExecutor(ABC):
         Do some cleanup operations, e.g. stop the observer thread.
         """
         raise NotImplementedError()
-
-    def _wait_for_stopping_task(
-        self,
-        key: TaskExecutionKey,
-        check_interval: int,
-        max_check_num: int,
-    ) -> bool:
-        """
-        Wait check_interval * max_check_num seconds for task to be killed successfully
-        :param key: the task instance key
-        :type key: TaskInstanceKey
-        :param check_interval: interval between checking state
-        :type check_interval: int
-        :param max_check_num: max times of checking state
-        :type max_check_num: int
-        """
-        check_num = 0
-        while check_num < max_check_num and check_interval > 0:
-            check_num = check_num + 1
-            te = self._get_task_execution(key)
-            if te and te.state == TaskStatus.KILLED:
-                return True
-            else:
-                time.sleep(check_interval)
-        return False

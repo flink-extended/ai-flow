@@ -1,3 +1,4 @@
+#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,8 +16,25 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-"""task-execution command"""
+import time
+import unittest
+
+from ai_flow.common.util.process_utils import StoppableThread
 
 
-def run_task_execution(args):
-    pass
+class TestStoppableThread(StoppableThread):
+    def run(self) -> None:
+        while not self.stopped():
+            time.sleep(1)
+            print('waiting...')
+
+
+class TestLocalExecutor(unittest.TestCase):
+
+    def test_stoppable_thread(self):
+        test_thread = TestStoppableThread()
+        test_thread.start()
+        time.sleep(1)
+        test_thread.stop()
+        test_thread.join()
+        self.assertTrue(test_thread.stopped())

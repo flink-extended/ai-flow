@@ -15,7 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import time
 import unittest
+from queue import Empty
 from unittest import mock
 
 from ai_flow.common.configuration import config_constants
@@ -48,12 +50,25 @@ class TestLocalExecutor(unittest.TestCase):
 
         executor = LocalTaskExecutor(parallelism=3)
         executor.start()
+        executor._task_status_observer.stop()
+        executor._task_status_observer.join()
         executor.schedule_task(command)
 
-        ret_key, status = executor.result_queue.get()
+        ret_key, status = executor.result_queue.get(timeout=1)
         self.assertEqual(str(key), str(ret_key))
         self.assertEqual(TaskStatus.SUCCESS, status)
 
+        executor.stop()
+
+    def test_task_observer_thread(self):
+        key = TaskExecutionKey(1, 'task', 1)
+        command = ScheduleTaskCommand(key, TaskAction.START)
+
+        executor = LocalTaskExecutor(parallelism=3)
+        executor.start()
+        executor.schedule_task(command)
+        with self.assertRaises(Empty) as context:
+            executor.result_queue.get(timeout=1)
         executor.stop()
 
     def test_negative_parallelism(self):

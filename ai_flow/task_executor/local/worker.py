@@ -34,10 +34,12 @@ logger = logging.getLogger(__name__)
 
 class Worker(Process):
 
-    def __init__(self, task_queue: 'Queue[TaskExecutionCommandType]', result_queue: 'Queue[TaskExecutionStatusType]'):
-        super().__init__(target=self.do_work)
+    def __init__(self,
+                 task_queue: 'Queue[TaskExecutionCommandType]',
+                 result_queue: 'Queue[TaskExecutionStatusType]'):
         self.task_queue = task_queue
-        self.result_queue: 'Queue[TaskInstanceStateType]' = result_queue
+        self.result_queue = result_queue
+        super().__init__(target=self.do_work)
 
     @abstractmethod
     def do_work(self):
@@ -65,12 +67,15 @@ class Worker(Process):
         self.result_queue.put((key, status))
 
     def _execute_in_subprocess(self, command: CommandType) -> TaskStatus:
-        try:
-            subprocess.check_call(command, close_fds=True)
-            return TaskStatus.SUCCESS
-        except subprocess.CalledProcessError as e:
-            logger.error("Failed to execute task %s.", str(e))
+        process = subprocess.Popen(args=command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+        stdout, stderr = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            logger.error("Return code {} on {} with stdout: {}, stderr: {}".format(
+                retcode, " ".join(command), stdout, stderr))
             return TaskStatus.FAILED
+        else:
+            return TaskStatus.SUCCESS
 
     def _execute_in_fork(self, command: CommandType) -> TaskStatus:
         pid = os.fork()

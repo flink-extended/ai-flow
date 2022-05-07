@@ -24,8 +24,8 @@ from functools import lru_cache
 from typing import Callable, Dict, Iterable, List, NamedTuple, Optional, Union
 
 from ai_flow.common.module_load import import_string
-from ai_flow.util.cli_utils import ColorMode
-from ai_flow.util.helpers import partition
+from ai_flow.common.util.cli_utils import ColorMode
+from ai_flow.common.util.helpers import partition
 
 
 def lazy_load_command(import_path: str) -> Callable:
@@ -93,6 +93,8 @@ ARG_PROJECT_PATH = Arg(('project_path',), help='The path of the project')
 ARG_WORKFLOW_NAME = Arg(('workflow_name',), help='The name of the workflow')
 ARG_WORKFLOW_EXECUTION_ID = Arg(('workflow_execution_id',), help='The id of the workflow execution')
 ARG_JOB_NAME = Arg(('job_name',), help='The name of the job')
+ARG_TASK_NAME = Arg(('task_name',), help='The name of the task')
+ARG_SEQUENCE_NUM = Arg(('sequence_number',), help='The sequence number of the task execution')
 ARG_OPTION = Arg(('option',), help='The option name of the configuration', )
 
 ARG_DB_VERSION = Arg(
@@ -250,6 +252,15 @@ WORKFLOW_COMMANDS = (
     )
 )
 
+TASK_COMMANDS = (
+    ActionCommand(
+        name='run',
+        help='Run specific task execution on the worker.',
+        func=lazy_load_command('ai_flow.cli.commands.task_execution_command.run_task_execution'),
+        args=(ARG_WORKFLOW_EXECUTION_ID, ARG_TASK_NAME, ARG_SEQUENCE_NUM)
+    ),
+)
+
 JOB_COMMANDS = (
     ActionCommand(
         name='list-executions',
@@ -373,6 +384,11 @@ ai_flow_commands: List[CLICommand] = [
         name='job',
         help='Manages jobs of the given project',
         subcommands=JOB_COMMANDS,
+    ),
+    GroupCommand(
+        name='task-execution',
+        help='Manages task executions of AIFlow',
+        subcommands=TASK_COMMANDS,
     ),
     GroupCommand(
         name="config",

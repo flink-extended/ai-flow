@@ -19,8 +19,6 @@
 import logging.config
 import os
 
-from ai_flow.endpoint.server.server_config import AIFlowServerConfig
-
 # We hard code the logging config, we should make it configurable in the future.
 logging.config.dictConfig({
     'version': 1,
@@ -62,10 +60,3 @@ def get_configuration_file_path():
     if not os.path.exists(config_file_path):
         raise FileNotFoundError('Config file {} not found.'.format(config_file_path))
     return config_file_path
-
-
-def get_configuration():
-    config_file_path = get_configuration_file_path()
-    config = AIFlowServerConfig()
-    config.load_from_file(config_file_path)
-    return config

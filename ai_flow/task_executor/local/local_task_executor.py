@@ -16,15 +16,16 @@
 # under the License.
 #
 import logging
+import threading
 from multiprocessing import Manager
 from multiprocessing.managers import SyncManager
 from typing import Optional, Tuple
-from queue import Queue
+from queue import Queue, Empty
 
 from ai_flow.common.configuration.config_constants import LOCAL_TASK_EXECUTOR_PARALLELISM
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.status import TaskStatus
-from ai_flow.common.util.process_utils import stop_process
+from ai_flow.common.util.process_utils import stop_process, StoppableThread
 
 from ai_flow.model.task_execution import TaskExecutionKey
 from ai_flow.task_executor.local.worker import CommandType, Worker
@@ -38,12 +39,14 @@ TaskExecutionStatusType = Tuple[TaskExecutionKey, TaskStatus]
 
 class LocalTaskExecutor(BaseTaskExecutor):
 
-    def __init__(self):
+    def __init__(self,
+                 parallelism: int = LOCAL_TASK_EXECUTOR_PARALLELISM):
         self.manager: Optional[SyncManager] = None
         self.task_queue: Optional['Queue[TaskExecutionCommandType]'] = None
         self.result_queue: Optional['Queue[TaskExecutionStatusType]'] = None
-        self.parallelism = LOCAL_TASK_EXECUTOR_PARALLELISM
+        self.parallelism = parallelism
         self.workers = []
+        self._task_status_observer = StoppableThread(target=self._update_status)
 
     def start_task_execution(self, key: TaskExecutionKey) -> str:
         command = ["aiflow", "task-execution", "run",
@@ -72,18 +75,21 @@ class LocalTaskExecutor(BaseTaskExecutor):
         Do some initialization, e.g. start a new thread to observe the status
         of all task executions and update the status to metadata backend.
         """
+        if self.parallelism <= 0:
+            raise AIFlowException("Parallelism of LocalTaskExecutor should be a positive integer.")
+
         self.manager = Manager()
         self.task_queue = self.manager.Queue()
         self.result_queue = self.manager.Queue()
+        self._task_status_observer.start()
 
-        if self.parallelism <= 0:
-            raise AIFlowException("Parallelism of LocalTaskExecutor should be a positive integer.")
         self.workers = [
             Worker(self.task_queue, self.result_queue)
             for _ in range(self.parallelism)
         ]
         for worker in self.workers:
             worker.start()
+        self.recover()
 
     def stop(self):
         """
@@ -96,5 +102,23 @@ class LocalTaskExecutor(BaseTaskExecutor):
             self.task_queue.put((None, None))
         # Wait for commands to finish
         self.task_queue.join()
-
         self.manager.shutdown()
+
+        self._task_status_observer.stop()
+        self._task_status_observer.join()
+
+    def recover(self):
+        # TODO recover state
+        pass
+
+    def _update_status(self):
+        while not threading.current_thread().stopped():
+            try:
+                key, status = self.result_queue.get(timeout=1)
+                # TODO call scheduler interface to save meta
+                print("Save task execution {} with status {} to meta".format(key, status))
+            except Empty:
+                pass
+            except Exception as e:
+                logger.exception("Error occurred when update task status, {}".format(e))
+        logger.info("TaskStatusUpdateThread exiting")
