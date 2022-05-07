@@ -21,7 +21,7 @@ set -e
 
 coverage run -m unittest discover -v lib/notification_service/tests
 
-coverage run -m unittest discover -v ai_flow/tests
+coverage run -m unittest discover -v tests
 
 coverage combine
 coverage report
