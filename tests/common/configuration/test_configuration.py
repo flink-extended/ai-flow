@@ -28,9 +28,6 @@ from ai_flow.common.exception.exceptions import AIFlowConfigException
 from ai_flow.common.util.file_util import yaml_utils
 
 
-AIFLOW_HOME = '/path/to/aiflow'
-
-
 class TestConfiguration(unittest.TestCase):
 
     def test_home_dir(self):

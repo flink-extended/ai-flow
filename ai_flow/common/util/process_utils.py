@@ -47,11 +47,10 @@ def check_pid_exist(_pid):
         return True
 
 
-def stop_process(pid, process_name, timeout_sec: int = 60):
+def stop_process(pid, timeout_sec: int = 60):
     """
     Try hard to kill the process with the given pid. It sends
     :param pid: The process pid to stop
-    :param process_name: The process name to log
     :param timeout_sec: timeout before sending SIGKILL to kill the process
     """
 
@@ -60,14 +59,14 @@ def stop_process(pid, process_name, timeout_sec: int = 60):
         while check_pid_exist(pid):
             if time.monotonic() - start_time > timeout_sec:
                 raise RuntimeError(
-                    "{} pid: {} does not exit after {} seconds.".format(process_name, pid, timeout_sec))
+                    "pid: {} does not exit after {} seconds.".format(pid, timeout_sec))
             os.kill(pid, signal.SIGTERM)
             time.sleep(1)
     except Exception:
-        logger.warning("Failed to stop {} pid: {} with SIGTERM. Try to send SIGKILL".format(process_name, pid))
+        logger.warning("Failed to stop pid: {} with SIGTERM. Try to send SIGKILL".format(pid))
         try:
             os.kill(pid, signal.SIGKILL)
         except Exception as e:
-            raise RuntimeError("Failed to kill {} pid: {} with SIGKILL.".format(process_name, pid)) from e
+            raise RuntimeError("Failed to kill pid: {} with SIGKILL.".format(pid)) from e
 
-    logger.info("{} pid: {} stopped".format(process_name, pid))
+    logger.info("pid: {} stopped".format(pid))
