@@ -15,9 +15,21 @@
 # specific language governing permissions and limitations
 # under the License.
 from datetime import datetime
-
 from ai_flow.model.execution_type import ExecutionType
 from ai_flow.model.status import TaskStatus
+
+
+class TaskExecutionKey(object):
+    def __init__(self,
+                 workflow_execution_id,
+                 task_name,
+                 seq_num):
+        self.workflow_execution_id = workflow_execution_id
+        self.task_name = task_name
+        self.seq_num = seq_num
+
+    def __str__(self):
+        return '{}_{}_{}'.format(self.workflow_execution_id, self.task_name, self.seq_num)
 
 
 class TaskExecution(object):
@@ -30,9 +42,9 @@ class TaskExecution(object):
                  sequence_number: int,
                  try_number: int,
                  execution_type: ExecutionType,
-                 begin_date: datetime,
-                 end_date: datetime,
-                 status: TaskStatus,
+                 begin_date: datetime = None,
+                 end_date: datetime = None,
+                 status: TaskStatus = TaskStatus.INIT,
                  id: int = None
                  ):
         """
