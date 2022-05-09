@@ -19,7 +19,6 @@
 import logging
 import os
 import signal
-import threading
 import time
 
 import psutil
@@ -71,19 +70,3 @@ def stop_process(pid, timeout_sec: int = 60):
             raise RuntimeError("Failed to kill pid: {} with SIGKILL.".format(pid)) from e
 
     logger.info("pid: {} stopped".format(pid))
-
-
-class StoppableThread(threading.Thread):
-    """Thread class with a stop() method. The thread itself has to check
-    regularly for the stopped() condition."""
-
-    def __init__(self, *args, **kwargs):
-        super(StoppableThread, self).__init__(*args, **kwargs)
-        self._ended = threading.Event()
-
-    def stop(self):
-        logger.debug("stopping thread")
-        self._ended.set()
-
-    def stopped(self):
-        return self._ended.is_set()

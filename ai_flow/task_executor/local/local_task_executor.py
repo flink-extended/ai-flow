@@ -16,6 +16,7 @@
 # under the License.
 #
 import logging
+import os
 import threading
 from multiprocessing import Manager
 from multiprocessing.managers import SyncManager
@@ -24,10 +25,13 @@ from queue import Queue, Empty
 
 from ai_flow.common.configuration.config_constants import LOCAL_TASK_EXECUTOR_PARALLELISM
 from ai_flow.common.exception.exceptions import AIFlowException
+from ai_flow.common.util.thread_utils import StoppableThread
 from ai_flow.model.status import TaskStatus
-from ai_flow.common.util.process_utils import stop_process, StoppableThread
+from ai_flow.common.util.process_utils import stop_process
 
 from ai_flow.model.task_execution import TaskExecutionKey
+from ai_flow.settings import get_aiflow_home
+from ai_flow.task_executor.local.local_registry import LocalRegistry
 from ai_flow.task_executor.local.worker import CommandType, Worker
 from ai_flow.task_executor.task_executor import BaseTaskExecutor
 
@@ -35,20 +39,24 @@ from ai_flow.task_executor.task_executor import BaseTaskExecutor
 logger = logging.getLogger(__name__)
 TaskExecutionCommandType = Tuple[TaskExecutionKey, CommandType]
 TaskExecutionStatusType = Tuple[TaskExecutionKey, TaskStatus]
+MAX_QUEUE_SIZE = 10 * 1024
+LOCAL_REGISTRY_PATH = os.path.join(get_aiflow_home(), ".pid_registry")
 
 
 class LocalTaskExecutor(BaseTaskExecutor):
 
     def __init__(self,
-                 parallelism: int = LOCAL_TASK_EXECUTOR_PARALLELISM):
+                 parallelism: int = LOCAL_TASK_EXECUTOR_PARALLELISM,
+                 registry_path: str = LOCAL_REGISTRY_PATH):
         self.manager: Optional[SyncManager] = None
         self.task_queue: Optional['Queue[TaskExecutionCommandType]'] = None
         self.result_queue: Optional['Queue[TaskExecutionStatusType]'] = None
         self.parallelism = parallelism
         self.workers = []
         self._task_status_observer = StoppableThread(target=self._update_status)
+        self.registry = LocalRegistry(registry_path)
 
-    def start_task_execution(self, key: TaskExecutionKey) -> str:
+    def start_task_execution(self, key: TaskExecutionKey):
         command = ["aiflow", "task-execution", "run",
                    str(key.workflow_execution_id),
                    str(key.task_name),
@@ -57,15 +65,14 @@ class LocalTaskExecutor(BaseTaskExecutor):
             raise AIFlowException('LocalTaskExecutor not started.')
         self.task_queue.put((key, command))
 
-    def stop_task_execution(self, key: TaskExecutionKey, handle: str):
+    def stop_task_execution(self, key: TaskExecutionKey):
         """
         Stop the task execution of specified execution key.
 
         :param key: Id of the task execution
-        :param handle: The handle to identify the task execution process
         """
         try:
-            pid = int(handle)
+            pid = int(self.registry.get(str(key)))
         except ValueError:
             logger.exception('Failed to convert pid with value {}'.format(pid))
         stop_process(pid)
@@ -79,12 +86,12 @@ class LocalTaskExecutor(BaseTaskExecutor):
             raise AIFlowException("Parallelism of LocalTaskExecutor should be a positive integer.")
 
         self.manager = Manager()
-        self.task_queue = self.manager.Queue()
-        self.result_queue = self.manager.Queue()
+        self.task_queue = self.manager.Queue(maxsize=MAX_QUEUE_SIZE)
+        self.result_queue = self.manager.Queue(maxsize=MAX_QUEUE_SIZE)
         self._task_status_observer.start()
 
         self.workers = [
-            Worker(self.task_queue, self.result_queue)
+            Worker(self.task_queue, self.result_queue, self.registry)
             for _ in range(self.parallelism)
         ]
         for worker in self.workers:
@@ -115,6 +122,7 @@ class LocalTaskExecutor(BaseTaskExecutor):
         while not threading.current_thread().stopped():
             try:
                 key, status = self.result_queue.get(timeout=1)
+                self.registry.remove(str(key))
                 # TODO call scheduler interface to save meta
                 print("Save task execution {} with status {} to meta".format(key, status))
             except Empty:

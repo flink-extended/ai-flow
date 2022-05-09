@@ -20,14 +20,14 @@ import os
 import subprocess
 from abc import abstractmethod
 from multiprocessing import Process
-from typing import List
+from typing import List, Tuple
 from setproctitle import setproctitle
 from queue import Queue
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecutionKey
-from ai_flow.task_executor.local.local_task_executor import TaskExecutionCommandType, TaskExecutionStatusType
+from ai_flow.task_executor.local.local_registry import LocalRegistry
 
 CommandType = List[str]
 logger = logging.getLogger(__name__)
@@ -36,10 +36,12 @@ logger = logging.getLogger(__name__)
 class Worker(Process):
 
     def __init__(self,
-                 task_queue: 'Queue[TaskExecutionCommandType]',
-                 result_queue: 'Queue[TaskExecutionStatusType]'):
+                 task_queue,
+                 result_queue,
+                 registry: LocalRegistry):
         self.task_queue = task_queue
         self.result_queue = result_queue
+        self.registry = registry
         super().__init__(target=self.do_work)
 
     @abstractmethod
@@ -61,14 +63,15 @@ class Worker(Process):
 
         logger.info("Running %s", command)
         if config_constants.EXECUTE_TASKS_IN_NEW_INTERPRETER:
-            status = self._execute_in_subprocess(command)
+            status = self._execute_in_subprocess(key, command)
         else:
-            status = self._execute_in_fork(command)
+            status = self._execute_in_fork(key, command)
 
         self.result_queue.put((key, status))
 
-    def _execute_in_subprocess(self, command: CommandType) -> TaskStatus:
+    def _execute_in_subprocess(self, key, command: CommandType) -> TaskStatus:
         process = subprocess.Popen(args=command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+        self.registry.set(str(key), process.pid)
         stdout, stderr = process.communicate()
         retcode = process.poll()
         if retcode:
@@ -78,9 +81,10 @@ class Worker(Process):
         else:
             return TaskStatus.SUCCESS
 
-    def _execute_in_fork(self, command: CommandType) -> TaskStatus:
+    def _execute_in_fork(self, key, command: CommandType) -> TaskStatus:
         pid = os.fork()
         if pid:
+            self.registry.set(str(key), pid)
             pid, ret = os.waitpid(pid, 0)
             return TaskStatus.SUCCESS if ret == 0 else TaskStatus.FAILED
 

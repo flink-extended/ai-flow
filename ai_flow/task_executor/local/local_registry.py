@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,25 +15,29 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import time
-import unittest
-
-from ai_flow.common.util.process_utils import StoppableThread
+import dbm
 
 
-class TestStoppableThread(StoppableThread):
-    def run(self) -> None:
-        while not self.stopped():
-            time.sleep(1)
-            print('waiting...')
+class LocalRegistry(object):
+    """k-v store with string datatype based on local file."""
 
+    def __init__(self,
+                 file_path):
+        self._db = dbm.open(file_path, 'c')
 
-class TestLocalExecutor(unittest.TestCase):
+    def set(self, key, value):
+        self._db[str.encode(key)] = str(value)
+        return self
 
-    def test_stoppable_thread(self):
-        test_thread = TestStoppableThread()
-        test_thread.start()
-        time.sleep(1)
-        test_thread.stop()
-        test_thread.join()
-        self.assertTrue(test_thread.stopped())
+    def get(self, key):
+        if str.encode(key) in self._db.keys():
+            return self._db[str.encode(key)]
+        else:
+            return None
+
+    def remove(self, key):
+        if str.encode(key) in self._db.keys():
+            del self._db[str.encode(key)]
+
+    def __del__(self):
+        self._db.close()

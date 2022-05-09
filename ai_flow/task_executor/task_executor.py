@@ -56,22 +56,20 @@ class BaseTaskExecutor(ABC):
             self.stop_task_execution(command.task_execution)
             self.start_task_execution(command.task_execution)
 
-    def start_task_execution(self, key: TaskExecutionKey) -> str:
+    def start_task_execution(self, key: TaskExecutionKey):
         """
         Start the task execution on worker.
 
         :param key: Id of the task execution
-        :return: The handle of the submitted task execution, which can be used to stop the task execution
         """
         raise NotImplementedError()
 
     @abstractmethod
-    def stop_task_execution(self, key: TaskExecutionKey, handle: str):
+    def stop_task_execution(self, key: TaskExecutionKey):
         """
         Stop the task execution of specified execution key.
 
         :param key: Id of the task execution
-        :param handle: The handle to identify the task execution process
         """
         raise NotImplementedError()
 
