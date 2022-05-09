@@ -39,9 +39,13 @@ NOTIFICATION_SERVER_URI = SERVER_CONF.get_str('notification_server_uri', fallbac
 
 TASK_EXECUTOR = SERVER_CONF.get_str('task_executor', fallback='local')
 
+EXECUTE_TASKS_IN_NEW_INTERPRETER = SERVER_CONF.get_bool('execute_tasks_in_new_interpreter', fallback=False)
+
+LOCAL_TASK_EXECUTOR_PARALLELISM = SERVER_CONF.get_int('local_executor_parallelism', fallback=10)
+
 SQLALCHEMY_POOL_ENABLED = SERVER_CONF.get_bool('sql_alchemy_pool_enabled', fallback=True)
 
-SQLALCHEMY_POOL_SIZE = SERVER_CONF.get_int('sql_alchemy_po ol_size', fallback=5)
+SQLALCHEMY_POOL_SIZE = SERVER_CONF.get_int('sql_alchemy_pool_size', fallback=5)
 
 SQLALCHEMY_MAX_OVERFLOW = SERVER_CONF.get_int('sql_alchemy_max_overflow', fallback=10)
 

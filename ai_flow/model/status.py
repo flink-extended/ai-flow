@@ -53,3 +53,11 @@ class TaskStatus(str, Enum):
     KILLING = 'KILLING'
     KILLED = 'KILLED'
     RETRYING = 'RETRYING'
+
+    finished = frozenset(
+        [
+            SUCCESS,
+            FAILED,
+            KILLED,
+        ]
+    )
