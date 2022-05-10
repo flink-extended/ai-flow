@@ -14,9 +14,22 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import logging
+import signal
 from datetime import datetime
+
+from typing import List
+
+from ai_flow.common.exception.exceptions import AIFlowException, TaskFailException, TaskForceKilledException
+from ai_flow.common.util import workflow_utils
+from ai_flow.model import workflow_execution
+from ai_flow.model.context import Context
 from ai_flow.model.execution_type import ExecutionType
+from ai_flow.model.operator import AIFlowOperator
 from ai_flow.model.status import TaskStatus
+from ai_flow.model.workflow import Workflow
+
+logger = logging.getLogger(__name__)
 
 
 class TaskExecutionKey(object):
@@ -40,7 +53,6 @@ class TaskExecution(object):
                  workflow_execution_id: int,
                  task_name: str,
                  sequence_number: int,
-                 try_number: int,
                  execution_type: ExecutionType,
                  begin_date: datetime = None,
                  end_date: datetime = None,
@@ -52,7 +64,6 @@ class TaskExecution(object):
         :param task_name: The name of the task it belongs to.
         :param sequence_number: A task in a WorkflowExecution can be run multiple times,
                                 it indicates how many times this task is run.
-        :param try_number: TaskExecution will retry if it fails to run, try_number represents the total number of runs.
         :param execution_type: The type that triggers TaskExecution.
         :param begin_date: The time TaskExecution started executing.
         :param end_date: The time TaskExecution ends execution.
@@ -63,9 +74,52 @@ class TaskExecution(object):
         self.workflow_execution_id = workflow_execution_id
         self.task_name = task_name
         self.sequence_number = sequence_number
-        self.try_number = try_number
         self.execution_type = execution_type
         self.begin_date = begin_date
         self.end_date = end_date
         self.status = status
 
+        self.try_number = 0
+
+    def get_task(self):
+        snapshot_path = workflow_execution.get_workflow_snapshot(self.workflow_execution_id)
+        workflows: List[Workflow] = workflow_utils.extract_workflow(snapshot_path)
+        name = workflow_execution.get_workflow_name_by_execution_id(self.workflow_execution_id)
+        workflows = [x for x in workflows if x.name == name]
+        assert len(workflows) == 1
+        return workflows[0].tasks.get(self.task_name)
+
+    def run(self):
+        task = self.get_task()
+        try:
+            if isinstance(task, AIFlowOperator):
+
+                def signal_handler(signum, frame):  # pylint: disable=unused-argument
+                    self.log.error("Received SIGTERM. Terminating subprocesses.")
+                    task.stop()
+                    raise AIFlowException("Task received SIGTERM signal")
+                signal.signal(signal.SIGTERM, signal_handler)
+
+                context = Context()
+                task.start(context)
+        except TaskForceKilledException as e:
+            self.handle_force_kill()
+            raise
+        except (Exception, KeyboardInterrupt) as e:
+            self.handle_failure()
+            raise
+        finally:
+            logger.info(f'ti.finish.{task.dag_id}.{task.task_id}.{self.state}')
+
+        self._run_success_callback(context, task)
+
+    def is_eligible_to_retry(self, task):
+        """Is task execution is eligible for retry"""
+        max_tries = task.config.get('max_tries')
+        return max_tries is not None and self.try_number <= max_tries
+
+    def handle_force_kill(self):
+        pass
+
+    def _run_success_callback(self, context, task):
+        pass
