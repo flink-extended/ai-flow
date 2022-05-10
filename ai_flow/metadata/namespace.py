@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,32 +14,26 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-import time
-import datetime
+import json
+from sqlalchemy import Column, String
+
+from ai_flow.metadata.base import Base
 
 
-def generate_time_str():
-    return time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime())
+class NamespaceMeta(Base):
+    __tablename__ = 'namespace'
 
+    name = Column(String(256), primary_key=True, nullable=False, unique=True)
+    properties = Column(String(1024))
 
-def datetime_to_int64(d: datetime.datetime):
-    if d is None:
-        return 0
-    else:
-        return int(d.timestamp()*1000)
+    def __init__(self,
+                 name: str,
+                 properties: dict) -> None:
+        self.name = name
+        self.properties = json.dumps(properties)
 
+    def get_properties(self) -> dict:
+        return json.loads(self.properties)
 
-def parse_date(timestamp):
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestamp) / 1000))
-
-
-def utcnow() -> datetime.datetime:
-    """
-    Get the current date and time in UTC
-
-    :return:
-    """
-    result = datetime.datetime.utcnow()
-    result = result.replace(tzinfo=datetime.timezone.utc)
-    return result
+    def set_properties(self, value):
+        self.properties = json.dumps(value)
