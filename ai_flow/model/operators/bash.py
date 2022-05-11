@@ -77,11 +77,6 @@ class BashOperator(AIFlowOperator):
             os.killpg(os.getpgid(self.sub_process.pid), signal.SIGTERM)
 
     def await_termination(self, context: Context, timeout: Optional[int] = None):
-        """Wait for a task instance to finish.
-        :param context: The context in which the operator is executed.
-        :param timeout: If timeout is None, wait until the task ends.
-                        If timeout is not None, wait for the task to end or the time exceeds timeout(seconds).
-        """
         try:
             self.sub_process.wait(timeout=timeout)
         except TimeoutExpired:
@@ -89,7 +84,6 @@ class BashOperator(AIFlowOperator):
             raise
 
     def get_status(self, context: Context) -> TaskStatus:
-        """Get the status of a task instance."""
         pass
 
     def get_metrics(self, context: Context) -> Dict:
