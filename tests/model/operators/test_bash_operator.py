@@ -63,6 +63,7 @@ class TestBashOperator(unittest.TestCase):
         self.assertEqual('running', process.status())
 
         self.bash_operator.stop(context={})
+        time.sleep(0.1)
         with self.assertRaises(psutil.NoSuchProcess):
             psutil.Process(self.bash_operator.sub_process.pid)
 
