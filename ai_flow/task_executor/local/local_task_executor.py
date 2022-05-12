@@ -24,13 +24,13 @@ from typing import Optional, Tuple
 from queue import Queue, Empty
 
 from ai_flow.common.configuration.config_constants import LOCAL_TASK_EXECUTOR_PARALLELISM
+from ai_flow.common.configuration.helpers import get_aiflow_home
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.common.util.thread_utils import StoppableThread
 from ai_flow.model.status import TaskStatus
 from ai_flow.common.util.process_utils import stop_process
 
 from ai_flow.model.task_execution import TaskExecutionKey
-from ai_flow.settings import get_aiflow_home
 from ai_flow.task_executor.local.local_registry import LocalRegistry
 from ai_flow.task_executor.local.worker import CommandType, Worker
 from ai_flow.task_executor.task_executor import BaseTaskExecutor
