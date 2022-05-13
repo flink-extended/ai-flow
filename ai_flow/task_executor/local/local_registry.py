@@ -26,6 +26,7 @@ class LocalRegistry(object):
 
     def __init__(self,
                  file_path):
+        self._db = None
         if not os.path.isdir(os.path.dirname(os.path.abspath(file_path))):
             raise AIFlowException('Parent directory of local registry not exists.')
         self._db = dbm.open(file_path, 'c')

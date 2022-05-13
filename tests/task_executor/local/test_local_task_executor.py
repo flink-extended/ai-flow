@@ -63,13 +63,11 @@ class TestLocalExecutor(unittest.TestCase):
             executor = LocalTaskExecutor(parallelism=1,
                                          registry_path=os.path.join(tmp_dir, 'tmp_registry'))
             process = subprocess.Popen(args=['sleep', '10'], close_fds=True)
-            executor.start()
             executor.registry.set('key', process.pid)
             threading.Thread(target=_stop, args=(executor,)).start()
             process.wait()
             with self.assertRaises(psutil.NoSuchProcess):
                 psutil.Process(process.pid)
-            executor.stop()
 
     def _test_execute_task(self):
         key = TaskExecutionKey(1, 'task', 1)
@@ -78,6 +76,7 @@ class TestLocalExecutor(unittest.TestCase):
         with TemporaryDirectory(prefix='test_local_task_executor') as tmp_dir:
             executor = LocalTaskExecutor(parallelism=3,
                                          registry_path=os.path.join(tmp_dir, 'tmp_registry'))
+            executor.start()
             executor._task_status_observer.stop()
             executor._task_status_observer.join()
             executor.schedule_task(command)
@@ -85,6 +84,8 @@ class TestLocalExecutor(unittest.TestCase):
             ret_key, status = executor.result_queue.get(timeout=1)
             self.assertEqual(str(key), str(ret_key))
             self.assertEqual(TaskStatus.SUCCESS, status)
+
+            executor.stop()
 
     @mock.patch('ai_flow.task_executor.local.worker.os')
     def test_task_observer_thread(self, mock_os):
