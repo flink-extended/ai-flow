@@ -17,6 +17,8 @@
 #
 import os
 import subprocess
+import threading
+import time
 import unittest
 from queue import Empty
 from tempfile import TemporaryDirectory
@@ -35,32 +37,37 @@ from ai_flow.task_executor.task_executor import ScheduleTaskCommand
 
 class TestLocalExecutor(unittest.TestCase):
 
-    def test_execution_with_subprocess(self):
+    @mock.patch('subprocess.Popen')
+    def test_execution_with_subprocess(self, mock_popen):
         with mock.patch.object(
             config_constants, 'EXECUTE_TASKS_IN_NEW_INTERPRETER', new_callable=mock.PropertyMock
         ) as option:
             option.return_value = True
+            mock_popen.return_value.communicate.return_value = (b"OUT", b"ERR")
+            mock_popen.return_value.poll.return_value = 0
             self._test_execute_task()
 
-    def test_execution_with_fork(self):
+    @mock.patch('ai_flow.task_executor.local.worker.os')
+    def test_execution_with_fork(self, mock_os):
+        mock_os.fork.return_value = 1
+        mock_os.waitpid.return_value = (1, 0)
         self._test_execute_task()
 
     def test_stop_task_execution(self):
+
+        def _stop(local_executor):
+            time.sleep(1)
+            local_executor.stop_task_execution('key')
+
         with TemporaryDirectory(prefix='test_local_task_executor') as tmp_dir:
             executor = LocalTaskExecutor(parallelism=1,
                                          registry_path=os.path.join(tmp_dir, 'tmp_registry'))
-            executor.start()
-
             process = subprocess.Popen(args=['sleep', '10'], close_fds=True)
             executor.registry.set('key', process.pid)
-            self.assertEqual('running', psutil.Process(process.pid).status())
-
-            executor.stop_task_execution('key')
-            process.wait(timeout=1)
-
+            threading.Thread(target=_stop, args=(executor,)).start()
+            process.wait()
             with self.assertRaises(psutil.NoSuchProcess):
                 psutil.Process(process.pid)
-            executor.stop()
 
     def _test_execute_task(self):
         key = TaskExecutionKey(1, 'task', 1)
@@ -80,16 +87,20 @@ class TestLocalExecutor(unittest.TestCase):
 
             executor.stop()
 
-    def test_task_observer_thread(self):
+    @mock.patch('ai_flow.task_executor.local.worker.os')
+    def test_task_observer_thread(self, mock_os):
+        mock_os.fork.return_value = 1
+        mock_os.waitpid.return_value = (1, 0)
         key = TaskExecutionKey(1, 'task', 1)
         command = ScheduleTaskCommand(key, TaskAction.START)
-
-        executor = LocalTaskExecutor(parallelism=3)
-        executor.start()
-        executor.schedule_task(command)
-        with self.assertRaises(Empty):
-            executor.result_queue.get(timeout=1)
-        executor.stop()
+        with TemporaryDirectory(prefix='test_local_task_executor') as tmp_dir:
+            executor = LocalTaskExecutor(parallelism=3,
+                                         registry_path=os.path.join(tmp_dir, 'tmp_registry'))
+            executor.start()
+            executor.schedule_task(command)
+            with self.assertRaises(Empty):
+                executor.result_queue.get(timeout=1)
+            executor.stop()
 
     def test_negative_parallelism(self):
         with self.assertRaises(AIFlowException) as context:

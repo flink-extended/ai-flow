@@ -18,6 +18,7 @@
 import os
 import unittest
 
+from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.task_executor.local.local_registry import LocalRegistry
 
 
@@ -47,3 +48,7 @@ class TestLocalRegistry(unittest.TestCase):
         self._registry.remove('key1')
         self.assertEqual(b'value2', self._registry.get('key2'))
         self.assertIsNone(self._registry.get('key1'))
+
+    def test_non_exist_dir(self):
+        with self.assertRaisesRegex(AIFlowException, r'Parent directory of local registry not exists.'):
+            LocalRegistry('/non-exists-dir/registry')
