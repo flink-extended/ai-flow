@@ -16,6 +16,9 @@
 # under the License.
 #
 import dbm
+import os
+
+from ai_flow.common.exception.exceptions import AIFlowException
 
 
 class LocalRegistry(object):
@@ -23,6 +26,9 @@ class LocalRegistry(object):
 
     def __init__(self,
                  file_path):
+        self._db = None
+        if not os.path.isdir(os.path.dirname(os.path.abspath(file_path))):
+            raise AIFlowException('Parent directory of local registry not exists.')
         self._db = dbm.open(file_path, 'c')
 
     def set(self, key, value):
@@ -40,4 +46,5 @@ class LocalRegistry(object):
             del self._db[str.encode(key)]
 
     def __del__(self):
-        self._db.close()
+        if self._db:
+            self._db.close()
