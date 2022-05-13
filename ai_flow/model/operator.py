@@ -36,21 +36,15 @@ class Operator(object):
     """
     def __init__(self,
                  name: str,
-                 inputs: list = None,
-                 outputs: list = None,
                  **kwargs,
                  ):
         """
         :param name: The operator's name.
-        :param inputs: Operator input parameters.
-        :param outputs: Operator output parameters.
         :param kwargs: Operator's extended parameters.
         """
         from ai_flow.model.workflow import WorkflowContext
         self.name: str = name
         self.config: dict = kwargs
-        self.inputs = inputs
-        self.outputs = outputs
         self.workflow = WorkflowContext.get_current_workflow()  # The workflow to which the operator belongs.
         self.workflow.tasks[self.name] = self
 
@@ -91,10 +85,8 @@ class AIFlowOperator(Operator):
 
     def __init__(self,
                  task_name: str,
-                 inputs: list = None,
-                 outputs: list = None,
                  **kwargs):
-        super().__init__(task_name, inputs, outputs, **kwargs)
+        super().__init__(task_name, **kwargs)
 
     @abstractmethod
     def start(self, context: Context):

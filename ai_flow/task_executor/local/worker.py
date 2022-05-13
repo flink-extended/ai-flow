@@ -20,9 +20,8 @@ import os
 import subprocess
 from abc import abstractmethod
 from multiprocessing import Process
-from typing import List, Tuple
+from typing import List
 from setproctitle import setproctitle
-from queue import Queue
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.model.status import TaskStatus

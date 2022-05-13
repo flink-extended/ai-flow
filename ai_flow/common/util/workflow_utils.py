@@ -14,17 +14,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-"""task-execution command"""
 from typing import List
 
-from ai_flow.model.task_execution import TaskExecution
 from ai_flow.model.workflow import Workflow
 
 
-def run_task_execution(args):
-    task_execution = TaskExecution(workflow_execution_id=args.workflow_execution_id,
-                                   task_name=args.task_name,
-                                   sequence_number=args.seq_num,
-                                   execution_type=args.execution_type)
-    task_execution.run()
+def extract_workflow(snapshot_location: str) -> List[Workflow]:
+    """
+    Extract workflow objects from the snapshot
+    """
+    pass
