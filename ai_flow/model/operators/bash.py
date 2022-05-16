@@ -59,18 +59,6 @@ class BashOperator(AIFlowOperator):
                 preexec_fn=pre_exec,
             )
 
-            logger.info('Output:')
-            for raw_line in iter(self.sub_process.stdout.readline, b''):
-                line = raw_line.decode('utf-8').rstrip()
-                logger.info("%s", line)
-
-            self.sub_process.wait()
-
-            logger.info('Command exited with return code %s', self.sub_process.returncode)
-
-            if self.sub_process.returncode != 0:
-                raise AIFlowException('Bash command failed. The command returned a non-zero exit code.')
-
     def stop(self, context: Context):
         logger.info('Sending SIGTERM signal to bash process group')
         if self.sub_process and hasattr(self.sub_process, 'pid'):
@@ -78,7 +66,17 @@ class BashOperator(AIFlowOperator):
 
     def await_termination(self, context: Context, timeout: Optional[int] = None):
         try:
+            logger.info('Output:')
+            for raw_line in iter(self.sub_process.stdout.readline, b''):
+                line = raw_line.decode('utf-8').rstrip()
+                logger.info("%s", line)
+
             self.sub_process.wait(timeout=timeout)
+
+            logger.info('Command exited with return code %s', self.sub_process.returncode)
+
+            if self.sub_process.returncode != 0:
+                raise AIFlowException('Bash command failed. The command returned a non-zero exit code.')
         except TimeoutExpired:
             logger.error("Timeout to wait bash operator to be finished in {} seconds".format(timeout))
             raise
