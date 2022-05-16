@@ -22,6 +22,15 @@ from ai_flow.metadata.base import Base
 
 
 class WorkflowScheduleMeta(Base):
+    """
+    It represents the metadata of the WorkflowSchedule.
+    :param id: The unique identify of the WorkflowSchedule.
+    :param workflow_id: The unique identify of the Workflow.
+    :param expression: The expression for periodic scheduling Workflow.
+    :param create_time: The create time of the WorkflowSnapshot.
+    :param update_time: The update time of the WorkflowSnapshot.
+    :param is_paused: Whether to suspend scheduling.
+    """
     __tablename__ = 'workflow_schedule'
 
     id = Column(Integer, autoincrement=True, primary_key=True)

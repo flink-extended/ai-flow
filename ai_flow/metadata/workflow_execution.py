@@ -23,6 +23,18 @@ from ai_flow.model.status import WorkflowStatus
 
 
 class WorkflowExecutionMeta(Base):
+    """
+    It represents the metadata of the WorkflowExecution.
+    :param id: The unique identify of the WorkflowExecution.
+    :param workflow_id: The unique identify of the Workflow.
+    :param begin_date: The begin time of the WorkflowExecution.
+    :param end_date: The end time of the WorkflowExecution.
+    :param status: The status(Type:WorkflowStatus) of the WorkflowExecution.
+    :param run_type: The run type(Type:ExecutionType) of the WorkflowExecution.
+    :param snapshot_id: The unique identify of the WorkflowSnapshot.
+    :param event_offset: Event processing progress corresponding to WorkflowExecution.
+    """
+
     __tablename__ = 'workflow_execution'
 
     id = Column(Integer, autoincrement=True, primary_key=True)

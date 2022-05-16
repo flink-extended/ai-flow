@@ -292,9 +292,11 @@ class TestMetadataManager(unittest.TestCase):
                                                                                run_type=ExecutionType.MANUAL.value)
         for i in range(3):
             self.metadata_manager.add_task_execution(workflow_execution_id=workflow_execution_meta.id,
-                                                     task_name='task_{}'.format(i))
+                                                     task_name='task')
         metas = self.metadata_manager.list_task_executions(workflow_execution_id=workflow_execution_meta.id)
         self.assertEqual(3, len(metas))
+        for i in range(3):
+            self.assertEqual(i+1, metas[i].sequence_number)
         meta = self.metadata_manager.get_task_execution(task_execution_id=metas[0].id)
         self.assertIsNone(meta.end_date)
         self.metadata_manager.update_task_execution(task_execution_id=meta.id, end_date=utcnow())
@@ -365,14 +367,14 @@ class TestMetadataManager(unittest.TestCase):
         workflow_execution_meta = self.metadata_manager.add_workflow_execution(workflow_id=workflow_meta.id,
                                                                                snapshot_id=snapshot.id,
                                                                                run_type=ExecutionType.MANUAL.value)
-        state = self.metadata_manager.retrieve_workflow_state(workflow_id=workflow_meta.id,
-                                                              descriptor=ValueStateDescriptor(name='s1'))
+        state = self.metadata_manager.get_or_create_workflow_state(workflow_id=workflow_meta.id,
+                                                                   descriptor=ValueStateDescriptor(name='s1'))
         self.assertTrue(isinstance(state, ValueState))
         self.assertIsNone(state.value())
         state.update('xx')
         self.assertEqual('xx', state.value())
 
-        state = self.metadata_manager.retrieve_workflow_execution_state(
+        state = self.metadata_manager.get_or_create_workflow_execution_state(
             workflow_execution_id=workflow_execution_meta.id,
             descriptor=ValueStateDescriptor(name='s1'))
         self.assertTrue(isinstance(state, ValueState))

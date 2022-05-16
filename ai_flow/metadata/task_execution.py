@@ -21,6 +21,16 @@ from ai_flow.metadata.base import Base
 
 
 class TaskExecutionMeta(Base):
+    """
+    It represents the metadata of the TaskExecution.
+    :param id: The unique identify of the TaskExecution.
+    :param workflow_execution_id: The unique identify of the WorkflowExecution.
+    :param begin_date: The begin time of the TaskExecution.
+    :param end_date: The end time of the TaskExecution.
+    :param sequence_number: The sequence number of the TaskExecution
+    :param try_number: The number of retries for TaskExecution.
+    :param status: The status(Type:TaskStatus) of the TaskExecution.
+    """
     __tablename__ = 'task_execution'
 
     id = Column(BigInteger, autoincrement=True, primary_key=True)

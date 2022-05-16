@@ -21,6 +21,12 @@ from ai_flow.metadata.base import Base
 
 
 class NamespaceMeta(Base):
+    """
+    It represents the metadata of the Namespace.
+    :param name: The name of the Namespace.
+    :param properties: The properties of the Namespace.
+    """
+
     __tablename__ = 'namespace'
 
     name = Column(String(256), primary_key=True, nullable=False, unique=True)

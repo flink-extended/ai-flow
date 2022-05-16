@@ -23,6 +23,13 @@ from ai_flow.model.state import ValueState, StateType
 
 
 class WorkflowStateMeta(Base):
+    """
+    It represents the metadata of the WorkflowState.
+    :param id: The unique identify of the WorkflowState.
+    :param workflow_id: The unique identify of the Workflow.
+    :param type: The type of the WorkflowState.
+    :param value: The serialized value of the WorkflowState.
+    """
     __tablename__ = 'workflow_state'
 
     name = Column(String(256), primary_key=True)
@@ -44,6 +51,13 @@ class WorkflowStateMeta(Base):
 
 
 class WorkflowExecutionStateMeta(Base):
+    """
+    It represents the metadata of the WorkflowExecutionState.
+    :param id: The unique identify of the WorkflowExecutionState.
+    :param workflow_execution_id: The unique identify of the WorkflowExecution.
+    :param type: The type of the WorkflowExecutionState.
+    :param value: The serialized value of the WorkflowExecutionState.
+    """
     __tablename__ = 'workflow_execution_state'
 
     name = Column(String(256), primary_key=True)

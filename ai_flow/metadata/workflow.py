@@ -22,6 +22,18 @@ from ai_flow.metadata.base import Base
 
 
 class WorkflowMeta(Base):
+    """
+    It represents the metadata of the Workflow.
+    :param id: The unique identify of the Workflow.
+    :param name: The name of the Workflow.
+    :param namespace: The namespace of the Workflow.
+    :param workflow_object: The Workflow serialized object.
+    :param content: The source code of the Workflow.
+    :param create_time: The create time of the Workflow.
+    :param update_time: The update time of the Workflow.
+    :param enable: The properties of the Workflow.
+    :param event_offset: Event processing progress corresponding to Workflow.
+    """
     __tablename__ = 'workflow'
 
     id = Column(Integer, autoincrement=True, primary_key=True)

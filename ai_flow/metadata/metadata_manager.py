@@ -16,6 +16,8 @@
 # under the License.
 from typing import List, Optional, Tuple, Any
 
+from sqlalchemy.sql.functions import count
+
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.common.util.time_utils import utcnow
 from ai_flow.metadata.namespace import NamespaceMeta
@@ -33,6 +35,7 @@ from ai_flow.model.status import TaskStatus
 
 
 class BaseFilter(object):
+    """It is the base class of filter conditions for data filtering."""
     column_name = None
 
     def __init__(self, column_name):
@@ -43,6 +46,7 @@ class BaseFilter(object):
 
 
 class Filters(object):
+    """It is a combination of multiple filter conditions."""
     filters: List[Tuple[BaseFilter, Any]] = None
 
     def __init__(self, filters: List[Tuple[BaseFilter, Any]] = None):
@@ -67,6 +71,7 @@ class Filters(object):
 
 
 class BaseOrder(object):
+    """It is the base class of data order."""
     column_name = None
 
     def __init__(self, column_name):
@@ -77,6 +82,8 @@ class BaseOrder(object):
 
 
 class Orders(object):
+    """It is a combination of multiple order conditions."""
+
     orders: List[Tuple[BaseOrder, str]] = None
 
     def __init__(self, orders: List[Tuple[BaseOrder, str]] = None):
@@ -101,13 +108,13 @@ class Orders(object):
 
 
 class FilterEqual(BaseFilter):
-
+    """It represents data retention where the field value is equal to the specified value."""
     def apply(self, criterion, query, value):
         return query.filter(getattr(criterion, self.column_name) == value)
 
 
 class OrderBy(BaseOrder):
-
+    """It means that the data is sorted by the value of the specified column."""
     def apply(self, criterion, query, value):
         if value == 'ascend':
             return query.order_by(asc(getattr(criterion, self.column_name)))
@@ -116,11 +123,17 @@ class OrderBy(BaseOrder):
 
 
 class MetadataManager(object):
+    """It is responsible for managing metadata."""
     def __init__(self, session):
         self.session = session
 
     # begin namespace
     def add_namespace(self, name, properties) -> NamespaceMeta:
+        """
+        Add a namespace metadata to MetadataBackend.
+        :param name: The name of the namespace.
+        :param properties: The properties of the namespace.
+        """
         try:
             namespace_meta = NamespaceMeta(name=name, properties=properties)
             self.session.add(namespace_meta)
@@ -131,6 +144,11 @@ class MetadataManager(object):
             raise e
 
     def update_namespace(self, name, properties) -> NamespaceMeta:
+        """
+        Update the namespace metadata to MetadataBackend.
+        :param name: The name of the namespace.
+        :param properties: The properties of the namespace.
+        """
         try:
             namespace_meta = self.session.query(NamespaceMeta).filter(NamespaceMeta.name == name).one()
             namespace_meta.set_properties(properties)
@@ -142,6 +160,10 @@ class MetadataManager(object):
             raise e
 
     def delete_namespace(self, name):
+        """
+        Delete the namespace metadata from MetadataBackend.
+        :param name: The name of the namespace.
+        """
         try:
             self.session.query(NamespaceMeta).filter(NamespaceMeta.name == name).delete()
             self.session.commit()
@@ -150,15 +172,29 @@ class MetadataManager(object):
             raise e
 
     def get_namespace(self, name) -> NamespaceMeta:
+        """
+        Get a namespace metadata from MetadataBackend.
+        :param name: The name of the namespace.
+        """
         return self.session.query(NamespaceMeta).filter(NamespaceMeta.name == name).one()
 
     def list_namespace(self) -> List[NamespaceMeta]:
+        """
+        List all namespace metadata from MetadataBackend.
+        """
         return self.session.query(NamespaceMeta).all()
 
     # end namespace
 
     # begin workflow
     def add_workflow(self, namespace, name, content, workflow_object) -> WorkflowMeta:
+        """
+        Add a workflow metadata to MetadataBackend.
+        :param namespace: The name of the namespace.
+        :param name: The name of the workflow.
+        :param content: The workflow's source code.
+        :param workflow_object: The serialized workflow binary.
+        """
         try:
             workflow_meta = WorkflowMeta(namespace=namespace,
                                          name=name,
@@ -172,10 +208,19 @@ class MetadataManager(object):
             raise e
 
     def get_workflow_by_name(self, namespace, name) -> WorkflowMeta:
+        """
+        Get the workflow metadata from MetadataBackend.
+        :param namespace: The name of the namespace.
+        :param name: The name of the workflow.
+        """
         return self.session.query(WorkflowMeta).filter(WorkflowMeta.namespace == namespace,
                                                        WorkflowMeta.name == name).first()
 
     def get_workflow_by_id(self, workflow_id) -> Optional[WorkflowMeta]:
+        """
+        Get the workflow metadata from MetadataBackend.
+        :param workflow_id: The unique id of the workflow.
+        """
         return self.session.query(WorkflowMeta).filter(WorkflowMeta.id == workflow_id).first()
 
     def list_workflows(self,
@@ -184,6 +229,14 @@ class MetadataManager(object):
                        offset=None,
                        filters: Filters = None,
                        orders: Orders = None) -> List[WorkflowMeta]:
+        """
+        List workflow metadata from MetadataBackend.
+        :param namespace: The name of the namespace.
+        :param page_size: The number of the results.
+        :param offset: The start offset of the results.
+        :param filters: The conditions of the results.
+        :param orders: The orders of the results.
+        """
         query = self.session.query(WorkflowMeta).filter(WorkflowMeta.namespace == namespace)
         if filters:
             query = filters.apply_all(WorkflowMeta, query)
@@ -196,6 +249,11 @@ class MetadataManager(object):
         return query.all()
 
     def delete_workflow_by_name(self, namespace, workflow_name):
+        """
+        Delete a workflow metadata from MetadataBackend.
+        :param namespace: The name of the namespace.
+        :param workflow_name: The name of the workflow.
+        """
         try:
             self.session.query(WorkflowMeta).filter(WorkflowMeta.namespace == namespace,
                                                     WorkflowMeta.name == workflow_name).delete()
@@ -205,6 +263,10 @@ class MetadataManager(object):
             raise e
 
     def delete_workflow_by_id(self, workflow_id):
+        """
+        Delete a workflow metadata from MetadataBackend.
+        :param workflow_id: The unique id of the workflow.
+        """
         try:
             self.session.query(WorkflowMeta).filter(WorkflowMeta.id == workflow_id).delete()
             self.session.commit()
@@ -213,6 +275,14 @@ class MetadataManager(object):
             raise e
 
     def update_workflow(self, namespace, name, content=None, workflow_object=None, enable=None) -> WorkflowMeta:
+        """
+        Update the workflow metadata to MetadataBackend.
+        :param namespace: The name of the namespace.
+        :param name: The name of the workflow.
+        :param content: The workflow's source code.
+        :param workflow_object: The serialized workflow binary.
+        :param enable: The workflow can be schedule or not.
+        """
         try:
             workflow_meta = self.session.query(WorkflowMeta).filter(WorkflowMeta.namespace == namespace,
                                                                     WorkflowMeta.name == name).one()
@@ -234,6 +304,13 @@ class MetadataManager(object):
 
     # begin workflow snapshot
     def add_workflow_snapshot(self, workflow_id, uri, workflow_object, signature) -> WorkflowSnapshotMeta:
+        """
+        Add a workflow snapshot metadata to MetadataBackend.
+        :param workflow_id: The unique id of the workflow.
+        :param uri: The address of the workflow snapshot.
+        :param workflow_object: The serialized workflow binary.
+        :param signature: The signature of the snapshot.
+        """
         try:
             workflow_snapshot_meta = WorkflowSnapshotMeta(workflow_id=workflow_id,
                                                           uri=uri,
@@ -247,6 +324,10 @@ class MetadataManager(object):
             raise e
 
     def get_workflow_snapshot(self, snapshot_id) -> WorkflowSnapshotMeta:
+        """
+        Get the workflow snapshot metadata from MetadataBackend.
+        :param snapshot_id: The unique id of the workflow snapshot.
+        """
         return self.session.query(WorkflowSnapshotMeta).filter(WorkflowSnapshotMeta.id == snapshot_id).first()
 
     def list_workflow_snapshots(self,
@@ -255,6 +336,14 @@ class MetadataManager(object):
                                 offset=None,
                                 filters: Filters = None,
                                 orders: Orders = None) -> List[WorkflowSnapshotMeta]:
+        """
+        List workflow snapshot metadata from MetadataBackend.
+        :param workflow_id: The unique id of the workflow.
+        :param page_size: The number of the results.
+        :param offset: The start offset of the results.
+        :param filters: The conditions of the results.
+        :param orders: The orders of the results.
+        """
         query = self.session.query(WorkflowSnapshotMeta).filter(WorkflowSnapshotMeta.workflow_id == workflow_id)
         if filters:
             query = filters.apply_all(WorkflowSnapshotMeta, query)
@@ -267,6 +356,10 @@ class MetadataManager(object):
         return query.all()
 
     def delete_workflow_snapshot(self, snapshot_id):
+        """
+        Delete the workflow snapshot metadata from MetadataBackend.
+        :param snapshot_id: The unique id of the workflow snapshot.
+        """
         try:
             self.session.query(WorkflowSnapshotMeta).filter(WorkflowSnapshotMeta.id == snapshot_id).delete()
         except Exception as e:
@@ -277,6 +370,11 @@ class MetadataManager(object):
 
     # begin workflow schedule
     def add_workflow_schedule(self, workflow_id, expression) -> WorkflowScheduleMeta:
+        """
+        Add a workflow schedule metadata to MetadataBackend.
+        :param workflow_id: The unique id of the workflow.
+        :param expression: The expression of the workflow schedule.
+        """
         try:
             workflow_schedule_meta = WorkflowScheduleMeta(workflow_id=workflow_id,
                                                           expression=expression)
@@ -288,9 +386,17 @@ class MetadataManager(object):
             raise e
 
     def get_workflow_schedule(self, schedule_id) -> WorkflowScheduleMeta:
+        """
+        Get the workflow schedule metadata from MetadataBackend.
+        :param schedule_id: The unique id of the workflow schedule.
+        """
         return self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).first()
 
     def pause_workflow_schedule(self, schedule_id) -> WorkflowScheduleMeta:
+        """
+        Pause scheduling the workflow by workflow schedule.
+        :param schedule_id: The unique id of the workflow schedule.
+        """
         try:
             meta = self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).one()
             meta.is_paused = True
@@ -301,6 +407,10 @@ class MetadataManager(object):
             raise e
 
     def resume_workflow_schedule(self, schedule_id) -> WorkflowScheduleMeta:
+        """
+        Resume scheduling the workflow by workflow schedule.
+        :param schedule_id: The unique id of the workflow schedule.
+        """
         try:
             meta = self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).one()
             meta.is_paused = False
@@ -311,9 +421,17 @@ class MetadataManager(object):
             raise e
 
     def list_workflow_schedules(self, workflow_id) -> List[WorkflowScheduleMeta]:
+        """
+        List all workflow schedule metadata.
+        :param workflow_id: The unique id of the workflow.
+        """
         return self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.workflow_id == workflow_id).all()
 
     def delete_workflow_schedule(self, schedule_id):
+        """
+        Delete the workflow schedule metadata from MetadataBackend.
+        :param schedule_id: The unique id of the workflow schedule.
+        """
         try:
             self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).delete()
             self.session.commit()
@@ -326,6 +444,11 @@ class MetadataManager(object):
     # begin workflow trigger
 
     def add_workflow_trigger(self, workflow_id, rule) -> WorkflowEventTriggerMeta:
+        """
+        Add a workflow schedule metadata to MetadataBackend.
+        :param workflow_id: The unique id of the workflow.
+        :param rule: The rule's binary of the workflow trigger.
+        """
         try:
             workflow_trigger_meta = WorkflowEventTriggerMeta(workflow_id=workflow_id,
                                                              rule=rule)
@@ -337,10 +460,18 @@ class MetadataManager(object):
             raise e
 
     def get_workflow_trigger(self, trigger_id) -> WorkflowEventTriggerMeta:
+        """
+        Get the workflow trigger metadata from MetadataBackend.
+        :param trigger_id: The unique id of the workflow trigger.
+        """
         return self.session.query(WorkflowEventTriggerMeta) \
             .filter(WorkflowEventTriggerMeta.id == trigger_id).first()
 
     def pause_workflow_trigger(self, trigger_id) -> WorkflowEventTriggerMeta:
+        """
+        Pause scheduling the workflow by workflow trigger.
+        :param trigger_id: The unique id of the workflow trigger.
+        """
         try:
             meta = self.session.query(WorkflowEventTriggerMeta).filter(WorkflowEventTriggerMeta.id == trigger_id).one()
             meta.is_paused = True
@@ -351,6 +482,10 @@ class MetadataManager(object):
             raise e
 
     def resume_workflow_trigger(self, trigger_id) -> WorkflowEventTriggerMeta:
+        """
+        Resume scheduling the workflow by workflow trigger.
+        :param trigger_id: The unique id of the workflow trigger.
+        """
         try:
             meta = self.session.query(WorkflowEventTriggerMeta).filter(WorkflowEventTriggerMeta.id == trigger_id).one()
             meta.is_paused = False
@@ -361,10 +496,18 @@ class MetadataManager(object):
             raise e
 
     def list_workflow_triggers(self, workflow_id) -> List[WorkflowEventTriggerMeta]:
+        """
+        List all workflow trigger metadata.
+        :param workflow_id: The unique id of the workflow.
+        """
         return self.session.query(WorkflowEventTriggerMeta) \
             .filter(WorkflowEventTriggerMeta.workflow_id == workflow_id).all()
 
     def delete_workflow_trigger(self, trigger_id):
+        """
+        Delete the workflow trigger metadata from MetadataBackend.
+        :param trigger_id: The unique id of the workflow trigger.
+        """
         try:
             self.session.query(WorkflowEventTriggerMeta).filter(WorkflowEventTriggerMeta.id == trigger_id).delete()
             self.session.commit()
@@ -376,6 +519,12 @@ class MetadataManager(object):
 
     # begin workflow execution
     def add_workflow_execution(self, workflow_id, run_type, snapshot_id) -> WorkflowExecutionMeta:
+        """
+        Add a workflow execution metadata to MetadataBackend.
+        :param workflow_id: The unique id of the workflow.
+        :param run_type: The run type(ExecutionType) of the workflow execution.
+        :param snapshot_id: The unique id of the workflow snapshot.
+        """
         try:
             workflow_execution_meta = WorkflowExecutionMeta(workflow_id=workflow_id,
                                                             run_type=run_type,
@@ -388,6 +537,11 @@ class MetadataManager(object):
             raise e
 
     def update_workflow_execution_status(self, workflow_execution_id, status) -> WorkflowExecutionMeta:
+        """
+        Update the workflow execution's status metadata to MetadataBackend.
+        :param workflow_execution_id: The unique id of the workflow execution.
+        :param status: The status(WorkflowStatus) of the workflow execution.
+        """
         try:
             meta = self.session.query(WorkflowExecutionMeta) \
                 .filter(WorkflowExecutionMeta.id == workflow_execution_id).one()
@@ -400,6 +554,11 @@ class MetadataManager(object):
             raise e
 
     def set_workflow_execution_end_date(self, workflow_execution_id, end_date) -> WorkflowExecutionMeta:
+        """
+        Set the workflow execution's end date metadata to MetadataBackend.
+        :param workflow_execution_id: The unique id of the workflow execution.
+        :param end_date: The end date of the workflow execution.
+        """
         try:
             meta = self.session.query(WorkflowExecutionMeta) \
                 .filter(WorkflowExecutionMeta.id == workflow_execution_id).one()
@@ -412,6 +571,10 @@ class MetadataManager(object):
             raise e
 
     def get_workflow_execution(self, workflow_execution_id) -> WorkflowExecutionMeta:
+        """
+        Get the workflow execution metadata to MetadataBackend.
+        :param workflow_execution_id: The unique id of the workflow execution.
+        """
         return self.session.query(WorkflowExecutionMeta) \
             .filter(WorkflowExecutionMeta.id == workflow_execution_id).first()
 
@@ -421,6 +584,14 @@ class MetadataManager(object):
                                  offset=None,
                                  filters: Filters = None,
                                  orders: Orders = None) -> List[WorkflowExecutionMeta]:
+        """
+        List workflow execution metadata from MetadataBackend.
+        :param workflow_id: The unique id of the workflow.
+        :param page_size: The number of the results.
+        :param offset: The start offset of the results.
+        :param filters: The conditions of the results.
+        :param orders: The orders of the results.
+        """
         query = self.session.query(WorkflowExecutionMeta).filter(WorkflowExecutionMeta.workflow_id == workflow_id)
         if filters:
             query = filters.apply_all(WorkflowExecutionMeta, query)
@@ -433,6 +604,10 @@ class MetadataManager(object):
         return query.all()
 
     def delete_workflow_execution(self, workflow_execution_id):
+        """
+        Delete the workflow execution metadata from MetadataBackend.
+        :param workflow_execution_id: The unique id of the workflow execution.
+        """
         try:
             self.session.query(WorkflowExecutionMeta) \
                 .filter(WorkflowExecutionMeta.id == workflow_execution_id).delete()
@@ -447,15 +622,18 @@ class MetadataManager(object):
     def add_task_execution(self,
                            workflow_execution_id,
                            task_name) -> TaskExecutionMeta:
+        """
+        Add a task execution metadata to MetadataBackend.
+        :param workflow_execution_id: The unique id of the workflow execution.
+        :param task_name: The name of the task.
+        """
         try:
             task_execution = TaskExecutionMeta(workflow_execution_id=workflow_execution_id, task_name=task_name)
             task_execution.begin_date = utcnow()
             task_execution.status = TaskStatus.INIT.value
-            seq = self.session.query(TaskExecutionMeta.sequence_number) \
+            seq = self.session.query(count(TaskExecutionMeta.id)) \
                 .filter(TaskExecutionMeta.workflow_execution_id == workflow_execution_id,
-                        TaskExecutionMeta.task_name == task_name).first()
-            if seq is None:
-                seq = 0
+                        TaskExecutionMeta.task_name == task_name).scalar()
             task_execution.sequence_number = seq + 1
             task_execution.try_number = 1
             self.session.add(task_execution)
@@ -470,6 +648,13 @@ class MetadataManager(object):
                               try_number=None,
                               status=None,
                               end_date=None) -> TaskExecutionMeta:
+        """
+        Update the task execution metadata to MetadataBackend.
+        :param task_execution_id: The unique id of the task execution.
+        :param try_number: The run number of the task execution.
+        :param status: The status(TaskStatus) of the task execution.
+        :param end_date: The end date the task execution.
+        """
         try:
             meta = self.session.query(TaskExecutionMeta) \
                 .filter(TaskExecutionMeta.id == task_execution_id).one()
@@ -485,6 +670,10 @@ class MetadataManager(object):
             raise e
 
     def get_task_execution(self, task_execution_id) -> TaskExecutionMeta:
+        """
+        Get the task execution metadata from MetadataBackend.
+        :param task_execution_id: The unique id of the task execution.
+        """
         return self.session.query(TaskExecutionMeta) \
             .filter(TaskExecutionMeta.id == task_execution_id).first()
 
@@ -494,6 +683,14 @@ class MetadataManager(object):
                              offset=None,
                              filters: Filters = None,
                              orders: Orders = None) -> List[TaskExecutionMeta]:
+        """
+        List task execution metadata from MetadataBackend.
+        :param workflow_execution_id: The unique id of the workflow execution.
+        :param page_size: The number of the results.
+        :param offset: The start offset of the results.
+        :param filters: The conditions of the results.
+        :param orders: The orders of the results.
+        """
         query = self.session.query(TaskExecutionMeta) \
             .filter(TaskExecutionMeta.workflow_execution_id == workflow_execution_id)
         if filters:
@@ -507,6 +704,10 @@ class MetadataManager(object):
         return query.all()
 
     def delete_task_execution(self, task_execution_id):
+        """
+        Delete the task execution metadata from MetadataBackend.
+        :param task_execution_id: The unique id of the task execution.
+        """
         try:
             self.session.query(TaskExecutionMeta) \
                 .filter(TaskExecutionMeta.id == task_execution_id).delete()
@@ -518,46 +719,65 @@ class MetadataManager(object):
 
     # begin event offset
     def set_workflow_event_offset(self, workflow_id, event_offset):
-        """Do not committed"""
+        """
+        Set the event offset for the workflow(Do not committed).
+        :param workflow_id: The unique id of the workflow.
+        :param event_offset: The event offset for the workflow.
+        """
         meta = self.session.query(WorkflowMeta).filter(WorkflowMeta.id == workflow_id).one()
         meta.event_offset = event_offset
         self.session.merge(meta)
 
     def get_workflow_event_offset(self, workflow_id) -> int:
+        """
+        Get the event offset of the workflow.
+        :param workflow_id: The unique id of the workflow.
+        """
         return self.session.query(WorkflowMeta.event_offset).filter(WorkflowMeta.id == workflow_id).first()[0]
 
     def set_workflow_execution_event_offset(self, workflow_execution_id, event_offset):
-        """Do not committed"""
+        """
+        Set the event offset for the workflow execution(Do not committed).
+        :param workflow_execution_id: The unique id of the workflow execution.
+        :param event_offset: The event offset for the workflow execution.
+        """
         meta = self.session.query(WorkflowExecutionMeta) \
             .filter(WorkflowExecutionMeta.id == workflow_execution_id).one()
         meta.event_offset = event_offset
         self.session.merge(meta)
 
     def get_workflow_execution_event_offset(self, workflow_execution_id) -> int:
+        """
+        Get the event offset of the workflow execution.
+        :param workflow_execution_id: The unique id of the workflow execution.
+        """
         return self.session.query(WorkflowExecutionMeta.event_offset) \
             .filter(WorkflowExecutionMeta.id == workflow_execution_id).first()[0]
 
     # end event offset
 
     # begin state
-    def retrieve_workflow_state(self, workflow_id: int, descriptor: StateDescriptor) -> State:
+    def get_or_create_workflow_state(self, workflow_id: int, descriptor: StateDescriptor) -> State:
+        """
+        Get or create a workflow state.
+        :param workflow_id: The unique id of the workflow.
+        :param descriptor: The descriptor of the workflow state.
+        """
         if isinstance(descriptor, ValueStateDescriptor):
             return DBWorkflowValueState(session=self.session, workflow_id=workflow_id, state_name=descriptor.name)
         else:
             raise AIFlowException("Now AIFlow only support value state.")
 
-    def create_workflow_state(self, workflow_id: int, descriptor: StateDescriptor) -> State:
-        return self.retrieve_workflow_state(workflow_id=workflow_id, descriptor=descriptor)
-
-    def retrieve_workflow_execution_state(self, workflow_execution_id: int, descriptor: StateDescriptor) -> State:
+    def get_or_create_workflow_execution_state(self, workflow_execution_id: int, descriptor: StateDescriptor) -> State:
+        """
+        Get or create a workflow execution state.
+        :param workflow_execution_id: The unique id of the workflow execution.
+        :param descriptor: The descriptor of the workflow state.
+        """
         if isinstance(descriptor, ValueStateDescriptor):
             return DBWorkflowExecutionValueState(session=self.session,
                                                  workflow_execution_id=workflow_execution_id,
                                                  state_name=descriptor.name)
         else:
             raise AIFlowException("Now AIFlow only support value state.")
-
-    def create_workflow_execution_state(self, workflow_execution_id: int, descriptor: StateDescriptor) -> State:
-        return self.retrieve_workflow_execution_state(workflow_execution_id=workflow_execution_id,
-                                                      descriptor=descriptor)
     # end state

@@ -22,6 +22,15 @@ from ai_flow.metadata.base import Base
 
 
 class WorkflowEventTriggerMeta(Base):
+    """
+    It represents the metadata of the WorkflowSchedule.
+    :param id: The unique identify of the WorkflowSchedule.
+    :param workflow_id: The unique identify of the Workflow.
+    :param rule: The serialized rule for starting Workflow.
+    :param create_time: The create time of the WorkflowSnapshot.
+    :param update_time: The update time of the WorkflowSnapshot.
+    :param is_paused: Whether to suspend scheduling.
+    """
     __tablename__ = 'workflow_event_trigger'
 
     id = Column(Integer, autoincrement=True, primary_key=True)

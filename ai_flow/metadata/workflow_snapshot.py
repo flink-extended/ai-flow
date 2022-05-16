@@ -22,6 +22,15 @@ from ai_flow.metadata.base import Base
 
 
 class WorkflowSnapshotMeta(Base):
+    """
+    It represents the metadata of the WorkflowSnapshot.
+    :param id: The unique identify of the WorkflowSnapshot.
+    :param workflow_id: The unique identify of the Workflow.
+    :param create_time: The create time of the WorkflowSnapshot.
+    :param workflow_object: The Workflow serialized object.
+    :param uri: The address where the Workflow snapshot is stored.
+    :param signature: The signature of the WorkflowSnapshot.
+    """
     __tablename__ = 'workflow_snapshot'
 
     id = Column(Integer, autoincrement=True, primary_key=True)
