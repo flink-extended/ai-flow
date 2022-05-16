@@ -37,6 +37,7 @@ class TestBashOperator(unittest.TestCase):
         with Workflow(name='workflow') as workflow:
             bash_operator = BashOperator(name='test_start_bash', bash_command='rm {}'.format(test_file))
         bash_operator.start(context={})
+        bash_operator.await_termination(context={})
         self.assertEqual(1, len(workflow.tasks))
         self.assertFalse(os.path.isfile(test_file))
 
@@ -47,6 +48,7 @@ class TestBashOperator(unittest.TestCase):
             AIFlowException, "Bash command failed\\. The command returned a non-zero exit code\\."
         ):
             bash_operator.start(context={})
+            bash_operator.await_termination(context={})
 
     def test_stop(self):
         self.bash_operator = None
@@ -67,14 +69,10 @@ class TestBashOperator(unittest.TestCase):
     def test_await_termination(self):
         self.bash_operator = None
 
-        def bash_op():
-            with Workflow(name='workflow'):
-                self.bash_operator = BashOperator(name='test_await_termination', bash_command='sleep 10')
-            self.bash_operator.start(context={})
-
-        _thread = threading.Thread(target=bash_op, daemon=True)
-        _thread.start()
+        with Workflow(name='workflow'):
+            self.bash_operator = BashOperator(name='test_await_termination', bash_command='sleep 1')
+        self.bash_operator.start(context={})
 
         with self.assertRaises(TimeoutExpired):
             time.sleep(0.1)
-            self.bash_operator.await_termination(context={}, timeout=1)
+            self.bash_operator.await_termination(context={}, timeout=0.1)

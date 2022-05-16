@@ -19,11 +19,13 @@
 import logging
 import os
 import signal
-from subprocess import Popen, PIPE, STDOUT, TimeoutExpired
+import threading
+from subprocess import Popen, STDOUT, TimeoutExpired, PIPE
 from tempfile import TemporaryDirectory
 from typing import Dict, Optional
 
 from ai_flow.common.exception.exceptions import AIFlowException
+from ai_flow.common.util.thread_utils import StoppableThread
 from ai_flow.model.context import Context
 from ai_flow.model.operator import AIFlowOperator
 from ai_flow.model.status import TaskStatus
@@ -40,6 +42,7 @@ class BashOperator(AIFlowOperator):
         super().__init__(name, **kwargs)
         self.bash_command = bash_command
         self.sub_process = None
+        self.log_reader = StoppableThread(target=self._read_output)
 
     def start(self, context: Context):
         with TemporaryDirectory(prefix='aiflow_tmp') as tmp_dir:
@@ -58,19 +61,20 @@ class BashOperator(AIFlowOperator):
                 cwd=tmp_dir,
                 preexec_fn=pre_exec,
             )
+        self.log_reader.start()
 
     def stop(self, context: Context):
         logger.info('Sending SIGTERM signal to bash process group')
-        if self.sub_process and hasattr(self.sub_process, 'pid'):
-            os.killpg(os.getpgid(self.sub_process.pid), signal.SIGTERM)
+        try:
+            if self.sub_process and hasattr(self.sub_process, 'pid'):
+                os.killpg(os.getpgid(self.sub_process.pid), signal.SIGTERM)
+        finally:
+            # Need to call sub_process.wait() to avoid becoming zombie processes
+            self.sub_process.wait()
+            self.log_reader.stop()
 
     def await_termination(self, context: Context, timeout: Optional[int] = None):
         try:
-            logger.info('Output:')
-            for raw_line in iter(self.sub_process.stdout.readline, b''):
-                line = raw_line.decode('utf-8').rstrip()
-                logger.info("%s", line)
-
             self.sub_process.wait(timeout=timeout)
 
             logger.info('Command exited with return code %s', self.sub_process.returncode)
@@ -80,9 +84,18 @@ class BashOperator(AIFlowOperator):
         except TimeoutExpired:
             logger.error("Timeout to wait bash operator to be finished in {} seconds".format(timeout))
             raise
+        finally:
+            self.log_reader.stop()
 
     def get_status(self, context: Context) -> TaskStatus:
         pass
 
     def get_metrics(self, context: Context) -> Dict:
         pass
+
+    def _read_output(self):
+        logger.info('Output:')
+        for raw_line in iter(self.sub_process.stdout.readline, b''):
+            if not threading.current_thread().stopped():
+                line = raw_line.decode('utf-8').rstrip()
+                logger.info("%s", line)
