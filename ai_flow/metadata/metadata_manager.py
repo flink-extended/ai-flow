@@ -133,6 +133,7 @@ class MetadataManager(object):
         Add a namespace metadata to MetadataBackend.
         :param name: The name of the namespace.
         :param properties: The properties of the namespace.
+        :return: The namespace metadata.
         """
         try:
             namespace_meta = NamespaceMeta(name=name, properties=properties)
@@ -148,6 +149,7 @@ class MetadataManager(object):
         Update the namespace metadata to MetadataBackend.
         :param name: The name of the namespace.
         :param properties: The properties of the namespace.
+        :return: The namespace metadata.
         """
         try:
             namespace_meta = self.session.query(NamespaceMeta).filter(NamespaceMeta.name == name).one()
@@ -175,12 +177,14 @@ class MetadataManager(object):
         """
         Get a namespace metadata from MetadataBackend.
         :param name: The name of the namespace.
+        :return: The namespace metadata.
         """
         return self.session.query(NamespaceMeta).filter(NamespaceMeta.name == name).one()
 
     def list_namespace(self) -> List[NamespaceMeta]:
         """
         List all namespace metadata from MetadataBackend.
+        :return: The namespace metadata list.
         """
         return self.session.query(NamespaceMeta).all()
 
@@ -194,6 +198,7 @@ class MetadataManager(object):
         :param name: The name of the workflow.
         :param content: The workflow's source code.
         :param workflow_object: The serialized workflow binary.
+        :return: The workflow metadata.
         """
         try:
             workflow_meta = WorkflowMeta(namespace=namespace,
@@ -212,6 +217,7 @@ class MetadataManager(object):
         Get the workflow metadata from MetadataBackend.
         :param namespace: The name of the namespace.
         :param name: The name of the workflow.
+        :return: The workflow metadata.
         """
         return self.session.query(WorkflowMeta).filter(WorkflowMeta.namespace == namespace,
                                                        WorkflowMeta.name == name).first()
@@ -220,6 +226,7 @@ class MetadataManager(object):
         """
         Get the workflow metadata from MetadataBackend.
         :param workflow_id: The unique id of the workflow.
+        :return: The workflow metadata.
         """
         return self.session.query(WorkflowMeta).filter(WorkflowMeta.id == workflow_id).first()
 
@@ -236,6 +243,7 @@ class MetadataManager(object):
         :param offset: The start offset of the results.
         :param filters: The conditions of the results.
         :param orders: The orders of the results.
+        :return: The workflow metadata list.
         """
         query = self.session.query(WorkflowMeta).filter(WorkflowMeta.namespace == namespace)
         if filters:
@@ -282,6 +290,7 @@ class MetadataManager(object):
         :param content: The workflow's source code.
         :param workflow_object: The serialized workflow binary.
         :param enable: The workflow can be schedule or not.
+        :return: The workflow metadata.
         """
         try:
             workflow_meta = self.session.query(WorkflowMeta).filter(WorkflowMeta.namespace == namespace,
@@ -310,6 +319,7 @@ class MetadataManager(object):
         :param uri: The address of the workflow snapshot.
         :param workflow_object: The serialized workflow binary.
         :param signature: The signature of the snapshot.
+        :return: The workflow snapshot metadata.
         """
         try:
             workflow_snapshot_meta = WorkflowSnapshotMeta(workflow_id=workflow_id,
@@ -327,6 +337,7 @@ class MetadataManager(object):
         """
         Get the workflow snapshot metadata from MetadataBackend.
         :param snapshot_id: The unique id of the workflow snapshot.
+        :return: The workflow snapshot metadata.
         """
         return self.session.query(WorkflowSnapshotMeta).filter(WorkflowSnapshotMeta.id == snapshot_id).first()
 
@@ -343,6 +354,7 @@ class MetadataManager(object):
         :param offset: The start offset of the results.
         :param filters: The conditions of the results.
         :param orders: The orders of the results.
+        :return: The workflow snapshot metadata list.
         """
         query = self.session.query(WorkflowSnapshotMeta).filter(WorkflowSnapshotMeta.workflow_id == workflow_id)
         if filters:
@@ -374,6 +386,7 @@ class MetadataManager(object):
         Add a workflow schedule metadata to MetadataBackend.
         :param workflow_id: The unique id of the workflow.
         :param expression: The expression of the workflow schedule.
+        :return: The workflow schedule metadata.
         """
         try:
             workflow_schedule_meta = WorkflowScheduleMeta(workflow_id=workflow_id,
@@ -389,6 +402,7 @@ class MetadataManager(object):
         """
         Get the workflow schedule metadata from MetadataBackend.
         :param schedule_id: The unique id of the workflow schedule.
+        :return: The workflow schedule metadata.
         """
         return self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).first()
 
@@ -396,6 +410,7 @@ class MetadataManager(object):
         """
         Pause scheduling the workflow by workflow schedule.
         :param schedule_id: The unique id of the workflow schedule.
+        :return: The workflow schedule metadata.
         """
         try:
             meta = self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).one()
@@ -410,6 +425,7 @@ class MetadataManager(object):
         """
         Resume scheduling the workflow by workflow schedule.
         :param schedule_id: The unique id of the workflow schedule.
+        :return: The workflow schedule metadata.
         """
         try:
             meta = self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).one()
@@ -424,6 +440,7 @@ class MetadataManager(object):
         """
         List all workflow schedule metadata.
         :param workflow_id: The unique id of the workflow.
+        :return: The workflow schedule metadata list.
         """
         return self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.workflow_id == workflow_id).all()
 
@@ -448,6 +465,7 @@ class MetadataManager(object):
         Add a workflow schedule metadata to MetadataBackend.
         :param workflow_id: The unique id of the workflow.
         :param rule: The rule's binary of the workflow trigger.
+        :return: The workflow trigger metadata.
         """
         try:
             workflow_trigger_meta = WorkflowEventTriggerMeta(workflow_id=workflow_id,
@@ -463,6 +481,7 @@ class MetadataManager(object):
         """
         Get the workflow trigger metadata from MetadataBackend.
         :param trigger_id: The unique id of the workflow trigger.
+        :return: The workflow trigger metadata.
         """
         return self.session.query(WorkflowEventTriggerMeta) \
             .filter(WorkflowEventTriggerMeta.id == trigger_id).first()
@@ -471,6 +490,7 @@ class MetadataManager(object):
         """
         Pause scheduling the workflow by workflow trigger.
         :param trigger_id: The unique id of the workflow trigger.
+        :return: The workflow trigger metadata.
         """
         try:
             meta = self.session.query(WorkflowEventTriggerMeta).filter(WorkflowEventTriggerMeta.id == trigger_id).one()
@@ -485,6 +505,7 @@ class MetadataManager(object):
         """
         Resume scheduling the workflow by workflow trigger.
         :param trigger_id: The unique id of the workflow trigger.
+        :return: The workflow trigger metadata.
         """
         try:
             meta = self.session.query(WorkflowEventTriggerMeta).filter(WorkflowEventTriggerMeta.id == trigger_id).one()
@@ -499,6 +520,7 @@ class MetadataManager(object):
         """
         List all workflow trigger metadata.
         :param workflow_id: The unique id of the workflow.
+        :return: The workflow trigger metadata list.
         """
         return self.session.query(WorkflowEventTriggerMeta) \
             .filter(WorkflowEventTriggerMeta.workflow_id == workflow_id).all()
@@ -524,6 +546,7 @@ class MetadataManager(object):
         :param workflow_id: The unique id of the workflow.
         :param run_type: The run type(ExecutionType) of the workflow execution.
         :param snapshot_id: The unique id of the workflow snapshot.
+        :return: The workflow execution metadata.
         """
         try:
             workflow_execution_meta = WorkflowExecutionMeta(workflow_id=workflow_id,
@@ -541,6 +564,7 @@ class MetadataManager(object):
         Update the workflow execution's status metadata to MetadataBackend.
         :param workflow_execution_id: The unique id of the workflow execution.
         :param status: The status(WorkflowStatus) of the workflow execution.
+        :return: The workflow execution metadata.
         """
         try:
             meta = self.session.query(WorkflowExecutionMeta) \
@@ -558,6 +582,7 @@ class MetadataManager(object):
         Set the workflow execution's end date metadata to MetadataBackend.
         :param workflow_execution_id: The unique id of the workflow execution.
         :param end_date: The end date of the workflow execution.
+        :return: The workflow execution metadata.
         """
         try:
             meta = self.session.query(WorkflowExecutionMeta) \
@@ -574,6 +599,7 @@ class MetadataManager(object):
         """
         Get the workflow execution metadata to MetadataBackend.
         :param workflow_execution_id: The unique id of the workflow execution.
+        :return: The workflow execution metadata.
         """
         return self.session.query(WorkflowExecutionMeta) \
             .filter(WorkflowExecutionMeta.id == workflow_execution_id).first()
@@ -591,6 +617,7 @@ class MetadataManager(object):
         :param offset: The start offset of the results.
         :param filters: The conditions of the results.
         :param orders: The orders of the results.
+        :return: The workflow execution metadata list.
         """
         query = self.session.query(WorkflowExecutionMeta).filter(WorkflowExecutionMeta.workflow_id == workflow_id)
         if filters:
@@ -626,6 +653,7 @@ class MetadataManager(object):
         Add a task execution metadata to MetadataBackend.
         :param workflow_execution_id: The unique id of the workflow execution.
         :param task_name: The name of the task.
+        :return: The task execution metadata.
         """
         try:
             task_execution = TaskExecutionMeta(workflow_execution_id=workflow_execution_id, task_name=task_name)
@@ -654,6 +682,7 @@ class MetadataManager(object):
         :param try_number: The run number of the task execution.
         :param status: The status(TaskStatus) of the task execution.
         :param end_date: The end date the task execution.
+        :return: The task execution metadata.
         """
         try:
             meta = self.session.query(TaskExecutionMeta) \
@@ -673,6 +702,7 @@ class MetadataManager(object):
         """
         Get the task execution metadata from MetadataBackend.
         :param task_execution_id: The unique id of the task execution.
+        :return: The task execution metadata.
         """
         return self.session.query(TaskExecutionMeta) \
             .filter(TaskExecutionMeta.id == task_execution_id).first()
@@ -690,6 +720,7 @@ class MetadataManager(object):
         :param offset: The start offset of the results.
         :param filters: The conditions of the results.
         :param orders: The orders of the results.
+        :return: The task execution metadata list.
         """
         query = self.session.query(TaskExecutionMeta) \
             .filter(TaskExecutionMeta.workflow_execution_id == workflow_execution_id)
@@ -732,6 +763,7 @@ class MetadataManager(object):
         """
         Get the event offset of the workflow.
         :param workflow_id: The unique id of the workflow.
+        :return: The workflow event offset.
         """
         return self.session.query(WorkflowMeta.event_offset).filter(WorkflowMeta.id == workflow_id).first()[0]
 
@@ -750,6 +782,7 @@ class MetadataManager(object):
         """
         Get the event offset of the workflow execution.
         :param workflow_execution_id: The unique id of the workflow execution.
+        :return: The workflow execution event offset.
         """
         return self.session.query(WorkflowExecutionMeta.event_offset) \
             .filter(WorkflowExecutionMeta.id == workflow_execution_id).first()[0]
@@ -762,6 +795,7 @@ class MetadataManager(object):
         Get or create a workflow state.
         :param workflow_id: The unique id of the workflow.
         :param descriptor: The descriptor of the workflow state.
+        :return: The workflow state.
         """
         if isinstance(descriptor, ValueStateDescriptor):
             return DBWorkflowValueState(session=self.session, workflow_id=workflow_id, state_name=descriptor.name)
@@ -773,6 +807,7 @@ class MetadataManager(object):
         Get or create a workflow execution state.
         :param workflow_execution_id: The unique id of the workflow execution.
         :param descriptor: The descriptor of the workflow state.
+        :return: The workflow execution state.
         """
         if isinstance(descriptor, ValueStateDescriptor):
             return DBWorkflowExecutionValueState(session=self.session,
