@@ -27,6 +27,8 @@ class AIFlowEventType(object):
     TASK_STATUS_CHANGED: Task instance running status changed type.
     """
     TASK_STATUS_CHANGED = 'TASK_STATUS_CHANGED'
+    PERIODIC_RUN_WORKFLOW = 'PERIODIC_RUN_WORKFLOW'
+    PERIODIC_RUN_TASK = 'PERIODIC_RUN_TASK'
 
 
 class TaskStatusChangedEventKey(EventKey):
@@ -65,4 +67,55 @@ class TaskStatusChangedEvent(Event):
                                                              task_name=task_name,
                                                              namespace=namespace),
                          message=status)
+        self.context = json.dumps({'workflow_execution_id': workflow_execution_id})
+
+
+class PeriodicRunWorkflowEventKey(EventKey):
+    """PeriodicRunWorkflowEventKey represents an event of start a workflow event."""
+    def __init__(self,
+                 schedule_id: int):
+        """
+        :param schedule_id: The unique id of workflow schedule.
+        """
+        super().__init__(namespace=None,
+                         name=str(schedule_id),
+                         event_type=AIFlowEventType.PERIODIC_RUN_WORKFLOW,
+                         sender=None)
+
+
+class PeriodicRunWorkflowEvent(Event):
+    """PeriodicRunWorkflowEvent is an event of start a workflow event."""
+    def __init__(self,
+                 schedule_id: int):
+        """
+        :param schedule_id: The unique id of workflow schedule.
+        """
+        super().__init__(event_key=PeriodicRunWorkflowEventKey(schedule_id=schedule_id),
+                         message="")
+
+
+class PeriodicRunTaskEventKey(EventKey):
+    """PeriodicRunTaskEventKey represents an event of start a task event."""
+    def __init__(self,
+                 task_name: str):
+        """
+        :param task_name: The name of the task.
+        """
+        super().__init__(namespace=None,
+                         name=task_name,
+                         event_type=AIFlowEventType.PERIODIC_RUN_TASK,
+                         sender=None)
+
+
+class PeriodicRunTaskEvent(Event):
+    """PeriodicRunTaskEvent is an event of start a task event."""
+    def __init__(self,
+                 workflow_execution_id: int,
+                 task_name: str):
+        """
+        :param workflow_execution_id: The unique id of the workflow execution.
+        :param task_name: The name of the task.
+        """
+        super().__init__(event_key=PeriodicRunTaskEventKey(task_name=task_name),
+                         message="")
         self.context = json.dumps({'workflow_execution_id': workflow_execution_id})
