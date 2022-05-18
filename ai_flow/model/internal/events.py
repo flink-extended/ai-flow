@@ -31,6 +31,10 @@ class AIFlowEventType(object):
     PERIODIC_RUN_TASK = 'PERIODIC_RUN_TASK'
 
 
+class EventContextConstant(object):
+    WORKFLOW_EXECUTION_ID = 'workflow_execution_id'
+
+
 class TaskStatusChangedEventKey(EventKey):
     """TaskStatusChangedEventKey represents an event of the task status changed."""
     def __init__(self,
@@ -67,7 +71,7 @@ class TaskStatusChangedEvent(Event):
                                                              task_name=task_name,
                                                              namespace=namespace),
                          message=status)
-        self.context = json.dumps({'workflow_execution_id': workflow_execution_id})
+        self.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id})
 
 
 class PeriodicRunWorkflowEventKey(EventKey):
@@ -118,4 +122,4 @@ class PeriodicRunTaskEvent(Event):
         """
         super().__init__(event_key=PeriodicRunTaskEventKey(task_name=task_name),
                          message="")
-        self.context = json.dumps({'workflow_execution_id': workflow_execution_id})
+        self.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id})
