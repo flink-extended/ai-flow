@@ -99,6 +99,7 @@ class TestLocalExecutor(unittest.TestCase):
             executor.start()
             executor.schedule_task(command)
             with self.assertRaises(Empty):
+                time.sleep(0.1)
                 executor.result_queue.get(timeout=1)
             executor.stop()
 

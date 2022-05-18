@@ -102,6 +102,7 @@ class TaskExecution(object):
 
                 context = Context()
                 task.start(context)
+                task.await_termination(context)
         except TaskForceKilledException as e:
             self.handle_force_kill()
             raise
