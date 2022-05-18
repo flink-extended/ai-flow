@@ -14,7 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, BigInteger
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, BigInteger, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from ai_flow.metadata.base import Base
@@ -43,6 +43,10 @@ class TaskExecutionMeta(Base):
     status = Column(String(256))
 
     workflow_execution = relationship('WorkflowExecutionMeta')
+
+    __table_args__ = (
+        UniqueConstraint('workflow_execution_id', 'task_name', 'sequence_number'),
+    )
 
     def __init__(self,
                  workflow_execution_id,

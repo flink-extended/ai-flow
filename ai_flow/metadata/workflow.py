@@ -44,7 +44,7 @@ class WorkflowMeta(Base):
     content = Column(String(length=1048576), nullable=False)
     create_time = Column(DateTime)
     update_time = Column(DateTime)
-    enable = Column(Boolean, default=True)
+    is_enabled = Column(Boolean, default=True)
     event_offset = Column(BigInteger, default=-1)
 
     namespace_meta = relationship('NamespaceMeta')

@@ -17,7 +17,7 @@
 #
 import unittest
 import os
-from ai_flow.common.util.db_migration import init_db, table_exists
+from ai_flow.common.util.db_util.db_migration import init_db, table_exists
 
 
 class TestDBMigration(unittest.TestCase):

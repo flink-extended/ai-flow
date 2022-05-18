@@ -19,7 +19,7 @@ import os
 import unittest
 import cloudpickle
 
-from ai_flow.common.util.db_migration import init_db
+from ai_flow.common.util.db_util.db_migration import init_db
 from ai_flow.common.util.db_util.session import new_session
 from ai_flow.common.util.time_utils import utcnow
 from ai_flow.metadata.metadata_manager import MetadataManager, Filters, FilterEqual, Orders, OrderBy
@@ -89,10 +89,10 @@ class TestMetadataManager(unittest.TestCase):
         update_time_1 = workflow_meta.update_time
         self.metadata_manager.update_workflow(namespace=namespace_name,
                                               name='workflow_1',
-                                              enable=False)
+                                              is_enabled=False)
         workflow_meta = self.metadata_manager.get_workflow_by_id(workflow_meta.id)
         update_time_2 = workflow_meta.update_time
-        self.assertEqual(False, workflow_meta.enable)
+        self.assertEqual(False, workflow_meta.is_enabled)
         self.assertEqual(workflow_meta.create_time, workflow_meta.create_time)
         self.assertLess(update_time_1, update_time_2)
 

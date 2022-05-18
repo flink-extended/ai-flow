@@ -27,8 +27,7 @@ class WorkflowScheduleMeta(Base):
     :param id: The unique identify of the WorkflowSchedule.
     :param workflow_id: The unique identify of the Workflow.
     :param expression: The expression for periodic scheduling Workflow.
-    :param create_time: The create time of the WorkflowSnapshot.
-    :param update_time: The update time of the WorkflowSnapshot.
+    :param create_time: The create time of the WorkflowSchedule.
     :param is_paused: Whether to suspend scheduling.
     """
     __tablename__ = 'workflow_schedule'
@@ -37,7 +36,6 @@ class WorkflowScheduleMeta(Base):
     workflow_id = Column(Integer, ForeignKey('workflow.id'))
     expression = Column(String(256))
     create_time = Column(DateTime)
-    update_time = Column(DateTime)
     is_paused = Column(Boolean, default=False)
 
     workflow = relationship('WorkflowMeta')

@@ -282,25 +282,26 @@ class MetadataManager(object):
             self.session.rollback()
             raise e
 
-    def update_workflow(self, namespace, name, content=None, workflow_object=None, enable=None) -> WorkflowMeta:
+    def update_workflow(self, namespace, name, content=None, workflow_object=None, is_enabled=None) -> WorkflowMeta:
         """
         Update the workflow metadata to MetadataBackend.
         :param namespace: The name of the namespace.
         :param name: The name of the workflow.
         :param content: The workflow's source code.
         :param workflow_object: The serialized workflow binary.
-        :param enable: The workflow can be schedule or not.
+        :param is_enabled: The workflow can be schedule or not.
         :return: The workflow metadata.
         """
         try:
             workflow_meta = self.session.query(WorkflowMeta).filter(WorkflowMeta.namespace == namespace,
                                                                     WorkflowMeta.name == name).one()
+            # todo maybe create workflow snapshot
             if content is not None:
                 workflow_meta.context = content
             if workflow_object is not None:
                 workflow_meta.workflow_object = workflow_object
-            if enable is not None:
-                workflow_meta.enable = enable
+            if is_enabled is not None:
+                workflow_meta.is_enabled = is_enabled
             workflow_meta.update_time = utcnow()
             self.session.merge(workflow_meta)
             self.session.commit()
