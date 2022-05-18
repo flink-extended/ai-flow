@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,9 +14,32 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-AIFLOW_SERVER_BACKEND_STORE_URI = "AIFLOW_SERVER_BACKEND_STORE_URI"
-AIFLOW_SQLALCHEMYSTORE_POOL_SIZE = "AIFLOW_SQLALCHEMYSTORE_POOL_SIZE"
-AIFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW = "AIFLOW_SQLALCHEMYSTORE_MAX_OVERFLOW"
+import json
+from sqlalchemy import Column, String
 
-MONGO_DB_ALIAS_META_SERVICE = 'meta-service-db'
+from ai_flow.metadata.base import Base
+
+
+class NamespaceMeta(Base):
+    """
+    It represents the metadata of the Namespace.
+    :param name: The name of the Namespace.
+    :param properties: The properties of the Namespace.
+    """
+
+    __tablename__ = 'namespace'
+
+    name = Column(String(256), primary_key=True, nullable=False, unique=True)
+    properties = Column(String(1024))
+
+    def __init__(self,
+                 name: str,
+                 properties: dict) -> None:
+        self.name = name
+        self.properties = json.dumps(properties)
+
+    def get_properties(self) -> dict:
+        return json.loads(self.properties)
+
+    def set_properties(self, value):
+        self.properties = json.dumps(value)

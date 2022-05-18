@@ -33,3 +33,14 @@ def datetime_to_int64(d: datetime.datetime):
 
 def parse_date(timestamp):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestamp) / 1000))
+
+
+def utcnow() -> datetime.datetime:
+    """
+    Get the current date and time in UTC
+
+    :return:
+    """
+    result = datetime.datetime.utcnow()
+    result = result.replace(tzinfo=datetime.timezone.utc)
+    return result

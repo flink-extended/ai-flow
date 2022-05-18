@@ -20,6 +20,8 @@ from functools import wraps
 
 import sqlalchemy
 import sqlalchemy.orm
+from sqlalchemy.engine import Engine
+from sqlalchemy import event
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.common.exception.exceptions import AIFlowDBException
@@ -55,6 +57,13 @@ def _get_managed_session_maker(SessionMaker):
     return make_managed_session
 
 
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
+
+
 def create_sqlalchemy_engine(db_uri):
     """
     Create SQLAlchemy engine with specified database URI to support AIFlow entities backend storage.
@@ -75,6 +84,14 @@ def create_session(db_uri=None):
     SessionMaker = sqlalchemy.orm.sessionmaker(bind=db_engine)
     session_factory = _get_managed_session_maker(SessionMaker)
     return session_factory()
+
+
+def new_session(db_uri=None):
+    if db_uri is None:
+        db_uri = config_constants.METADATA_BACKEND_URI
+    db_engine = create_sqlalchemy_engine(db_uri)
+    SessionMaker = sqlalchemy.orm.sessionmaker(bind=db_engine)
+    return SessionMaker()
 
 
 def provide_session(func):

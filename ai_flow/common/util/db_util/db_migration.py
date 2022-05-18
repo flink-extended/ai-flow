@@ -26,7 +26,7 @@ def _get_alembic_config(url):
     from alembic.config import Config
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    package_dir = os.path.normpath(os.path.join(current_dir, '..'))
+    package_dir = os.path.normpath(os.path.join(current_dir, '../../..'))
     directory = os.path.join(package_dir, 'migrations')
     config = Config(os.path.join(package_dir, 'alembic.ini'))
     config.set_main_option('script_location', directory.replace('%', '%%'))
@@ -81,10 +81,11 @@ def downgrade(url, version):
     command.downgrade(config, version)
 
 
-def tables_exists(url):
+def table_exists(url, table_name):
     """Returns whether tables are created"""
     engine_ = sqlalchemy.create_engine(url)
-    if len(engine_.table_names()) > 0:
+    tables = set(engine_.table_names())
+    if table_name in tables:
         return True
     else:
         return False
