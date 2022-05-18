@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,24 +14,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
 from sqlalchemy import BigInteger
-from sqlalchemy import Column
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.ext.declarative import declarative_base
 
-base = declarative_base()
+Base = declarative_base()
 
 
 @compiles(BigInteger, 'sqlite')
 def bi_c(element, compiler, **kw):
     return "INTEGER"
-
-
-class Base:
-    __table_args__ = {'sqlite_autoincrement': True}
-
-    """
-    Column uuid is SQL model primary key, auto increment, which type is BigInteger, but Integer for SQLite.
-    """
-    uuid = Column(BigInteger, primary_key=True, autoincrement=True)
