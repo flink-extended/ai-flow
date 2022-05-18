@@ -23,7 +23,7 @@ from typing import Dict, Any
 import oss2
 
 from ai_flow.blob_manager.blob_manager_interface import BlobManager
-from ai_flow.common.exception.exceptions import AIFlowException
+from ai_flow.common.exception.exceptions import AIFlowException, AIFlowConfigException
 
 
 class OssBlobManager(BlobManager):
@@ -39,7 +39,7 @@ class OssBlobManager(BlobManager):
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         if not self.root_dir:
-            raise AIFlowException('`root_directory` option of blob manager config is not configured.')
+            raise AIFlowConfigException('`root_directory` option of blob manager config is not configured.')
         self.ack_id = config.get('access_key_id', None)
         self.ack_secret = config.get('access_key_secret', None)
         self.endpoint = config.get('endpoint', None)

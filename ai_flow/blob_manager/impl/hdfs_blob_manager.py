@@ -23,7 +23,7 @@ from typing import Dict, Any
 from hdfs.client import InsecureClient
 
 from ai_flow.blob_manager.blob_manager_interface import BlobManager
-from ai_flow.common.exception.exceptions import AIFlowException
+from ai_flow.common.exception.exceptions import AIFlowException, AIFlowConfigException
 
 
 class HDFSBlobManager(BlobManager):
@@ -38,10 +38,10 @@ class HDFSBlobManager(BlobManager):
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         if not self.root_dir:
-            raise AIFlowException('`root_directory` option of blob manager config is not configured.')
+            raise AIFlowConfigException('`root_directory` option of blob manager config is not configured.')
         hdfs_url = config.get('hdfs_url', None)
         if not hdfs_url:
-            raise AIFlowException('`hdfs_url` is not configured.')
+            raise AIFlowConfigException('`hdfs_url` is not configured.')
         hdfs_user = config.get('hdfs_user', 'default')
         hdfs_client = InsecureClient(url=hdfs_url, user=hdfs_user)
         self._hdfs_client = hdfs_client

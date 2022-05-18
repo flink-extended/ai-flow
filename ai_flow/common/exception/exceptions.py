@@ -37,3 +37,6 @@ class AIFlowYAMLException(AIFlowException):
 class TaskForceKilledException(AIFlowException):
     """Raise when task execution is force killed"""
 
+
+class AIFlowTimeoutException(AIFlowException):
+    """Raise when operation timeout"""
