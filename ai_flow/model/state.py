@@ -28,6 +28,10 @@ class StateDescriptor(object):
         self.name = name
 
 
+class StateType(object):
+    VALUE = 'value'
+
+
 class ValueState(State):
     """Single-valued user-defined state"""
 
