@@ -105,6 +105,7 @@ class TestTimer(unittest.TestCase):
 
         timer.add_workflow_schedule(schedule_id=1,
                                     expression='interval@0 0 0 1')
+        self.session.commit()
         jobs = timer.store.get_all_jobs()
         self.assertEqual(1, len(jobs))
         time.sleep(2.5)
@@ -123,6 +124,7 @@ class TestTimer(unittest.TestCase):
         timer.add_task_schedule(workflow_execution_id=1,
                                 task_name='task',
                                 expression='cron@*/1 * * * * * * utc')
+        self.session.commit()
         jobs = timer.store.get_all_jobs()
         self.assertEqual(1, len(jobs))
         time.sleep(2)
@@ -141,6 +143,7 @@ class TestTimer(unittest.TestCase):
         timer.add_task_schedule(workflow_execution_id=1,
                                 task_name='task',
                                 expression='interval@0 0 0 1')
+        self.session.commit()
         jobs = timer.store.get_all_jobs()
         self.assertEqual(1, len(jobs))
         time.sleep(2.5)
