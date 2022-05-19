@@ -24,7 +24,7 @@ from typing import List
 from notification_service.event import Event, EventKey
 from notification_service.notification_client import NotificationClient, ListenerRegistrationId, ListenerProcessor
 
-from ai_flow.common.util.db_migration import init_db
+from ai_flow.common.util.db_util.db_migration import init_db
 from ai_flow.common.util.db_util.session import new_session
 from ai_flow.model.internal.events import PeriodicRunWorkflowEvent, PeriodicRunTaskEvent
 from ai_flow.scheduler.timer import Timer
