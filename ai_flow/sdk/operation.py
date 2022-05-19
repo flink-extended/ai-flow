@@ -21,6 +21,8 @@ import tempfile
 from pathlib import Path
 from typing import List
 
+from ai_flow.common.exception.exceptions import AIFlowException
+
 from ai_flow.common.util import serialization_utils
 
 from ai_flow.blob_manager.blob_manager_interface import BlobManagerFactory, BlobManagerConfig
@@ -94,7 +96,7 @@ def _extract_workflows(file_path: str) -> List[Workflow]:
     :return: The list of workflow objects
     """
     if file_path is None or not os.path.isfile(file_path):
-        return []
+        raise AIFlowException(f"Cannot extract workflow because file not exists: {file_path}")
     try:
         mod = load_module(file_path)
     except Exception:

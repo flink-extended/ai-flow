@@ -19,6 +19,8 @@ import tempfile
 import unittest
 from unittest import mock
 
+from ai_flow.common.exception.exceptions import AIFlowException
+
 from ai_flow.common.configuration import config_constants
 from ai_flow.sdk import operation
 
@@ -26,10 +28,15 @@ from ai_flow.sdk import operation
 class TestOperation(unittest.TestCase):
 
     def test__extract_workflows(self):
-        workflows = operation._extract_workflows('./__init__.py')
+        current_dir = os.path.abspath(os.path.dirname(__file__))
+        workflows = operation._extract_workflows(os.path.join(current_dir, '__init__.py'))
         self.assertEqual(0, len(workflows))
 
-        workflows = operation._extract_workflows('./workflow_for_test.py')
+        with self.assertRaisesRegex(AIFlowException, r"Cannot extract workflow"):
+            operation._extract_workflows('non_exists_file')
+
+        print(os.path.join(os.path.dirname(__file__), 'workflow_for_test.py'))
+        workflows = operation._extract_workflows(os.path.join(current_dir, 'workflow_for_test.py'))
         self.assertEqual(3, len(workflows))
         self.assertEqual('workflow_1', workflows[0].name)
         self.assertEqual('workflow_2', workflows[1].name)
