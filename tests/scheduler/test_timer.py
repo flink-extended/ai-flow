@@ -102,7 +102,6 @@ class TestTimer(unittest.TestCase):
         timer.shutdown()
 
     def test_task_schedule_cron_expression(self):
-        global results
         timer = Timer(notification_client=self.notification_client, session=self.session)
         timer.start()
 
@@ -119,7 +118,6 @@ class TestTimer(unittest.TestCase):
         timer.shutdown()
 
     def test_task_schedule_interval_expression(self):
-        global results
         timer = Timer(notification_client=self.notification_client, session=self.session)
         timer.start()
 
