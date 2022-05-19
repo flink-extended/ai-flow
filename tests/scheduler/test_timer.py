@@ -16,7 +16,6 @@
 # under the License.
 #
 import os
-import time
 import unittest
 from datetime import datetime
 from typing import List
@@ -26,11 +25,7 @@ from notification_service.notification_client import NotificationClient, Listene
 
 from ai_flow.common.util.db_util.db_migration import init_db
 from ai_flow.common.util.db_util.session import new_session
-from ai_flow.model.internal.events import PeriodicRunWorkflowEvent, PeriodicRunTaskEvent
 from ai_flow.scheduler.timer import Timer
-
-
-results = []
 
 
 class MockNotificationClient(NotificationClient):
@@ -39,8 +34,7 @@ class MockNotificationClient(NotificationClient):
         super().__init__('namespace', 'sender')
 
     def send_event(self, event: Event):
-        global results
-        results.append(event)
+        pass
 
     def register_listener(self, listener_processor: ListenerProcessor, event_keys: List[EventKey] = None,
                           offset: int = None) -> ListenerRegistrationId:
@@ -71,13 +65,10 @@ class TestTimer(unittest.TestCase):
             os.remove(self.file)
 
     def tearDown(self) -> None:
-        global results
         self.session.close()
         self._delete_db_file()
-        results.clear()
 
     def test_workflow_schedule_cron_expression(self):
-        global results
         timer = Timer(notification_client=self.notification_client, session=self.session)
         timer.start()
 
@@ -87,19 +78,15 @@ class TestTimer(unittest.TestCase):
         jobs = timer.store.get_all_jobs()
         self.assertEqual(1, len(jobs))
         timer.pause_workflow_schedule(schedule_id=1)
-        time.sleep(2)
-        self.assertEqual(0, len(results))
+        self.assertEqual(None, timer.store.lookup_job(jobs[0].id).next_run_time)
         timer.resume_workflow_schedule(schedule_id=1)
-        time.sleep(2)
-        self.assertEqual(2, len(results))
-        self.assertTrue(isinstance(results[0], PeriodicRunWorkflowEvent))
+        self.assertIsNotNone(timer.store.lookup_job(jobs[0].id).next_run_time)
         timer.delete_workflow_schedule(1)
         jobs = timer.store.get_all_jobs()
         self.assertEqual(0, len(jobs))
         timer.shutdown()
 
     def test_workflow_schedule_interval_expression(self):
-        global results
         timer = Timer(notification_client=self.notification_client, session=self.session)
         timer.start()
 
@@ -108,9 +95,7 @@ class TestTimer(unittest.TestCase):
         self.session.commit()
         jobs = timer.store.get_all_jobs()
         self.assertEqual(1, len(jobs))
-        time.sleep(2.5)
-        self.assertEqual(2, len(results))
-        self.assertTrue(isinstance(results[0], PeriodicRunWorkflowEvent))
+        self.assertIsNotNone(timer.store.lookup_job(jobs[0].id).next_run_time)
         timer.delete_workflow_schedule(1)
         jobs = timer.store.get_all_jobs()
         self.assertEqual(0, len(jobs))
@@ -127,9 +112,7 @@ class TestTimer(unittest.TestCase):
         self.session.commit()
         jobs = timer.store.get_all_jobs()
         self.assertEqual(1, len(jobs))
-        time.sleep(2)
-        self.assertEqual(2, len(results))
-        self.assertTrue(isinstance(results[0], PeriodicRunTaskEvent))
+        self.assertIsNotNone(timer.store.lookup_job(jobs[0].id).next_run_time)
         timer.delete_task_schedule(workflow_execution_id=1, task_name='task')
         jobs = timer.store.get_all_jobs()
         self.assertEqual(0, len(jobs))
@@ -146,9 +129,7 @@ class TestTimer(unittest.TestCase):
         self.session.commit()
         jobs = timer.store.get_all_jobs()
         self.assertEqual(1, len(jobs))
-        time.sleep(2.5)
-        self.assertEqual(2, len(results))
-        self.assertTrue(isinstance(results[0], PeriodicRunTaskEvent))
+        self.assertIsNotNone(timer.store.lookup_job(jobs[0].id).next_run_time)
         timer.delete_task_schedule(workflow_execution_id=1, task_name='task')
         jobs = timer.store.get_all_jobs()
         self.assertEqual(0, len(jobs))
