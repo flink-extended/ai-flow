@@ -21,14 +21,18 @@ import os
 import shutil
 import threading
 
-from ai_flow.blob_manager.blob_manager_interface import BlobManagerFactory
+from ai_flow.blob_manager.blob_manager_interface import BlobManagerFactory, BlobManagerConfig
 
 _TMP_FOLDER = '/tmp/' + __name__
 _UPLOAD_FOLDER = os.path.join(_TMP_FOLDER, 'upload')
 _DOWNLOAD_FOLDER = os.path.join(_TMP_FOLDER, 'download')
 _TMP_FILE = os.path.join(_TMP_FOLDER, 'file.txt')
-LOCAL_BLOB_MANAGER_CLASS = 'ai_flow.blob_manager.impl.local_blob_manager.LocalBlobManager'
-LOCAL_BLOB_MANAGER_CONFIG = {'root_directory': _UPLOAD_FOLDER}
+CONFIG = BlobManagerConfig({
+    'blob_manager_class': 'ai_flow.blob_manager.impl.local_blob_manager.LocalBlobManager',
+    'blob_manager_config': {
+        'root_directory': _UPLOAD_FOLDER
+    }
+})
 
 
 class TestLocalBlobManager(unittest.TestCase):
@@ -53,12 +57,15 @@ class TestLocalBlobManager(unittest.TestCase):
             os.remove(_TMP_FILE)
 
     def test_without_root_directory_set(self):
+        conf = BlobManagerConfig({
+            'blob_manager_class': 'ai_flow.blob_manager.impl.local_blob_manager.LocalBlobManager',
+            'blob_manager_config': {}
+        })
         with self.assertRaisesRegex(Exception, '`root_directory` option of blob manager config is not configured'):
-            BlobManagerFactory.create_blob_manager(LOCAL_BLOB_MANAGER_CLASS, {})
+            BlobManagerFactory.create_blob_manager(conf)
 
     def test_project_upload_download_local(self):
-        blob_manager = BlobManagerFactory.create_blob_manager(LOCAL_BLOB_MANAGER_CLASS,
-                                                              LOCAL_BLOB_MANAGER_CONFIG)
+        blob_manager = BlobManagerFactory.create_blob_manager(CONFIG)
         uploaded_path = blob_manager.upload(_TMP_FILE)
         self.assertEqual(os.path.join(_UPLOAD_FOLDER, os.path.basename(_TMP_FILE), uploaded_path), uploaded_path)
 
@@ -66,15 +73,13 @@ class TestLocalBlobManager(unittest.TestCase):
         self.assertEqual(os.path.join(_DOWNLOAD_FOLDER, os.path.basename(_TMP_FILE)), downloaded_path)
 
     def test_project_upload_download_local_2(self):
-        blob_manager = BlobManagerFactory.create_blob_manager(LOCAL_BLOB_MANAGER_CLASS,
-                                                              LOCAL_BLOB_MANAGER_CONFIG)
+        blob_manager = BlobManagerFactory.create_blob_manager(CONFIG)
         uploaded_path = blob_manager.upload(_TMP_FILE)
         downloaded_path = blob_manager.download(uploaded_path)
         self.assertEqual(uploaded_path, downloaded_path)
 
     def test_project_download_local_same_time(self):
-        blob_manager = BlobManagerFactory.create_blob_manager(LOCAL_BLOB_MANAGER_CLASS,
-                                                              LOCAL_BLOB_MANAGER_CONFIG)
+        blob_manager = BlobManagerFactory.create_blob_manager(CONFIG)
         uploaded_path = blob_manager.upload(_TMP_FILE)
 
         def download_project():

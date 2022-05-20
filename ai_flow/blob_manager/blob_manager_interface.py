@@ -20,6 +20,8 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict
 
+from ai_flow.common.exception.exceptions import AIFlowConfigException
+
 from ai_flow.common.configuration import config_constants
 from ai_flow.common.util.module_utils import import_string
 
@@ -63,21 +65,36 @@ class BlobManager(ABC):
         pass
 
 
+class BlobManagerConfig:
+
+    def __init__(self, config: Dict):
+        if config is None:
+            raise AIFlowConfigException('The blob manager option is not configured.')
+        if config.get('blob_manager_class') is None:
+            raise AIFlowConfigException('The `blob_manager_class` option of blob config is not configured.')
+        self.config = config
+
+    def get_class(self):
+        return self.config.get('blob_manager_class')
+
+    def get_customized_config(self):
+        return self.config.get('blob_manager_config')
+
+
 class BlobManagerFactory:
 
     @classmethod
     def get_default_blob_manager(cls) -> BlobManager:
-        default_class = config_constants.BLOB_MANAGER_CLASS
-        default_config = config_constants.BLOB_MANAGER_CONFIG
-        cls.create_blob_manager(default_class, default_config)
+        cls.create_blob_manager(config_constants.BLOB_MANAGER)
 
     @classmethod
-    def create_blob_manager(cls, class_name, config: Dict) -> BlobManager:
+    def create_blob_manager(cls, config: BlobManagerConfig) -> BlobManager:
         """
-        :param class_name: The class name of a (~class:`ai_flow.plugin_interface.blob_manager_interface.BlobManager`)
         :param config: The configuration of the BlobManager.
         """
+        class_name = config.get_class()
+        customized_config = config.get_customized_config()
         if class_name is None:
             return None
         class_object = import_string(class_name)
-        return class_object(config)
+        return class_object(customized_config)

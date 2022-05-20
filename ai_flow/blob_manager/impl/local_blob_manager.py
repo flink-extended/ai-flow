@@ -21,7 +21,7 @@ import shutil
 from typing import Dict, Any
 
 from ai_flow.blob_manager.blob_manager_interface import BlobManager
-from ai_flow.common.exception.exceptions import AIFlowException
+from ai_flow.common.exception.exceptions import AIFlowException, AIFlowConfigException
 
 
 class LocalBlobManager(BlobManager):
@@ -33,7 +33,9 @@ class LocalBlobManager(BlobManager):
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
         if not self.root_dir:
-            raise AIFlowException('`root_directory` option of blob manager config is not configured.')
+            raise AIFlowConfigException('`root_directory` option of blob manager config is not configured.')
+        if not os.path.isdir(self.root_dir):
+            raise AIFlowException(f'Root dir: {self.root_dir} is not a directory.')
 
     def upload(self, local_file_path: str) -> str:
         """

@@ -22,13 +22,17 @@ import unittest
 import os
 from unittest import mock
 
-from ai_flow.blob_manager.blob_manager_interface import BlobManagerFactory
+from ai_flow.blob_manager.blob_manager_interface import BlobManagerFactory, BlobManagerConfig
 
 _TMP_FOLDER = '/tmp/' + __name__
 _TMP_FILE = os.path.join(_TMP_FOLDER, 'file.txt')
-HDFS_BLOB_MANAGER_CLASS = 'ai_flow.blob_manager.impl.hdfs_blob_manager.HDFSBlobManager'
-HDFS_BLOB_MANAGER_CONFIG = {'root_directory': 'hdfs:///path',
-                            'hdfs_url': 'localhost:50070'}
+CONFIG = BlobManagerConfig({
+    'blob_manager_class': 'ai_flow.blob_manager.impl.hdfs_blob_manager.HDFSBlobManager',
+    'blob_manager_config': {
+        'root_directory': 'hdfs:///path',
+        'hdfs_url': 'localhost:50070'
+    }
+})
 
 
 class TestHDFSBlobManager(unittest.TestCase):
@@ -52,22 +56,36 @@ class TestHDFSBlobManager(unittest.TestCase):
             os.remove(_TMP_FILE)
 
     def test_without_root_directory_set(self):
+        conf1 = BlobManagerConfig({
+            'blob_manager_class': 'ai_flow.blob_manager.impl.hdfs_blob_manager.HDFSBlobManager',
+            'blob_manager_config': {
+                'hdfs_url': 'localhost:50070'
+            }
+        })
+        conf2 = BlobManagerConfig({
+            'blob_manager_class': 'ai_flow.blob_manager.impl.hdfs_blob_manager.HDFSBlobManager',
+            'blob_manager_config': {
+                'root_directory': 'hdfs:///path'
+            }
+        })
         with self.assertRaisesRegex(Exception, '`root_directory` option of blob manager config is not configured'):
-            BlobManagerFactory.create_blob_manager(HDFS_BLOB_MANAGER_CLASS, {})
+            BlobManagerFactory.create_blob_manager(conf1)
         with self.assertRaisesRegex(Exception, '`hdfs_url` is not configured'):
-            BlobManagerFactory.create_blob_manager(HDFS_BLOB_MANAGER_CLASS, {'root_directory': 'hdfs:///path'})
+            BlobManagerFactory.create_blob_manager(conf2)
 
     @unittest.skipUnless((os.environ.get('blob_server.hdfs_url') is not None
                           and os.environ.get('blob_server.hdfs_user') is not None
                           and os.environ.get('blob_server.repo_name') is not None), 'need set hdfs config')
     def test_project_upload_download_hdfs(self):
-        config = {
-            'hdfs_url': os.environ.get('blob_server.hdfs_url'),
-            'hdfs_user': os.environ.get('blob_server.hdfs_user'),
-            'root_directory': os.environ.get('blob_server.repo_name')
-        }
-        blob_manager = BlobManagerFactory.create_blob_manager(HDFS_BLOB_MANAGER_CLASS,
-                                                              config)
+        config = BlobManagerConfig({
+            'blob_manager_class': 'ai_flow.blob_manager.impl.hdfs_blob_manager.HDFSBlobManager',
+            'blob_manager_config': {
+                'hdfs_url': os.environ.get('blob_server.hdfs_url'),
+                'hdfs_user': os.environ.get('blob_server.hdfs_user'),
+                'root_directory': os.environ.get('blob_server.repo_name')
+            }
+        })
+        blob_manager = BlobManagerFactory.create_blob_manager(config)
         uploaded_path = blob_manager.upload(_TMP_FILE)
         self.assertEqual(os.path.join(os.environ.get('blob_server.repo_name'), os.path.basename(_TMP_FILE)),
                          uploaded_path)
@@ -76,8 +94,8 @@ class TestHDFSBlobManager(unittest.TestCase):
         self.assertEqual(os.path.join(_TMP_FOLDER, os.path.basename(_TMP_FILE)), downloaded_path)
 
     def test_download_existed_file(self):
-        blob_manager = BlobManagerFactory.create_blob_manager(HDFS_BLOB_MANAGER_CLASS,
-                                                              HDFS_BLOB_MANAGER_CONFIG)
+        blob_manager = BlobManagerFactory.create_blob_manager(CONFIG)
+
         def mock_download_file_from_hdfs(hdfs_path, local_path):
             with open(local_path, 'w') as f:
                 f.write(str(time.time() * 1000))
