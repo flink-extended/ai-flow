@@ -71,7 +71,7 @@ class TaskStatusChangedEvent(Event):
 
 
 class PeriodicRunWorkflowEventKey(EventKey):
-    """PeriodicRunWorkflowEventKey represents an event of start a workflow event."""
+    """PeriodicRunWorkflowEventKey represents an event of starting a workflow."""
     def __init__(self,
                  schedule_id: int):
         """
@@ -84,7 +84,7 @@ class PeriodicRunWorkflowEventKey(EventKey):
 
 
 class PeriodicRunWorkflowEvent(Event):
-    """PeriodicRunWorkflowEvent is an event of start a workflow event."""
+    """PeriodicRunWorkflowEvent is an event of starting a workflow."""
     def __init__(self,
                  schedule_id: int):
         """
@@ -95,7 +95,7 @@ class PeriodicRunWorkflowEvent(Event):
 
 
 class PeriodicRunTaskEventKey(EventKey):
-    """PeriodicRunTaskEventKey represents an event of start a task event."""
+    """PeriodicRunTaskEventKey represents an event of starting a task."""
     def __init__(self,
                  task_name: str):
         """
@@ -108,7 +108,7 @@ class PeriodicRunTaskEventKey(EventKey):
 
 
 class PeriodicRunTaskEvent(Event):
-    """PeriodicRunTaskEvent is an event of start a task event."""
+    """PeriodicRunTaskEvent is an event of starting a task."""
     def __init__(self,
                  workflow_execution_id: int,
                  task_name: str):
