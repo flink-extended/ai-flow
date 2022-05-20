@@ -20,6 +20,6 @@ server_address: localhost:50051
 
 # configurations about blob manager
 blob_manager:
-  blob_manager_class: ai_flow_plugins.blob_manager_plugins.local_blob_manager.LocalBlobManager
+  blob_manager_class: ai_flow.blob_manager.impl.local_blob_manager.LocalBlobManager
   blob_manager_config:
     root_directory: /tmp

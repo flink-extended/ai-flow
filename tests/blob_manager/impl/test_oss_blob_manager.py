@@ -23,12 +23,19 @@ from unittest import mock
 
 import os
 
-from ai_flow.blob_manager.blob_manager_interface import BlobManagerFactory
+from ai_flow.blob_manager.blob_manager_interface import BlobManagerFactory, BlobManagerConfig
 from ai_flow.blob_manager.impl.oss_blob_manager import OssBlobManager
 
 _TMP_FOLDER = '/tmp/' + __name__
 _TMP_FILE = os.path.join(_TMP_FOLDER, 'file.txt')
-OSS_BLOB_MANAGER_CLASS = 'ai_flow.blob_manager.impl.oss_blob_manager.OssBlobManager'
+CONFIG = BlobManagerConfig({
+    'blob_manager_class': 'ai_flow.blob_manager.impl.oss_blob_manager.OssBlobManager',
+    'blob_manager_config': {
+        'endpoint': 'endpoint',
+        'bucket': 'bucket',
+        'root_directory': 'tmp'
+    }
+})
 
 
 class TestOSSBlobManager(unittest.TestCase):
@@ -52,8 +59,12 @@ class TestOSSBlobManager(unittest.TestCase):
             os.remove(_TMP_FILE)
 
     def test_without_root_directory_set(self):
+        config = BlobManagerConfig({
+            'blob_manager_class': 'ai_flow.blob_manager.impl.oss_blob_manager.OssBlobManager',
+            'blob_manager_config': {}
+        })
         with self.assertRaisesRegex(Exception, '`root_directory` option of blob manager config is not configured'):
-            BlobManagerFactory.create_blob_manager(OSS_BLOB_MANAGER_CLASS, {})
+            BlobManagerFactory.create_blob_manager(config)
 
     @unittest.skipUnless((os.environ.get('blob_server.endpoint') is not None
                           and os.environ.get('blob_server.access_key_id') is not None
@@ -61,16 +72,17 @@ class TestOSSBlobManager(unittest.TestCase):
                           and os.environ.get('blob_server.bucket') is not None
                           and os.environ.get('blob_server.repo_name') is not None), 'need set oss')
     def test_project_upload_download_oss(self):
-        config = {
-            'access_key_id': os.environ.get('blob_server.access_key_id'),
-            'access_key_secret': os.environ.get('blob_server.access_key_secret'),
-            'endpoint': os.environ.get('blob_server.endpoint'),
-            'bucket': os.environ.get('blob_server.bucket'),
-            'root_directory': os.environ.get('blob_server.repo_name')
-        }
-
-        blob_manager = BlobManagerFactory.create_blob_manager(OSS_BLOB_MANAGER_CLASS,
-                                                              config)
+        config = BlobManagerConfig({
+            'blob_manager_class': 'ai_flow.blob_manager.impl.oss_blob_manager.OssBlobManager',
+            'blob_manager_config': {
+                'access_key_id': os.environ.get('blob_server.access_key_id'),
+                'access_key_secret': os.environ.get('blob_server.access_key_secret'),
+                'endpoint': os.environ.get('blob_server.endpoint'),
+                'bucket': os.environ.get('blob_server.bucket'),
+                'root_directory': os.environ.get('blob_server.repo_name')
+            }
+        })
+        blob_manager = BlobManagerFactory.create_blob_manager(config)
         uploaded_path = blob_manager.upload(_TMP_FILE)
         self.assertEqual(os.path.join(os.environ.get('blob_server.repo_name'), os.path.basename(_TMP_FILE)),
                          uploaded_path)

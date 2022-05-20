@@ -53,6 +53,11 @@ SQLALCHEMY_MAX_OVERFLOW = SERVER_CONF.get_int('sql_alchemy_max_overflow', fallba
 
 SERVER_ADDRESS = CLIENT_CONF.get_str('server_address', fallback='127.0.0.1:50051')
 
-BLOB_MANAGER_CLASS = CLIENT_CONF.get('blob_manager').get('blob_manager_class')
 
-BLOB_MANAGER_CONFIG = CLIENT_CONF.get('blob_manager').get('blob_manager_config')
+BLOB_MANAGER_DEFAULT_VALUE = {
+    'blob_manager_class': 'ai_flow.blob_manager.impl.local_blob_manager.LocalBlobManager',
+    'blob_manager_config': {
+        'root_directory': '/tmp'
+    }
+}
+BLOB_MANAGER = CLIENT_CONF.get('blob_manager', fallback=BLOB_MANAGER_DEFAULT_VALUE)
