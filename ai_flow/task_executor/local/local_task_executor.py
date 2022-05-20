@@ -105,14 +105,16 @@ class LocalTaskExecutor(BaseTaskExecutor):
         if not self.manager:
             raise AIFlowException("The executor should be started first!")
 
+        self._task_status_observer.stop()
+        self._task_status_observer.join()
+
         for _ in self.workers:
             self.task_queue.put((None, None))
         # Wait for commands to finish
         self.task_queue.join()
         self.manager.shutdown()
 
-        self._task_status_observer.stop()
-        self._task_status_observer.join()
+
 
     def recover(self):
         # TODO recover state
