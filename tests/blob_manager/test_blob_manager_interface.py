@@ -18,7 +18,7 @@
 #
 import unittest
 
-from ai_flow.blob_manager.blob_manager_interface import BlobManager, BlobManagerFactory
+from ai_flow.blob_manager.blob_manager_interface import BlobManager, BlobManagerFactory, BlobManagerConfig
 
 
 class MockBlockManager(BlobManager):
@@ -35,17 +35,28 @@ class MockBlockManager(BlobManager):
 class TestBlobManager(unittest.TestCase):
 
     def test_blob_manager_factory(self):
-        blob_manager_class = 'tests.blob_manager.test_blob_manager_interface.MockBlockManager'
-        blob_manager_config = {
-                'root_directory': '/tmp'
+        config = {
+            'blob_manager_class': 'tests.blob_manager.test_blob_manager_interface.MockBlockManager',
+            'blob_manager_config': {
+                'root_directory': '/tmp/ai-flow'
+            }
         }
-        blob_manager = BlobManagerFactory.create_blob_manager(blob_manager_class,
-                                                              blob_manager_config)
+        blob_manager = BlobManagerFactory.create_blob_manager(BlobManagerConfig(config))
         uploaded_path = blob_manager.upload('')
         self.assertEqual('upload', uploaded_path)
 
         downloaded_path = blob_manager.download('', '')
         self.assertEqual('download', downloaded_path)
+
+    def test_config(self):
+        config = BlobManagerConfig({
+            'blob_manager_class': 'ai_flow.blob_manager.impl.local_blob_manager.LocalBlobManager',
+            'blob_manager_config': {
+                'root_directory': '/tmp/ai-flow'
+            }
+        })
+        self.assertEqual('ai_flow.blob_manager.impl.local_blob_manager.LocalBlobManager', config.get_class())
+        self.assertEqual({'root_directory': '/tmp/ai-flow'}, config.get_customized_config())
 
 
 if __name__ == '__main__':
