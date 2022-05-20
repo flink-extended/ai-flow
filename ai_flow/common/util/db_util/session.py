@@ -74,7 +74,10 @@ def create_sqlalchemy_engine(db_uri):
         pool_kwargs['pool_size'] = config_constants.SQLALCHEMY_POOL_SIZE
         pool_kwargs['max_overflow'] = config_constants.SQLALCHEMY_MAX_OVERFLOW
         logger.info("Create SQLAlchemy engine with pool options %s", pool_kwargs)
-    return sqlalchemy.create_engine(db_uri, pool_pre_ping=True, **pool_kwargs)
+    return sqlalchemy.create_engine(db_uri,
+                                    pool_pre_ping=True,
+                                    connect_args={"check_same_thread": False},
+                                    **pool_kwargs)
 
 
 def create_session(db_uri=None):
