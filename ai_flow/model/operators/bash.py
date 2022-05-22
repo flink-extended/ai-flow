@@ -87,12 +87,6 @@ class BashOperator(AIFlowOperator):
         finally:
             self.log_reader.stop()
 
-    def get_status(self, context: Context) -> TaskStatus:
-        pass
-
-    def get_metrics(self, context: Context) -> Dict:
-        pass
-
     def _read_output(self):
         logger.info('Output:')
         for raw_line in iter(self.sub_process.stdout.readline, b''):
