@@ -1,10 +1,10 @@
-Flink-AI-Extended
-Copyright 1999-2020 The Alibaba Group Holding Ltd
+AI Flow
+Copyright 2019-2022 The Alibaba Group Holding Ltd
 
 This product includes software developed at The Alibaba Group Holding Ltd
 (https://www.alibaba.com/).
 
-The Flink-AI-Extended project contains subcomponents with separate copyright
+The AI Flow project contains subcomponents with separate copyright
 notices and license terms. Your use of the source code for the these
 subcomponents is subject to the terms and conditions of the following
 licenses.
@@ -18,7 +18,7 @@ See project link for details. The text of each license is also included
 at licenses/LICENSE-[project].txt.
 
     (ALv2 License) Apache-Flink v1.8.0 (http://flink.apache.org/)
-    (ALv2 License) Apache-Airflow v1.10.10 (http://airflow.apache.org/)
+    (ALv2 License) Apache-Airflow v2.0.0 (http://airflow.apache.org/)
     (ALv2 License) tensorflow v1.11.0 (https://www.tensorflow.org/)
     (ALv2 License) hue v4.3.0 (https://github.com/cloudera/hue/)
     (ALv2 License) jqclock v2.3.0 (https://github.com/JohnRDOrazio/jQuery-Clock-Plugin)
