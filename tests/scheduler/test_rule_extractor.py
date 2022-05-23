@@ -23,7 +23,7 @@ import unittest
 import cloudpickle
 from notification_service.event import Event, EventKey
 
-from ai_flow.common.util.db_migration import init_db
+from ai_flow.common.util.db_util.db_migration import init_db
 from ai_flow.common.util.db_util.session import new_session
 from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.action import TaskAction
