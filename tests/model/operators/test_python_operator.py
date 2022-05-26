@@ -19,15 +19,19 @@ import threading
 import time
 import unittest
 import psutil
+from ai_flow.common.util.serialization_utils import serialize
 
 from ai_flow.model.operators.python import PythonOperator
 from ai_flow.model.workflow import Workflow
 
 
+def func(secs):
+    time.sleep(secs)
+
+
 class TestBashOperator(unittest.TestCase):
 
-    def func(self, secs):
-        time.sleep(secs)
+
 
     def test_python_operator(self):
         def func(arg1, arg2):
@@ -71,3 +75,12 @@ class TestBashOperator(unittest.TestCase):
         time.sleep(0.1)
         with self.assertRaises(psutil.NoSuchProcess):
             psutil.Process(self.python_operator.process.pid)
+
+    def test_pickle(self):
+        with Workflow(name='workflow') as workflow:
+            python_operator = PythonOperator(
+                name='test_await_termination',
+                python_callable=func,
+                callable_args=[1],
+            )
+        self.assertIsNotNone(serialize(workflow))
