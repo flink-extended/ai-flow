@@ -29,9 +29,7 @@ def func(secs):
     time.sleep(secs)
 
 
-class TestBashOperator(unittest.TestCase):
-
-
+class TestPythonOperator(unittest.TestCase):
 
     def test_python_operator(self):
         def func(arg1, arg2):
@@ -50,7 +48,7 @@ class TestBashOperator(unittest.TestCase):
         with Workflow(name='workflow'):
             python_operator = PythonOperator(
                 name='test_await_termination',
-                python_callable=self.func,
+                python_callable=func,
                 callable_args=[1],
             )
             python_operator.start(context=None)
@@ -64,7 +62,7 @@ class TestBashOperator(unittest.TestCase):
         def python_op():
             with Workflow(name='workflow'):
                 self.python_operator = PythonOperator(name='test_await_termination',
-                                                      python_callable=self.func,
+                                                      python_callable=func,
                                                       callable_args=[100],)
             self.python_operator.start(context={})
         _thread = threading.Thread(target=python_op, daemon=True)
