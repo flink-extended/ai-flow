@@ -245,7 +245,9 @@ class MetadataManager(object):
         :param orders: The orders of the results.
         :return: The workflow metadata list.
         """
-        query = self.session.query(WorkflowMeta).filter(WorkflowMeta.namespace == namespace)
+        query = self.session.query(WorkflowMeta)
+        if namespace:
+            query = query.filter(WorkflowMeta.namespace == namespace)
         if filters:
             query = filters.apply_all(WorkflowMeta, query)
         if orders:
@@ -537,6 +539,13 @@ class MetadataManager(object):
         except Exception as e:
             self.session.rollback()
             raise e
+
+    def list_all_workflow_triggers(self) -> List[WorkflowEventTriggerMeta]:
+        """
+        List all workflow trigger metadata.
+        :return: The workflow trigger metadata list.
+        """
+        return self.session.query(WorkflowEventTriggerMeta).all()
 
     # end workflow trigger
 
