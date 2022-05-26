@@ -42,7 +42,6 @@ class TestRuleExtractorUtil(unittest.TestCase):
 
     def test_gen_all_combination(self):
         a = [1, None, 3, None]
-        a.reverse()
         results = gen_all_combination(a)
         self.assertEqual(4, len(results))
         self.assertTrue((1, None, 3, None) in results)
@@ -51,11 +50,9 @@ class TestRuleExtractorUtil(unittest.TestCase):
         self.assertTrue((None, None, None, None) in results)
 
         a = [1, 2, 3, None]
-        a.reverse()
         self.assertEqual(8, len(gen_all_combination(a)))
 
         a = [1, 2, 3, 4]
-        a.reverse()
         self.assertEqual(16, len(gen_all_combination(a)))
 
     def test_gen_all_tuple_by_event_key(self):

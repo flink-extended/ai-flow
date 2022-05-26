@@ -55,10 +55,10 @@ def gen_all_combination(inputs: list) -> list:
     for result in results:
         if inputs[0] is not None:
             r1 = deepcopy(result)
-            r1 = r1 + (inputs[0],)
+            r1 = (inputs[0],) + r1
             new_results.append(r1)
         r2 = deepcopy(result)
-        r2 = r2 + (None,)
+        r2 = (None,) + r2
         new_results.append(r2)
     return new_results
 
@@ -66,7 +66,6 @@ def gen_all_combination(inputs: list) -> list:
 def gen_all_tuple_by_event_key(event_key: EventKey) -> List[EventTuple]:
     """Generate all tuple combinations that match the event key"""
     keys = [event_key.namespace, event_key.name, event_key.event_type, event_key.sender]
-    keys.reverse()
     return gen_all_combination(keys)
 
 
