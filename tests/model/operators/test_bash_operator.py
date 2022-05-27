@@ -22,6 +22,7 @@ import unittest
 from subprocess import TimeoutExpired
 
 import psutil
+from ai_flow.common.util.serialization_utils import serialize
 
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.operators.bash import BashOperator
@@ -76,3 +77,9 @@ class TestBashOperator(unittest.TestCase):
         with self.assertRaises(TimeoutExpired):
             time.sleep(0.1)
             self.bash_operator.await_termination(context={}, timeout=0.1)
+
+    def test_pickle(self):
+        with Workflow(name='workflow') as workflow:
+            self.bash_operator = BashOperator(name='test_pickle', bash_command='sleep 1')
+        serialize(workflow)
+        self.assertIsNotNone(serialize(workflow))

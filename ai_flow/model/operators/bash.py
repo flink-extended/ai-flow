@@ -42,7 +42,7 @@ class BashOperator(AIFlowOperator):
         super().__init__(name, **kwargs)
         self.bash_command = bash_command
         self.sub_process = None
-        self.log_reader = StoppableThread(target=self._read_output)
+        self.log_reader = None
 
     def start(self, context: Context):
         with TemporaryDirectory(prefix='aiflow_tmp') as tmp_dir:
@@ -61,6 +61,7 @@ class BashOperator(AIFlowOperator):
                 cwd=tmp_dir,
                 preexec_fn=pre_exec,
             )
+        self.log_reader = StoppableThread(target=self._read_output)
         self.log_reader.start()
 
     def stop(self, context: Context):
@@ -86,12 +87,6 @@ class BashOperator(AIFlowOperator):
             raise
         finally:
             self.log_reader.stop()
-
-    def get_status(self, context: Context) -> TaskStatus:
-        pass
-
-    def get_metrics(self, context: Context) -> Dict:
-        pass
 
     def _read_output(self):
         logger.info('Output:')
