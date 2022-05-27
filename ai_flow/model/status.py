@@ -54,10 +54,22 @@ class TaskStatus(str, Enum):
     KILLED = 'KILLED'
     RETRYING = 'RETRYING'
 
-    finished = frozenset(
-        [
-            SUCCESS,
-            FAILED,
-            KILLED,
-        ]
-    )
+
+TASK_FINISHED_SET = frozenset(
+    [
+        TaskStatus.SUCCESS,
+        TaskStatus.FAILED,
+        TaskStatus.KILLED,
+    ]
+)
+
+
+TASK_ALIVE_SET = frozenset(
+    [
+        TaskStatus.INIT,
+        TaskStatus.QUEUED,
+        TaskStatus.RETRYING,
+        TaskStatus.RESTARTING,
+        TaskStatus.RUNNING
+    ]
+)
