@@ -41,3 +41,12 @@ notification_server_uri: 127.0.0.1:50052
 
 # task executor
 task_executor: Local
+
+# kubernetes task executor config
+k8s_executor_config:
+  pod_template_file:
+  image_repository:
+  image_tag:
+  namespace:
+  in_cluster: False
+

@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,28 +15,13 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import unittest
+
+from ai_flow.common.configuration import config_constants
+from ai_flow.task_executor.kubernetes.kube_config import KubeConfig
 
 
-class AIFlowException(Exception):
-    """Base exception of AIFlow"""
-
-
-class AIFlowConfigException(AIFlowException):
-    """Raise when there is configuration problem"""
-
-
-class AIFlowDBException(AIFlowException):
-    """Raise when there is database problem"""
-
-
-class AIFlowYAMLException(AIFlowException):
-    """Raise when there is yaml handling problem"""
-
-
-class TaskForceKilledException(AIFlowException):
-    """Raise when task execution is force killed"""
-
-
-class AIFlowK8sException(AIFlowException):
-    """Raise when there is a k8s related error"""
-
+class TestKubeConfig(unittest.TestCase):
+    def test_kube_config(self):
+        kube_config = KubeConfig(config_constants.K8S_TASK_EXECUTOR_CONFIG)
+        kube_config
