@@ -93,12 +93,10 @@ class AIFlowOperator(Operator):
         """Start a task instance."""
         pass
 
-    @abstractmethod
     def stop(self, context: Context):
         """Stop a task instance."""
         pass
 
-    @abstractmethod
     def await_termination(self, context: Context, timeout: Optional[int] = None):
         """Wait for a task instance to finish.
         :param context: The context in which the operator is executed.
@@ -107,12 +105,6 @@ class AIFlowOperator(Operator):
         """
         pass
 
-    @abstractmethod
-    def get_status(self, context: Context) -> TaskStatus:
-        """Get the status of a task instance."""
-        pass
-
-    @abstractmethod
     def get_metrics(self, context: Context) -> Dict:
         """Get the metrics of a task instance."""
         pass
