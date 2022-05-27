@@ -149,6 +149,7 @@ class TestRuleExtractor(unittest.TestCase):
         self.metadata_manager = MetadataManager(session=self.session)
         self.namespace_name = 'namespace'
         namespace_meta = self.metadata_manager.add_namespace(name=self.namespace_name, properties={'a': 'a'})
+        self.metadata_manager.flush()
 
     def _delete_db_file(self):
         if os.path.exists(self.file):
@@ -167,6 +168,7 @@ class TestRuleExtractor(unittest.TestCase):
                                                                    name=workflow.name,
                                                                    content='',
                                                                    workflow_object=cloudpickle.dumps(workflow))
+                self.metadata_manager.flush()
                 expect_events_1 = [EventKey(namespace='namespace',
                                             name='event_1',
                                             event_type='event_type',
@@ -202,9 +204,11 @@ class TestRuleExtractor(unittest.TestCase):
                 self.metadata_manager.add_workflow_trigger(workflow_id=workflow_meta.id,
                                                            rule=cloudpickle.dumps(WorkflowRule(condition=Condition(
                                                                expect_events=expect_events_1))))
+                self.metadata_manager.flush()
                 self.metadata_manager.add_workflow_trigger(workflow_id=workflow_meta.id,
                                                            rule=cloudpickle.dumps(WorkflowRule(condition=Condition(
                                                                expect_events=expect_events_2))))
+                self.metadata_manager.flush()
 
         build_workflows()
 
@@ -215,6 +219,7 @@ class TestRuleExtractor(unittest.TestCase):
                                          event_type='event_type',
                                          sender='sender'), message='')
         results = rule_extractor.extract_workflow_rules(event=event)
+        self.metadata_manager.flush()
         self.assertEqual(3, len(results))
         for r in results:
             self.assertEqual(1, len(r.rules))
@@ -224,6 +229,7 @@ class TestRuleExtractor(unittest.TestCase):
                                          event_type='event_type',
                                          sender='sender'), message='')
         results = rule_extractor.extract_workflow_rules(event=event)
+        self.metadata_manager.flush()
         self.assertEqual(3, len(results))
         for r in results:
             self.assertEqual(2, len(r.rules))
@@ -276,21 +282,25 @@ class TestRuleExtractor(unittest.TestCase):
                                                                    name=workflow.name,
                                                                    content='',
                                                                    workflow_object=cloudpickle.dumps(workflow))
+                self.metadata_manager.flush()
                 snapshot_meta = self.metadata_manager.add_workflow_snapshot(
                     workflow_id=workflow_meta.id,
                     workflow_object=workflow_meta.workflow_object,
                     uri='url',
                     signature=str(i))
+                self.metadata_manager.flush()
                 for j in range(3):
                     workflow_execution_meta = self.metadata_manager.add_workflow_execution(
                         workflow_id=workflow_meta.id,
                         run_type=ExecutionType.MANUAL,
                         snapshot_id=snapshot_meta.id)
+                    self.metadata_manager.flush()
                     if 0 == j % 2:
                         self.metadata_manager.update_workflow_execution_status(
                             workflow_execution_id=workflow_execution_meta.id,
                             status=WorkflowStatus.RUNNING.value
                         )
+                        self.metadata_manager.flush()
 
         build_workflows()
 
@@ -301,6 +311,7 @@ class TestRuleExtractor(unittest.TestCase):
                                          event_type='event_type',
                                          sender='sender'), message='')
         results = rule_extractor.extract_workflow_execution_rules(event=event)
+        self.metadata_manager.flush()
         self.assertEqual(6, len(results))
         for r in results:
             self.assertEqual(1, len(r.task_rule_wrappers))
@@ -310,12 +321,14 @@ class TestRuleExtractor(unittest.TestCase):
                                          event_type='event_type',
                                          sender='sender'), message='')
         results = rule_extractor.extract_workflow_execution_rules(event=event)
+        self.metadata_manager.flush()
         self.assertEqual(6, len(results))
         for r in results:
             self.assertEqual(2, len(r.task_rule_wrappers))
 
         event.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: 1})
         results = rule_extractor.extract_workflow_execution_rules(event=event)
+        self.metadata_manager.flush()
         self.assertEqual(1, len(results))
 
 
