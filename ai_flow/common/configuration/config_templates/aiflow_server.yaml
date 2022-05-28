@@ -49,4 +49,5 @@ k8s_executor_config:
   image_tag:
   namespace:
   in_cluster: False
+  kube_config_file:
 

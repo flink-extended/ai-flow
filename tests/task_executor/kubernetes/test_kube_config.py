@@ -23,5 +23,30 @@ from ai_flow.task_executor.kubernetes.kube_config import KubeConfig
 
 class TestKubeConfig(unittest.TestCase):
     def test_kube_config(self):
+        config_dict = {
+            'pod_template_file': '/foo/bar',
+            'image_repository': 'repo/image',
+            'image_tag': '0.1',
+            'namespace': 'default',
+            'in_cluster': True,
+            'kube_config_file': '~/.kube/config',
+            'client_request_args': {
+                'arg1': 'val1',
+                'arg2': 'val2'
+            }
+        }
+        kube_config = KubeConfig(config_dict)
+        self.assertEqual(kube_config.get_pod_template_file(), '/foo/bar')
+        self.assertEqual(kube_config.get_image(), 'repo/image:0.1')
+        self.assertEqual(kube_config.get_namespace(), 'default')
+        self.assertTrue(kube_config.is_in_cluster())
+        self.assertEqual(kube_config.get_config_file(), '~/.kube/config')
+        self.assertEqual(kube_config.get_client_request_args(), {
+            'arg1': 'val1',
+            'arg2': 'val2'
+        })
+
+    def test_default_kube_config(self):
         kube_config = KubeConfig(config_constants.K8S_TASK_EXECUTOR_CONFIG)
-        kube_config
+        self.assertFalse(kube_config.is_in_cluster())
+        self.assertIsNone(kube_config.get_config_file())

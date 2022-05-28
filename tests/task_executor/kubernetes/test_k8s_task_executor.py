@@ -22,7 +22,7 @@ from unittest import mock
 
 from kubernetes.client import CoreV1Api
 
-from ai_flow.common.exception.exceptions import AIFlowK8sException, AIFlowException
+from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.task_execution import TaskExecutionKey
 from ai_flow.task_executor.kubernetes.helpers import make_safe_label_value
 from ai_flow.task_executor.kubernetes.k8s_task_executor import KubernetesTaskExecutor
@@ -31,10 +31,12 @@ from ai_flow.task_executor.kubernetes.kube_config import KubeConfig
 
 class TestK8sTaskExecutor(unittest.TestCase):
 
-    def test_start_task_execution(self):
+    @mock.patch('ai_flow.task_executor.kubernetes.helpers.get_kube_client')
+    def test_start_task_execution(self, mock_kube_client):
         executor = KubernetesTaskExecutor()
         with self.assertRaises(AIFlowException):
             executor.start_task_execution(None)
+        mock_kube_client.assert_called_once_with(config_file=None, in_cluster=False)
 
         executor.task_queue = queue.Queue()
         key = TaskExecutionKey(1, 'task', 1)
@@ -43,8 +45,11 @@ class TestK8sTaskExecutor(unittest.TestCase):
 
     @mock.patch('kubernetes.client.CoreV1Api.list_namespaced_pod')
     @mock.patch('kubernetes.client.CoreV1Api.delete_namespaced_pod')
-    def test_stop_task_execution(self, mock_delete_func, mock_list_func):
+    @mock.patch('ai_flow.task_executor.kubernetes.helpers.get_kube_client')
+    def test_stop_task_execution(self, mock_client, mock_delete_func, mock_list_func):
         executor = KubernetesTaskExecutor()
+        mock_client.assert_called_once_with(config_file=None, in_cluster=False)
+
         executor.kube_client = CoreV1Api()
         executor.kube_config = KubeConfig({'namespace': 'test'})
 

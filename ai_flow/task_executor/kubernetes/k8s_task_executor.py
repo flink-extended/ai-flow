@@ -20,6 +20,7 @@ import multiprocessing
 import threading
 from multiprocessing.managers import SyncManager
 from typing import Optional
+from queue import Queue
 
 from kubernetes import client
 from kubernetes.client import V1Pod
@@ -28,6 +29,7 @@ from kubernetes.client.rest import ApiException
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.task_execution import TaskExecutionKey
 from ai_flow.task_executor.task_executor import BaseTaskExecutor
+from . import helpers
 from .helpers import make_safe_label_value, POISON, get_kube_client
 from .kube_config import KubeConfig
 from .kube_scheduler import KubernetesScheduler
@@ -45,8 +47,8 @@ class KubernetesTaskExecutor(BaseTaskExecutor):
         self.kube_scheduler: Optional[KubernetesScheduler] = None
         self.kube_watcher: Optional[KubernetesJobWatcher] = None
         self.kube_config = KubeConfig(config_constants.K8S_TASK_EXECUTOR_CONFIG)
-        self.kube_client = get_kube_client(in_cluster=self.kube_config.is_in_cluster(),
-                                           config_file=self.kube_config.get_config_file())
+        self.kube_client = helpers.get_kube_client(in_cluster=self.kube_config.is_in_cluster(),
+                                                   config_file=self.kube_config.get_config_file())
         self._process_observer = StoppableThread(target=self._check_watcher_alive)
 
     def start_task_execution(self, key: TaskExecutionKey):

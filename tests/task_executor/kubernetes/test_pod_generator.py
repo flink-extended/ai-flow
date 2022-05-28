@@ -266,21 +266,6 @@ class TestPodGenerator(unittest.TestCase):
         with self.assertRaises(AIFlowK8sException):
             PodGenerator.get_base_pod_from_template(None)
 
-    def test_make_safe_label_value(self):
-        test_cases = []
-        test_cases.extend(
-            [(self._gen_random_string(seed, 200), self._gen_random_string(seed, 200)) for seed in range(100)]
-        )
-        for dag_id, task_id in test_cases:
-            safe_dag_id = make_safe_label_value(dag_id)
-            assert self._is_safe_label_value(safe_dag_id)
-            safe_task_id = make_safe_label_value(task_id)
-            assert self._is_safe_label_value(safe_task_id)
-            dag_id = "my_dag_id"
-            assert dag_id == make_safe_label_value(dag_id)
-            dag_id = "my_dag_id_" + "a" * 64
-            assert "my_dag_id_" + "a" * 43 + "-0ce114c45" == make_safe_label_value(dag_id)
-
     def test_create_pod_id(self):
         keys = [TaskExecutionKey(self._gen_random_string(seed, 200),
                                  self._gen_random_string(seed, 200),
@@ -301,8 +286,3 @@ class TestPodGenerator(unittest.TestCase):
             random.seed(str(seed) * char_seed)
             char_list.append(random.choice(string.printable))
         return ''.join(char_list)
-
-    @staticmethod
-    def _is_safe_label_value(value):
-        regex = r'^[^a-z0-9A-Z]*|[^a-zA-Z0-9_\-\.]|[^a-z0-9A-Z]*$'
-        return len(value) <= 63 and re.match(regex, value)

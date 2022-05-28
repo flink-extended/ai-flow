@@ -65,10 +65,10 @@ def make_safe_label_value(value):
 
 
 def create_pod_id(key: TaskExecutionKey) -> str:
-    safe_dag_id = replace_invalid_chars(str(key.workflow_execution_id))
-    safe_task_id = replace_invalid_chars(str(key.task_name))
-    safe_seq_num = replace_invalid_chars(str(key.seq_num))
-    return f'{safe_dag_id}-{safe_task_id}-{safe_seq_num}'
+    workflow_execution_id = replace_invalid_chars(str(key.workflow_execution_id))
+    task_name = replace_invalid_chars(str(key.task_name))
+    seq_num = replace_invalid_chars(str(key.seq_num))
+    return f'{workflow_execution_id}-{task_name}-{seq_num}'
 
 
 def labels_to_key(labels: Dict[str, str]) -> TaskExecutionKey:
@@ -86,10 +86,9 @@ def key_to_label_selector(key: TaskExecutionKey) -> str:
 
 
 def gen_command(key: TaskExecutionKey):
-    # return ["aiflow",
-    #         "task-execution",
-    #         "run",
-    #         str(key.workflow_execution_id),
-    #         str(key.task_name),
-    #         str(key.seq_num)]
-    return ['python', '/usr/local/aiflow/test_handler.py']
+    return ["aiflow",
+            "task-execution",
+            "run",
+            str(key.workflow_execution_id),
+            str(key.task_name),
+            str(key.seq_num)]

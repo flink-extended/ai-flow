@@ -27,25 +27,25 @@ class KubeConfig:
             raise AIFlowConfigException('The kubernetes option is not configured.')
         self.config = config
 
-    def get_pod_template_file(self):
+    def get_pod_template_file(self) -> str:
         return self.config.get('pod_template_file')
 
-    def get_image(self):
+    def get_image(self) -> str:
         repository = self.config.get('image_repository')
         tag = self.config.get('image_tag')
         return f'{repository}:{tag}'
 
-    def get_namespace(self):
+    def get_namespace(self) -> str:
         return self.config.get('namespace', 'default')
 
-    def get_client_request_args(self):
+    def get_client_request_args(self) -> dict:
         return self.config.get('client_request_args', {})
 
-    def get_delete_request_args(self):
+    def get_delete_request_args(self) -> dict:
         return self.config.get('delete_request_kwargs', {})
 
-    def is_in_cluster(self):
+    def is_in_cluster(self) -> bool:
         return self.config.get('in_cluster', False)
 
-    def get_config_file(self):
-        return self.config.get('config_file', os.path.expanduser('~/.kube/config'))
+    def get_config_file(self) -> str:
+        return self.config.get('kube_config_file', None)
