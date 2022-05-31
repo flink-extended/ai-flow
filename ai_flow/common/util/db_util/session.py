@@ -80,19 +80,21 @@ def create_sqlalchemy_engine(db_uri):
                                     **pool_kwargs)
 
 
-def create_session(db_uri=None):
+def create_session(db_uri=None, db_engine=None):
     if db_uri is None:
         db_uri = config_constants.METADATA_BACKEND_URI
-    db_engine = create_sqlalchemy_engine(db_uri)
+    if db_engine is None:
+        db_engine = create_sqlalchemy_engine(db_uri)
     SessionMaker = sqlalchemy.orm.sessionmaker(bind=db_engine)
     session_factory = _get_managed_session_maker(SessionMaker)
     return session_factory()
 
 
-def new_session(db_uri=None):
+def new_session(db_uri=None, db_engine=None):
     if db_uri is None:
         db_uri = config_constants.METADATA_BACKEND_URI
-    db_engine = create_sqlalchemy_engine(db_uri)
+    if db_engine is None:
+        db_engine = create_sqlalchemy_engine(db_uri)
     SessionMaker = sqlalchemy.orm.sessionmaker(bind=db_engine)
     return SessionMaker()
 
