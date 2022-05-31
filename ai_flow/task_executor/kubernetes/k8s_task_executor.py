@@ -18,6 +18,7 @@
 import logging
 import multiprocessing
 import threading
+import time
 from multiprocessing.managers import SyncManager
 from typing import Optional
 from queue import Queue
@@ -112,6 +113,7 @@ class KubernetesTaskExecutor(BaseTaskExecutor):
                     self.kube_watcher = self.create_kube_watcher()
             except Exception as e:
                 logger.exception("Error occurred while checking kube watcher, {}".format(e))
+                time.sleep(1)
         logger.info("Check process alive thread exiting.")
 
     def delete_pod(self, pod: V1Pod, namespace: str) -> None:
@@ -120,7 +122,7 @@ class KubernetesTaskExecutor(BaseTaskExecutor):
             self.kube_client.delete_namespaced_pod(
                 name=pod.metadata.name,
                 namespace=namespace,
-                body=client.V1DeleteOptions(**self.kube_config.get_delete_request_args()),
+                body=client.V1DeleteOptions(**self.kube_config.get_delete_options()),
                 **self.kube_config.get_client_request_args())
         except ApiException:
             logger.exception('Error occurred while deleting k8s pod.')

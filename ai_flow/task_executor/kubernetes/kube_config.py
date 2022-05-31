@@ -41,8 +41,8 @@ class KubeConfig:
     def get_client_request_args(self) -> dict:
         return self.config.get('client_request_args', {})
 
-    def get_delete_request_args(self) -> dict:
-        return self.config.get('delete_request_kwargs', {})
+    def get_delete_options(self) -> dict:
+        return self.config.get('delete_options', {})
 
     def is_in_cluster(self) -> bool:
         return self.config.get('in_cluster', False)
