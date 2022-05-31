@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import cloudpickle
+import logging
 from notification_service.event import Event
 from typing import Optional
 
@@ -28,7 +29,7 @@ from ai_flow.model.task_execution import TaskExecutionKey
 from ai_flow.scheduler.rule_wrapper import WorkflowExecutionRuleWrapper, WorkflowRuleWrapper
 from ai_flow.scheduler.runtime_context import WorkflowExecutionContextImpl, WorkflowContextImpl
 from ai_flow.scheduler.schedule_command import TaskScheduleCommand, WorkflowExecutionScheduleCommand, \
-    WorkflowScheduleCommand
+    WorkflowExecutionStartCommand
 
 
 class RuleExecutor(object):
@@ -64,10 +65,10 @@ class RuleExecutor(object):
                     break
 
             if action is not None:
+                current_task_execution_meta = self.metadata_manager.get_latest_task_execution(
+                    workflow_execution_id=rule.workflow_execution_id,
+                    task_name=task_rule_wrapper.task_name)
                 if TaskAction.START == action:
-                    current_task_execution_meta = self.metadata_manager.get_latest_task_execution(
-                        workflow_execution_id=rule.workflow_execution_id,
-                        task_name=task_rule_wrapper.task_name)
                     if current_task_execution_meta is None \
                             or TaskStatus(current_task_execution_meta.status) not in TASK_ALIVE_SET:
                         task_execution_meta = self.metadata_manager.add_task_execution(
@@ -80,11 +81,14 @@ class RuleExecutor(object):
                                                      current_task_execution=None,
                                                      new_task_execution=new_task_execution)
                     else:
+                        logging.info("Ignore the start task command. The task's(workflow_execution_id:{}, task_name:{}"
+                                     ", sequence_number: {}) status is {}"
+                                     .format(current_task_execution_meta.workflow_execution_id,
+                                             current_task_execution_meta.task_name,
+                                             current_task_execution_meta.sequence_number,
+                                             current_task_execution_meta.status))
                         continue
                 elif TaskAction.RESTART == action:
-                    current_task_execution_meta = self.metadata_manager.get_latest_task_execution(
-                        workflow_execution_id=rule.workflow_execution_id,
-                        task_name=task_rule_wrapper.task_name)
                     if current_task_execution_meta is None:
                         current_task_execution = None
                     else:
@@ -101,9 +105,6 @@ class RuleExecutor(object):
                                                  current_task_execution=current_task_execution,
                                                  new_task_execution=new_task_execution)
                 else:
-                    current_task_execution_meta = self.metadata_manager.get_latest_task_execution(
-                        workflow_execution_id=rule.workflow_execution_id,
-                        task_name=task_rule_wrapper.task_name)
                     current_task_execution = TaskExecutionKey(workflow_execution_id=rule.workflow_execution_id,
                                                               task_name=task_rule_wrapper.task_name,
                                                               seq_num=current_task_execution_meta.sequence_number)
@@ -118,7 +119,7 @@ class RuleExecutor(object):
 
     def execute_workflow_rule(self,
                               event: Event,
-                              rule: WorkflowRuleWrapper) -> Optional[WorkflowScheduleCommand]:
+                              rule: WorkflowRuleWrapper) -> Optional[WorkflowExecutionStartCommand]:
         """
         Execute all rules on a workflow
         :param event: The event that triggers the rule.
@@ -139,8 +140,7 @@ class RuleExecutor(object):
                 break
         if flag:
             snapshot_meta = self.metadata_manager.get_latest_snapshot(workflow_id=rule.workflow_id)
-            return WorkflowScheduleCommand(workflow_id=rule.workflow_id,
-                                           snapshot_id=snapshot_meta.id,
-                                           run_type=ExecutionType.EVENT)
+            return WorkflowExecutionStartCommand(snapshot_id=snapshot_meta.id,
+                                                 run_type=ExecutionType.EVENT)
         else:
             return None

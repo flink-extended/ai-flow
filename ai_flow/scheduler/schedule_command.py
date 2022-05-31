@@ -50,15 +50,23 @@ class WorkflowExecutionScheduleCommand(object):
         self.task_schedule_commands = task_schedule_commands
 
 
-class WorkflowScheduleCommand(object):
+class WorkflowExecutionStopCommand(object):
+    """The command to stop the workflow execution"""
+
+    def __init__(self, workflow_execution_id: int):
+        """
+        :param workflow_execution_id: The identify of the workflow execution.
+        """
+        self.workflow_execution_id = workflow_execution_id
+
+
+class WorkflowExecutionStartCommand(object):
     """The command to schedule workflows"""
 
-    def __init__(self, workflow_id: int, snapshot_id: int, run_type: ExecutionType = ExecutionType.EVENT):
+    def __init__(self, snapshot_id: int, run_type: ExecutionType = ExecutionType.EVENT):
         """
-        :param workflow_id: The identify of the workflow.
         :param snapshot_id: The identity of the workflow snapshot.
         :param run_type: The run type of the workflow execution.
         """
-        self.workflow_id = workflow_id
         self.snapshot_id = snapshot_id
         self.run_type = run_type
