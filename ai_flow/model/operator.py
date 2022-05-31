@@ -42,10 +42,10 @@ class Operator(object):
         :param name: The operator's name.
         :param kwargs: Operator's extended parameters.
         """
-        from ai_flow.model.workflow import WorkflowContext
+        from ai_flow.model.workflow import WorkflowContextManager
         self.name: str = name
         self.config: dict = kwargs
-        self.workflow = WorkflowContext.get_current_workflow()  # The workflow to which the operator belongs.
+        self.workflow = WorkflowContextManager.get_current_workflow()  # The workflow to which the operator belongs.
         self.workflow.tasks[self.name] = self
 
     def action_on_condition(self, action: TaskAction, condition: Condition):
