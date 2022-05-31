@@ -51,11 +51,11 @@ class Workflow(object):
 
     # Context Manager -----------------------------------------------
     def __enter__(self):
-        WorkflowContext.push_context_managed_workflow(self)
+        WorkflowContextManager.push_context_managed_workflow(self)
         return self
 
     def __exit__(self, _type, _value, _tb):
-        WorkflowContext.pop_context_managed_workflow()
+        WorkflowContextManager.pop_context_managed_workflow()
 
     # Context Manager -----------------------------------------------
 
@@ -103,9 +103,9 @@ class Workflow(object):
                                  condition=TaskStatusAllMetCondition(condition_list=conditions))
 
 
-class WorkflowContext(object):
+class WorkflowContextManager(object):
     """
-    Workflow context is used to keep the current Workflow when Workflow is used as ContextManager.
+    Workflow context manager is used to keep the current Workflow when Workflow is used as ContextManager.
     You can use Workflow as context:
     .. code-block:: python
         with Workflow(
