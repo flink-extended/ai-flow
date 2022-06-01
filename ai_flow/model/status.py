@@ -24,11 +24,13 @@ class WorkflowStatus(str, Enum):
     RUNNING: The WorkflowExecution is running.
     SUCCESS: The WorkflowExecution finished running without errors.
     FAILED: The WorkflowExecution had errors during execution and failed to run.
+    STOPPED: The WorkflowExecution has been stopped.
     """
     INIT = 'INIT'
     RUNNING = 'RUNNING'
     SUCCESS = 'SUCCESS'
     FAILED = 'FAILED'
+    STOPPED = 'STOPPED'
 
 
 class TaskStatus(str, Enum):
