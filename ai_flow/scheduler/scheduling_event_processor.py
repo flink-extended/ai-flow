@@ -14,6 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import logging
 import json
 from typing import Union
 
@@ -36,18 +37,16 @@ class SchedulingEventProcessor(object):
     def process(self, event: Event) -> Union[WorkflowExecutionScheduleCommand,
                                              WorkflowExecutionStartCommand,
                                              WorkflowExecutionStopCommand]:
-        inner_event_type = SchedulingEventType(event.event_key.name)
-        if SchedulingEventType.START_WORKFLOW_EXECUTION == inner_event_type:
-            context = json.loads(event.context)
+        scheduling_event_type = SchedulingEventType(event.event_key.name)
+        context = json.loads(event.context)
+        if SchedulingEventType.START_WORKFLOW_EXECUTION == scheduling_event_type:
             snapshot_id = context[EventContextConstant.WORKFLOW_SNAPSHOT_ID]
             return WorkflowExecutionStartCommand(snapshot_id=snapshot_id,
                                                  run_type=ExecutionType.MANUAL)
-        elif SchedulingEventType.STOP_WORKFLOW_EXECUTION == inner_event_type:
-            context = json.loads(event.context)
+        elif SchedulingEventType.STOP_WORKFLOW_EXECUTION == scheduling_event_type:
             workflow_execution_id = context[EventContextConstant.WORKFLOW_EXECUTION_ID]
             return WorkflowExecutionStopCommand(workflow_execution_id=workflow_execution_id)
-        elif SchedulingEventType.START_TASK_EXECUTION == inner_event_type:
-            context = json.loads(event.context)
+        elif SchedulingEventType.START_TASK_EXECUTION == scheduling_event_type:
             workflow_execution_id = context[EventContextConstant.WORKFLOW_EXECUTION_ID]
             task_name = context[EventContextConstant.TASK_NAME]
             current_task_execution_meta = self.metadata_manager.get_latest_task_execution(
@@ -65,10 +64,9 @@ class SchedulingEventProcessor(object):
                     workflow_execution_id=workflow_execution_id,
                     task_schedule_commands=[TaskScheduleCommand(action=TaskAction.START,
                                                                 new_task_execution=new_task_execution)])
-        elif SchedulingEventType.RESTART_TASK_EXECUTION == inner_event_type:
-            return self.restart_task_execution(event)
-        elif SchedulingEventType.STOP_TASK_EXECUTION == inner_event_type:
-            context = json.loads(event.context)
+        elif SchedulingEventType.RESTART_TASK_EXECUTION == scheduling_event_type:
+            return self.restart_task_execution(context)
+        elif SchedulingEventType.STOP_TASK_EXECUTION == scheduling_event_type:
             task_execution_id = context[EventContextConstant.TASK_EXECUTION_ID]
             task_execution = self.metadata_manager.get_task_execution(task_execution_id=task_execution_id)
             return WorkflowExecutionScheduleCommand(
@@ -78,20 +76,18 @@ class SchedulingEventProcessor(object):
                     current_task_execution=TaskExecutionKey(workflow_execution_id=task_execution.workflow_execution_id,
                                                             task_name=task_execution.task_name,
                                                             seq_num=task_execution.sequence_number))])
-        elif SchedulingEventType.PERIODIC_RUN_WORKFLOW == inner_event_type:
-            context = json.loads(event.context)
+        elif SchedulingEventType.PERIODIC_RUN_WORKFLOW == scheduling_event_type:
             schedule_id = context[EventContextConstant.WORKFLOW_SCHEDULE_ID]
             workflow_schedule = self.metadata_manager.get_workflow_schedule(schedule_id=schedule_id)
             snapshot = self.metadata_manager.get_latest_snapshot(workflow_id=workflow_schedule.workflow_id)
             return WorkflowExecutionStartCommand(snapshot_id=snapshot.id,
                                                  run_type=ExecutionType.PERIODIC)
-        elif SchedulingEventType.PERIODIC_RUN_TASK == inner_event_type:
-            return self.restart_task_execution(event)
+        elif SchedulingEventType.PERIODIC_RUN_TASK == scheduling_event_type:
+            return self.restart_task_execution(context)
         else:
-            pass
+            logging.warning("Ignore the scheduling event: {}.".format(str(event)))
 
-    def restart_task_execution(self, event):
-        context = json.loads(event.context)
+    def restart_task_execution(self, context):
         workflow_execution_id = context[EventContextConstant.WORKFLOW_EXECUTION_ID]
         task_name = context[EventContextConstant.TASK_NAME]
         task_execution = self.metadata_manager.get_latest_task_execution(
