@@ -64,6 +64,9 @@ class SchedulingEventProcessor(object):
                     workflow_execution_id=workflow_execution_id,
                     task_schedule_commands=[TaskScheduleCommand(action=TaskAction.START,
                                                                 new_task_execution=new_task_execution)])
+            else:
+                logging.info("Ignore the start task execution event({}), because the task({}) is alive."
+                             .format(event, task_name))
         elif SchedulingEventType.RESTART_TASK_EXECUTION == scheduling_event_type:
             return self.restart_task_execution(context)
         elif SchedulingEventType.STOP_TASK_EXECUTION == scheduling_event_type:
