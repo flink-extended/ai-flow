@@ -14,15 +14,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import os
 import unittest
 
 import cloudpickle
-from notification_service.event import EventKey, Event
+from notification_service.event import Event
 
-from ai_flow.common.util.db_util.db_migration import init_db
-from ai_flow.common.util.db_util.session import new_session
-from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.action import TaskAction
 from ai_flow.model.internal.events import StartWorkflowExecutionEvent, StopTaskExecutionEvent, StartTaskExecutionEvent, \
     ReStartTaskExecutionEvent, PeriodicRunWorkflowEvent, PeriodicRunTaskEvent, StopWorkflowExecutionEvent
@@ -32,19 +28,12 @@ from ai_flow.scheduler.scheduling_event_processor import SchedulingEventProcesso
 from ai_flow.scheduler.schedule_command import WorkflowExecutionStartCommand, WorkflowExecutionStopCommand, \
     WorkflowExecutionScheduleCommand
 from ai_flow.scheduler.workflow_executor import WorkflowExecutor
+from tests.scheduler.test_utils import UnitTestWithNamespace
 
 
-class TestSchedulingEventProcessor(unittest.TestCase):
+class TestSchedulingEventProcessor(UnitTestWithNamespace):
     def setUp(self) -> None:
-        self.file = 'test.db'
-        self._delete_db_file()
-        self.url = 'sqlite:///{}'.format(self.file)
-        init_db(self.url)
-        self.session = new_session(db_uri=self.url)
-        self.metadata_manager = MetadataManager(session=self.session)
-        self.namespace_name = 'namespace'
-        namespace_meta = self.metadata_manager.add_namespace(name=self.namespace_name, properties={'a': 'a'})
-        self.metadata_manager.flush()
+        super().setUp()
         with Workflow(name='workflow') as workflow:
             op = Operator(name='op')
 
@@ -59,14 +48,6 @@ class TestSchedulingEventProcessor(unittest.TestCase):
             uri='url',
             signature='')
         self.metadata_manager.flush()
-
-    def _delete_db_file(self):
-        if os.path.exists(self.file):
-            os.remove(self.file)
-
-    def tearDown(self) -> None:
-        self.session.close()
-        self._delete_db_file()
 
     def test_process_event(self):
         inner_event_processor = SchedulingEventProcessor(metadata_manager=self.metadata_manager)
