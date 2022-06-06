@@ -72,8 +72,8 @@ class TestDispatcher(UnitTestWithNamespace):
                                                                                     run_type=ExecutionType.MANUAL,
                                                                                     snapshot_id=self.snapshot_meta.id)
         self.metadata_manager.flush()
-        self.metadata_manager.update_workflow_execution_status(workflow_execution_id=self.workflow_execution_meta.id,
-                                                               status=WorkflowStatus.RUNNING)
+        self.metadata_manager.update_workflow_execution(workflow_execution_id=self.workflow_execution_meta.id,
+                                                        status=WorkflowStatus.RUNNING)
         self.metadata_manager.flush()
 
     def test_dispatch(self):

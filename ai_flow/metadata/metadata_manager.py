@@ -31,7 +31,7 @@ from ai_flow.metadata.workflow_snapshot import WorkflowSnapshotMeta
 from sqlalchemy import asc, desc
 
 from ai_flow.model.state import StateDescriptor, State, ValueStateDescriptor
-from ai_flow.model.status import TaskStatus
+from ai_flow.model.status import TaskStatus, TASK_FINISHED_SET
 
 
 class BaseFilter(object):
@@ -506,7 +506,7 @@ class MetadataManager(object):
         self.session.add(workflow_execution_meta)
         return workflow_execution_meta
 
-    def update_workflow_execution_status(self, workflow_execution_id, status) -> WorkflowExecutionMeta:
+    def update_workflow_execution(self, workflow_execution_id, status=None) -> WorkflowExecutionMeta:
         """
         Update the workflow execution's status metadata to MetadataBackend.
         :param workflow_execution_id: The unique id of the workflow execution.
@@ -515,20 +515,10 @@ class MetadataManager(object):
         """
         meta = self.session.query(WorkflowExecutionMeta) \
             .filter(WorkflowExecutionMeta.id == workflow_execution_id).one()
-        meta.status = status
-        self.session.merge(meta)
-        return meta
-
-    def set_workflow_execution_end_date(self, workflow_execution_id, end_date) -> WorkflowExecutionMeta:
-        """
-        Set the workflow execution's end date metadata to MetadataBackend.
-        :param workflow_execution_id: The unique id of the workflow execution.
-        :param end_date: The end date of the workflow execution.
-        :return: The workflow execution metadata.
-        """
-        meta = self.session.query(WorkflowExecutionMeta) \
-            .filter(WorkflowExecutionMeta.id == workflow_execution_id).one()
-        meta.end_date = end_date
+        if status is not None:
+            meta.status = status
+        if TaskStatus(status) in TASK_FINISHED_SET:
+            meta.end_date = utcnow()
         self.session.merge(meta)
         return meta
 
