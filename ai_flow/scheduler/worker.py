@@ -21,6 +21,7 @@ from ai_flow.scheduler.scheduling_unit import SchedulingUnit
 
 
 class Worker(threading.Thread):
+    """Worker's responsibility is executing the scheduling unit."""
 
     def __init__(self,
                  max_queue_size: int = 20,

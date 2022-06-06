@@ -25,6 +25,9 @@ from ai_flow.scheduler.worker import Worker
 
 
 class Dispatcher(object):
+    """
+    Dispatcher generates scheduling units based on events and distributes them to specified workers for processing.
+    """
 
     def __init__(self,
                  workers: List[Worker],
