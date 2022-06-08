@@ -128,13 +128,11 @@ class TaskStatusCondition(Condition):
                  ):
         """
         :param workflow_name: The name of the workflow to which the task belongs.
-        :param task_name: The task's name.
-        :param namespace: The task's namespace.
         :param expect_status: Desired status of the task.
         """
-        super().__init__([TaskStatusChangedEventKey(workflow_name=workflow_name,
-                                                    task_name=task_name,
-                                                    namespace=namespace)])
+        super().__init__([TaskStatusChangedEventKey(namespace=namespace,
+                                                    workflow_name=workflow_name,
+                                                    task_name=task_name)])
         self.expect_status = expect_status
 
     # todo: To judge whether to trigger or not,
