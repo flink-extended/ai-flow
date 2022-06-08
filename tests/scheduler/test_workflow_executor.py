@@ -15,15 +15,11 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
 import unittest
 
 import cloudpickle
 from notification_service.event import EventKey
 
-from ai_flow.common.util.db_util.db_migration import init_db
-from ai_flow.common.util.db_util.session import new_session
-from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
 from ai_flow.model.operator import Operator
@@ -31,6 +27,7 @@ from ai_flow.model.status import WorkflowStatus
 from ai_flow.model.workflow import Workflow
 from ai_flow.scheduler.schedule_command import WorkflowExecutionStartCommand, WorkflowExecutionStopCommand
 from ai_flow.scheduler.workflow_executor import WorkflowExecutor
+from tests.scheduler.test_utils import UnitTestWithNamespace
 
 
 def build_workflow():
@@ -61,24 +58,7 @@ def build_workflow():
     return workflow
 
 
-class TestWorkflowExecutor(unittest.TestCase):
-    def setUp(self) -> None:
-        self.file = 'test.db'
-        self._delete_db_file()
-        self.url = 'sqlite:///{}'.format(self.file)
-        init_db(self.url)
-        self.session = new_session(db_uri=self.url)
-        self.metadata_manager = MetadataManager(session=self.session)
-        self.namespace_name = 'namespace'
-        namespace_meta = self.metadata_manager.add_namespace(name=self.namespace_name, properties={'a': 'a'})
-
-    def _delete_db_file(self):
-        if os.path.exists(self.file):
-            os.remove(self.file)
-
-    def tearDown(self) -> None:
-        self.session.close()
-        self._delete_db_file()
+class TestWorkflowExecutor(UnitTestWithNamespace):
 
     def test_execute_workflow_command(self):
         workflow = build_workflow()
