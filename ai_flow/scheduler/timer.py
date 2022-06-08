@@ -141,6 +141,7 @@ class TimerJobStore(BaseJobStore):
                 timer_meta.next_run_time = datetime_to_utc_timestamp(job.next_run_time)
                 timer_meta.job_state = pickle.dumps(job.__getstate__(), self.pickle_protocol)
                 session.merge(timer_meta)
+                session.commit()
 
         _internal_update_job(self.session)
 

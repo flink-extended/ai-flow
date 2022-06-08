@@ -16,15 +16,11 @@
 # under the License.
 #
 import unittest
-import os
 from typing import List
 
 import cloudpickle
 from notification_service.event import EventKey, Event
 
-from ai_flow.common.util.db_util.db_migration import init_db
-from ai_flow.common.util.db_util.session import new_session
-from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
 from ai_flow.model.context import Context
@@ -36,6 +32,7 @@ from ai_flow.model.status import WorkflowStatus, TaskStatus
 from ai_flow.model.workflow import Workflow
 from ai_flow.scheduler.rule_executor import RuleExecutor
 from ai_flow.scheduler.rule_extractor import RuleExtractor
+from tests.scheduler.test_utils import UnitTestWithNamespace
 
 
 class SimpleCondition(Condition):
@@ -63,25 +60,7 @@ class StateCondition(Condition):
             return False
 
 
-class TestRuleExecutor(unittest.TestCase):
-    def setUp(self) -> None:
-        self.file = 'test.db'
-        self._delete_db_file()
-        self.url = 'sqlite:///{}'.format(self.file)
-        init_db(self.url)
-        self.session = new_session(db_uri=self.url)
-        self.metadata_manager = MetadataManager(session=self.session)
-        self.namespace_name = 'namespace'
-        namespace_meta = self.metadata_manager.add_namespace(name=self.namespace_name, properties={'a': 'a'})
-        self.metadata_manager.flush()
-
-    def _delete_db_file(self):
-        if os.path.exists(self.file):
-            os.remove(self.file)
-
-    def tearDown(self) -> None:
-        self.session.close()
-        self._delete_db_file()
+class TestRuleExecutor(UnitTestWithNamespace):
 
     def _build_workflow_execution(self):
         expect_events_1 = [EventKey(namespace='namespace',
