@@ -152,7 +152,7 @@ class KubernetesJobWatcher(Process):
                 # So the status would be updated to FAILED firstly, and then eventually it will be set to KILLED
                 # TODO replace the KILLED status judge logic, e.g. set to killing before deleting pod.
                 logger.info('Set task status to KILLED after receiving event: %s', event_str)
-                self._update_status(pod_id, TaskStatus.KILLED, annotations)
+                self._update_status(pod_id, TaskStatus.STOPPED, annotations)
             else:
                 logger.error('Set task status to FAILED after receiving event: %s', event_str)
                 self._update_status(pod_id, TaskStatus.FAILED, annotations)

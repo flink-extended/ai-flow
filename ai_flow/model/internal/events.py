@@ -42,6 +42,8 @@ class SchedulingEventType(str, Enum):
     RESTART_TASK_EXECUTION = 'RESTART_TASK_EXECUTION'
     PERIODIC_RUN_WORKFLOW = 'PERIODIC_RUN_WORKFLOW'
     PERIODIC_RUN_TASK = 'PERIODIC_RUN_TASK'
+    TASK_STATUS = 'TASK_STATUS'
+    TASK_HEARTBEAT_TIMEOUT = 'TASK_HEARTBEAT_TIMEOUT'
 
 
 class EventContextConstant(object):
@@ -53,23 +55,24 @@ class EventContextConstant(object):
     TASK_EXECUTION_ID = 'task_execution_id'
     WORKFLOW_SCHEDULE_ID = 'workflow_schedule_id'
     WORKFLOW_SNAPSHOT_ID = 'workflow_snapshot_id'
+    SEQUENCE_NUMBER = 'sequence_number'
+    TASK_STATUS = 'task_status'
 
 
 class TaskStatusChangedEventKey(EventKey):
     """TaskStatusChangedEventKey represents an event of the task status changed."""
     def __init__(self,
+                 namespace: str,
                  workflow_name: str,
-                 task_name: str,
-                 namespace: str = DEFAULT_NAMESPACE):
+                 task_name: str,):
         """
         :param workflow_name: The name of the workflow to which the task belongs.
         :param task_name: The task's name.
-        :param namespace: The task's namespace.
         """
-        super().__init__(namespace=namespace,
-                         name=workflow_name,
+        super().__init__(namespace=None,
+                         name='{}.{}.{}'.format(namespace, workflow_name, task_name),
                          event_type=AIFlowEventType.TASK_STATUS_CHANGED,
-                         sender=task_name)
+                         sender=None)
 
 
 class TaskStatusChangedEvent(Event):
@@ -79,19 +82,22 @@ class TaskStatusChangedEvent(Event):
                  workflow_execution_id: int,
                  task_name: str,
                  status: TaskStatus,
-                 namespace: str = DEFAULT_NAMESPACE):
+                 namespace: str):
         """
         :param workflow_name: The name of the workflow to which the task belongs.
         :param workflow_execution_id: Unique ID of WorkflowExecution.
         :param task_name: The task's name.
         :param status: The current status of the task.
-        :param namespace: The task's namespace.
         """
         super().__init__(event_key=TaskStatusChangedEventKey(workflow_name=workflow_name,
                                                              task_name=task_name,
                                                              namespace=namespace),
-                         message=status)
-        self.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id})
+                         message="")
+        self.context = json.dumps({EventContextConstant.NAMESPACE: namespace,
+                                   EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id,
+                                   EventContextConstant.WORKFLOW_NAME: workflow_name,
+                                   EventContextConstant.TASK_NAME: task_name,
+                                   EventContextConstant.TASK_STATUS: status.value})
 
 
 class SchedulingEvent(Event):
@@ -166,3 +172,30 @@ class PeriodicRunWorkflowEvent(SchedulingEvent):
         """
         super().__init__(SchedulingEventType.PERIODIC_RUN_WORKFLOW, None)
         self.context = json.dumps({EventContextConstant.WORKFLOW_SCHEDULE_ID: schedule_id})
+
+
+class TaskStatusEvent(SchedulingEvent):
+    """TaskStatusChangeEvent is an event of indicating a task execution's status changed."""
+    def __init__(self,
+                 workflow_execution_id: int,
+                 task_name: str,
+                 sequence_number: int,
+                 status: TaskStatus):
+        super().__init__(SchedulingEventType.TASK_STATUS, None)
+        self.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id,
+                                   EventContextConstant.TASK_NAME: task_name,
+                                   EventContextConstant.SEQUENCE_NUMBER: sequence_number,
+                                   EventContextConstant.TASK_STATUS: status.value})
+
+
+class TaskHeartbeatTimeoutEvent(SchedulingEvent):
+    """TaskHeartbeatTimeoutEvent is an event of indicating a task execution's heartbeat is timeout."""
+
+    def __init__(self,
+                 workflow_execution_id: int,
+                 task_name: str,
+                 sequence_number: int):
+        super().__init__(SchedulingEventType.TASK_HEARTBEAT_TIMEOUT, None)
+        self.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id,
+                                   EventContextConstant.TASK_NAME: task_name,
+                                   EventContextConstant.SEQUENCE_NUMBER: sequence_number})

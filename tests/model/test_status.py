@@ -40,8 +40,8 @@ class TestTaskStatus(unittest.TestCase):
         self.assertTrue(TaskStatus.SUCCESS.value in TASK_FINISHED_SET)
         self.assertTrue(TaskStatus.FAILED in TASK_FINISHED_SET)
         self.assertTrue(TaskStatus.FAILED.value in TASK_FINISHED_SET)
-        self.assertTrue(TaskStatus.KILLED in TASK_FINISHED_SET)
-        self.assertTrue(TaskStatus.KILLED.value in TASK_FINISHED_SET)
+        self.assertTrue(TaskStatus.STOPPED in TASK_FINISHED_SET)
+        self.assertTrue(TaskStatus.STOPPED.value in TASK_FINISHED_SET)
 
 
 if __name__ == '__main__':
