@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
 import unittest
 from datetime import datetime
 from typing import List
@@ -23,9 +22,8 @@ from typing import List
 from notification_service.event import Event, EventKey
 from notification_service.notification_client import NotificationClient, ListenerRegistrationId, ListenerProcessor
 
-from ai_flow.common.util.db_util.db_migration import init_db
-from ai_flow.common.util.db_util.session import new_session
 from ai_flow.scheduler.timer import Timer
+from tests.scheduler.test_utils import BaseUnitTest
 
 
 class MockNotificationClient(NotificationClient):
@@ -51,22 +49,10 @@ class MockNotificationClient(NotificationClient):
         pass
 
 
-class TestTimer(unittest.TestCase):
+class TestTimer(BaseUnitTest):
     def setUp(self) -> None:
-        self.file = 'test.db'
-        self._delete_db_file()
-        self.url = 'sqlite:///{}'.format(self.file)
-        init_db(self.url)
-        self.session = new_session(db_uri=self.url)
+        super().setUp()
         self.notification_client = MockNotificationClient()
-
-    def _delete_db_file(self):
-        if os.path.exists(self.file):
-            os.remove(self.file)
-
-    def tearDown(self) -> None:
-        self.session.close()
-        self._delete_db_file()
 
     def test_workflow_schedule_cron_expression(self):
         timer = Timer(notification_client=self.notification_client, session=self.session)
