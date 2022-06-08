@@ -311,7 +311,6 @@ class MetadataManager(object):
         self.session.add(workflow_snapshot_meta)
         return workflow_snapshot_meta
 
-
     def get_workflow_snapshot(self, snapshot_id) -> WorkflowSnapshotMeta:
         """
         Get the workflow snapshot metadata from MetadataBackend.
@@ -639,7 +638,7 @@ class MetadataManager(object):
         self.session.merge(meta)
         return meta
 
-    def get_task_execution(self, task_execution_id) -> TaskExecutionMeta:
+    def get_task_execution_by_id(self, task_execution_id) -> TaskExecutionMeta:
         """
         Get the task execution metadata from MetadataBackend.
         :param task_execution_id: The unique id of the task execution.
@@ -647,6 +646,19 @@ class MetadataManager(object):
         """
         return self.session.query(TaskExecutionMeta) \
             .filter(TaskExecutionMeta.id == task_execution_id).first()
+
+    def get_task_execution(self, workflow_execution_id, task_name, sequence_number) -> TaskExecutionMeta:
+        """
+        Get the task execution metadata from MetadataBackend.
+        :param workflow_execution_id: The unique id of the workflow execution.
+        :param task_name: The name of the task.
+        :param sequence_number: The task execution's sequence number.
+        :return: The task execution metadata.
+        """
+        return self.session.query(TaskExecutionMeta) \
+            .filter(TaskExecutionMeta.workflow_execution_id == workflow_execution_id,
+                    TaskExecutionMeta.task_name == task_name,
+                    TaskExecutionMeta.sequence_number == sequence_number).first()
 
     def list_task_executions(self,
                              workflow_execution_id,

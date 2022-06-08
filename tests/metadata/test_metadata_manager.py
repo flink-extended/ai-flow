@@ -353,11 +353,11 @@ class TestMetadataManager(unittest.TestCase):
         self.assertEqual(3, seq_num)
         for i in range(3):
             self.assertEqual(i+1, metas[i].sequence_number)
-        meta = self.metadata_manager.get_task_execution(task_execution_id=metas[0].id)
+        meta = self.metadata_manager.get_task_execution_by_id(task_execution_id=metas[0].id)
         self.assertIsNone(meta.end_date)
         self.metadata_manager.update_task_execution(task_execution_id=meta.id, end_date=utcnow())
         self.metadata_manager.commit()
-        meta = self.metadata_manager.get_task_execution(task_execution_id=meta.id)
+        meta = self.metadata_manager.get_task_execution_by_id(task_execution_id=meta.id)
         self.assertIsNotNone(meta.end_date)
         self.assertEqual(TaskStatus.INIT.value, meta.status)
         self.assertEqual(1, meta.try_number)
@@ -366,7 +366,9 @@ class TestMetadataManager(unittest.TestCase):
                                                            try_number=2,
                                                            status=TaskStatus.SUCCESS.value)
         self.metadata_manager.commit()
-        meta = self.metadata_manager.get_task_execution(task_execution_id=meta.id)
+        meta = self.metadata_manager.get_task_execution(workflow_execution_id=meta.workflow_execution_id,
+                                                        task_name=meta.task_name,
+                                                        sequence_number=meta.sequence_number)
         self.assertEqual(WorkflowStatus.SUCCESS.value, meta.status)
         self.assertEqual(2, meta.try_number)
 
