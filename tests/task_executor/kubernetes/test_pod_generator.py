@@ -27,8 +27,6 @@ from ai_flow.common.exception.exceptions import AIFlowK8sException
 
 from ai_flow.model.task_execution import TaskExecutionKey
 from kubernetes.client import ApiClient, models as k8s
-
-from ai_flow.task_executor.kubernetes.helpers import make_safe_label_value, create_pod_id
 from ai_flow.task_executor.kubernetes.pod_generator import PodGenerator
 from ai_flow.version import __version__ as version
 
@@ -52,7 +50,6 @@ class TestPodGenerator(unittest.TestCase):
             'workflow_execution_id': str(self.workflow_execution_id),
             'task_name': self.task_name,
             'seq_number': str(self.seq_num),
-            'try_number': str(self.try_number),
             'aiflow_version': version,
         }
 
@@ -219,8 +216,6 @@ class TestPodGenerator(unittest.TestCase):
             workflow_execution_id=self.workflow_execution_id,
             task_name=self.task_name,
             seq_num=self.seq_num,
-            try_number=self.try_number,
-            pod_id='pod_id',
             kube_image='image',
             args=['command'],
             base_worker_pod=base_pod,
@@ -230,7 +225,7 @@ class TestPodGenerator(unittest.TestCase):
         expected.metadata.labels = self.labels
         expected.metadata.labels['app'] = 'aiflow'
         expected.metadata.annotations = self.annotations
-        expected.metadata.name = 'pod_id.' + self.static_uuid.hex
+        expected.metadata.name = '101-taskname-3.' + self.static_uuid.hex
         expected.metadata.namespace = 'test_namespace'
         expected.spec.containers[0].args = ['command']
         expected.spec.containers[0].image = 'image'
@@ -271,7 +266,7 @@ class TestPodGenerator(unittest.TestCase):
                                  self._gen_random_string(seed, 200),
                                  self._gen_random_string(seed, 200)) for seed in range(100)]
         for key in keys:
-            pod_name = PodGenerator.make_unique_pod_id(create_pod_id(key))
+            pod_name = PodGenerator.create_pod_id(key.workflow_execution_id, key.task_name, key.seq_num)
             self.assertTrue(self._is_valid_pod_id(pod_name))
 
     @staticmethod

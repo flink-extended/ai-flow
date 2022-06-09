@@ -22,11 +22,14 @@ import sqlalchemy
 import sqlalchemy.orm
 from sqlalchemy.engine import Engine
 from sqlalchemy import event
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.common.exception.exceptions import AIFlowDBException
 
 logger = logging.getLogger(__name__)
+engine = None
+Session = None
 
 
 def _get_managed_session_maker(SessionMaker):
@@ -80,14 +83,35 @@ def create_sqlalchemy_engine(db_uri):
                                     **pool_kwargs)
 
 
-def create_session(db_uri=None, db_engine=None):
-    if db_uri is None:
-        db_uri = config_constants.METADATA_BACKEND_URI
-    if db_engine is None:
-        db_engine = create_sqlalchemy_engine(db_uri)
-    SessionMaker = sqlalchemy.orm.sessionmaker(bind=db_engine)
-    session_factory = _get_managed_session_maker(SessionMaker)
-    return session_factory()
+def prepare_session(db_uri=None, db_engine=None):
+    global engine
+    global Session
+    if engine is None or Session is None:
+        if db_uri is None:
+            db_uri = config_constants.METADATA_BACKEND_URI
+        if db_engine is not None:
+            engine = db_engine
+        else:
+            engine = create_sqlalchemy_engine(db_uri)
+        Session = scoped_session(
+            sessionmaker(autocommit=False,
+                         autoflush=False,
+                         bind=engine,
+                         expire_on_commit=False))
+
+
+@contextlib.contextmanager
+def create_session():
+    prepare_session()
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 
 def new_session(db_uri=None, db_engine=None):

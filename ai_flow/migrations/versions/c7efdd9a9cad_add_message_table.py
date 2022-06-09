@@ -14,31 +14,35 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import logging
-from abc import abstractmethod, ABC
-from ai_flow.scheduler.schedule_command import TaskScheduleCommand
 
-logger = logging.getLogger(__name__)
+"""add message table
+
+Revision ID: c7efdd9a9cad
+Revises: 7edd3c063e94
+Create Date: 2022-06-05 15:37:44.650789
+
+"""
+from alembic import op
+import sqlalchemy as sa
 
 
-class TaskExecutor(ABC):
+# revision identifiers, used by Alembic.
+revision = 'c7efdd9a9cad'
+down_revision = '7edd3c063e94'
+branch_labels = None
+depends_on = None
 
-    @abstractmethod
-    def schedule_task(self, command: TaskScheduleCommand):
-        """
-        Start, stop or restart the task.
 
-        :param command: The command that contains information to schedule a task.
-        """
+def upgrade():
+    op.create_table(
+        'message',
+        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('type', sa.String(length=256), nullable=False),
+        sa.Column('data', sa.LargeBinary(), nullable=False),
+        sa.PrimaryKeyConstraint('id'),
+        sqlite_autoincrement=True
+    )
 
-    @abstractmethod
-    def start(self):
-        """
-        Do some initialization.
-        """
 
-    @abstractmethod
-    def stop(self):
-        """
-        Do some cleanup operations.
-        """
+def downgrade():
+    op.drop_table('message')

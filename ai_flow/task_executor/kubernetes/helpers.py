@@ -16,15 +16,17 @@
 # under the License.
 #
 import hashlib
+import json
+import logging
 import re
 from typing import Optional, Dict
 from kubernetes import client, config
 
+from ai_flow.common.util.local_registry import LocalRegistry
 from ai_flow.model.task_execution import TaskExecutionKey
 
+logger = logging.getLogger(__name__)
 MAX_LABEL_LEN = 63
-
-POISON = None
 
 
 def get_kube_client(
@@ -64,31 +66,47 @@ def make_safe_label_value(value):
     return safe_label
 
 
-def create_pod_id(key: TaskExecutionKey) -> str:
-    workflow_execution_id = replace_invalid_chars(str(key.workflow_execution_id))
-    task_name = replace_invalid_chars(str(key.task_name))
-    seq_num = replace_invalid_chars(str(key.seq_num))
-    return f'{workflow_execution_id}-{task_name}-{seq_num}'
-
-
-def labels_to_key(labels: Dict[str, str]) -> TaskExecutionKey:
-    workflow_execution_id = labels['workflow_execution_id']
-    task_name = labels['task_name']
-    seq_num = int(labels['seq_number'])
+def annotations_to_key(annotations: Dict[str, str]) -> TaskExecutionKey:
+    workflow_execution_id = int(annotations['workflow_execution_id'])
+    task_name = annotations['task_name']
+    seq_num = int(annotations['seq_number'])
     return TaskExecutionKey(workflow_execution_id, task_name, seq_num)
 
 
 def key_to_label_selector(key: TaskExecutionKey) -> str:
     return "workflow_execution_id={}, task_name={}, seq_number={}".format(
-        key.workflow_execution_id,
-        key.task_name,
-        key.seq_num)
+        make_safe_label_value(key.workflow_execution_id),
+        make_safe_label_value(key.task_name),
+        make_safe_label_value(key.seq_num)
+    )
 
 
-def gen_command(key: TaskExecutionKey):
-    return ["aiflow",
-            "task-execution",
-            "run",
-            str(key.workflow_execution_id),
-            str(key.task_name),
-            str(key.seq_num)]
+def run_pod(core_api: client.CoreV1Api,
+            pod: client.V1Pod,
+            **kwargs):
+    sanitized_pod = core_api.api_client.sanitize_for_serialization(pod)
+    json_pod = json.dumps(sanitized_pod, indent=2)
+    try:
+        resp = core_api.create_namespaced_pod(
+            body=sanitized_pod, namespace=pod.metadata.namespace, **kwargs
+        )
+        return resp
+    except Exception as e:
+        logger.exception('Exception when attempting to create Namespaced Pod: %s', json_pod)
+        raise e
+
+
+class ResourceVersionManager(object):
+    """For tracking resourceVersion from Kubernetes"""
+    # TODO Persist the resource version to database or zookeeper in case of host crash
+
+    def __init__(self, file_path):
+        self.registry = LocalRegistry(file_path)
+
+    def get_last_resource_version(self) -> Optional[str]:
+        val = self.registry.get('last_resource_version')
+        return val.decode("utf-8") if val is not None else None
+
+    def update_resource_version(self, resource_version):
+        self.registry.set('last_resource_version', resource_version)
+        self.registry.sync()

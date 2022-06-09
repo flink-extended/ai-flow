@@ -26,7 +26,9 @@ SERVER_CONF = get_server_configuration()
 
 LOG_DIR = SERVER_CONF.get_str('log_dir', fallback='/tmp')
 
-SERVER_RPC_PORT = SERVER_CONF.get_str('server_rpc_port', fallback=50051)
+RPC_PORT = SERVER_CONF.get_str('rpc_port', fallback=50051)
+
+INTERNAL_RPC_PORT = SERVER_CONF.get_str('internal_rpc_port', fallback=50000)
 
 REST_PORT = SERVER_CONF.get_int('rest_port', fallback=8000)
 
@@ -38,6 +40,12 @@ HISTORY_RETENTION = SERVER_CONF.get_str('history_retention', fallback='30d')
 NOTIFICATION_SERVER_URI = SERVER_CONF.get_str('notification_server_uri', fallback='127.0.0.1:50052')
 
 TASK_EXECUTOR = SERVER_CONF.get_str('task_executor', fallback='local')
+
+TASK_EXECUTOR_HEARTBEAT_CHECK_INTERVAL = SERVER_CONF.get_int('task_executor_heartbeat_check_interval', fallback=10)
+
+TASK_HEARTBEAT_TIMEOUT = SERVER_CONF.get_int('task_heartbeat_timeout', fallback=60)
+
+TASK_HEARTBEAT_INTERVAL = SERVER_CONF.get_int('task_heartbeat_interval', fallback=10)
 
 EXECUTE_TASKS_IN_NEW_INTERPRETER = SERVER_CONF.get_bool('execute_tasks_in_new_interpreter', fallback=False)
 

@@ -15,53 +15,84 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import queue
-import time
+import os
 import unittest
 from unittest import mock
-
-from kubernetes.client import CoreV1Api
-
-from ai_flow.common.exception.exceptions import AIFlowException
+from ai_flow.common.exception.exceptions import AIFlowConfigException
 from ai_flow.model.task_execution import TaskExecutionKey
-from ai_flow.task_executor.kubernetes.helpers import make_safe_label_value
 from ai_flow.task_executor.kubernetes.k8s_task_executor import KubernetesTaskExecutor
-from ai_flow.task_executor.kubernetes.kube_config import KubeConfig
 
 
 class TestK8sTaskExecutor(unittest.TestCase):
 
-    @mock.patch('ai_flow.task_executor.kubernetes.helpers.get_kube_client')
-    def test_start_task_execution(self, mock_kube_client):
+    @mock.patch('ai_flow.task_executor.kubernetes.k8s_task_executor.KubernetesTaskExecutor._list_pods')
+    @mock.patch('ai_flow.task_executor.kubernetes.k8s_task_executor.KubernetesTaskExecutor._is_task_submitted')
+    @mock.patch('ai_flow.task_executor.kubernetes.helpers.run_pod')
+    def test_run_existed_task(self, mock_run_pod, mock_is_submmitted, mock_list_pods):
         executor = KubernetesTaskExecutor()
-        with self.assertRaises(AIFlowException):
-            executor.start_task_execution(None)
-        mock_kube_client.assert_called_once_with(config_file=None, in_cluster=False)
-
-        executor.task_queue = queue.Queue()
-        key = TaskExecutionKey(1, 'task', 1)
+        key = TaskExecutionKey(1, 'task', 2)
+        mock_is_submmitted.return_value = True
         executor.start_task_execution(key)
-        self.assertEqual(key, executor.task_queue.get())
+        mock_run_pod.assert_not_called()
 
-    @mock.patch('kubernetes.client.CoreV1Api.list_namespaced_pod')
-    @mock.patch('kubernetes.client.CoreV1Api.delete_namespaced_pod')
-    @mock.patch('ai_flow.task_executor.kubernetes.helpers.get_kube_client')
-    def test_stop_task_execution(self, mock_client, mock_delete_func, mock_list_func):
+    @mock.patch('ai_flow.task_executor.kubernetes.k8s_task_executor.KubernetesTaskExecutor._list_pods')
+    def test__is_task_submitted(self, mock_list_pods):
         executor = KubernetesTaskExecutor()
-        mock_client.assert_called_once_with(config_file=None, in_cluster=False)
+        key = TaskExecutionKey(1, 'task', 3)
+        expected = []
+        for i in range(2):
+            mock_pod = mock.MagicMock()
+            mock_pod.metadata.annotations = {
+                'workflow_execution_id': 1,
+                'task_name': 'task',
+                'seq_number': i
+            }
+            expected.append(mock_pod)
+        mock_list_pods.return_value = expected
+        self.assertFalse(executor._is_task_submitted(key))
+        mock_pod = mock.MagicMock()
+        mock_pod.metadata.annotations = {
+            'workflow_execution_id': 1,
+            'task_name': 'task',
+            'seq_number': 3
+        }
+        expected.append(mock_pod)
+        mock_list_pods.return_value = expected
+        self.assertTrue(executor._is_task_submitted(key))
 
-        executor.kube_client = CoreV1Api()
-        executor.kube_config = KubeConfig({'namespace': 'test'})
+    @mock.patch('ai_flow.task_executor.kubernetes.k8s_task_executor.KubernetesTaskExecutor._list_pods')
+    @mock.patch('ai_flow.task_executor.kubernetes.helpers.run_pod')
+    def test_start_task_execution_without_template(self, mock_run_pod, mock_list_pods):
+        executor = KubernetesTaskExecutor()
+        executor.kube_config.config['pod_template_file'] = None
+        key = TaskExecutionKey(1, 'task', 2)
+        mock_list_pods.return_value = []
+        with self.assertRaises(AIFlowConfigException):
+            executor.start_task_execution(key)
+        mock_run_pod.assert_not_called()
 
-        dict_string = "workflow_execution_id={},task_name={},seq_number={}".format(
-            make_safe_label_value(1),
-            make_safe_label_value('task'),
-            make_safe_label_value(1),
-        )
-        key = TaskExecutionKey(1, 'task', 1)
+    @mock.patch('ai_flow.task_executor.kubernetes.k8s_task_executor.KubernetesTaskExecutor._list_pods')
+    @mock.patch('ai_flow.task_executor.kubernetes.helpers.run_pod')
+    @mock.patch('ai_flow.task_executor.kubernetes.helpers.get_kube_client')
+    def test_start_task_execution(self, mock_client, mock_run_pod, mock_list_pods):
+        executor = KubernetesTaskExecutor()
+        template_file = os.path.join(os.path.dirname(__file__), 'base_pod.yaml')
+        executor.kube_config.config['pod_template_file'] = template_file
+        key = TaskExecutionKey(1, 'task', 2)
 
-        mock_list_func.return_value.items = [mock.MagicMock()]
+        mock_list_pods.return_value = []
+
+        executor.start_task_execution(key)
+        mock_run_pod.assert_called_once()
+
+    @mock.patch('ai_flow.task_executor.kubernetes.helpers.get_kube_client')
+    @mock.patch('ai_flow.task_executor.kubernetes.k8s_task_executor.KubernetesTaskExecutor._delete_pod')
+    @mock.patch('ai_flow.task_executor.kubernetes.k8s_task_executor.KubernetesTaskExecutor._list_pods')
+    def test_stop_task_execution(self, mock_list_pods, mock_delete_func, mock_client):
+        executor = KubernetesTaskExecutor()
+        key = TaskExecutionKey(1, 'task', 2)
+        mock_list_pods.return_value = [mock.MagicMock()]
         executor.stop_task_execution(key)
-
-        mock_list_func.assert_called_once_with(namespace='test', label_selector=dict_string)
         mock_delete_func.assert_called_once()
+
+

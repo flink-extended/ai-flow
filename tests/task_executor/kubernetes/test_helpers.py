@@ -18,9 +18,11 @@
 import random
 import re
 import string
+import tempfile
 import unittest
 
 from ai_flow.task_executor.kubernetes import helpers
+from ai_flow.task_executor.kubernetes.helpers import ResourceVersionManager
 
 
 class TestHelpers(unittest.TestCase):
@@ -53,3 +55,11 @@ class TestHelpers(unittest.TestCase):
     def _is_safe_label_value(value):
         regex = r'^[^a-z0-9A-Z]*|[^a-zA-Z0-9_\-\.]|[^a-z0-9A-Z]*$'
         return len(value) <= 63 and re.match(regex, value)
+
+    def test_resource_version(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            instance = ResourceVersionManager(temp_dir)
+            self.assertEqual(None, instance.get_last_resource_version())
+
+            instance.update_resource_version(100)
+            self.assertEqual('100', instance.get_last_resource_version())

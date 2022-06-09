@@ -53,6 +53,7 @@ class TestSession(unittest.TestCase):
 
             with create_session(db_uri=db_uri) as session:
                 session.add(TestTable("name1"))
+            with create_session(db_uri=db_uri) as session:
                 self.assertEqual(1, len(session.query(TestTable).all()))
 
     def test_providered_session(self):

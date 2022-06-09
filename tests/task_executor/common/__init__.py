@@ -14,31 +14,4 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import logging
-from abc import abstractmethod, ABC
-from ai_flow.scheduler.schedule_command import TaskScheduleCommand
-
-logger = logging.getLogger(__name__)
-
-
-class TaskExecutor(ABC):
-
-    @abstractmethod
-    def schedule_task(self, command: TaskScheduleCommand):
-        """
-        Start, stop or restart the task.
-
-        :param command: The command that contains information to schedule a task.
-        """
-
-    @abstractmethod
-    def start(self):
-        """
-        Do some initialization.
-        """
-
-    @abstractmethod
-    def stop(self):
-        """
-        Do some cleanup operations.
-        """
+#

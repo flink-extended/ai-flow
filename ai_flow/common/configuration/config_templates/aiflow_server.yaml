@@ -21,8 +21,11 @@ log_dir : {AIFLOW_HOME}/logs
 # address of AIFlow rpc server
 server_address: localhost
 
-# port of AIFlow rpc server
-server_port: 50051
+# port of rpc server
+rpc_port: 50051
+
+# port of internal rpc
+internal_rpc_port: 50000
 
 # port of rest server
 rest_port: 8000
@@ -44,10 +47,11 @@ task_executor: Local
 
 # kubernetes task executor config
 k8s_executor_config:
-  pod_template_file:
-  image_repository:
-  image_tag:
-  namespace:
+  pod_template_file: /Users/alibaba/work/opensource/ai-flow/ai_flow/task_executor/kubernetes/pod_template_file_sample/pod_template.yaml
+  image_repository: jiangxin369/test-k8s-executor
+  image_tag: 0.1.1
+  namespace: aiflow-test
   in_cluster: False
-  kube_config_file:
+  kube_config_file: ~/.kube/config
+  resource_version_file: {AIFLOW_HOME}/.k8s_resource_version
 

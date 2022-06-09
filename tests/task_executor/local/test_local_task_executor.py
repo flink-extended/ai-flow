@@ -16,6 +16,7 @@
 # under the License.
 #
 import os
+import queue
 import subprocess
 import threading
 import time
@@ -28,11 +29,12 @@ import psutil
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.common.exception.exceptions import AIFlowException
+from ai_flow.common.util.local_registry import LocalRegistry
 from ai_flow.model.action import TaskAction
 from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecutionKey
+from ai_flow.scheduler.schedule_command import TaskScheduleCommand
 from ai_flow.task_executor.local.local_task_executor import LocalTaskExecutor
-from ai_flow.task_executor.task_executor import ScheduleTaskCommand
 
 
 class TestLocalExecutor(unittest.TestCase):
@@ -43,6 +45,7 @@ class TestLocalExecutor(unittest.TestCase):
             config_constants, 'EXECUTE_TASKS_IN_NEW_INTERPRETER', new_callable=mock.PropertyMock
         ) as option:
             option.return_value = True
+            mock_popen.return_value.pid = 1
             mock_popen.return_value.communicate.return_value = (b"OUT", b"ERR")
             mock_popen.return_value.poll.return_value = 0
             self._test_execute_task()
@@ -52,6 +55,23 @@ class TestLocalExecutor(unittest.TestCase):
         mock_os.fork.return_value = 1
         mock_os.waitpid.return_value = (1, 0)
         self._test_execute_task()
+
+    def _test_execute_task(self, ):
+        key = TaskExecutionKey(1, 'task', 1)
+
+        with TemporaryDirectory(prefix='test_local_task_executor') as tmp_dir:
+            executor = LocalTaskExecutor(parallelism=3,
+                                         registry_path=os.path.join(tmp_dir, 'tmp_registry'))
+            executor.initialize()
+            # call start twice
+            executor.start_task_execution(key)
+            executor.start_task_execution(key)
+            time.sleep(1)
+
+            registry = LocalRegistry(os.path.join(tmp_dir, 'tmp_registry'))
+            self.assertEqual(1, int(registry.get(str(key))))
+            self.assertEqual(1, len(registry._db.keys()))
+            executor.destroy()
 
     def test_stop_task_execution(self):
 
@@ -69,49 +89,21 @@ class TestLocalExecutor(unittest.TestCase):
             with self.assertRaises(psutil.NoSuchProcess):
                 psutil.Process(process.pid)
 
-    def _test_execute_task(self):
-        key = TaskExecutionKey(1, 'task', 1)
-        command = ScheduleTaskCommand(key, TaskAction.START)
-
-        with TemporaryDirectory(prefix='test_local_task_executor') as tmp_dir:
-            executor = LocalTaskExecutor(parallelism=3,
-                                         registry_path=os.path.join(tmp_dir, 'tmp_registry'))
-            executor.start()
-            executor._task_status_observer.stop()
-            executor._task_status_observer.join()
-            executor.schedule_task(command)
-
-            ret_key, status = executor.result_queue.get(timeout=1)
-            self.assertEqual(str(key), str(ret_key))
-            self.assertEqual(TaskStatus.SUCCESS, status)
-
-            executor.stop()
-
-    @mock.patch('ai_flow.task_executor.local.worker.os')
-    def test_task_observer_thread(self, mock_os):
-        mock_os.fork.return_value = 1
-        mock_os.waitpid.return_value = (1, 0)
-        key = TaskExecutionKey(1, 'task', 1)
-        command = ScheduleTaskCommand(key, TaskAction.START)
-        with TemporaryDirectory(prefix='test_local_task_executor') as tmp_dir:
-            executor = LocalTaskExecutor(parallelism=3,
-                                         registry_path=os.path.join(tmp_dir, 'tmp_registry'))
-            executor.start()
-            executor.schedule_task(command)
-            with self.assertRaises(Empty):
-                time.sleep(0.1)
-                executor.result_queue.get(timeout=1)
-            executor.stop()
-
     def test_negative_parallelism(self):
         with self.assertRaises(AIFlowException) as context:
-            executor = LocalTaskExecutor(0)
-            executor.start()
-            self.assertTrue('Parallelism of LocalTaskExecutor should be a positive integer' in context.exception)
+            try:
+                executor = LocalTaskExecutor(0)
+                executor.start()
+                self.assertTrue('Parallelism of LocalTaskExecutor should be a positive integer' in context.exception)
+            finally:
+                executor.stop()
         with self.assertRaises(AIFlowException) as context:
-            executor = LocalTaskExecutor(-1)
-            executor.start()
-            self.assertTrue('Parallelism of LocalTaskExecutor should be a positive integer' in context.exception)
+            try:
+                executor = LocalTaskExecutor(-1)
+                executor.start()
+                self.assertTrue('Parallelism of LocalTaskExecutor should be a positive integer' in context.exception)
+            finally:
+                executor.stop()
 
 
 if __name__ == '__main__':

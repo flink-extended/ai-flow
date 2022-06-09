@@ -16,6 +16,7 @@
 # under the License.
 import os
 from typing import Dict
+from ai_flow.common.configuration.helpers import expand_env_var, get_aiflow_home
 
 from ai_flow.common.exception.exceptions import AIFlowConfigException
 
@@ -48,4 +49,9 @@ class KubeConfig:
         return self.config.get('in_cluster', False)
 
     def get_config_file(self) -> str:
-        return self.config.get('kube_config_file', None)
+        path = self.config.get('kube_config_file', '~/.kube/config')
+        return expand_env_var(path)
+
+    def get_resource_version_file(self) -> str:
+        path = self.config.get('resource_version_file', os.path.join(get_aiflow_home(), '.k8s_resource_version'))
+        return expand_env_var(path)
