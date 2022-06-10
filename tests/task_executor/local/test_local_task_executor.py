@@ -16,24 +16,18 @@
 # under the License.
 #
 import os
-import queue
 import subprocess
 import threading
 import time
 import unittest
-from queue import Empty
+import psutil
 from tempfile import TemporaryDirectory
 from unittest import mock
-
-import psutil
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.common.util.local_registry import LocalRegistry
-from ai_flow.model.action import TaskAction
-from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecutionKey
-from ai_flow.scheduler.schedule_command import TaskScheduleCommand
 from ai_flow.task_executor.local.local_task_executor import LocalTaskExecutor
 
 
@@ -83,7 +77,8 @@ class TestLocalExecutor(unittest.TestCase):
             executor = LocalTaskExecutor(parallelism=1,
                                          registry_path=os.path.join(tmp_dir, 'tmp_registry'))
             process = subprocess.Popen(args=['sleep', '10'], close_fds=True)
-            executor.registry.set('key', process.pid)
+            registry = LocalRegistry(os.path.join(tmp_dir, 'tmp_registry'))
+            registry.set('key', process.pid)
             threading.Thread(target=_stop, args=(executor,)).start()
             process.wait()
             with self.assertRaises(psutil.NoSuchProcess):

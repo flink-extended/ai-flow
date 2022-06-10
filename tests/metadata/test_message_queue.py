@@ -44,6 +44,7 @@ class TestMessageQueue(unittest.TestCase):
 
     def tearDown(self) -> None:
         self._delete_db_file()
+        session.clear_engine_and_session()
 
     def test_get_and_put(self):
         queue = PersistentQueue()

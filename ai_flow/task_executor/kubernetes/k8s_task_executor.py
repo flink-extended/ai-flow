@@ -16,6 +16,8 @@
 # under the License.
 #
 import logging
+import os
+
 from kubernetes import client
 from kubernetes.client import V1Pod, V1PodList
 from kubernetes.client.rest import ApiException
@@ -51,8 +53,8 @@ class KubernetesTaskExecutor(TaskExecutorBase):
         command = self.generate_command(key)
         logger.info('Running job %s %s', str(key), str(command))
         template_file = self.kube_config.get_pod_template_file()
-        if template_file is None:
-            raise AIFlowConfigException('Option pod_template_file of kubernetes is not set.')
+        if template_file is None or not os.path.exists(template_file):
+            raise AIFlowConfigException(f'pod_template_file {template_file} of kubernetes not found.')
         try:
             base_worker_pod = PodGenerator.get_base_pod_from_template(template_file)
             pod = PodGenerator.construct_pod(

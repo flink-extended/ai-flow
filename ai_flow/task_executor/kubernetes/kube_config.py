@@ -29,7 +29,10 @@ class KubeConfig:
         self.config = config
 
     def get_pod_template_file(self) -> str:
-        return self.config.get('pod_template_file')
+        default_template = os.path.join(os.path.dirname(__file__),
+                                        'pod_template_file_sample/pod_template.yaml')
+        template = self.config.get('pod_template_file')
+        return template if template else default_template
 
     def get_image(self) -> str:
         repository = self.config.get('image_repository')
@@ -49,9 +52,5 @@ class KubeConfig:
         return self.config.get('in_cluster', False)
 
     def get_config_file(self) -> str:
-        path = self.config.get('kube_config_file', '~/.kube/config')
-        return expand_env_var(path)
-
-    def get_resource_version_file(self) -> str:
-        path = self.config.get('resource_version_file', os.path.join(get_aiflow_home(), '.k8s_resource_version'))
+        path = self.config.get('kube_config_file', None)
         return expand_env_var(path)

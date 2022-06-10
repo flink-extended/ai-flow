@@ -100,6 +100,13 @@ def prepare_session(db_uri=None, db_engine=None):
                          expire_on_commit=False))
 
 
+def clear_engine_and_session():
+    global engine
+    global Session
+    engine = None
+    Session = None
+
+
 @contextlib.contextmanager
 def create_session():
     prepare_session()

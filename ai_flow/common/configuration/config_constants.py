@@ -57,7 +57,7 @@ SQLALCHEMY_POOL_SIZE = SERVER_CONF.get_int('sql_alchemy_pool_size', fallback=5)
 
 SQLALCHEMY_MAX_OVERFLOW = SERVER_CONF.get_int('sql_alchemy_max_overflow', fallback=10)
 
-K8S_TASK_EXECUTOR_CONFIG = SERVER_CONF.get('k8s_executor_config', fallback='None')
+K8S_TASK_EXECUTOR_CONFIG = SERVER_CONF.get('k8s_executor_config', fallback={})
 
 # Client Config
 

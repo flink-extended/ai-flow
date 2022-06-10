@@ -94,19 +94,3 @@ def run_pod(core_api: client.CoreV1Api,
     except Exception as e:
         logger.exception('Exception when attempting to create Namespaced Pod: %s', json_pod)
         raise e
-
-
-class ResourceVersionManager(object):
-    """For tracking resourceVersion from Kubernetes"""
-    # TODO Persist the resource version to database or zookeeper in case of host crash
-
-    def __init__(self, file_path):
-        self.registry = LocalRegistry(file_path)
-
-    def get_last_resource_version(self) -> Optional[str]:
-        val = self.registry.get('last_resource_version')
-        return val.decode("utf-8") if val is not None else None
-
-    def update_resource_version(self, resource_version):
-        self.registry.set('last_resource_version', resource_version)
-        self.registry.sync()

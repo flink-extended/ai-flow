@@ -23,7 +23,8 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 
 from ai_flow.common.configuration.config_constants import METADATA_BACKEND_URI
-from ai_flow.common.util.db_util.session import create_session, create_sqlalchemy_engine, provide_session
+from ai_flow.common.util.db_util.session import create_session, create_sqlalchemy_engine, provide_session, \
+    prepare_session, clear_engine_and_session
 
 TestBase = declarative_base()
 
@@ -44,16 +45,17 @@ class TestSession(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
+        clear_engine_and_session()
 
     def test_create_session(self):
         with TemporaryDirectory(prefix='test_config') as tmp_dir:
             db_uri = "sqlite:///{}/aiflow.db".format(tmp_dir)
+            prepare_session(db_uri=db_uri)
             TestBase.metadata.create_all(create_sqlalchemy_engine(db_uri))
 
-            with create_session(db_uri=db_uri) as session:
+            with create_session() as session:
                 session.add(TestTable("name1"))
-            with create_session(db_uri=db_uri) as session:
+            with create_session() as session:
                 self.assertEqual(1, len(session.query(TestTable).all()))
 
     def test_providered_session(self):

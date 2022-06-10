@@ -18,9 +18,6 @@
 # directory of AIFlow logs
 log_dir : {AIFLOW_HOME}/logs
 
-# address of AIFlow rpc server
-server_address: localhost
-
 # port of rpc server
 rpc_port: 50051
 
@@ -39,19 +36,43 @@ history_retention: 30d
 # uri of state backend
 state_backend_uri: sqlite:///{AIFLOW_HOME}/aiflow.db
 
+# whether SqlAlchemy should pool database connections.
+sql_alchemy_pool_enabled: True
+
+# the maximum number of database connections in the pool. 0 indicates no limit.
+sql_alchemy_pool_size: 5
+
+# the maximum overflow size of the pool.
+sql_alchemy_max_overflow: 10
+
 # uri of the server of notification service
 notification_server_uri: 127.0.0.1:50052
 
 # task executor
 task_executor: Local
 
+# the interval in seconds that the task executor check the heartbeat of task executions
+task_executor_heartbeat_check_interval: 10
+
+# the timeout in seconds that the task executions is treated as timeout
+task_heartbeat_timeout: 60
+
+# the interval in seconds that the task executions send heartbeats
+task_heartbeat_interval: 10
+
+# should tasks be executed via forking of the parent process ("False",
+# the speedier option) or by spawning a new python process ("True")
+execute_tasks_in_new_interpreter: False
+
+# num of workers of local task executor
+local_executor_parallelism: 10
+
 # kubernetes task executor config
 k8s_executor_config:
-  pod_template_file: /Users/alibaba/work/opensource/ai-flow/ai_flow/task_executor/kubernetes/pod_template_file_sample/pod_template.yaml
-  image_repository: jiangxin369/test-k8s-executor
-  image_tag: 0.1.1
-  namespace: aiflow-test
+  pod_template_file:
+  image_repository:
+  image_tag:
+  namespace:
   in_cluster: False
-  kube_config_file: ~/.kube/config
-  resource_version_file: {AIFLOW_HOME}/.k8s_resource_version
+  kube_config_file:
 
