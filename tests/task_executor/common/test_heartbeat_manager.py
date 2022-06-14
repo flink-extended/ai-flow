@@ -38,7 +38,7 @@ class TestHeartbeatManager(unittest.TestCase):
         manager = None
         try:
             expect_tasks = [
-                TaskExecutionMeta(i, f'task_{i}', i)
+                TaskExecutionMeta(i, f'task_{i}')
                 for i in [1, 2, 3]
             ]
             mock_session.return_value.__enter__.return_value.query.return_value.\
@@ -58,9 +58,11 @@ class TestHeartbeatManager(unittest.TestCase):
             self.assertTrue(cnt < 100)
 
             expect_tasks = [
-                TaskExecutionMeta(i, f'task_{i}', i)
+                TaskExecutionMeta(i, f'task_{i}')
                 for i in [1, 4]
             ]
+            for t in expect_tasks:
+                t.sequence_number = t.workflow_execution_id
             mock_session.return_value.__enter__.return_value.query.return_value.\
                 filter.return_value.all.return_value = expect_tasks
             cnt = 0
@@ -92,7 +94,7 @@ class TestHeartbeatManager(unittest.TestCase):
     @mock.patch.object(heartbeat_manager, 'create_session')
     def test__update_running_tasks(self, mock_session):
         expect_tasks = [
-            TaskExecutionMeta(i, f'task_{i}', i)
+            TaskExecutionMeta(i, f'task_{i}')
             for i in [1, 2, 3]
         ]
         mock_session.return_value.__enter__.return_value.query.return_value.\
@@ -104,7 +106,7 @@ class TestHeartbeatManager(unittest.TestCase):
             self.assertTrue(f'{t.workflow_execution_id}_{t.task_name}_{t.sequence_number}' in manager.task_dict)
 
         expect_tasks = [
-            TaskExecutionMeta(i, f'task_{i}', i)
+            TaskExecutionMeta(i, f'task_{i}')
             for i in [1, 2, 4]
         ]
         mock_session.return_value.__enter__.return_value.query.return_value.\

@@ -50,8 +50,6 @@ class TaskExecutionMeta(Base):
 
     def __init__(self,
                  workflow_execution_id,
-                 task_name,
-                 sequence_number):
+                 task_name):
         self.workflow_execution_id = workflow_execution_id
         self.task_name = task_name
-        self.sequence_number = sequence_number

@@ -18,11 +18,9 @@
 """task-execution command"""
 import logging
 import threading
-import time
 
 from notification_service.embedded_notification_client import EmbeddedNotificationClient
 
-from ai_flow.common.configuration import config_constants
 from ai_flow.common.exception.exceptions import TaskFailedException, TaskForceStoppedException
 from ai_flow.model.internal.events import TaskStatusEvent
 from ai_flow.model.status import TaskStatus
@@ -56,11 +54,10 @@ class TaskManager(object):
                  heartbeat_server_uri,
                  heartbeat_interval):
         self.task_execution = task_execution
-        self.heartbeat_interval = heartbeat_interval
         self.notification_client = EmbeddedNotificationClient(
             server_uri=notification_server_uri, namespace='task_status_change', sender='task_manager')
         self.heartbeat_client = HeartbeatClient(heartbeat_server_uri)
-        self.heartbeat_thread = threading.Thread(target=self._heartbeat, daemon=True)
+        self.heartbeat_thread = threading.Timer(heartbeat_interval, self._send_heartbeat)
 
     def start(self):
         self.heartbeat_thread.start()
@@ -83,16 +80,14 @@ class TaskManager(object):
                                 status=status)
         self.notification_client.send_event(event)
 
-    def _heartbeat(self):
-        while not threading.current_thread().stopped():
-            logger.debug("Sending heartbeat to task executor.")
-            self.heartbeat_client.send_heartbeat(self.task_execution.workflow_execution_id,
-                                                 self.task_execution.task_name,
-                                                 self.task_execution.sequence_number)
-            time.sleep(self.heartbeat_interval)
+    def _send_heartbeat(self):
+        logger.debug("Sending heartbeat to task executor.")
+        self.heartbeat_client.send_heartbeat(self.task_execution.workflow_execution_id,
+                                             self.task_execution.task_name,
+                                             self.task_execution.sequence_number)
 
     def stop(self):
         self.notification_client.close()
-        self.heartbeat_thread.stop()
+        self.heartbeat_thread.cancel()
         self.heartbeat_thread.join()
 
