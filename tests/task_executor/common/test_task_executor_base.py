@@ -109,7 +109,7 @@ class TestTaskExecutorBase(unittest.TestCase):
                                           new_task_execution=None)
             self.executor.command_queue.put(command)
             time.sleep(0.5)
-            self.assertEqual(mock_send.call_count, 2)
+            self.assertEqual(mock_send.call_count, 1)
         finally:
             command_processor.stop()
 
@@ -125,7 +125,7 @@ class TestTaskExecutorBase(unittest.TestCase):
                                           new_task_execution=key_new)
             self.executor.command_queue.put(command)
             time.sleep(0.5)
-            self.assertEqual(mock_send.call_count, 2)
+            self.assertEqual(mock_send.call_count, 1)
         finally:
             command_processor.stop()
 

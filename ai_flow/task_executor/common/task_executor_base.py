@@ -87,6 +87,7 @@ class TaskExecutorBase(TaskExecutor):
         self.notification_client.send_event(event)
 
     def _process_command(self):
+        # TODO put command processor in an Actor or thread pool with order preserving
         while not threading.current_thread().stopped():
             try:
                 schedule_command = self.command_queue.get(timeout=1)
@@ -100,10 +101,8 @@ class TaskExecutorBase(TaskExecutor):
                         self._send_task_status_change(task=current_task, status=TaskStatus.RUNNING)
                     elif action == TaskAction.STOP:
                         self.stop_task_execution(current_task)
-                        self._send_task_status_change(task=current_task, status=TaskStatus.STOPPED)
                     elif action == TaskAction.RESTART:
                         self.stop_task_execution(current_task)
-                        self._send_task_status_change(task=current_task, status=TaskStatus.STOPPED)
                         new_task = schedule_command.new_task_execution
                         self.start_task_execution(new_task)
                         self._send_task_status_change(task=new_task, status=TaskStatus.RUNNING)

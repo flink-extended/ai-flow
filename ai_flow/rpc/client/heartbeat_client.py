@@ -27,8 +27,9 @@ class HeartbeatClient(object):
         channel = grpc.insecure_channel(server_uri)
         self.stub = heartbeat_service_pb2_grpc.HeartbeatServiceStub(channel)
 
-    def send_heartbeat(self, task_execution_id):
-        request = HeartbeatRequest(
-            task_execution_id=task_execution_id)
+    def send_heartbeat(self, workflow_execution_id, task_name, seq_num):
+        request = HeartbeatRequest(workflow_execution_id=workflow_execution_id,
+                                   task_name=task_name,
+                                   sequence_number=seq_num)
         response = self.stub.send_heartbeat(request)
         return response.return_code

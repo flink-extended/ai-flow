@@ -32,5 +32,7 @@ service HeartbeatService {
 }
 
 message HeartbeatRequest {
-    int64 task_execution_id = 1;
+    int64 workflow_execution_id = 1;
+    string task_name = 2;
+    int64 sequence_number = 3;
 }

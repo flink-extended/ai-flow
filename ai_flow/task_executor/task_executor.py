@@ -16,6 +16,9 @@
 # under the License.
 import logging
 from abc import abstractmethod, ABC
+
+from ai_flow.common.exception.exceptions import AIFlowException
+from ai_flow.common.util.module_utils import import_string
 from ai_flow.scheduler.schedule_command import TaskScheduleCommand
 
 logger = logging.getLogger(__name__)
@@ -42,3 +45,23 @@ class TaskExecutor(ABC):
         """
         Do some cleanup operations.
         """
+
+
+class TaskExecutorFactory(object):
+
+    @classmethod
+    def get_class_name(cls, executor_type: str):
+        executors = {
+            'local': 'ai_flow.task_executor.local.local_task_executor.LocalTaskExecutor',
+            'kubernetes': 'ai_flow.task_executor.kubernetes.k8s_task_executor.KubernetesTaskExecutor'
+        }
+        if executor_type.lower() in executors:
+            return executors[executor_type.lower()]
+        else:
+            raise AIFlowException("Invalid task executor type: {}".format(executor_type))
+
+    @classmethod
+    def get_task_executor(cls, executor_type: str) -> TaskExecutor:
+        class_name = cls.get_class_name(executor_type)
+        class_object = import_string(class_name)
+        return class_object()

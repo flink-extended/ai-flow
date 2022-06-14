@@ -34,7 +34,11 @@ class AIFlowYAMLException(AIFlowException):
     """Raise when there is yaml handling problem"""
 
 
-class TaskForceKilledException(AIFlowException):
+class TaskFailedException(AIFlowException):
+    """Raise when the task execution failed"""
+
+
+class TaskForceStoppedException(AIFlowException):
     """Raise when task execution is force killed"""
 
 

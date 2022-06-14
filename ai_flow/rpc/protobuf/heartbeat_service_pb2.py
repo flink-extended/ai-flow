@@ -41,7 +41,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n\027org.aiflow.client.protoZ\010/ai_flow\210\001\001\220\001\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x17heartbeat_service.proto\x12\x07\x61i_flow\x1a\rmessage.proto\"-\n\x10HeartbeatRequest\x12\x19\n\x11task_execution_id\x18\x01 \x01(\x03\x32T\n\x10HeartbeatService\x12@\n\x0esend_heartbeat\x12\x19.ai_flow.HeartbeatRequest\x1a\x11.ai_flow.Response\"\x00\x42)\n\x17org.aiflow.client.protoZ\x08/ai_flow\x88\x01\x01\x90\x01\x01\x62\x06proto3'
+  serialized_pb=b'\n\x17heartbeat_service.proto\x12\x07\x61i_flow\x1a\rmessage.proto\"]\n\x10HeartbeatRequest\x12\x1d\n\x15workflow_execution_id\x18\x01 \x01(\x03\x12\x11\n\ttask_name\x18\x02 \x01(\t\x12\x17\n\x0fsequence_number\x18\x03 \x01(\x03\x32T\n\x10HeartbeatService\x12@\n\x0esend_heartbeat\x12\x19.ai_flow.HeartbeatRequest\x1a\x11.ai_flow.Response\"\x00\x42)\n\x17org.aiflow.client.protoZ\x08/ai_flow\x88\x01\x01\x90\x01\x01\x62\x06proto3'
   ,
   dependencies=[message__pb2.DESCRIPTOR,])
 
@@ -57,8 +57,22 @@ _HEARTBEATREQUEST = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='task_execution_id', full_name='ai_flow.HeartbeatRequest.task_execution_id', index=0,
+      name='workflow_execution_id', full_name='ai_flow.HeartbeatRequest.workflow_execution_id', index=0,
       number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='task_name', full_name='ai_flow.HeartbeatRequest.task_name', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sequence_number', full_name='ai_flow.HeartbeatRequest.sequence_number', index=2,
+      number=3, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -76,7 +90,7 @@ _HEARTBEATREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=51,
-  serialized_end=96,
+  serialized_end=144,
 )
 
 DESCRIPTOR.message_types_by_name['HeartbeatRequest'] = _HEARTBEATREQUEST
@@ -99,8 +113,8 @@ _HEARTBEATSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=98,
-  serialized_end=182,
+  serialized_start=146,
+  serialized_end=230,
   methods=[
   _descriptor.MethodDescriptor(
     name='send_heartbeat',
