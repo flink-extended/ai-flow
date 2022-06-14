@@ -20,7 +20,7 @@ from datetime import datetime
 
 from typing import List
 
-from ai_flow.common.exception.exceptions import AIFlowException, TaskForceKilledException
+from ai_flow.common.exception.exceptions import TaskForceStoppedException, TaskFailedException
 from ai_flow.common.util import workflow_utils
 from ai_flow.model import workflow_execution
 from ai_flow.model.context import Context
@@ -95,20 +95,20 @@ class TaskExecution(object):
             if isinstance(task, AIFlowOperator):
 
                 def signal_handler(signum, frame):  # pylint: disable=unused-argument
-                    self.log.error("Received SIGTERM. Terminating subprocesses.")
+                    logger.error("Received SIGTERM. Terminating subprocesses.")
                     task.stop()
-                    raise AIFlowException("Task received SIGTERM signal")
+                    raise TaskForceStoppedException("Task received SIGTERM signal")
                 signal.signal(signal.SIGTERM, signal_handler)
 
                 context = Context()
                 task.start(context)
                 task.await_termination(context)
-        except TaskForceKilledException as e:
+        except TaskForceStoppedException:
             self.handle_force_kill()
             raise
         except (Exception, KeyboardInterrupt) as e:
-            self.handle_failure()
-            raise
+            self._run_failure_callback()
+            raise TaskFailedException(e)
         finally:
             logger.info(f'ti.finish.{task.dag_id}.{task.task_id}.{self.state}')
 
@@ -123,4 +123,7 @@ class TaskExecution(object):
         pass
 
     def _run_success_callback(self, context, task):
+        pass
+
+    def _run_failure_callback(self, context, task):
         pass

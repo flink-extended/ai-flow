@@ -24,9 +24,9 @@ from typing import List
 from setproctitle import setproctitle
 
 from ai_flow.common.configuration import config_constants
+from ai_flow.common.util.local_registry import LocalRegistry
 from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecutionKey
-from ai_flow.task_executor.local.local_registry import LocalRegistry
 
 CommandType = List[str]
 logger = logging.getLogger(__name__)
@@ -36,41 +36,36 @@ class Worker(Process):
 
     def __init__(self,
                  task_queue,
-                 result_queue,
-                 registry: LocalRegistry):
+                 registry_path):
         self.task_queue = task_queue
-        self.result_queue = result_queue
-        self.registry = registry
+        self.registry_path = registry_path
         super().__init__(target=self.do_work)
 
     @abstractmethod
     def do_work(self):
         """Called in the subprocess and should then execute tasks"""
         while True:
-            key, command = self.task_queue.get()
+            task, command = self.task_queue.get()
             try:
-                if key is None and command is None:
-                    # Received poison pill, no more tasks to run
+                if task is None and command is None:
+                    logger.info('Poison received, breaking the loop...')
                     break
-                self.execute_work(key=key, command=command)
+                self.execute_work(key=task, command=command)
             finally:
                 self.task_queue.task_done()
 
     def execute_work(self, key: TaskExecutionKey, command: CommandType) -> None:
         if key is None:
             return
-
         logger.info("Running %s", command)
         if config_constants.EXECUTE_TASKS_IN_NEW_INTERPRETER:
-            status = self._execute_in_subprocess(key, command)
+            self._execute_in_subprocess(key, command)
         else:
-            status = self._execute_in_fork(key, command)
-
-        self.result_queue.put((key, status))
+            self._execute_in_fork(key, command)
 
     def _execute_in_subprocess(self, key, command: CommandType) -> TaskStatus:
         process = subprocess.Popen(args=command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
-        self.registry.set(str(key), process.pid)
+        LocalRegistry(self.registry_path).set(str(key), process.pid)
         stdout, stderr = process.communicate()
         retcode = process.poll()
         if retcode:
@@ -83,7 +78,7 @@ class Worker(Process):
     def _execute_in_fork(self, key, command: CommandType) -> TaskStatus:
         pid = os.fork()
         if pid:
-            self.registry.set(str(key), pid)
+            LocalRegistry(self.registry_path).set(str(key), pid)
             pid, ret = os.waitpid(pid, 0)
             return TaskStatus.SUCCESS if ret == 0 else TaskStatus.FAILED
 
@@ -105,7 +100,7 @@ class Worker(Process):
             args.func(args)
             ret = 0
             return TaskStatus.SUCCESS
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:
             logger.error("Failed to execute task %s.", str(e))
         finally:
             logging.shutdown()

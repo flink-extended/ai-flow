@@ -19,7 +19,7 @@ import os
 import unittest
 
 from ai_flow.common.exception.exceptions import AIFlowException
-from ai_flow.task_executor.local.local_registry import LocalRegistry
+from ai_flow.common.util.local_registry import LocalRegistry
 
 
 class TestLocalRegistry(unittest.TestCase):
@@ -30,8 +30,12 @@ class TestLocalRegistry(unittest.TestCase):
 
     def tearDown(self):
         del self._registry
-        if os.path.exists("tmp_registry.db"):
-            os.remove("tmp_registry.db")
+        if os.path.exists("tmp_registry.bak"):
+            os.remove("tmp_registry.bak")
+        if os.path.exists("tmp_registry.dat"):
+            os.remove("tmp_registry.dat")
+        if os.path.exists("tmp_registry.dir"):
+            os.remove("tmp_registry.dir")
         super().tearDown()
 
     def test_local_registry(self):
@@ -52,3 +56,10 @@ class TestLocalRegistry(unittest.TestCase):
     def test_non_exist_dir(self):
         with self.assertRaisesRegex(AIFlowException, r'Parent directory of local registry not exists.'):
             LocalRegistry('/non-exists-dir/registry')
+
+    def test_persistent(self):
+        self._registry.set('key1', 'value1')
+        new_registry = LocalRegistry("tmp_registry")
+        self.assertEqual(b'value1', new_registry.get('key1'))
+
+

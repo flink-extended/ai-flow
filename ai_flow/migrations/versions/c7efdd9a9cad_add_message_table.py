@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,33 +14,35 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
+
+"""add message table
+
+Revision ID: c7efdd9a9cad
+Revises: 7edd3c063e94
+Create Date: 2022-06-05 15:37:44.650789
+
+"""
+from alembic import op
+import sqlalchemy as sa
 
 
-class AIFlowException(Exception):
-    """Base exception of AIFlow"""
+# revision identifiers, used by Alembic.
+revision = 'c7efdd9a9cad'
+down_revision = '7edd3c063e94'
+branch_labels = None
+depends_on = None
 
 
-class AIFlowConfigException(AIFlowException):
-    """Raise when there is configuration problem"""
+def upgrade():
+    op.create_table(
+        'message',
+        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('type', sa.String(length=256), nullable=False),
+        sa.Column('data', sa.LargeBinary(), nullable=False),
+        sa.PrimaryKeyConstraint('id'),
+        sqlite_autoincrement=True
+    )
 
 
-class AIFlowDBException(AIFlowException):
-    """Raise when there is database problem"""
-
-
-class AIFlowYAMLException(AIFlowException):
-    """Raise when there is yaml handling problem"""
-
-
-class TaskFailedException(AIFlowException):
-    """Raise when the task execution failed"""
-
-
-class TaskForceStoppedException(AIFlowException):
-    """Raise when task execution is force killed"""
-
-
-class AIFlowK8sException(AIFlowException):
-    """Raise when there is a k8s related error"""
-
+def downgrade():
+    op.drop_table('message')
