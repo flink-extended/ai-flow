@@ -53,7 +53,7 @@ class TaskStatus(str, Enum):
     SUCCESS = 'SUCCESS'
     FAILED = 'FAILED'
     STOPPING = 'STOPPING'
-    STOPPED = 'KILLED'
+    STOPPED = 'STOPPED'
     RETRYING = 'RETRYING'
 
 

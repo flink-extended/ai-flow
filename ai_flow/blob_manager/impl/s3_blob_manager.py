@@ -103,7 +103,7 @@ class S3BlobManager(BlobManager):
                     except OSError as e:
                         self.log.warning("Failed to remove lock file: {}".format(lock_file_path), exc_info=e)
         else:
-            self.log.info("S3 file: {} already exist at {}".format(remote_file_path, local_file_path))
+            self.log.debug("S3 file: {} already exist at {}".format(remote_file_path, local_file_path))
         return
 
     def _get_s3_object(self, local_path, object_key, retry_sleep_sec=5):

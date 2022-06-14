@@ -20,12 +20,14 @@ import uuid
 import yaml
 
 from functools import reduce
-from typing import List, Optional, Union
+from typing import List, Optional
+
+from ai_flow.model.task_execution import TaskExecutionKey
 from kubernetes.client import models as k8s
 from kubernetes.client.api_client import ApiClient
 
 from ai_flow.common.exception.exceptions import AIFlowK8sException
-from ai_flow.task_executor.kubernetes.helpers import make_safe_label_value
+from ai_flow.task_executor.kubernetes.helpers import make_safe_label_value, replace_invalid_chars
 from ai_flow.version import __version__ as version
 
 MAX_LABEL_LEN = 63
@@ -35,11 +37,9 @@ class PodGenerator:
 
     @staticmethod
     def construct_pod(
-            workflow_execution_id: str,
+            workflow_execution_id: int,
             task_name: str,
             seq_num: int,
-            try_number: int,
-            pod_id: str,
             kube_image: str,
             args: List[str],
             base_worker_pod: k8s.V1Pod,
@@ -50,12 +50,11 @@ class PodGenerator:
                 namespace=namespace,
                 annotations={
                     'workflow_execution_id': str(workflow_execution_id),
-                    'task_name': task_name,
+                    'task_name': str(task_name),
                     'seq_number': str(seq_num),
-                    'try_number': str(try_number),
                     'aiflow_version': version,
                 },
-                name=PodGenerator.make_unique_pod_id(pod_id),
+                name=PodGenerator.create_pod_id(workflow_execution_id, task_name, seq_num),
                 labels={
                     'workflow_execution_id': make_safe_label_value(workflow_execution_id),
                     'task_name': make_safe_label_value(task_name),
@@ -179,6 +178,14 @@ class PodGenerator:
                 else:
                     user_obj_cp[base_key] = base_val
         return user_obj_cp
+
+    @staticmethod
+    def create_pod_id(workflow_execution_id, task_name, seq_num) -> str:
+        workflow_execution_id = replace_invalid_chars(str(workflow_execution_id))
+        task_name = replace_invalid_chars(str(task_name))
+        seq_num = replace_invalid_chars(str(seq_num))
+        readable_pod_id = f'{workflow_execution_id}-{task_name}-{seq_num}'
+        return PodGenerator.make_unique_pod_id(readable_pod_id)
 
     @staticmethod
     def make_unique_pod_id(pod_id: str) -> str:

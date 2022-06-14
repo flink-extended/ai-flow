@@ -1,3 +1,4 @@
+#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -14,47 +15,21 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+#
+import grpc
+
+from ai_flow.rpc.protobuf import heartbeat_service_pb2_grpc
+from ai_flow.rpc.protobuf.heartbeat_service_pb2 import HeartbeatRequest
 
 
-class Status:
-    INIT = 'INIT'
-    QUEUED = 'QUEUED'
-    RESTARTING = 'RESTARTING'
-    RUNNING = 'RUNNING'
-    SUCCESS = 'SUCCESS'
-    FAILED = 'FAILED'
-    KILLING = 'KILLING'
-    KILLED = 'KILLED'
-    RETRYING = 'RETRYING'
+class HeartbeatClient(object):
+    def __init__(self, server_uri):
+        channel = grpc.insecure_channel(server_uri)
+        self.stub = heartbeat_service_pb2_grpc.HeartbeatServiceStub(channel)
 
-    task_status = frozenset(
-        [
-            INIT,
-            QUEUED,
-            RESTARTING,
-            RUNNING,
-            SUCCESS,
-            FAILED,
-            KILLING,
-            KILLED,
-            RETRYING,
-        ]
-    )
-
-    workflow_status = frozenset(
-        [
-            RUNNING,
-            SUCCESS,
-            FAILED,
-            KILLING,
-            KILLED,
-        ]
-    )
-
-    finished = frozenset(
-        [
-            SUCCESS,
-            FAILED,
-            KILLED,
-        ]
-    )
+    def send_heartbeat(self, workflow_execution_id, task_name, seq_num):
+        request = HeartbeatRequest(workflow_execution_id=workflow_execution_id,
+                                   task_name=task_name,
+                                   sequence_number=seq_num)
+        response = self.stub.send_heartbeat(request)
+        return response.return_code

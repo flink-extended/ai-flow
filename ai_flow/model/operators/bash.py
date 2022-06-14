@@ -22,13 +22,12 @@ import signal
 import threading
 from subprocess import Popen, STDOUT, TimeoutExpired, PIPE
 from tempfile import TemporaryDirectory
-from typing import Dict, Optional
+from typing import Optional
 
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.common.util.thread_utils import StoppableThread
 from ai_flow.model.context import Context
 from ai_flow.model.operator import AIFlowOperator
-from ai_flow.model.status import TaskStatus
 
 logger = logging.getLogger(__name__)
 

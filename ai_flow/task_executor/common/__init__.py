@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,26 +14,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-import queue
-
-
-class MessageQueue(object):
-
-    def __init__(self) -> None:
-        self.queue = queue.Queue()
-
-    def send(self, event):
-        self.queue.put_nowait(event)
-
-    def get(self):
-        return self.queue.get()
-
-    def length(self):
-        return self.queue.qsize()
-
-    def get_with_timeout(self, timeout=1):
-        try:
-            return self.queue.get(timeout=timeout)
-        except Exception as e:
-            return None

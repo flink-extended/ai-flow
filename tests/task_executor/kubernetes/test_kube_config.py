@@ -15,7 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import os
 import unittest
+
+from ai_flow.common.configuration.helpers import expand_env_var
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.task_executor.kubernetes.kube_config import KubeConfig
@@ -40,7 +43,7 @@ class TestKubeConfig(unittest.TestCase):
         self.assertEqual(kube_config.get_image(), 'repo/image:0.1')
         self.assertEqual(kube_config.get_namespace(), 'default')
         self.assertTrue(kube_config.is_in_cluster())
-        self.assertEqual(kube_config.get_config_file(), '~/.kube/config')
+        self.assertEqual(kube_config.get_config_file(), expand_env_var('~/.kube/config'))
         self.assertEqual(kube_config.get_client_request_args(), {
             'arg1': 'val1',
             'arg2': 'val2'
@@ -49,4 +52,8 @@ class TestKubeConfig(unittest.TestCase):
     def test_default_kube_config(self):
         kube_config = KubeConfig(config_constants.K8S_TASK_EXECUTOR_CONFIG)
         self.assertFalse(kube_config.is_in_cluster())
-        self.assertIsNone(kube_config.get_config_file())
+        self.assertEqual(None, kube_config.get_config_file())
+        self.assertEqual(os.path.abspath(os.path.join(
+            os.path.dirname(__file__),
+            '../../../ai_flow/task_executor/kubernetes/pod_template_file_sample/pod_template.yaml'
+        )), kube_config.get_pod_template_file())

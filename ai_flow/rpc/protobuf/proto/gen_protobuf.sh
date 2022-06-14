@@ -162,6 +162,13 @@ python3 -m grpc.tools.protoc -I. \
   --grpc_python_out=.. \
   high_availability.proto
 
+python3 -m grpc.tools.protoc -I. \
+  -I/usr/local/include \
+  -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+  --python_out=.. \
+  --grpc_python_out=.. \
+  heartbeat_service.proto
+
 cd ..
 
 sed -i -E 's/^import message_pb2 as message__pb2/from \. import message_pb2 as message__pb2/' *pb2*.py
