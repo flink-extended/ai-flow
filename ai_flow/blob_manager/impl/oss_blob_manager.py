@@ -94,7 +94,7 @@ class OssBlobManager(BlobManager):
                     except OSError as e:
                         self.log.warning("Failed to remove lock file: {}".format(lock_file_path), exc_info=e)
         else:
-            self.log.info("Oss file: {} already exist at {}".format(oss_object_key, local_file_path))
+            self.log.debug("Oss file: {} already exist at {}".format(oss_object_key, local_file_path))
         return local_file_path
 
     @property

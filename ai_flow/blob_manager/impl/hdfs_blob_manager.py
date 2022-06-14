@@ -91,7 +91,7 @@ class HDFSBlobManager(BlobManager):
                     except OSError as e:
                         self.log.warning("Failed to remove lock file: {}".format(lock_file_path), exc_info=e)
         else:
-            self.log.info("HDFS file: {} already exist at {}".format(remote_file_path, local_file_path))
+            self.log.debug("HDFS file: {} already exist at {}".format(remote_file_path, local_file_path))
         return local_file_path
 
     def _download_file_from_hdfs(self, hdfs_path, local_path, retry_sleep_sec=5):

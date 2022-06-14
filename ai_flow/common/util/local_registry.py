@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import dbm
+from dbm import dumb
 import os
 
 from ai_flow.common.exception.exceptions import AIFlowException
@@ -29,7 +29,7 @@ class LocalRegistry(object):
         self._db = None
         if not os.path.isdir(os.path.dirname(os.path.abspath(file_path))):
             raise AIFlowException('Parent directory of local registry not exists.')
-        self._db = dbm.open(file_path, 'c')
+        self._db = dumb.open(file_path, 'c')
 
     def set(self, key, value):
         self._db[str.encode(key)] = str(value)
@@ -40,6 +40,9 @@ class LocalRegistry(object):
             return self._db[str.encode(key)]
         else:
             return None
+
+    def sync(self):
+        self._db.sync()
 
     def remove(self, key):
         if str.encode(key) in self._db.keys():

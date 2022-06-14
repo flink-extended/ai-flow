@@ -15,75 +15,53 @@
 # specific language governing permissions and limitations
 # under the License.
 import logging
-import time
-from abc import ABC, abstractmethod
-from datetime import datetime
+from abc import abstractmethod, ABC
 
-from typing import List
-
-from ai_flow.common.exception.exceptions import AIFlowDBException
-from ai_flow.model.action import TaskAction
-from ai_flow.model.status import TaskStatus
-from ai_flow.common.util.db_util.session import create_session
-from ai_flow.model.execution_type import ExecutionType
-from ai_flow.model.task_execution import TaskExecution, TaskExecutionKey
+from ai_flow.common.exception.exceptions import AIFlowException
+from ai_flow.common.util.module_utils import import_string
+from ai_flow.scheduler.schedule_command import TaskScheduleCommand
 
 logger = logging.getLogger(__name__)
 
 
-class ScheduleTaskCommand(object):
-    def __init__(self,
-                 task_execution: TaskExecutionKey,
-                 action: TaskAction):
-        self.task_execution = task_execution
-        self.action = action
-
-    def __str__(self):
-        return "task_execution: {0} action: {1}".format(self.task_execution, self.action)
-
-
-class BaseTaskExecutor(ABC):
-
-    def __init__(self):
-        pass
-
-    def schedule_task(self, command: ScheduleTaskCommand):
-        if command.action == TaskAction.START:
-            self.start_task_execution(command.task_execution)
-        elif command.action == TaskAction.STOP:
-            self.stop_task_execution(command.task_execution)
-        elif command.action == TaskAction.RESTART:
-            self.stop_task_execution(command.task_execution)
-            self.start_task_execution(command.task_execution)
-
-    def start_task_execution(self, key: TaskExecutionKey):
-        """
-        Start the task execution on worker.
-
-        :param key: Id of the task execution
-        """
-        raise NotImplementedError()
+class TaskExecutor(ABC):
 
     @abstractmethod
-    def stop_task_execution(self, key: TaskExecutionKey):
+    def schedule_task(self, command: TaskScheduleCommand):
         """
-        Stop the task execution of specified execution key.
+        Start, stop or restart the task.
 
-        :param key: Id of the task execution
+        :param command: The command that contains information to schedule a task.
         """
-        raise NotImplementedError()
 
     @abstractmethod
     def start(self):
         """
-        Do some initialization, e.g. start a new thread to observe the status
-        of all task executions and update the status to metadata backend.
+        Do some initialization.
         """
-        raise NotImplementedError()
 
     @abstractmethod
     def stop(self):
         """
-        Do some cleanup operations, e.g. stop the observer thread.
+        Do some cleanup operations.
         """
-        raise NotImplementedError()
+
+
+class TaskExecutorFactory(object):
+
+    @classmethod
+    def get_class_name(cls, executor_type: str):
+        executors = {
+            'local': 'ai_flow.task_executor.local.local_task_executor.LocalTaskExecutor',
+            'kubernetes': 'ai_flow.task_executor.kubernetes.k8s_task_executor.KubernetesTaskExecutor'
+        }
+        if executor_type.lower() in executors:
+            return executors[executor_type.lower()]
+        else:
+            raise AIFlowException("Invalid task executor type: {}".format(executor_type))
+
+    @classmethod
+    def get_task_executor(cls, executor_type: str) -> TaskExecutor:
+        class_name = cls.get_class_name(executor_type)
+        class_object = import_string(class_name)
+        return class_object()
