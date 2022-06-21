@@ -66,32 +66,10 @@ class TestTaskExecutorBase(unittest.TestCase):
 
     def test_executor_not_started(self):
         command = TaskScheduleCommand(action=TaskAction.START,
-                                      current_task_execution=TaskExecutionKey(1, 'task', 1),
-                                      new_task_execution=None)
+                                      new_task_execution=TaskExecutionKey(1, 'task', 1))
         with self.assertRaises(AIFlowException):
             executor = MockTaskExecutor()
             executor.schedule_task(command)
-
-    @mock.patch('ai_flow.task_executor.common.task_executor_base.TaskExecutorBase._send_task_status_change')
-    def test_schedule_task(self, mock_send):
-        key = TaskExecutionKey(1, 'task', 1)
-        command = TaskScheduleCommand(action=TaskAction.START,
-                                      current_task_execution=key,
-                                      new_task_execution=None)
-        self.executor.schedule_task(command)
-        mock_send.assert_called_once_with(task=key, status=TaskStatus.QUEUED)
-
-        command = TaskScheduleCommand(action=TaskAction.STOP,
-                                      current_task_execution=key,
-                                      new_task_execution=None)
-        self.executor.schedule_task(command)
-        mock_send.assert_called_with(task=key, status=TaskStatus.STOPPING)
-
-        command = TaskScheduleCommand(action=TaskAction.RESTART,
-                                      current_task_execution=key,
-                                      new_task_execution=None)
-        self.executor.schedule_task(command)
-        mock_send.assert_called_with(task=key, status=TaskStatus.RESTARTING)
 
     @mock.patch('ai_flow.task_executor.common.task_executor_base.TaskExecutorBase._send_task_status_change')
     def test__process_command(self, mock_send):
@@ -101,8 +79,7 @@ class TestTaskExecutorBase(unittest.TestCase):
 
             key = TaskExecutionKey(1, 'task', 1)
             command = TaskScheduleCommand(action=TaskAction.START,
-                                          current_task_execution=key,
-                                          new_task_execution=None)
+                                          new_task_execution=key)
             self.executor.command_queue.put(command)
             command = TaskScheduleCommand(action=TaskAction.STOP,
                                           current_task_execution=key,

@@ -52,13 +52,6 @@ class TaskExecutorBase(TaskExecutor):
         if not self.command_queue:
             raise AIFlowException('TaskExecutor not started.')
         self.command_queue.put(command)
-        task = command.current_task_execution
-        if command.action == TaskAction.START:
-            self._send_task_status_change(task=task, status=TaskStatus.QUEUED)
-        elif command.action == TaskAction.STOP:
-            self._send_task_status_change(task=task, status=TaskStatus.STOPPING)
-        elif command.action == TaskAction.RESTART:
-            self._send_task_status_change(task=task, status=TaskStatus.RESTARTING)
 
     def start(self):
         self.notification_client = EmbeddedNotificationClient(
@@ -93,17 +86,17 @@ class TaskExecutorBase(TaskExecutor):
                 schedule_command = self.command_queue.get(timeout=1)
                 try:
                     current_task = schedule_command.current_task_execution
+                    new_task = schedule_command.new_task_execution
                     action = schedule_command.action
                     logger.info("Running {} command on {}".format(action, current_task))
 
                     if action == TaskAction.START:
-                        self.start_task_execution(current_task)
+                        self.start_task_execution(new_task)
                         self._send_task_status_change(task=current_task, status=TaskStatus.RUNNING)
                     elif action == TaskAction.STOP:
                         self.stop_task_execution(current_task)
                     elif action == TaskAction.RESTART:
                         self.stop_task_execution(current_task)
-                        new_task = schedule_command.new_task_execution
                         self.start_task_execution(new_task)
                         self._send_task_status_change(task=new_task, status=TaskStatus.RUNNING)
                     self.command_queue.remove_expired()
