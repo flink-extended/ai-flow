@@ -60,7 +60,6 @@ class TestSchedulingEventProcessor(UnitTestWithNamespace):
         self.assertEquals(self.snapshot_meta.id, command.snapshot_id)
         command = workflow_executor.execute(command)
         workflow_execution_id = command.workflow_execution_id
-        self.metadata_manager.flush()
         self.assertTrue(isinstance(command, WorkflowExecutionScheduleCommand))
         self.assertEqual(1, len(command.task_schedule_commands))
         self.assertEqual(TaskAction.START, command.task_schedule_commands[0].action)
@@ -92,7 +91,6 @@ class TestSchedulingEventProcessor(UnitTestWithNamespace):
         command = scheduling_event_processor.process(event)
         self.assertTrue(isinstance(command, WorkflowExecutionStopCommand))
         command = workflow_executor.execute(command)
-        self.metadata_manager.flush()
         self.assertTrue(isinstance(command, WorkflowExecutionScheduleCommand))
         self.assertEqual(TaskAction.STOP, command.task_schedule_commands[0].action)
 
@@ -109,7 +107,6 @@ class TestSchedulingEventProcessor(UnitTestWithNamespace):
         self.assertEquals(self.snapshot_meta.id, command.snapshot_id)
         command = workflow_executor.execute(command)
         workflow_execution_id = command.workflow_execution_id
-        self.metadata_manager.flush()
         self.assertTrue(isinstance(command, WorkflowExecutionScheduleCommand))
         self.assertEqual(1, len(command.task_schedule_commands))
         self.assertEqual(TaskAction.START, command.task_schedule_commands[0].action)

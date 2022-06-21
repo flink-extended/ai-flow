@@ -33,7 +33,7 @@ class TaskRule(object):
         :param action: The execution commands for scheduled tasks.
         """
         self.condition = condition
-        self.acton = action
+        self.action = action
 
     def trigger(self, event: Event, context: Context) -> Optional[TaskAction]:
         """
@@ -44,7 +44,7 @@ class TaskRule(object):
                 Not None: Execution command for scheduling the task.
         """
         if self.condition.is_met(event, context):
-            return self.acton
+            return self.action
         else:
             return None
 

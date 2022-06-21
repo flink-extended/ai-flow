@@ -18,7 +18,7 @@ import os
 import unittest
 
 from ai_flow.common.util.db_util.db_migration import init_db
-from ai_flow.common.util.db_util.session import new_session
+from ai_flow.common.util.db_util.session import new_session, create_sqlalchemy_engine, prepare_session
 from ai_flow.metadata.metadata_manager import MetadataManager
 
 
@@ -28,7 +28,9 @@ class BaseUnitTest(unittest.TestCase):
         self._delete_db_file()
         self.url = 'sqlite:///{}'.format(self.file)
         init_db(self.url)
-        self.session = new_session(db_uri=self.url)
+        self.db_engine = create_sqlalchemy_engine(db_uri=self.url)
+        self.session = new_session(db_engine=self.db_engine)
+        prepare_session(db_engine=self.db_engine)
 
     def _delete_db_file(self):
         if os.path.exists(self.file):
