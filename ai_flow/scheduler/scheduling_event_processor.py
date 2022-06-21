@@ -26,6 +26,7 @@ from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.action import TaskAction
 from ai_flow.model.execution_type import ExecutionType
 from ai_flow.model.internal.events import SchedulingEventType, EventContextConstant
+from ai_flow.model.operator import OperatorConfigItem
 from ai_flow.model.status import TaskStatus, TASK_ALIVE_SET, TASK_FINISHED_SET, WorkflowStatus
 from ai_flow.model.task_execution import TaskExecutionKey
 from ai_flow.model.workflow import Workflow
@@ -60,6 +61,7 @@ class SchedulingEventProcessor(object):
                 task_execution_meta = self.metadata_manager.add_task_execution(
                     workflow_execution_id=workflow_execution_id,
                     task_name=task_name)
+                self.metadata_manager.flush()
                 new_task_execution = TaskExecutionKey(workflow_execution_id=workflow_execution_id,
                                                       task_name=task_name,
                                                       seq_num=task_execution_meta.sequence_number)
@@ -143,7 +145,8 @@ class SchedulingEventProcessor(object):
         if workflow.rules is not None and len(workflow.rules) != 0:
             return
         for op in workflow.tasks.values():
-            if 'periodic_config' in op.config:
+            if OperatorConfigItem.PERIODIC_EXPRESSION in op.config \
+                    and op.config[OperatorConfigItem.PERIODIC_EXPRESSION] is not None:
                 return
         # check task execution's status.
         task_executions = []
@@ -155,10 +158,8 @@ class SchedulingEventProcessor(object):
         is_success = True
         for te in task_executions:
             if TaskStatus(te.status) == TaskStatus.FAILED:
-                self.metadata_manager.update_workflow_execution_status(workflow_execution_id=workflow_execution_id,
-                                                                       status=WorkflowStatus.FAILED.value)
-                self.metadata_manager.set_workflow_execution_end_date(workflow_execution_id=workflow_execution_id,
-                                                                      end_date=utcnow())
+                self.metadata_manager.update_workflow_execution(workflow_execution_id=workflow_execution_id,
+                                                                status=WorkflowStatus.FAILED.value)
                 self.metadata_manager.flush()
                 is_success = False
                 break
@@ -166,10 +167,8 @@ class SchedulingEventProcessor(object):
                 is_success = False
                 break
         if is_success:
-            self.metadata_manager.update_workflow_execution_status(workflow_execution_id=workflow_execution_id,
-                                                                   status=WorkflowStatus.SUCCESS.value)
-            self.metadata_manager.set_workflow_execution_end_date(workflow_execution_id=workflow_execution_id,
-                                                                  end_date=utcnow())
+            self.metadata_manager.update_workflow_execution(workflow_execution_id=workflow_execution_id,
+                                                            status=WorkflowStatus.SUCCESS.value)
             self.metadata_manager.flush()
 
     def restart_task_execution(self, context):

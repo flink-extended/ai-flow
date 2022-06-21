@@ -299,14 +299,12 @@ class TestMetadataManager(unittest.TestCase):
         self.assertEqual(3, len(metas))
         meta = self.metadata_manager.get_workflow_execution(workflow_execution_id=metas[0].id)
         self.assertIsNone(meta.end_date)
-        self.metadata_manager.set_workflow_execution_end_date(workflow_execution_id=meta.id, end_date=utcnow())
-        self.metadata_manager.commit()
         meta = self.metadata_manager.get_workflow_execution(workflow_execution_id=meta.id)
-        self.assertIsNotNone(meta.end_date)
         self.assertEqual(WorkflowStatus.INIT.value, meta.status)
-        meta = self.metadata_manager.update_workflow_execution_status(workflow_execution_id=meta.id,
-                                                                      status=WorkflowStatus.SUCCESS.value)
+        meta = self.metadata_manager.update_workflow_execution(workflow_execution_id=meta.id,
+                                                               status=WorkflowStatus.SUCCESS.value)
         self.metadata_manager.commit()
+        self.assertIsNotNone(meta.end_date)
         meta = self.metadata_manager.get_workflow_execution(workflow_execution_id=meta.id)
         self.assertEqual(WorkflowStatus.SUCCESS.value, meta.status)
         meta = self.metadata_manager.delete_workflow_execution(workflow_execution_id=meta.id)

@@ -274,7 +274,7 @@ class TestRuleExtractor(UnitTestWithNamespace):
                         snapshot_id=snapshot_meta.id)
                     self.metadata_manager.flush()
                     if 0 == j % 2:
-                        self.metadata_manager.update_workflow_execution_status(
+                        self.metadata_manager.update_workflow_execution(
                             workflow_execution_id=workflow_execution_meta.id,
                             status=WorkflowStatus.RUNNING.value
                         )

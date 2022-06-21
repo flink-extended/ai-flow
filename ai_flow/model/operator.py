@@ -26,6 +26,14 @@ from ai_flow.model.context import Context
 from ai_flow.model.status import TaskStatus
 
 
+class OperatorConfigItem(object):
+    """
+    The Operator's config items.
+    PERIODIC_EXPRESSION: The expression for the periodic task.
+    """
+    PERIODIC_EXPRESSION = 'periodic_expression'
+
+
 class Operator(object):
     """
     Operator is a template that defines a task. It is the abstract base class for all operators.
@@ -34,6 +42,7 @@ class Operator(object):
     This class is abstract and shouldn't be instantiated. Instantiating a class derived from this one results in
     the creation of a task object, which ultimately becomes a task in Workflow objects.
     """
+
     def __init__(self,
                  name: str,
                  **kwargs,
@@ -62,7 +71,7 @@ class Operator(object):
         :param event_key: The event for scheduling the task to depend on.
         :param action: The action for scheduling the task.
         """
-        self.workflow.action_on_event_received(task_name=self.name, event_key=event_key,  action=action)
+        self.workflow.action_on_event_received(task_name=self.name, event_key=event_key, action=action)
 
     def action_on_task_status(self,
                               action: TaskAction,

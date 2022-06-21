@@ -61,8 +61,8 @@ class WorkflowExecutor(object):
                                                    ))
                     task_schedule_commands.append(task_cmd)
                     self.metadata_manager.session.flush()
-            self.metadata_manager.update_workflow_execution_status(workflow_execution_id=workflow_execution_meta.id,
-                                                                   status=WorkflowStatus.RUNNING.value)
+            self.metadata_manager.update_workflow_execution(workflow_execution_id=workflow_execution_meta.id,
+                                                            status=WorkflowStatus.RUNNING.value)
             self.metadata_manager.flush()
             if len(task_schedule_commands) > 0:
                 return WorkflowExecutionScheduleCommand(workflow_execution_id=workflow_execution_meta.id,
@@ -85,12 +85,9 @@ class WorkflowExecutor(object):
                                                        seq_num=task_execution.sequence_number,
                                                    ))
                     task_schedule_commands.append(task_cmd)
-                self.metadata_manager.update_workflow_execution_status(
+                self.metadata_manager.update_workflow_execution(
                     workflow_execution_id=schedule_cmd.workflow_execution_id,
-                    status=WorkflowStatus.STOPPED.value)
-                self.metadata_manager.set_workflow_execution_end_date(
-                    workflow_execution_id=schedule_cmd.workflow_execution_id,
-                    end_date=utcnow()
+                    status=WorkflowStatus.STOPPED.value
                 )
                 self.metadata_manager.flush()
                 if len(task_schedule_commands) > 0:
