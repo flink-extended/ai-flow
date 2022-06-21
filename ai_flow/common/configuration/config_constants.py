@@ -59,6 +59,11 @@ SQLALCHEMY_MAX_OVERFLOW = SERVER_CONF.get_int('sql_alchemy_max_overflow', fallba
 
 K8S_TASK_EXECUTOR_CONFIG = SERVER_CONF.get('k8s_executor_config', fallback={})
 
+SERVER_WORKER_QUEUE_SIZE = SERVER_CONF.get('server_worker_queue_size', fallback=20)
+
+SERVER_WORKER_NUMBER = SERVER_CONF.get('server_worker_number', fallback=5)
+
+
 # Client Config
 
 SERVER_ADDRESS = CLIENT_CONF.get_str('server_address', fallback='127.0.0.1:50051')

@@ -61,8 +61,8 @@ class TestWorkflow(unittest.TestCase):
             task.action_on_event_received(event_key=EventKey(name='b'), action=TaskAction.STOP)
         self.assertEqual(1, len(workflow.tasks))
         self.assertEqual(2, len(workflow.rules['task']))
-        self.assertEqual(TaskAction.START, workflow.rules['task'][0].acton)
-        self.assertEqual(TaskAction.STOP, workflow.rules['task'][1].acton)
+        self.assertEqual(TaskAction.START, workflow.rules['task'][0].action)
+        self.assertEqual(TaskAction.STOP, workflow.rules['task'][1].action)
 
     def test_action_on_task_status(self):
         with Workflow(name='workflow') as workflow:

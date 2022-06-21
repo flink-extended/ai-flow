@@ -127,7 +127,7 @@ class TestRuleExecutor(UnitTestWithNamespace):
             run_type=ExecutionType.MANUAL,
             snapshot_id=snapshot_meta.id)
         self.metadata_manager.flush()
-        self.metadata_manager.update_workflow_execution_status(
+        self.metadata_manager.update_workflow_execution(
             workflow_execution_id=workflow_execution_meta.id,
             status=WorkflowStatus.RUNNING.value)
         self.metadata_manager.flush()
@@ -250,7 +250,7 @@ class TestRuleExecutor(UnitTestWithNamespace):
             run_type=ExecutionType.MANUAL,
             snapshot_id=snapshot_meta.id)
         self.metadata_manager.flush()
-        self.metadata_manager.update_workflow_execution_status(
+        self.metadata_manager.update_workflow_execution(
             workflow_execution_id=workflow_execution_meta.id,
             status=WorkflowStatus.RUNNING.value)
         self.metadata_manager.flush()

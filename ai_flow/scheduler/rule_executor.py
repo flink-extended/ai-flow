@@ -74,6 +74,7 @@ class RuleExecutor(object):
                         task_execution_meta = self.metadata_manager.add_task_execution(
                             workflow_execution_id=rule.workflow_execution_id,
                             task_name=task_rule_wrapper.task_name)
+                        self.metadata_manager.flush()
                         new_task_execution = TaskExecutionKey(workflow_execution_id=rule.workflow_execution_id,
                                                               task_name=task_rule_wrapper.task_name,
                                                               seq_num=task_execution_meta.sequence_number)
@@ -98,6 +99,7 @@ class RuleExecutor(object):
                     task_execution_meta = self.metadata_manager.add_task_execution(
                         workflow_execution_id=rule.workflow_execution_id,
                         task_name=task_rule_wrapper.task_name)
+                    self.metadata_manager.flush()
                     new_task_execution = TaskExecutionKey(workflow_execution_id=rule.workflow_execution_id,
                                                           task_name=task_rule_wrapper.task_name,
                                                           seq_num=task_execution_meta.sequence_number)

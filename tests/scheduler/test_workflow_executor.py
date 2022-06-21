@@ -77,7 +77,6 @@ class TestWorkflowExecutor(UnitTestWithNamespace):
         workflow_executor = WorkflowExecutor(metadata_manager=self.metadata_manager)
 
         command = workflow_executor.execute(WorkflowExecutionStartCommand(snapshot_id=snapshot_meta.id))
-        self.metadata_manager.commit()
         self.assertIsNotNone(command)
         self.assertEqual(3, len(command.task_schedule_commands))
         for c in command.task_schedule_commands:
