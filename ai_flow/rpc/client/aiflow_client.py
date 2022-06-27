@@ -16,33 +16,26 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import logging.config
-import os
+import grpc
+from ai_flow.rpc.client.scheduler_client import SchedulerClient
 
-
-# We hard code the logging config, we should make it configurable in the future.
+from ai_flow.rpc.client.metadata_client import MetadataClient
 from ai_flow.common.configuration import config_constants
 
-logging.config.dictConfig({
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'default': {
-            'format': '[%(asctime)s - %(filename)s:%(lineno)d [%(threadName)s] - %(levelname)s: %(message)s',
-        }
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://sys.stderr',
-            'formatter': 'default'
-        }
-    },
-    'root': {
-        'level': 'INFO',
-        'handlers': ['console']
-    }
-})
 
-AIFLOW_PID_FILENAME = 'aiflow_server.pid'
-AIFLOW_WEBSERVER_PID_FILENAME = "aiflow_web_server.pid"
+class AIFlowClient(MetadataClient, SchedulerClient):
+    def __init__(self, server_uri):
+        self.server_uri = server_uri
+        MetadataClient.__init__(self, server_uri)
+        SchedulerClient.__init__(self, server_uri)
+        self.wait_for_server_ready(60)   # TODO make it configurable
+
+    def wait_for_server_ready(self, timeout):
+        channel = grpc.insecure_channel(self.server_uri)
+        fut = grpc.channel_ready_future(channel)
+        fut.result(timeout)
+
+
+def get_ai_flow_client():
+    server_uri = config_constants.SERVER_ADDRESS
+    return AIFlowClient(server_uri=server_uri)

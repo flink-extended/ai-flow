@@ -46,9 +46,12 @@ class WorkflowSnapshotMeta(Base):
                  workflow_id,
                  workflow_object,
                  uri,
-                 signature):
+                 signature,
+                 create_time=None,
+                 uuid=None):
         self.workflow_id = workflow_id
         self.workflow_object = workflow_object
         self.uri = uri
         self.signature = signature
-        self.create_time = utcnow()
+        self.create_time = utcnow() if create_time is None else create_time
+        self.id = uuid

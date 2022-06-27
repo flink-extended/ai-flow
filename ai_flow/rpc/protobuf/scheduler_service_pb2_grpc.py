@@ -3,10 +3,10 @@
 import grpc
 
 from . import message_pb2 as message__pb2
-from . import metadata_service_pb2 as metadata__service__pb2
+from . import scheduler_service_pb2 as scheduler__service__pb2
 
 
-class MetadataServiceStub(object):
+class SchedulerServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -15,172 +15,155 @@ class MetadataServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.addNamespace = channel.unary_unary(
-                '/ai_flow.MetadataService/addNamespace',
-                request_serializer=message__pb2.NamespaceProto.SerializeToString,
+        self.startWorkflowExecution = channel.unary_unary(
+                '/ai_flow.SchedulerService/startWorkflowExecution',
+                request_serializer=message__pb2.WorkflowIdentifier.SerializeToString,
                 response_deserializer=message__pb2.Response.FromString,
                 )
-        self.getNamespace = channel.unary_unary(
-                '/ai_flow.MetadataService/getNamespace',
-                request_serializer=message__pb2.NameRequest.SerializeToString,
+        self.addWorkflow = channel.unary_unary(
+                '/ai_flow.SchedulerService/addWorkflow',
+                request_serializer=message__pb2.WorkflowProto.SerializeToString,
                 response_deserializer=message__pb2.Response.FromString,
                 )
-        self.updateNamespace = channel.unary_unary(
-                '/ai_flow.MetadataService/updateNamespace',
-                request_serializer=message__pb2.NamespaceProto.SerializeToString,
+        self.updateWorkflow = channel.unary_unary(
+                '/ai_flow.SchedulerService/updateWorkflow',
+                request_serializer=scheduler__service__pb2.UpdateWorkflowRequest.SerializeToString,
                 response_deserializer=message__pb2.Response.FromString,
                 )
-        self.listNamespaces = channel.unary_unary(
-                '/ai_flow.MetadataService/listNamespaces',
-                request_serializer=message__pb2.ListRequest.SerializeToString,
+        self.getWorkflow = channel.unary_unary(
+                '/ai_flow.SchedulerService/getWorkflow',
+                request_serializer=message__pb2.WorkflowIdentifier.SerializeToString,
                 response_deserializer=message__pb2.Response.FromString,
                 )
-        self.deleteNamespace = channel.unary_unary(
-                '/ai_flow.MetadataService/deleteNamespace',
-                request_serializer=message__pb2.NameRequest.SerializeToString,
+        self.deleteWorkflow = channel.unary_unary(
+                '/ai_flow.SchedulerService/deleteWorkflow',
+                request_serializer=message__pb2.WorkflowIdentifier.SerializeToString,
                 response_deserializer=message__pb2.Response.FromString,
                 )
-        self.addWorkflowSnapshot = channel.unary_unary(
-                '/ai_flow.MetadataService/addWorkflowSnapshot',
-                request_serializer=message__pb2.WorkflowSnapshotProto.SerializeToString,
+        self.disableWorkflow = channel.unary_unary(
+                '/ai_flow.SchedulerService/disableWorkflow',
+                request_serializer=message__pb2.WorkflowIdentifier.SerializeToString,
                 response_deserializer=message__pb2.Response.FromString,
                 )
-        self.getWorkflowSnapshot = channel.unary_unary(
-                '/ai_flow.MetadataService/getWorkflowSnapshot',
-                request_serializer=message__pb2.IdRequest.SerializeToString,
+        self.enableWorkflow = channel.unary_unary(
+                '/ai_flow.SchedulerService/enableWorkflow',
+                request_serializer=message__pb2.WorkflowIdentifier.SerializeToString,
                 response_deserializer=message__pb2.Response.FromString,
                 )
-        self.listWorkflowSnapshots = channel.unary_unary(
-                '/ai_flow.MetadataService/listWorkflowSnapshots',
-                request_serializer=metadata__service__pb2.ListWorkflowSnapshotsRequest.SerializeToString,
-                response_deserializer=message__pb2.Response.FromString,
-                )
-        self.deleteWorkflowSnapshot = channel.unary_unary(
-                '/ai_flow.MetadataService/deleteWorkflowSnapshot',
-                request_serializer=message__pb2.IdRequest.SerializeToString,
+        self.listWorkflows = channel.unary_unary(
+                '/ai_flow.SchedulerService/listWorkflows',
+                request_serializer=scheduler__service__pb2.ListWorkflowsRequest.SerializeToString,
                 response_deserializer=message__pb2.Response.FromString,
                 )
 
 
-class MetadataServiceServicer(object):
+class SchedulerServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def addNamespace(self, request, context):
-        """begin namespace api
+    def startWorkflowExecution(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def addWorkflow(self, request, context):
+        """begin workflow api
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def getNamespace(self, request, context):
+    def updateWorkflow(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def updateNamespace(self, request, context):
+    def getWorkflow(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def listNamespaces(self, request, context):
+    def deleteWorkflow(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def deleteNamespace(self, request, context):
+    def disableWorkflow(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def addWorkflowSnapshot(self, request, context):
-        """begin workflow snapshot api
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def getWorkflowSnapshot(self, request, context):
+    def enableWorkflow(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def listWorkflowSnapshots(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def deleteWorkflowSnapshot(self, request, context):
+    def listWorkflows(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_MetadataServiceServicer_to_server(servicer, server):
+def add_SchedulerServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'addNamespace': grpc.unary_unary_rpc_method_handler(
-                    servicer.addNamespace,
-                    request_deserializer=message__pb2.NamespaceProto.FromString,
+            'startWorkflowExecution': grpc.unary_unary_rpc_method_handler(
+                    servicer.startWorkflowExecution,
+                    request_deserializer=message__pb2.WorkflowIdentifier.FromString,
                     response_serializer=message__pb2.Response.SerializeToString,
             ),
-            'getNamespace': grpc.unary_unary_rpc_method_handler(
-                    servicer.getNamespace,
-                    request_deserializer=message__pb2.NameRequest.FromString,
+            'addWorkflow': grpc.unary_unary_rpc_method_handler(
+                    servicer.addWorkflow,
+                    request_deserializer=message__pb2.WorkflowProto.FromString,
                     response_serializer=message__pb2.Response.SerializeToString,
             ),
-            'updateNamespace': grpc.unary_unary_rpc_method_handler(
-                    servicer.updateNamespace,
-                    request_deserializer=message__pb2.NamespaceProto.FromString,
+            'updateWorkflow': grpc.unary_unary_rpc_method_handler(
+                    servicer.updateWorkflow,
+                    request_deserializer=scheduler__service__pb2.UpdateWorkflowRequest.FromString,
                     response_serializer=message__pb2.Response.SerializeToString,
             ),
-            'listNamespaces': grpc.unary_unary_rpc_method_handler(
-                    servicer.listNamespaces,
-                    request_deserializer=message__pb2.ListRequest.FromString,
+            'getWorkflow': grpc.unary_unary_rpc_method_handler(
+                    servicer.getWorkflow,
+                    request_deserializer=message__pb2.WorkflowIdentifier.FromString,
                     response_serializer=message__pb2.Response.SerializeToString,
             ),
-            'deleteNamespace': grpc.unary_unary_rpc_method_handler(
-                    servicer.deleteNamespace,
-                    request_deserializer=message__pb2.NameRequest.FromString,
+            'deleteWorkflow': grpc.unary_unary_rpc_method_handler(
+                    servicer.deleteWorkflow,
+                    request_deserializer=message__pb2.WorkflowIdentifier.FromString,
                     response_serializer=message__pb2.Response.SerializeToString,
             ),
-            'addWorkflowSnapshot': grpc.unary_unary_rpc_method_handler(
-                    servicer.addWorkflowSnapshot,
-                    request_deserializer=message__pb2.WorkflowSnapshotProto.FromString,
+            'disableWorkflow': grpc.unary_unary_rpc_method_handler(
+                    servicer.disableWorkflow,
+                    request_deserializer=message__pb2.WorkflowIdentifier.FromString,
                     response_serializer=message__pb2.Response.SerializeToString,
             ),
-            'getWorkflowSnapshot': grpc.unary_unary_rpc_method_handler(
-                    servicer.getWorkflowSnapshot,
-                    request_deserializer=message__pb2.IdRequest.FromString,
+            'enableWorkflow': grpc.unary_unary_rpc_method_handler(
+                    servicer.enableWorkflow,
+                    request_deserializer=message__pb2.WorkflowIdentifier.FromString,
                     response_serializer=message__pb2.Response.SerializeToString,
             ),
-            'listWorkflowSnapshots': grpc.unary_unary_rpc_method_handler(
-                    servicer.listWorkflowSnapshots,
-                    request_deserializer=metadata__service__pb2.ListWorkflowSnapshotsRequest.FromString,
-                    response_serializer=message__pb2.Response.SerializeToString,
-            ),
-            'deleteWorkflowSnapshot': grpc.unary_unary_rpc_method_handler(
-                    servicer.deleteWorkflowSnapshot,
-                    request_deserializer=message__pb2.IdRequest.FromString,
+            'listWorkflows': grpc.unary_unary_rpc_method_handler(
+                    servicer.listWorkflows,
+                    request_deserializer=scheduler__service__pb2.ListWorkflowsRequest.FromString,
                     response_serializer=message__pb2.Response.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'ai_flow.MetadataService', rpc_method_handlers)
+            'ai_flow.SchedulerService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class MetadataService(object):
+class SchedulerService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def addNamespace(request,
+    def startWorkflowExecution(request,
             target,
             options=(),
             channel_credentials=None,
@@ -190,14 +173,14 @@ class MetadataService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/addNamespace',
-            message__pb2.NamespaceProto.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.SchedulerService/startWorkflowExecution',
+            message__pb2.WorkflowIdentifier.SerializeToString,
             message__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def getNamespace(request,
+    def addWorkflow(request,
             target,
             options=(),
             channel_credentials=None,
@@ -207,14 +190,14 @@ class MetadataService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/getNamespace',
-            message__pb2.NameRequest.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.SchedulerService/addWorkflow',
+            message__pb2.WorkflowProto.SerializeToString,
             message__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def updateNamespace(request,
+    def updateWorkflow(request,
             target,
             options=(),
             channel_credentials=None,
@@ -224,14 +207,14 @@ class MetadataService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/updateNamespace',
-            message__pb2.NamespaceProto.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.SchedulerService/updateWorkflow',
+            scheduler__service__pb2.UpdateWorkflowRequest.SerializeToString,
             message__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def listNamespaces(request,
+    def getWorkflow(request,
             target,
             options=(),
             channel_credentials=None,
@@ -241,14 +224,14 @@ class MetadataService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/listNamespaces',
-            message__pb2.ListRequest.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.SchedulerService/getWorkflow',
+            message__pb2.WorkflowIdentifier.SerializeToString,
             message__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def deleteNamespace(request,
+    def deleteWorkflow(request,
             target,
             options=(),
             channel_credentials=None,
@@ -258,14 +241,14 @@ class MetadataService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/deleteNamespace',
-            message__pb2.NameRequest.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.SchedulerService/deleteWorkflow',
+            message__pb2.WorkflowIdentifier.SerializeToString,
             message__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def addWorkflowSnapshot(request,
+    def disableWorkflow(request,
             target,
             options=(),
             channel_credentials=None,
@@ -275,14 +258,14 @@ class MetadataService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/addWorkflowSnapshot',
-            message__pb2.WorkflowSnapshotProto.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.SchedulerService/disableWorkflow',
+            message__pb2.WorkflowIdentifier.SerializeToString,
             message__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def getWorkflowSnapshot(request,
+    def enableWorkflow(request,
             target,
             options=(),
             channel_credentials=None,
@@ -292,14 +275,14 @@ class MetadataService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/getWorkflowSnapshot',
-            message__pb2.IdRequest.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.SchedulerService/enableWorkflow',
+            message__pb2.WorkflowIdentifier.SerializeToString,
             message__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def listWorkflowSnapshots(request,
+    def listWorkflows(request,
             target,
             options=(),
             channel_credentials=None,
@@ -309,25 +292,8 @@ class MetadataService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/listWorkflowSnapshots',
-            metadata__service__pb2.ListWorkflowSnapshotsRequest.SerializeToString,
-            message__pb2.Response.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def deleteWorkflowSnapshot(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/ai_flow.MetadataService/deleteWorkflowSnapshot',
-            message__pb2.IdRequest.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/ai_flow.SchedulerService/listWorkflows',
+            scheduler__service__pb2.ListWorkflowsRequest.SerializeToString,
             message__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
