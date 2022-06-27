@@ -119,6 +119,7 @@ class DBWorkflowValueState(DBValueState):
         else:
             meta.value = obj_bytes
             self.session.merge(meta)
+        self.session.flush()
 
 
 class DBWorkflowExecutionValueState(DBValueState):
@@ -155,4 +156,5 @@ class DBWorkflowExecutionValueState(DBValueState):
         else:
             meta.value = obj_bytes
             self.session.merge(meta)
+        self.session.flush()
 
