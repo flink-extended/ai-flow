@@ -107,7 +107,8 @@ class Worker(threading.Thread):
     def run(self) -> None:
         with create_session() as session:
             metadata_manager = MetadataManager(session=session)
-            scheduling_event_processor = SchedulingEventProcessor(metadata_manager=metadata_manager)
+            scheduling_event_processor = SchedulingEventProcessor(metadata_manager=metadata_manager,
+                                                                  notification_client=self.notification_client)
             workflow_executor = WorkflowExecutor(metadata_manager=metadata_manager)
             rule_executor = RuleExecutor(metadata_manager=metadata_manager)
             while True:
@@ -140,7 +141,7 @@ class Worker(threading.Thread):
                     metadata_manager.commit()
                 except Exception as e:
                     session.rollback()
-                    logging.error("Can not handle event {}, exception {}".format(str(event), str(e)))
+                    logging.exception("Can not handle event {}, exception {}".format(str(event), str(e)))
                 finally:
                     self.input_queue.task_done()
 

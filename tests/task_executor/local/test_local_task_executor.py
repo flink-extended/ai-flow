@@ -34,23 +34,12 @@ from ai_flow.task_executor.local.local_task_executor import LocalTaskExecutor
 class TestLocalExecutor(unittest.TestCase):
 
     @mock.patch('subprocess.Popen')
-    def test_execution_with_subprocess(self, mock_popen):
-        with mock.patch.object(
-            config_constants, 'EXECUTE_TASKS_IN_NEW_INTERPRETER', new_callable=mock.PropertyMock
-        ) as option:
-            option.return_value = True
-            mock_popen.return_value.pid = 1
-            mock_popen.return_value.communicate.return_value = (b"OUT", b"ERR")
-            mock_popen.return_value.poll.return_value = 0
-            self._test_execute_task()
-
-    @mock.patch('ai_flow.task_executor.local.worker.os')
-    def test_execution_with_fork(self, mock_os):
-        mock_os.fork.return_value = 1
-        mock_os.waitpid.return_value = (1, 0)
-        self._test_execute_task()
-
-    def _test_execute_task(self, ):
+    @mock.patch('ai_flow.task_executor.common.task_executor_base.TaskExecutorBase.generate_command')
+    def test_execution_with_subprocess(self, mock_command, mock_popen):
+        mock_popen.return_value.pid = 1
+        mock_popen.return_value.communicate.return_value = (b"OUT", b"ERR")
+        mock_popen.return_value.poll.return_value = 0
+        mock_command.return_value = None
         key = TaskExecutionKey(1, 'task', 1)
 
         with TemporaryDirectory(prefix='test_local_task_executor') as tmp_dir:
@@ -59,6 +48,7 @@ class TestLocalExecutor(unittest.TestCase):
             executor.initialize()
             # call start twice
             executor.start_task_execution(key)
+            mock_command.assert_called_once_with(key)
             executor.start_task_execution(key)
             time.sleep(1)
 

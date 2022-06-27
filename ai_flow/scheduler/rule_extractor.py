@@ -179,6 +179,9 @@ class RuleExtractor(object):
     def _load_workflow_triggers(self):
         return self.metadata_manager.list_all_workflow_triggers()
 
+    def update_workflow(self, workflow_id, pickled_workflow):
+        self.workflow_dict[workflow_id] = cloudpickle.loads(pickled_workflow)
+
     def extract_workflow_execution_rules(self, event: Event) -> List[WorkflowExecutionRuleWrapper]:
         """Extract rules for workflow execution"""
         workflow_execution_id = parse_workflow_execution_id(event.context)
@@ -224,3 +227,4 @@ class RuleExtractor(object):
             if len(rules) > 0:
                 results.append(WorkflowRuleWrapper(workflow_id=workflow_id, rules=rules))
         return results
+

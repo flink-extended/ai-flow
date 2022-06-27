@@ -50,7 +50,8 @@ class Dispatcher(object):
         is_scheduling_event = self._is_scheduling_event(event=event)
         if is_scheduling_event:
             context = json.loads(event.context)
-            if SchedulingEventType.START_WORKFLOW_EXECUTION == SchedulingEventType(event.event_key.name):
+            if SchedulingEventType.START_WORKFLOW_EXECUTION == SchedulingEventType(event.event_key.name) or \
+                    SchedulingEventType.PERIODIC_RUN_WORKFLOW == SchedulingEventType(event.event_key.name):
                 worker_index = self._worker_index(context[EventContextConstant.WORKFLOW_ID])
             else:
                 worker_index = self._worker_index(context[EventContextConstant.WORKFLOW_EXECUTION_ID])

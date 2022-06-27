@@ -20,12 +20,14 @@ from typing import Union
 
 import cloudpickle
 from notification_service.event import Event
+from notification_service.notification_client import NotificationClient
 
+from ai_flow.common.util import workflow_utils
 from ai_flow.common.util.time_utils import utcnow
 from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.action import TaskAction
 from ai_flow.model.execution_type import ExecutionType
-from ai_flow.model.internal.events import SchedulingEventType, EventContextConstant
+from ai_flow.model.internal.events import SchedulingEventType, EventContextConstant, TaskStatusChangedEvent
 from ai_flow.model.operator import OperatorConfigItem
 from ai_flow.model.status import TaskStatus, TASK_ALIVE_SET, TASK_FINISHED_SET, WorkflowStatus
 from ai_flow.model.task_execution import TaskExecutionKey
@@ -35,8 +37,11 @@ from ai_flow.scheduler.schedule_command import WorkflowExecutionScheduleCommand,
 
 
 class SchedulingEventProcessor(object):
-    def __init__(self, metadata_manager: MetadataManager):
+    def __init__(self,
+                 metadata_manager: MetadataManager,
+                 notification_client: NotificationClient):
         self.metadata_manager = metadata_manager
+        self.notification_client = notification_client
 
     def process(self, event: Event) -> Union[WorkflowExecutionScheduleCommand,
                                              WorkflowExecutionStartCommand,
@@ -115,6 +120,14 @@ class SchedulingEventProcessor(object):
                     status=status)
                 self.metadata_manager.flush()
                 self._set_workflow_execution_status(workflow_execution_id=workflow_execution_id)
+
+                workflow = workflow_utils.get_workflow(workflow_execution_id)
+                event = TaskStatusChangedEvent(workflow_name=workflow.name,
+                                               workflow_execution_id=workflow_execution_id,
+                                               task_name=task_name,
+                                               status=TaskStatus(status),
+                                               namespace=workflow.namespace)
+                self.notification_client.send_event(event)
 
         elif SchedulingEventType.TASK_HEARTBEAT_TIMEOUT == scheduling_event_type:
             workflow_execution_id = context[EventContextConstant.WORKFLOW_EXECUTION_ID]

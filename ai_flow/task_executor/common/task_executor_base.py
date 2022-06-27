@@ -21,10 +21,13 @@ from queue import Empty
 
 from notification_service.notification_client import NotificationClient
 
-from ai_flow.common.configuration.config_constants import NOTIFICATION_SERVER_URI
+from ai_flow.common.configuration.config_constants import NOTIFICATION_SERVER_URI, INTERNAL_RPC_PORT, \
+    TASK_HEARTBEAT_INTERVAL
 from notification_service.embedded_notification_client import EmbeddedNotificationClient
 
 from ai_flow.common.exception.exceptions import AIFlowException
+from ai_flow.common.util import workflow_utils
+from ai_flow.common.util.net_utils import get_ip_addr
 from ai_flow.common.util.thread_utils import StoppableThread
 from ai_flow.metadata.message import PersistentQueue
 
@@ -92,7 +95,7 @@ class TaskExecutorBase(TaskExecutor):
 
                     if action == TaskAction.START:
                         self.start_task_execution(new_task)
-                        self._send_task_status_change(task=current_task, status=TaskStatus.RUNNING)
+                        self._send_task_status_change(task=new_task, status=TaskStatus.RUNNING)
                     elif action == TaskAction.STOP:
                         self.stop_task_execution(current_task)
                     elif action == TaskAction.RESTART:
@@ -127,10 +130,21 @@ class TaskExecutorBase(TaskExecutor):
 
     @staticmethod
     def generate_command(key: TaskExecutionKey):
+        workflow = workflow_utils.get_workflow(key.workflow_execution_id)
+        if workflow is None:
+            raise AIFlowException(f'Cannot find corresponding workflow for task {key}.')
+        workflow_snapshot = workflow_utils.get_workflow_snapshot(workflow.id)
+        if workflow_snapshot is None:
+            raise AIFlowException(f'Cannot find workflow snapshot for task {key}.')
         return ["aiflow",
                 "task-execution",
                 "run",
+                str(workflow.name),
                 str(key.workflow_execution_id),
                 str(key.task_name),
-                str(key.seq_num)
+                str(key.seq_num),
+                str(workflow_snapshot.uri),
+                NOTIFICATION_SERVER_URI,
+                '{}:{}'.format(get_ip_addr(), INTERNAL_RPC_PORT),
+                '--heartbeat-interval', str(TASK_HEARTBEAT_INTERVAL)
                 ]

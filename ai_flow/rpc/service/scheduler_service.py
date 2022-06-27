@@ -13,12 +13,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from typing import List
 
 from ai_flow.rpc.service.util.meta_to_proto import MetaToProto
 from notification_service.embedded_notification_client import EmbeddedNotificationClient
-from notification_service.event import Event
-from notification_service.notification_client import ListenerProcessor
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.common.result import BaseResult, RetCode
@@ -34,11 +31,10 @@ from ai_flow.scheduler.scheduler import EventDrivenScheduler
 class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
 
     def __init__(self):
-        db_engine = create_sqlalchemy_engine(config_constants.METADATA_BACKEND_URI, connect_args={'check_same_thread': False})
+        db_engine = create_sqlalchemy_engine(config_constants.METADATA_BACKEND_URI)
         self.notification_client = EmbeddedNotificationClient(
             server_uri=config_constants.NOTIFICATION_SERVER_URI,
-            namespace='scheduler', sender='scheduler', client_id: int =None,
-                 initial_seq_num: )
+            namespace='scheduler', sender='scheduler')
         self.scheduler = EventDrivenScheduler(db_engine=db_engine,
                                               notification_client=self.notification_client)
 

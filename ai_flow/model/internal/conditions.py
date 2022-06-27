@@ -14,12 +14,14 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import json
+
 from notification_service.event import EventKey, Event
 from typing import List
 
 from ai_flow.model.condition import Condition
 from ai_flow.model.context import Context
-from ai_flow.model.internal.events import TaskStatusChangedEventKey
+from ai_flow.model.internal.events import TaskStatusChangedEventKey, TaskStatusChangedEvent, EventContextConstant
 from ai_flow.model.state import ValueState, ValueStateDescriptor
 from ai_flow.model.status import TaskStatus
 
@@ -138,8 +140,37 @@ class TaskStatusCondition(Condition):
     # todo: To judge whether to trigger or not,
     #  it is necessary to consider the inconsistency between the task status and the events.
     def is_met(self, event: Event, context: Context) -> bool:
-        status = context.get_task_status(task_name=self.expect_events[0].sender)
-        if self.expect_status == status:
+        context_dict = json.loads(event.context)
+        task_status = context_dict[EventContextConstant.TASK_STATUS]
+        if self.expect_status == task_status:
             return True
         else:
             return False
+
+
+class TaskStatusAllMetCondition(Condition):
+
+    def __init__(self, condition_list: List[TaskStatusCondition]):
+        """
+        :param condition_list: The conditions that this condition contains.
+        """
+        events = []
+        for c in condition_list:
+            events.extend(c.expect_events)
+        super().__init__(expect_events=events)
+        self.condition_list = condition_list
+
+    def is_met(self, event: Event, context: Context) -> bool:
+        # assert isinstance(event, TaskStatusChangedEvent)
+
+        for condition in self.condition_list:
+            namespace_name = context.workflow.namespace
+            workflow_name = context.workflow.name
+            index = len(f'{namespace_name}.{workflow_name}')
+
+            event_key: TaskStatusChangedEventKey = condition.expect_events[0]
+            task_name = event_key.name[index+1:]
+            task_status = context.get_task_status(task_name=task_name)
+            if task_status != condition.expect_status:
+                return False
+        return True
