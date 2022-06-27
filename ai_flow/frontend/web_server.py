@@ -32,7 +32,7 @@ from ai_flow.endpoint.server.server_config import AIFlowServerConfig
 from ai_flow.meta.workflow_meta import WorkflowMeta
 from ai_flow.plugin_interface.scheduler_interface import Scheduler, SchedulerFactory
 from ai_flow.scheduler_service.service.config import SchedulerServiceConfig
-from ai_flow.settings import AIFLOW_HOME
+from ai_flow.common.configuration.helpers import AIFLOW_HOME
 from ai_flow.store.abstract_store import Filters, AbstractStore, Orders
 from ai_flow.store.db.db_util import create_db_store
 from ai_flow.util.json_utils import loads, Jsonable, dumps

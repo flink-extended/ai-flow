@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,12 +14,17 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-from itertools import filterfalse, tee
-from typing import Callable, Iterable
+from sqlalchemy import event
 
 
-def partition(pred: Callable, iterable: Iterable):
-    """Use a predicate to partition entries into false entries and true entries"""
-    iter_1, iter_2 = tee(iterable)
-    return filterfalse(pred, iter_1), filter(pred, iter_2)
+def setup_event_handlers(engine):
+    """Setups event handlers."""
+
+    if engine.dialect.name == "sqlite":
+
+        @event.listens_for(engine, "connect")
+        def set_sqlite_pragma(dbapi_connection, connection_record):
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
+
