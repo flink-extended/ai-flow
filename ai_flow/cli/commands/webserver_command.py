@@ -23,9 +23,9 @@ import daemon
 from daemon.pidfile import TimeoutPIDLockFile
 
 import ai_flow.settings
+from ai_flow.common.util.process_utils import check_pid_exist, stop_process
 from ai_flow.frontend.web_server import start_web_server_by_config_file_path
 from ai_flow.settings import get_configuration_file_path
-from ai_flow.util.process_utils import check_pid_exist, stop_process
 
 logger = logging.getLogger(__name__)
 
