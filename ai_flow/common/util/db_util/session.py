@@ -68,12 +68,12 @@ def create_sqlalchemy_engine(db_uri, **kwargs):
     if enable_pool and 'sqlite' not in db_uri:
         options['pool_size'] = config_constants.SQLALCHEMY_POOL_SIZE
         options['max_overflow'] = config_constants.SQLALCHEMY_MAX_OVERFLOW
-        logger.info("Create SQLAlchemy engine with pool options %s", options)
     if 'sqlite' in db_uri:
         options['connect_args'] = {'check_same_thread': False}
         logger.warning("SQLite can only be used in test mode with option `check_same_thread=False`")
     for k, v in kwargs.items():
         options[k] = v
+    logger.info("Create SQLAlchemy engine with options %s", options)
     return sqlalchemy.create_engine(db_uri, **options)
 
 

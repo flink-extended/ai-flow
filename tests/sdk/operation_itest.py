@@ -17,12 +17,8 @@
 import os
 import time
 import unittest
-from unittest import mock
-
-from ai_flow.common.configuration import config_constants
 from notification_service.embedded_notification_client import EmbeddedNotificationClient
 from notification_service.event_storage import DbEventStorage
-from notification_service.notification_client import NotificationClient
 from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 from notification_service.util import db

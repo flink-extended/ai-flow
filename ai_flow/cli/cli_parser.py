@@ -84,7 +84,6 @@ class Arg:
         parser.add_argument(*self.flags, **self.kwargs)
 
 
-# Common Args
 ARG_NAMESPACE_NAME = Arg(('namespace_name',), help='The name of the namespace')
 ARG_WORKFLOW_NAME = Arg(('workflow_name',), help='The name of the workflow')
 ARG_WORKFLOW_EXECUTION_ID = Arg(('workflow_execution_id',), help='The id of the workflow execution')

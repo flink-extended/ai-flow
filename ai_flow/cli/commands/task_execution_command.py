@@ -34,7 +34,6 @@ from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecutionKey
 from ai_flow.rpc.client.heartbeat_client import HeartbeatClient
 from ai_flow.common.configuration.helpers import AIFLOW_HOME
-from ai_flow.scheduler.runtime_context import TaskExecutionContextImpl
 
 logging.basicConfig(filename='/Users/alibaba/aiflow/logs/'+__name__+'.log',
                     format='[%(asctime)s-%(filename)s-%(levelname)s:%(message)s]',
@@ -102,17 +101,14 @@ class TaskManager(object):
                     logger.error("Received SIGTERM. Terminating subprocesses.")
                     task.stop()
                     raise TaskForceStoppedException("Task received SIGTERM signal")
-
                 signal.signal(signal.SIGTERM, signal_handler)
 
                 context = Context()
                 task.start(context)
                 task.await_termination(context)
         except TaskForceStoppedException:
-            # self.handle_force_kill()
             raise
         except (Exception, KeyboardInterrupt) as e:
-            # self._run_failure_callback()
             raise TaskFailedException(e)
         finally:
             logger.info(f'Task execution {self.task_execution_key} finished, ')

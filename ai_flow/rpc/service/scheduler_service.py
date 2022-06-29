@@ -62,6 +62,9 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
 
     def get_last_committed_offset(self):
         # metadata_manager = MetadataManager(self.session)
+
+
+
         return 0
 
     @catch_exception

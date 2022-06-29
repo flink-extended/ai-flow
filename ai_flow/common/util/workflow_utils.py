@@ -129,29 +129,3 @@ def extract_workflows_from_zip(file_path: str, extract_path: str) -> List[Workfl
             ws = extract_workflows_from_file(abs_path)
             workflows.extend(ws)
     return workflows
-
-    #
-    # workflows = []
-    # current_zip_file = zipfile.ZipFile(file_path)
-    # for zip_info in current_zip_file.infolist():
-    #     print(zip_info)
-    #     head, _ = os.path.split(zip_info.filename)
-    #     mod_name, ext = os.path.splitext(zip_info.filename)
-    #     if ext not in [".py", ".pyc"]:
-    #         continue
-    #     # if head:
-    #     #     continue
-    #
-    #     if mod_name in sys.modules:
-    #         del sys.modules[mod_name]
-    #
-    #     try:
-    #         sys.path.insert(0, file_path)
-    #         current_module = importlib.import_module(mod_name)
-    #         ws = [o for o in list(current_module.__dict__.values()) if isinstance(o, Workflow)]
-    #         workflows.extend(ws)
-    #     except Exception as e:  # pylint: disable=broad-except
-    #         logger.exception("Failed to import: %s", file_path)
-    # return workflows
-
-
