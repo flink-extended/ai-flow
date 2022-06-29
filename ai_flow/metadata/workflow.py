@@ -14,7 +14,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from sqlalchemy import Column, String, Integer, Binary, DateTime, Boolean, BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, String, Integer, Binary, DateTime, Boolean, BigInteger, ForeignKey, UniqueConstraint, \
+    Text
 from sqlalchemy.orm import relationship
 
 from ai_flow.common.util.time_utils import utcnow
@@ -41,7 +42,7 @@ class WorkflowMeta(Base):
     namespace = Column(String(256),
                        ForeignKey('namespace.name', ondelete='cascade'), nullable=False)
     workflow_object = Column(Binary, nullable=False)
-    content = Column(String(length=1048576), nullable=False)
+    content = Column(Text, nullable=False)
     create_time = Column(DateTime)
     update_time = Column(DateTime)
     is_enabled = Column(Boolean, default=True)
@@ -56,10 +57,19 @@ class WorkflowMeta(Base):
                  name: str,
                  namespace: str,
                  content: str,
-                 workflow_object) -> None:
+                 workflow_object: bytes,
+                 create_time=None,
+                 update_time=None,
+                 is_enabled=True,
+                 event_offset=-1,
+                 uuid=None) -> None:
+        current_dt = utcnow()
         self.name = name
         self.namespace = namespace
         self.content = content
         self.workflow_object = workflow_object
-        self.create_time = utcnow()
-        self.update_time = utcnow()
+        self.create_time = current_dt if create_time is None else create_time
+        self.update_time = current_dt if update_time is None else update_time
+        self.is_enabled = is_enabled
+        self.event_offset = event_offset
+        self.id = uuid

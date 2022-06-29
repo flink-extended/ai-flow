@@ -69,7 +69,8 @@ class LocalTaskExecutor(TaskExecutorBase):
             self.task_queue.put((None, None))
         if self.task_queue is not None:
             self.task_queue.join()
-        self.manager.shutdown()
+        if self.manager is not None:
+            self.manager.shutdown()
 
     def start_task_execution(self, key: TaskExecutionKey):
         registry = LocalRegistry(self.registry_path)

@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,12 +14,27 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-from itertools import filterfalse, tee
-from typing import Callable, Iterable
+import os
+import unittest
+
+from ai_flow.common.util.db_util.db_migration import init_db
+from ai_flow.common.util.db_util.session import new_session, create_sqlalchemy_engine, prepare_session
 
 
-def partition(pred: Callable, iterable: Iterable):
-    """Use a predicate to partition entries into false entries and true entries"""
-    iter_1, iter_2 = tee(iterable)
-    return filterfalse(pred, iter_1), filter(pred, iter_2)
+class BaseUnitTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.file = 'test.db'
+        self._delete_db_file()
+        self.url = 'sqlite:///{}'.format(self.file)
+        init_db(self.url)
+        self.db_engine = create_sqlalchemy_engine(db_uri=self.url)
+        self.session = new_session(db_engine=self.db_engine)
+        prepare_session(db_engine=self.db_engine)
+
+    def _delete_db_file(self):
+        if os.path.exists(self.file):
+            os.remove(self.file)
+
+    def tearDown(self) -> None:
+        self.session.close()
+        self._delete_db_file()

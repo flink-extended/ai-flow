@@ -152,6 +152,7 @@ class MetadataManager(object):
         """
         namespace_meta = NamespaceMeta(name=name, properties=properties)
         self.session.add(namespace_meta)
+        self.flush()
         return namespace_meta
 
     def update_namespace(self, name, properties) -> NamespaceMeta:
@@ -164,6 +165,7 @@ class MetadataManager(object):
         namespace_meta = self.session.query(NamespaceMeta).filter(NamespaceMeta.name == name).one()
         namespace_meta.set_properties(properties)
         self.session.merge(namespace_meta)
+        self.flush()
         return namespace_meta
 
     def delete_namespace(self, name):
@@ -179,14 +181,31 @@ class MetadataManager(object):
         :param name: The name of the namespace.
         :return: The namespace metadata.
         """
-        return self.session.query(NamespaceMeta).filter(NamespaceMeta.name == name).one()
+        return self.session.query(NamespaceMeta).filter(NamespaceMeta.name == name).first()
 
-    def list_namespace(self) -> List[NamespaceMeta]:
+    def list_namespace(self,
+                       page_size=None,
+                       offset=None,
+                       filters: Filters = None,
+                       orders: Orders = None) -> List[NamespaceMeta]:
         """
         List all namespace metadata from MetadataBackend.
+        :param page_size: The number of the results.
+        :param offset: The start offset of the results.
+        :param filters: The conditions of the results.
+        :param orders: The orders of the results.
         :return: The namespace metadata list.
         """
-        return self.session.query(NamespaceMeta).all()
+        query = self.session.query(NamespaceMeta)
+        if filters:
+            query = filters.apply_all(NamespaceMeta, query)
+        if orders:
+            query = orders.apply_all(NamespaceMeta, query)
+        if page_size:
+            query = query.limit(page_size)
+        if offset:
+            query = query.offset(offset)
+        return query.all()
 
     # end namespace
 
@@ -205,6 +224,7 @@ class MetadataManager(object):
                                      content=content,
                                      workflow_object=workflow_object)
         self.session.add(workflow_meta)
+        self.flush()
         return workflow_meta
 
     def get_workflow_by_name(self, namespace, name) -> WorkflowMeta:
@@ -227,7 +247,7 @@ class MetadataManager(object):
 
     def list_workflows(self,
                        namespace,
-                       page_size=10,
+                       page_size=None,
                        offset=None,
                        filters: Filters = None,
                        orders: Orders = None) -> List[WorkflowMeta]:
@@ -290,6 +310,7 @@ class MetadataManager(object):
             workflow_meta.is_enabled = is_enabled
         workflow_meta.update_time = utcnow()
         self.session.merge(workflow_meta)
+        self.flush()
         return workflow_meta
 
     # end workflow
@@ -309,6 +330,7 @@ class MetadataManager(object):
                                                       workflow_object=workflow_object,
                                                       signature=signature)
         self.session.add(workflow_snapshot_meta)
+        self.flush()
         return workflow_snapshot_meta
 
     def get_workflow_snapshot(self, snapshot_id) -> WorkflowSnapshotMeta:
@@ -321,7 +343,7 @@ class MetadataManager(object):
 
     def list_workflow_snapshots(self,
                                 workflow_id,
-                                page_size=10,
+                                page_size=None,
                                 offset=None,
                                 filters: Filters = None,
                                 orders: Orders = None) -> List[WorkflowSnapshotMeta]:
@@ -372,6 +394,7 @@ class MetadataManager(object):
         workflow_schedule_meta = WorkflowScheduleMeta(workflow_id=workflow_id,
                                                       expression=expression)
         self.session.add(workflow_schedule_meta)
+        self.flush()
         return workflow_schedule_meta
 
     def get_workflow_schedule(self, schedule_id) -> WorkflowScheduleMeta:
@@ -391,6 +414,7 @@ class MetadataManager(object):
         meta = self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).one()
         meta.is_paused = True
         self.session.merge(meta)
+        self.flush()
         return meta
 
     def resume_workflow_schedule(self, schedule_id) -> WorkflowScheduleMeta:
@@ -402,15 +426,34 @@ class MetadataManager(object):
         meta = self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).one()
         meta.is_paused = False
         self.session.merge(meta)
+        self.flush()
         return meta
 
-    def list_workflow_schedules(self, workflow_id) -> List[WorkflowScheduleMeta]:
+    def list_workflow_schedules(self,
+                                workflow_id,
+                                page_size=None,
+                                offset=None,
+                                filters: Filters = None,
+                                orders: Orders = None) -> List[WorkflowScheduleMeta]:
         """
         List all workflow schedule metadata.
         :param workflow_id: The unique id of the workflow.
+        :param page_size: The number of the results.
+        :param offset: The start offset of the results.
+        :param filters: The conditions of the results.
+        :param orders: The orders of the results.
         :return: The workflow schedule metadata list.
         """
-        return self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.workflow_id == workflow_id).all()
+        query = self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.workflow_id == workflow_id)
+        if filters:
+            query = filters.apply_all(WorkflowScheduleMeta, query)
+        if orders:
+            query = orders.apply_all(WorkflowScheduleMeta, query)
+        if page_size:
+            query = query.limit(page_size)
+        if offset:
+            query = query.offset(offset)
+        return query.all()
 
     def delete_workflow_schedule(self, schedule_id):
         """
@@ -433,6 +476,7 @@ class MetadataManager(object):
         workflow_trigger_meta = WorkflowEventTriggerMeta(workflow_id=workflow_id,
                                                          rule=rule)
         self.session.add(workflow_trigger_meta)
+        self.flush()
         return workflow_trigger_meta
 
     def get_workflow_trigger(self, trigger_id) -> WorkflowEventTriggerMeta:
@@ -453,6 +497,7 @@ class MetadataManager(object):
         meta = self.session.query(WorkflowEventTriggerMeta).filter(WorkflowEventTriggerMeta.id == trigger_id).one()
         meta.is_paused = True
         self.session.merge(meta)
+        self.flush()
         return meta
 
     def resume_workflow_trigger(self, trigger_id) -> WorkflowEventTriggerMeta:
@@ -464,16 +509,36 @@ class MetadataManager(object):
         meta = self.session.query(WorkflowEventTriggerMeta).filter(WorkflowEventTriggerMeta.id == trigger_id).one()
         meta.is_paused = False
         self.session.merge(meta)
+        self.flush()
         return meta
 
-    def list_workflow_triggers(self, workflow_id) -> List[WorkflowEventTriggerMeta]:
+    def list_workflow_triggers(self,
+                               workflow_id,
+                               page_size=None,
+                               offset=None,
+                               filters: Filters = None,
+                               orders: Orders = None
+                               ) -> List[WorkflowEventTriggerMeta]:
         """
         List all workflow trigger metadata.
         :param workflow_id: The unique id of the workflow.
+        :param page_size: The number of the results.
+        :param offset: The start offset of the results.
+        :param filters: The conditions of the results.
+        :param orders: The orders of the results.
         :return: The workflow trigger metadata list.
         """
-        return self.session.query(WorkflowEventTriggerMeta) \
-            .filter(WorkflowEventTriggerMeta.workflow_id == workflow_id).all()
+        query = self.session.query(WorkflowEventTriggerMeta) \
+            .filter(WorkflowEventTriggerMeta.workflow_id == workflow_id)
+        if filters:
+            query = filters.apply_all(WorkflowEventTriggerMeta, query)
+        if orders:
+            query = orders.apply_all(WorkflowEventTriggerMeta, query)
+        if page_size:
+            query = query.limit(page_size)
+        if offset:
+            query = query.offset(offset)
+        return query.all()
 
     def delete_workflow_trigger(self, trigger_id):
         """
@@ -482,12 +547,26 @@ class MetadataManager(object):
         """
         self.session.query(WorkflowEventTriggerMeta).filter(WorkflowEventTriggerMeta.id == trigger_id).delete()
 
-    def list_all_workflow_triggers(self) -> List[WorkflowEventTriggerMeta]:
+    def list_all_workflow_triggers(self,
+                                   page_size=None,
+                                   offset=None,
+                                   filters: Filters = None,
+                                   orders: Orders = None
+                                   ) -> List[WorkflowEventTriggerMeta]:
         """
         List all workflow trigger metadata.
         :return: The workflow trigger metadata list.
         """
-        return self.session.query(WorkflowEventTriggerMeta).all()
+        query = self.session.query(WorkflowEventTriggerMeta)
+        if filters:
+            query = filters.apply_all(WorkflowEventTriggerMeta, query)
+        if orders:
+            query = orders.apply_all(WorkflowEventTriggerMeta, query)
+        if page_size:
+            query = query.limit(page_size)
+        if offset:
+            query = query.offset(offset)
+        return query.all()
 
     # end workflow trigger
 
@@ -504,6 +583,7 @@ class MetadataManager(object):
                                                         run_type=run_type,
                                                         snapshot_id=snapshot_id)
         self.session.add(workflow_execution_meta)
+        self.flush()
         return workflow_execution_meta
 
     def update_workflow_execution(self, workflow_execution_id, status=None) -> WorkflowExecutionMeta:
@@ -520,6 +600,7 @@ class MetadataManager(object):
         if TaskStatus(status) in TASK_FINISHED_SET:
             meta.end_date = utcnow()
         self.session.merge(meta)
+        self.flush()
         return meta
 
     def get_workflow_execution(self, workflow_execution_id) -> WorkflowExecutionMeta:
@@ -533,7 +614,7 @@ class MetadataManager(object):
 
     def list_workflow_executions(self,
                                  workflow_id,
-                                 page_size=10,
+                                 page_size=None,
                                  offset=None,
                                  filters: Filters = None,
                                  orders: Orders = None) -> List[WorkflowExecutionMeta]:
@@ -585,6 +666,7 @@ class MetadataManager(object):
         task_execution.sequence_number = seq + 1
         task_execution.try_number = 1
         self.session.add(task_execution)
+        self.flush()
         return task_execution
 
     def get_latest_sequence_number(self, workflow_execution_id, task_name) -> int:
@@ -626,6 +708,7 @@ class MetadataManager(object):
         if end_date is not None:
             meta.end_date = end_date
         self.session.merge(meta)
+        self.flush()
         return meta
 
     def get_task_execution_by_id(self, task_execution_id) -> TaskExecutionMeta:
@@ -652,7 +735,7 @@ class MetadataManager(object):
 
     def list_task_executions(self,
                              workflow_execution_id,
-                             page_size=10,
+                             page_size=None,
                              offset=None,
                              filters: Filters = None,
                              orders: Orders = None) -> List[TaskExecutionMeta]:
@@ -697,6 +780,7 @@ class MetadataManager(object):
         meta = self.session.query(WorkflowMeta).filter(WorkflowMeta.id == workflow_id).one()
         meta.event_offset = event_offset
         self.session.merge(meta)
+        self.flush()
 
     def get_workflow_event_offset(self, workflow_id) -> int:
         """
@@ -716,6 +800,7 @@ class MetadataManager(object):
             .filter(WorkflowExecutionMeta.id == workflow_execution_id).one()
         meta.event_offset = event_offset
         self.session.merge(meta)
+        self.flush()
 
     def get_workflow_execution_event_offset(self, workflow_execution_id) -> int:
         """

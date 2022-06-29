@@ -18,6 +18,7 @@
 #
 import grpc
 
+from ai_flow.model.task_execution import TaskExecutionKey
 from ai_flow.rpc.protobuf import heartbeat_service_pb2_grpc
 from ai_flow.rpc.protobuf.heartbeat_service_pb2 import HeartbeatRequest
 
@@ -27,9 +28,9 @@ class HeartbeatClient(object):
         channel = grpc.insecure_channel(server_uri)
         self.stub = heartbeat_service_pb2_grpc.HeartbeatServiceStub(channel)
 
-    def send_heartbeat(self, workflow_execution_id, task_name, seq_num):
-        request = HeartbeatRequest(workflow_execution_id=workflow_execution_id,
-                                   task_name=task_name,
-                                   sequence_number=seq_num)
+    def send_heartbeat(self, key: TaskExecutionKey):
+        request = HeartbeatRequest(workflow_execution_id=key.workflow_execution_id,
+                                   task_name=key.task_name,
+                                   sequence_number=key.seq_num)
         response = self.stub.send_heartbeat(request)
         return response.return_code

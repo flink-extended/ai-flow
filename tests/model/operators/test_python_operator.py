@@ -18,8 +18,9 @@
 import threading
 import time
 import unittest
+
+import cloudpickle
 import psutil
-from ai_flow.common.util.serialization_utils import serialize
 
 from ai_flow.model.operators.python import PythonOperator
 from ai_flow.model.workflow import Workflow
@@ -81,4 +82,4 @@ class TestPythonOperator(unittest.TestCase):
                 python_callable=func,
                 callable_args=[1],
             )
-        self.assertIsNotNone(serialize(workflow))
+        self.assertIsNotNone(cloudpickle.dumps(workflow))

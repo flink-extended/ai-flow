@@ -23,7 +23,7 @@ from typing import Text
 from ai_flow.endpoint.server.server import AIFlowServer
 from ai_flow.endpoint.server.server_config import AIFlowServerConfig
 from ai_flow.client.ai_flow_client import get_ai_flow_client
-from ai_flow.settings import AIFLOW_HOME
+from ai_flow.common.configuration.helpers import AIFLOW_HOME
 from ai_flow.util.net_utils import get_ip_addr
 import logging
 
