@@ -17,6 +17,7 @@
 from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.internal.contexts import WorkflowContext, WorkflowExecutionContext, TaskExecutionContext
 from ai_flow.model.state import State, StateDescriptor
+from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecution
 from ai_flow.model.workflow import Workflow
 from ai_flow.model.workflow_execution import WorkflowExecution
@@ -50,6 +51,14 @@ class WorkflowExecutionContextImpl(WorkflowExecutionContext):
         return self._metadata_manager.get_or_create_workflow_execution_state(
             workflow_execution_id=self.workflow_execution.id,
             descriptor=state_descriptor)
+
+    def get_task_status(self, task_name) -> TaskStatus:
+        task_execution = self._metadata_manager.get_latest_task_execution(
+            self.workflow_execution.id, task_name)
+        if task_execution is not None:
+            return TaskStatus(task_execution.status)
+        else:
+            return None
 
 
 class TaskExecutionContextImpl(TaskExecutionContext):

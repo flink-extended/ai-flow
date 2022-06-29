@@ -64,18 +64,21 @@ class TestK8sTaskExecutor(unittest.TestCase):
     @mock.patch('ai_flow.task_executor.kubernetes.k8s_task_executor.KubernetesTaskExecutor._list_pods')
     @mock.patch('ai_flow.task_executor.kubernetes.helpers.run_pod')
     @mock.patch('ai_flow.task_executor.kubernetes.helpers.get_kube_client')
-    def test_start_task_execution_without_template(self, mock_client, mock_run_pod, mock_list_pods):
+    @mock.patch('ai_flow.task_executor.common.task_executor_base.TaskExecutorBase.generate_command')
+    def test_start_task_execution_without_template(self, mock_command, mock_client, mock_run_pod, mock_list_pods):
         executor = KubernetesTaskExecutor()
         executor.kube_config.config['pod_template_file'] = None
         key = TaskExecutionKey(1, 'task', 2)
         mock_list_pods.return_value = []
         executor.start_task_execution(key)
+        mock_command.assert_called_once_with(key)
         mock_run_pod.assert_called_once()
 
     @mock.patch('ai_flow.task_executor.kubernetes.k8s_task_executor.KubernetesTaskExecutor._list_pods')
     @mock.patch('ai_flow.task_executor.kubernetes.helpers.run_pod')
     @mock.patch('ai_flow.task_executor.kubernetes.helpers.get_kube_client')
-    def test_start_task_execution(self, mock_client, mock_run_pod, mock_list_pods):
+    @mock.patch('ai_flow.task_executor.common.task_executor_base.TaskExecutorBase.generate_command')
+    def test_start_task_execution(self, mock_command, mock_client, mock_run_pod, mock_list_pods):
         executor = KubernetesTaskExecutor()
         template_file = os.path.join(os.path.dirname(__file__), 'base_pod.yaml')
         executor.kube_config.config['pod_template_file'] = template_file
@@ -84,6 +87,7 @@ class TestK8sTaskExecutor(unittest.TestCase):
         mock_list_pods.return_value = []
 
         executor.start_task_execution(key)
+        mock_command.assert_called_once_with(key)
         mock_run_pod.assert_called_once()
 
     @mock.patch('ai_flow.task_executor.kubernetes.helpers.get_kube_client')

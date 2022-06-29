@@ -20,19 +20,23 @@ import time
 import datetime
 
 
-def generate_time_str():
+def generate_local_time_str():
     return time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime())
 
 
-def datetime_to_int64(d: datetime.datetime):
+def parse_date(timestamp):
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestamp) / 1000))
+
+
+def datetime_to_epoch(d: datetime.datetime):
     if d is None:
         return 0
     else:
         return int(d.timestamp()*1000)
 
 
-def parse_date(timestamp):
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestamp) / 1000))
+def parse_to_utc_date(timestamp):
+    return datetime.datetime.utcfromtimestamp(timestamp/1000).replace(tzinfo=datetime.timezone.utc)
 
 
 def utcnow() -> datetime.datetime:

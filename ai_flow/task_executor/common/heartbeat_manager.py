@@ -20,6 +20,9 @@ import time
 from concurrent import futures
 
 import grpc
+from notification_service.embedded_notification_client import EmbeddedNotificationClient
+
+from ai_flow.common.configuration.config_constants import NOTIFICATION_SERVER_URI
 from ai_flow.common.util.db_util.session import create_session
 from ai_flow.model.task_execution import TaskExecutionKey
 
@@ -37,8 +40,7 @@ logger = logging.getLogger(__name__)
 
 
 class HeartbeatManager(object):
-    def __init__(self,
-                 notification_client):
+    def __init__(self):
         self.task_dict = {}
         self._update_running_tasks()
 
@@ -51,7 +53,8 @@ class HeartbeatManager(object):
         self.grpc_server.add_insecure_port('[::]:{}'.format(config_constants.INTERNAL_RPC_PORT))
 
         self.heartbeat_check_thread = StoppableThread(target=self._check_heartbeat_timeout)
-        self.notification_client = notification_client
+        self.notification_client = EmbeddedNotificationClient(
+            server_uri=NOTIFICATION_SERVER_URI, namespace='task_status_change', sender='task_executor')
 
     def start(self):
         self.grpc_server.start()
@@ -62,6 +65,7 @@ class HeartbeatManager(object):
         self.heartbeat_check_thread.stop()
         self.heartbeat_check_thread.join()
         self.grpc_server.stop(0)
+        self.notification_client.close()
         logging.info('Heartbeat Service stopped.')
 
     def _update_running_tasks(self):

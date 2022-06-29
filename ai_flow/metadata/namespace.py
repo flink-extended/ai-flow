@@ -39,6 +39,8 @@ class NamespaceMeta(Base):
         self.properties = json.dumps(properties)
 
     def get_properties(self) -> dict:
+        if self.properties is None:
+            return None
         return json.loads(self.properties)
 
     def set_properties(self, value):

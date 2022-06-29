@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,21 +14,17 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-import cloudpickle
-
-_BYTES_ENCODE = "ISO-8859-1"
+from sqlalchemy import event
 
 
-def serialize(o: object) -> bytes:
-    return cloudpickle.dumps(o)
+def setup_event_handlers(engine):
+    """Setups event handlers."""
 
+    if engine.dialect.name == "sqlite":
 
-def deserialize(s: bytes) -> object:
-    return cloudpickle.loads(s)
+        @event.listens_for(engine, "connect")
+        def set_sqlite_pragma(dbapi_connection, connection_record):
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
 
-
-def read_object_from_serialized_file(file_path):
-    with open(file_path, 'rb') as f:
-        serialized_bytes = f.read()
-    return deserialize(serialized_bytes)

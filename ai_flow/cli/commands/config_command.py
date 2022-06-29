@@ -22,38 +22,33 @@ import pygments
 import yaml
 from pygments.lexers.configs import IniLexer
 
-from ai_flow.settings import get_configuration_file_path, AIFLOW_HOME
-from ai_flow.util.cli_utils import should_use_colors, get_terminal_formatter
-from ai_flow.util.config_utils import create_default_server_config
+from ai_flow.common.configuration.configuration import get_server_configuration
+from ai_flow.common.configuration.helpers import write_default_config, get_server_configuration_file_path
+from ai_flow.common.configuration.helpers import AIFLOW_HOME
+from ai_flow.common.util.cli_utils import should_use_colors, get_terminal_formatter
 
 logger = logging.getLogger(__name__)
 
 
 def config_get_value(args):
     """Gets the option value of the configuration."""
-    with open(get_configuration_file_path(), 'r') as f:
-        yaml_config = yaml.load(f, Loader=yaml.FullLoader)
-        if args.option not in yaml_config:
-            raise SystemExit(f'The option [{args.option}] is not found in config.')
-        value = yaml_config[args.option]
-        print(value)
+    config = get_server_configuration()
+    if config.get(args.option) is None:
+        raise SystemExit(f'The option [{args.option}] is not found in config.')
+    value = config.get(args.option)
+    print(value)
 
 
 def config_init(args):
     """Initializes the default configuration."""
     if not os.path.exists(AIFLOW_HOME):
         os.makedirs(AIFLOW_HOME)
-    config_file = AIFLOW_HOME + '/aiflow_server.yaml'
-    if os.path.exists(config_file):
-        logger.info('AIFlow server config has already initialized at {}.'.format(config_file))
-    else:
-        create_default_server_config(AIFLOW_HOME)
-        logger.info('AIFlow server config generated at {}.'.format(config_file))
+    write_default_config('aiflow_server.yaml')
 
 
 def config_list(args):
     """List all options of the configuration."""
-    with open(get_configuration_file_path(), 'r') as f:
+    with open(get_server_configuration_file_path(), 'r') as f:
         code = f.read()
         if should_use_colors(args):
             code = pygments.highlight(code=code, formatter=get_terminal_formatter(), lexer=IniLexer())

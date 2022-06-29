@@ -19,18 +19,14 @@ import threading
 from abc import abstractmethod
 from queue import Empty
 
-from notification_service.notification_client import NotificationClient
-
-from ai_flow.common.configuration.config_constants import NOTIFICATION_SERVER_URI
-from notification_service.embedded_notification_client import EmbeddedNotificationClient
-
+from ai_flow.common.configuration.config_constants import NOTIFICATION_SERVER_URI, INTERNAL_RPC_PORT, \
+    TASK_HEARTBEAT_INTERVAL
 from ai_flow.common.exception.exceptions import AIFlowException
+from ai_flow.common.util import workflow_utils
+from ai_flow.common.util.net_utils import get_ip_addr
 from ai_flow.common.util.thread_utils import StoppableThread
 from ai_flow.metadata.message import PersistentQueue
-
 from ai_flow.model.action import TaskAction
-from ai_flow.model.internal.events import TaskStatusEvent
-from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecutionKey
 from ai_flow.scheduler.schedule_command import TaskScheduleCommand
 from ai_flow.task_executor.common.heartbeat_manager import HeartbeatManager
@@ -45,7 +41,6 @@ class TaskExecutorBase(TaskExecutor):
     def __init__(self):
         self.command_queue: PersistentQueue = None
         self.command_processor = StoppableThread(target=self._process_command)
-        self.notification_client: NotificationClient = None
         self.heartbeat_manager: HeartbeatManager = None
 
     def schedule_task(self, command: TaskScheduleCommand):
@@ -54,11 +49,9 @@ class TaskExecutorBase(TaskExecutor):
         self.command_queue.put(command)
 
     def start(self):
-        self.notification_client = EmbeddedNotificationClient(
-            server_uri=NOTIFICATION_SERVER_URI, namespace='task_status_change', sender='task_executor')
         self.command_queue = PersistentQueue(maxsize=MAX_QUEUE_SIZE)
         self.command_processor.start()
-        self.heartbeat_manager = HeartbeatManager(self.notification_client)
+        self.heartbeat_manager = HeartbeatManager()
         self.heartbeat_manager.start()
         self.initialize()
 
@@ -70,14 +63,6 @@ class TaskExecutorBase(TaskExecutor):
         self.command_processor.stop()
         self.command_processor.join()
         self.command_queue.join()
-        self.notification_client.close()
-
-    def _send_task_status_change(self, task: TaskExecutionKey, status: TaskStatus):
-        event = TaskStatusEvent(workflow_execution_id=task.workflow_execution_id,
-                                task_name=task.task_name,
-                                sequence_number=task.seq_num,
-                                status=status)
-        self.notification_client.send_event(event)
 
     def _process_command(self):
         # TODO put command processor in an Actor or thread pool with order preserving
@@ -92,13 +77,11 @@ class TaskExecutorBase(TaskExecutor):
 
                     if action == TaskAction.START:
                         self.start_task_execution(new_task)
-                        self._send_task_status_change(task=current_task, status=TaskStatus.RUNNING)
                     elif action == TaskAction.STOP:
                         self.stop_task_execution(current_task)
                     elif action == TaskAction.RESTART:
                         self.stop_task_execution(current_task)
                         self.start_task_execution(new_task)
-                        self._send_task_status_change(task=new_task, status=TaskStatus.RUNNING)
                     self.command_queue.remove_expired()
                 except Exception as e:
                     logger.exception("Error occurred while processing command queue, {}".format(e))
@@ -127,10 +110,21 @@ class TaskExecutorBase(TaskExecutor):
 
     @staticmethod
     def generate_command(key: TaskExecutionKey):
+        workflow = workflow_utils.get_workflow(key.workflow_execution_id)
+        if workflow is None:
+            raise AIFlowException(f'Cannot find corresponding workflow for task {key}.')
+        workflow_snapshot = workflow_utils.get_workflow_snapshot(workflow.id)
+        if workflow_snapshot is None:
+            raise AIFlowException(f'Cannot find workflow snapshot for task {key}.')
         return ["aiflow",
                 "task-execution",
                 "run",
+                str(workflow.name),
                 str(key.workflow_execution_id),
                 str(key.task_name),
-                str(key.seq_num)
+                str(key.seq_num),
+                str(workflow_snapshot.uri),
+                NOTIFICATION_SERVER_URI,
+                '{}:{}'.format(get_ip_addr(), INTERNAL_RPC_PORT),
+                '--heartbeat-interval', str(TASK_HEARTBEAT_INTERVAL)
                 ]

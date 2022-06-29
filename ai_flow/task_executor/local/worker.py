@@ -58,10 +58,7 @@ class Worker(Process):
         if key is None:
             return
         logger.info("Running %s", command)
-        if config_constants.EXECUTE_TASKS_IN_NEW_INTERPRETER:
-            self._execute_in_subprocess(key, command)
-        else:
-            self._execute_in_fork(key, command)
+        self._execute_in_subprocess(key, command)
 
     def _execute_in_subprocess(self, key, command: CommandType) -> TaskStatus:
         process = subprocess.Popen(args=command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
@@ -74,34 +71,3 @@ class Worker(Process):
             return TaskStatus.FAILED
         else:
             return TaskStatus.SUCCESS
-
-    def _execute_in_fork(self, key, command: CommandType) -> TaskStatus:
-        pid = os.fork()
-        if pid:
-            LocalRegistry(self.registry_path).set(str(key), pid)
-            pid, ret = os.waitpid(pid, 0)
-            return TaskStatus.SUCCESS if ret == 0 else TaskStatus.FAILED
-
-        ret = 1
-        try:
-            import signal
-            from ai_flow.cli.cli_parser import get_parser
-
-            signal.signal(signal.SIGINT, signal.SIG_DFL)
-            signal.signal(signal.SIGTERM, signal.SIG_DFL)
-            signal.signal(signal.SIGUSR2, signal.SIG_DFL)
-
-            parser = get_parser()
-            args = parser.parse_args(command[1:])
-            args.shut_down_logging = False
-
-            setproctitle(f"AIFlow task supervisor: {command}")
-
-            args.func(args)
-            ret = 0
-            return TaskStatus.SUCCESS
-        except Exception as e:
-            logger.error("Failed to execute task %s.", str(e))
-        finally:
-            logging.shutdown()
-            os._exit(ret)

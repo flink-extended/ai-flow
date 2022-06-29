@@ -43,7 +43,7 @@ def upgrade():
                     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
                     sa.Column('name', sa.String(length=256), nullable=False),
                     sa.Column('namespace', sa.String(length=256), nullable=False),
-                    sa.Column('content', sa.String(length=1048576), nullable=False),
+                    sa.Column('content', sa.Text(), nullable=False),
                     sa.Column('workflow_object', sa.LargeBinary(), nullable=False),
                     sa.Column('create_time', sa.DateTime(), nullable=True),
                     sa.Column('update_time', sa.DateTime(), nullable=True),
