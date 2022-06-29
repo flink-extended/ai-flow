@@ -33,12 +33,16 @@ from ai_flow.task_executor.common.task_executor_base import TaskExecutorBase
 
 
 class MockTaskExecutor(TaskExecutorBase):
+    def __init__(self):
+        self.command_queue: PersistentQueue = None
+        self.started_task = []
+        self.stopped_task = []
 
     def start_task_execution(self, key: TaskExecutionKey):
-        pass
+        self.started_task.append(key)
 
     def stop_task_execution(self, key: TaskExecutionKey):
-        pass
+        self.stopped_task.append(key)
 
     def start(self):
         self.command_queue = PersistentQueue(maxsize=100)
@@ -71,8 +75,7 @@ class TestTaskExecutorBase(unittest.TestCase):
             executor = MockTaskExecutor()
             executor.schedule_task(command)
 
-    @mock.patch('ai_flow.task_executor.common.task_executor_base.TaskExecutorBase._send_task_status_change')
-    def test__process_command(self, mock_send):
+    def test__process_command(self):
         try:
             command_processor = StoppableThread(target=self.executor._process_command)
             command_processor.start()
@@ -86,12 +89,12 @@ class TestTaskExecutorBase(unittest.TestCase):
                                           new_task_execution=None)
             self.executor.command_queue.put(command)
             time.sleep(0.5)
-            self.assertEqual(mock_send.call_count, 1)
+            self.assertEqual(str(key), str(self.executor.started_task[0]))
+            self.assertEqual(str(key), str(self.executor.stopped_task[0]))
         finally:
             command_processor.stop()
 
-    @mock.patch('ai_flow.task_executor.common.task_executor_base.TaskExecutorBase._send_task_status_change')
-    def test_process_restart_command(self, mock_send):
+    def test_process_restart_command(self):
         try:
             command_processor = StoppableThread(target=self.executor._process_command)
             command_processor.start()
@@ -102,7 +105,8 @@ class TestTaskExecutorBase(unittest.TestCase):
                                           new_task_execution=key_new)
             self.executor.command_queue.put(command)
             time.sleep(0.5)
-            self.assertEqual(mock_send.call_count, 1)
+            self.assertEqual(str(key_new), str(self.executor.started_task[0]))
+            self.assertEqual(str(key), str(self.executor.stopped_task[0]))
         finally:
             command_processor.stop()
 

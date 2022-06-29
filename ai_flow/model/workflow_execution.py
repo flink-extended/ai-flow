@@ -46,23 +46,3 @@ class WorkflowExecution(object):
         self.end_date = end_date
         self.status = status
         self.id = id
-
-
-def get_workflow_snapshot(workflow_execution_id) -> str:
-    """
-    Get the location of the snapshot of the workflow execution
-
-    :param workflow_execution_id: Id of the workflow execution
-    :return: the location of the workflow snapshot
-    """
-    pass
-
-
-def get_workflow_name_by_execution_id(execution_id) -> str:
-    """
-    Get the name of the workflow by the execution id
-
-    :param execution_id: Id of the workflow execution
-    :return: The name of the workflow
-    """
-    pass

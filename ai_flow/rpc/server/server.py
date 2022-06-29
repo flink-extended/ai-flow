@@ -22,118 +22,42 @@ import inspect
 import logging
 import os
 import sys
-import tempfile
 import threading
-import time
 from concurrent import futures
-from typing import Dict
 
 import grpc
+from ai_flow.common.configuration import config_constants
 from grpc import _common, _server
 from grpc._cython.cygrpc import StatusCode
 from grpc._server import _serialize_response, _status, _abort, _Context, _unary_request, \
     _select_thread_pool_for_behavior, _unary_response_in_pool
 
-from ai_flow.endpoint.server.high_availability import SimpleAIFlowServerHaManager, HighAvailableService
-from ai_flow.endpoint.server.server_config import DBType
-from ai_flow.metadata_store.service.service import MetadataService
-from ai_flow.metric.service.metric_service import MetricService
-from ai_flow.model_center.service.service import ModelCenterService
-from ai_flow.protobuf.high_availability_pb2_grpc import add_HighAvailabilityManagerServicer_to_server
-from ai_flow.scheduler_service.service.service import SchedulerService, SchedulerServiceConfig
-from ai_flow.settings import AIFLOW_HOME
-from ai_flow.store.db.base_model import base
-from ai_flow.store.db.db_util import extract_db_engine_from_uri, create_db_store
-from ai_flow.store.mongo_store import MongoStoreConnManager
-from ai_flow.store.sqlalchemy_store import SqlAlchemyStore
-from ai_flow.util import sqlalchemy_db
-from notification_service.proto import notification_service_pb2_grpc
-from notification_service.service import NotificationService
+from ai_flow.rpc.protobuf import metadata_service_pb2_grpc, scheduler_service_pb2_grpc
+from ai_flow.rpc.service.metadata_service import MetadataService
+from ai_flow.rpc.service.scheduler_service import SchedulerService
 
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../../..")))
 
-from ai_flow.protobuf import model_center_service_pb2_grpc, \
-    metadata_service_pb2_grpc, metric_service_pb2_grpc, scheduling_service_pb2_grpc
-
-_PORT = '50051'
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 
 class AIFlowServer(object):
     """
-    Block/Async server of an AIFlow Rest Endpoint that provides Metadata/Model/Notification function service.
+    Block/Async server of an AIFlow.
     """
-
-    def __init__(self,
-                 store_uri=None,
-                 port=_PORT,
-                 notification_server_uri=None,
-                 start_meta_service: bool = True,
-                 start_model_center_service: bool = True,
-                 start_metric_service: bool = True,
-                 start_scheduler_service: bool = True,
-                 scheduler_service_config: Dict = None,
-                 enabled_ha: bool = False,
-                 ha_manager=None,
-                 ha_server_uri=None,
-                 ha_storage=None,
-                 ttl_ms: int = 10000,
-                 base_log_folder: str = AIFLOW_HOME):
-        self.store_uri = store_uri
-        self.db_type = DBType.value_of(extract_db_engine_from_uri(store_uri))
+    def __init__(self):
         self.executor = Executor(futures.ThreadPoolExecutor(max_workers=10))
         self.server = grpc.server(self.executor)
-        self.enabled_ha = enabled_ha
-        self.start_scheduler_service = start_scheduler_service
-        server_uri = 'localhost:{}'.format(port)
-
-        if start_model_center_service:
-            logging.info("start model center service.")
-
-            model_center_service_pb2_grpc.add_ModelCenterServiceServicer_to_server(
-                ModelCenterService(store_uri=store_uri), self.server)
-        if start_meta_service:
-            logging.info("start meta service.")
-            metadata_service_pb2_grpc.add_MetadataServiceServicer_to_server(
-                MetadataService(db_uri=store_uri, server_uri=server_uri), self.server)
-        if start_metric_service:
-            logging.info("start metric service.")
-            metric_service_pb2_grpc.add_MetricServiceServicer_to_server(MetricService(db_uri=store_uri), self.server)
-
-        if start_scheduler_service:
-            self._add_scheduler_service(scheduler_service_config, store_uri, notification_server_uri, base_log_folder)
-
-        if enabled_ha:
-            self._add_ha_service(ha_manager, ha_server_uri, ha_storage, store_uri, ttl_ms)
-
-        self.server.add_insecure_port('[::]:' + str(port))
-
+        self.scheduler_service = SchedulerService()
+        metadata_service_pb2_grpc.add_MetadataServiceServicer_to_server(MetadataService(), self.server)
+        scheduler_service_pb2_grpc.add_SchedulerServiceServicer_to_server(self.scheduler_service, self.server)
+        self.server.add_insecure_port('[::]:{}'.format(config_constants.RPC_PORT))
         self._stop = threading.Event()
 
-    def _add_scheduler_service(self, scheduler_service_config, db_uri, notification_server_uri, base_log_folder):
-        logging.info("start scheduler service.")
-        real_config = SchedulerServiceConfig(scheduler_service_config)
-        self.scheduler_service = SchedulerService(real_config, db_uri, notification_server_uri, base_log_folder)
-        scheduling_service_pb2_grpc.add_SchedulingServiceServicer_to_server(self.scheduler_service,
-                                                                            self.server)
-
-    def _add_ha_service(self, ha_manager, ha_server_uri, ha_storage, store_uri, ttl_ms):
-        if ha_manager is None:
-            ha_manager = SimpleAIFlowServerHaManager()
-        if ha_server_uri is None:
-            raise ValueError("ha_server_uri is required with ha enabled!")
-        if ha_storage is None:
-            ha_storage = create_db_store(store_uri)
-        self.ha_service = HighAvailableService(ha_manager, ha_server_uri, ha_storage, ttl_ms)
-        add_HighAvailabilityManagerServicer_to_server(self.ha_service, self.server)
-
     def run(self, is_block=False):
-        if self.enabled_ha:
-            self.ha_service.start()
         self.server.start()
-        if self.start_scheduler_service:
-            self.scheduler_service.start()
         logging.info('AIFlow server started.')
+        self.scheduler_service.start()
         if is_block:
             try:
                 while not self._stop.is_set():
@@ -144,29 +68,13 @@ class AIFlowServer(object):
         else:
             pass
 
-    def stop(self, clear_sql_lite_db_file=False):
+    def stop(self):
         logging.info("stopping AIFlow server")
-        if self.start_scheduler_service:
-            self.scheduler_service.stop()
+        self.scheduler_service.stop()
         self.server.stop(0)
-        if self.enabled_ha:
-            self.ha_service.stop()
         self.executor.shutdown()
-
-        if self.db_type == DBType.SQLITE and clear_sql_lite_db_file:
-            sqlalchemy_db.clear_db(self.store_uri, base.metadata)
-            os.remove(self.store_uri[10:])
-        elif self.db_type == DBType.MONGODB:
-            MongoStoreConnManager().disconnect_all()
-
         self._stop.set()
         logging.info('AIFlow server stopped.')
-
-    def _clear_db(self):
-        if self.db_type == DBType.SQLITE:
-            sqlalchemy_db.reset_db(self.store_uri, base.metadata)
-        elif self.db_type == DBType.MONGODB:
-            MongoStoreConnManager().drop_all()
 
 
 def _loop(loop: asyncio.AbstractEventLoop):
@@ -242,10 +150,3 @@ def _handle_unary_unary(rpc_event, state, method_handler, default_thread_pool):
 
 
 _server._handle_unary_unary = _handle_unary_unary
-
-if __name__ == '__main__':
-    fd, temp_db_file = tempfile.mkstemp()
-    os.close(fd)
-    store_uri = '%s%s' % ('sqlite:///', temp_db_file)
-    server = AIFlowServer(store_uri=store_uri)
-    server.run(is_block=True)

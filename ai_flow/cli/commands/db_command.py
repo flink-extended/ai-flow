@@ -16,39 +16,37 @@
 # under the License.
 
 import logging
-from ai_flow.util import sqlalchemy_db
-from ai_flow.store.db.base_model import base
-from ai_flow.settings import get_configuration
+
+from ai_flow.metadata.base import Base
+from ai_flow.common.util.db_util import db_migration
+from ai_flow.common.configuration import config_constants
 
 _logger = logging.getLogger(__name__)
+db_uri = config_constants.METADATA_BACKEND_URI
 
 
 def init(args):
     """Init the metadata database"""
-    config = get_configuration()
-    _logger.info('Initialize the database, db uri: {}'.format(config.get_db_uri()))
-    sqlalchemy_db.upgrade(url=config.get_db_uri())
+    _logger.info('Initialize the database, db uri: {}'.format(db_uri))
+    db_migration.init_db(url=db_uri)
 
 
 def reset(args):
     """Reset the metadata database"""
-    config = get_configuration()
-    _logger.info('Reset the database, db uri: {}'.format(config.get_db_uri()))
+    _logger.info('Reset the database, db uri: {}'.format(db_uri))
     if args.yes or input("This will drop existing tables if they exist. Proceed? (y/n)").upper() == "Y":
-        sqlalchemy_db.reset_db(url=config.get_db_uri(), metadata=base.metadata)
+        db_migration.reset_db(url=db_uri, metadata=Base.metadata)
     else:
-        _logger.info('Cancel reset the database, db uri: {}'.format(config.get_db_uri()))
+        _logger.info('Cancel reset the database, db uri: {}'.format(db_uri))
 
 
 def upgrade(args):
     """Upgrade the metadata database"""
-    config = get_configuration()
-    _logger.info('Upgrade the database, db uri: {}'.format(config.get_db_uri()))
-    sqlalchemy_db.upgrade(url=config.get_db_uri(), version=args.version)
+    _logger.info('Upgrade the database, db uri: {}'.format(db_uri))
+    db_migration.upgrade(url=db_uri, version=args.version)
 
 
 def downgrade(args):
     """Downgrade the metadata database"""
-    config = get_configuration()
-    _logger.info('Downgrade the database, db uri: {}'.format(config.get_db_uri()))
-    sqlalchemy_db.downgrade(url=config.get_db_uri(), version=args.version)
+    _logger.info('Downgrade the database, db uri: {}'.format(db_uri))
+    db_migration.downgrade(url=db_uri, version=args.version)

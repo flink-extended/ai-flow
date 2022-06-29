@@ -20,12 +20,11 @@ from functools import wraps
 
 import sqlalchemy
 import sqlalchemy.orm
-from sqlalchemy.engine import Engine
-from sqlalchemy import event
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.common.exception.exceptions import AIFlowDBException
+from ai_flow.common.util.db_util.orm_event_handlers import setup_event_handlers
 
 logger = logging.getLogger(__name__)
 engine = None
@@ -60,27 +59,22 @@ def _get_managed_session_maker(SessionMaker):
     return make_managed_session
 
 
-@event.listens_for(Engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.close()
-
-
-def create_sqlalchemy_engine(db_uri):
+def create_sqlalchemy_engine(db_uri, **kwargs):
     """
     Create SQLAlchemy engine with specified database URI to support AIFlow entities backend storage.
     """
     enable_pool = config_constants.SQLALCHEMY_POOL_ENABLED
-    pool_kwargs = {}
+    options = {}
     if enable_pool and 'sqlite' not in db_uri:
-        pool_kwargs['pool_size'] = config_constants.SQLALCHEMY_POOL_SIZE
-        pool_kwargs['max_overflow'] = config_constants.SQLALCHEMY_MAX_OVERFLOW
-        logger.info("Create SQLAlchemy engine with pool options %s", pool_kwargs)
-    return sqlalchemy.create_engine(db_uri,
-                                    pool_pre_ping=True,
-                                    connect_args={"check_same_thread": False},
-                                    **pool_kwargs)
+        options['pool_size'] = config_constants.SQLALCHEMY_POOL_SIZE
+        options['max_overflow'] = config_constants.SQLALCHEMY_MAX_OVERFLOW
+    if 'sqlite' in db_uri:
+        options['connect_args'] = {'check_same_thread': False}
+        logger.warning("SQLite can only be used in test mode with option `check_same_thread=False`")
+    for k, v in kwargs.items():
+        options[k] = v
+    logger.info("Create SQLAlchemy engine with options %s", options)
+    return sqlalchemy.create_engine(db_uri, **options)
 
 
 def prepare_session(db_uri=None, db_engine=None):
@@ -93,6 +87,7 @@ def prepare_session(db_uri=None, db_engine=None):
             engine = db_engine
         else:
             engine = create_sqlalchemy_engine(db_uri)
+        setup_event_handlers(engine)
         Session = scoped_session(
             sessionmaker(autocommit=False,
                          autoflush=False,
@@ -122,12 +117,8 @@ def create_session():
 
 
 def new_session(db_uri=None, db_engine=None):
-    if db_uri is None:
-        db_uri = config_constants.METADATA_BACKEND_URI
-    if db_engine is None:
-        db_engine = create_sqlalchemy_engine(db_uri)
-    SessionMaker = sqlalchemy.orm.sessionmaker(bind=db_engine)
-    return SessionMaker()
+    prepare_session(db_uri, db_engine)
+    return Session()
 
 
 def provide_session(func):

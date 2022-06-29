@@ -16,3 +16,32 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from google.protobuf.wrappers_pb2 import StringValue, Int32Value, Int64Value, DoubleValue
+
+
+def string_value(field):
+    if field is None:
+        return None
+    else:
+        return StringValue(value=field)
+
+
+def int32_value(field):
+    if field is None:
+        return None
+    else:
+        return Int32Value(value=field)
+
+
+def int64_value(field):
+    if field is None:
+        return None
+    else:
+        return Int64Value(value=field)
+
+
+def double_value(field):
+    if field is None:
+        return None
+    else:
+        return DoubleValue(value=field)

@@ -18,23 +18,23 @@ from enum import Enum
 from typing import Text
 
 
-class ReturnCode(Enum):
+class RetCode(Enum):
     OK = 0,
     ERROR = 1,
 
 
 class BaseResult(object):
-    def __init__(self, status: ReturnCode = ReturnCode.OK, error_message: Text = None):
+    def __init__(self, status: RetCode = RetCode.OK, message: Text = None):
         self._status = status
-        self._error_message = error_message
+        self._message = message
 
     @property
-    def error_message(self):
-        return self._error_message
+    def message(self):
+        return self._message
 
-    @error_message.setter
-    def error_message(self, value):
-        self._error_message = value
+    @message.setter
+    def message(self, value):
+        self._message = value
 
     @property
     def status(self):

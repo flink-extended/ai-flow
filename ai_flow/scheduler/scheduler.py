@@ -14,9 +14,12 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from typing import List
+
+from ai_flow.common.util.db_util import session
 from notification_service.event import Event
+
 from ai_flow.common.configuration import config_constants
-from ai_flow.common.util.db_util.session import new_session, create_sqlalchemy_engine, prepare_session
 from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.scheduler.dispatcher import Dispatcher
 from ai_flow.scheduler.worker import Worker
@@ -27,12 +30,12 @@ class EventDrivenScheduler(object):
     def __init__(self,
                  db_engine,
                  schedule_worker_num: int = config_constants.SERVER_WORKER_NUMBER,
-                 task_executor: TaskExecutor =
-                 TaskExecutorFactory.get_task_executor(executor_type=config_constants.TASK_EXECUTOR)
+                 task_executor: TaskExecutor = None,
                  ):
         self.db_engine = db_engine
-        self.session = new_session(db_engine=self.db_engine)
-        self.task_executor: TaskExecutor = task_executor
+        self.session = session.new_session(db_engine=self.db_engine)
+        self.task_executor = task_executor if task_executor is not None else \
+            TaskExecutorFactory.get_task_executor(executor_type=config_constants.TASK_EXECUTOR)
         self.workers = []
         for i in range(schedule_worker_num):
             self.workers.append(Worker(max_queue_size=config_constants.SERVER_WORKER_QUEUE_SIZE,
@@ -51,6 +54,7 @@ class EventDrivenScheduler(object):
 
     def stop(self):
         self.session.close()
+        session.Session.remove()
         self.task_executor.stop()
         for w in self.workers:
             w.stop()

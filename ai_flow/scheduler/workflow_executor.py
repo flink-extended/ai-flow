@@ -44,7 +44,7 @@ class WorkflowExecutor(object):
             workflow_execution_meta = self.metadata_manager.add_workflow_execution(workflow_id=snapshot_meta.workflow_id,
                                                                                    run_type=schedule_cmd.run_type.value,
                                                                                    snapshot_id=schedule_cmd.snapshot_id)
-            self.metadata_manager.session.flush()
+            self.metadata_manager.flush()
             snapshot_meta = self.metadata_manager.get_workflow_snapshot(snapshot_id=schedule_cmd.snapshot_id)
             workflow: Workflow = cloudpickle.loads(snapshot_meta.workflow_object)
             task_schedule_commands = []
@@ -60,7 +60,7 @@ class WorkflowExecutor(object):
                                                        seq_num=task_execution_meta.sequence_number,
                                                    ))
                     task_schedule_commands.append(task_cmd)
-                    self.metadata_manager.session.flush()
+                    self.metadata_manager.flush()
             self.metadata_manager.update_workflow_execution(workflow_execution_id=workflow_execution_meta.id,
                                                             status=WorkflowStatus.RUNNING.value)
             self.metadata_manager.flush()

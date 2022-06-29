@@ -19,7 +19,10 @@
 import logging.config
 import os
 
+
 # We hard code the logging config, we should make it configurable in the future.
+from ai_flow.common.configuration import config_constants
+
 logging.config.dictConfig({
     'version': 1,
     'disable_existing_loggers': False,
@@ -41,22 +44,5 @@ logging.config.dictConfig({
     }
 })
 
-
-def get_aiflow_home():
-    if 'AIFLOW_HOME' in os.environ:
-        home = os.getenv('AIFLOW_HOME')
-    else:
-        home = os.getenv('HOME') + '/aiflow'
-    return home
-
-
-AIFLOW_HOME = get_aiflow_home()
 AIFLOW_PID_FILENAME = 'aiflow_server.pid'
 AIFLOW_WEBSERVER_PID_FILENAME = "aiflow_web_server.pid"
-
-
-def get_configuration_file_path():
-    config_file_path = AIFLOW_HOME + '/aiflow_server.yaml'
-    if not os.path.exists(config_file_path):
-        raise FileNotFoundError('Config file {} not found.'.format(config_file_path))
-    return config_file_path

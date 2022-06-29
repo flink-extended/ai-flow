@@ -14,351 +14,65 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from ai_flow.endpoint.server import stringValue
-from ai_flow.util import json_utils
-
-from ai_flow.workflow.control_edge import EventCondition
-from typing import Text, List, Dict
+#
+from typing import Optional, List
 
 import grpc
-from ai_flow.protobuf import scheduling_service_pb2_grpc
-from ai_flow.protobuf import scheduling_service_pb2
-from ai_flow.protobuf.message_pb2 import WorkflowProto, WorkflowExecutionProto, JobProto, StatusProto
+from ai_flow.metadata.workflow import WorkflowMeta
 
-from ai_flow.endpoint.client.base_client import BaseClient
+from ai_flow.rpc.client.util.response_unwrapper import unwrap_string_response, unwrap_workflow_list_response, \
+    unwrap_bool_response, unwrap_workflow_response
+from ai_flow.rpc.protobuf import scheduler_service_pb2_grpc
+from ai_flow.rpc.protobuf.message_pb2 import WorkflowIdentifier, WorkflowProto
+from ai_flow.rpc.protobuf.scheduler_service_pb2 import ListWorkflowsRequest, UpdateWorkflowRequest
 
 
-class SchedulerClient(BaseClient):
+class SchedulerClient(object):
     def __init__(self, server_uri):
-        super(SchedulerClient, self).__init__(server_uri)
-        self.channel = grpc.insecure_channel(server_uri)
-        self.scheduling_stub = scheduling_service_pb2_grpc.SchedulingServiceStub(self.channel)
+        channel = grpc.insecure_channel(server_uri)
+        self.scheduler_stub = scheduler_service_pb2_grpc.SchedulerServiceStub(channel)
 
-    def submit_workflow_to_scheduler(self,
-                                     namespace: Text,
-                                     workflow_json: Text,
-                                     workflow_name: Text = None,
-                                     args: Dict = None) -> WorkflowProto:
-        """
-        Submit the ai flow workflow to the scheduler.
-        :param workflow_json:
-        :param namespace:
-        :param workflow_name: The ai flow workflow identify.
-        :param args: The arguments of the submit action.
-        :return: The result of the submit action.
-        """
-        request = scheduling_service_pb2.ScheduleWorkflowRequest()
-        request.namespace = namespace
-        request.workflow_name = workflow_name
-        request.workflow_json = workflow_json
-        if args is not None:
-            for k, v in args.items():
-                request.args[k] = v
-        response = self.scheduling_stub.submitWorkflow(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow
+    def add_workflow(self, name, namespace, content: str, pickled_workflow: bytes) -> Optional[WorkflowMeta]:
+        request = WorkflowProto(name=name, namespace=namespace, content=content, pickled_workflow=pickled_workflow)
+        response = self.scheduler_stub.addWorkflow(request)
+        return unwrap_workflow_response(response)
 
-    def delete_workflow(self,
-                        namespace: Text,
-                        workflow_name: Text = None) -> WorkflowProto:
-        """
-        Delete the ai flow workflow from the scheduler.
-        :param namespace:
-        :param workflow_name: The ai flow workflow identify.
-        :return: The result of the action.
-        """
-        request = scheduling_service_pb2.ScheduleWorkflowRequest()
-        request.namespace = namespace
-        request.workflow_name = workflow_name
-        response = self.scheduling_stub.deleteWorkflow(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow
+    def get_workflow(self, name, namespace) -> Optional[WorkflowMeta]:
+        request = WorkflowIdentifier(namespace=namespace, workflow_name=name)
+        response = self.scheduler_stub.getWorkflow(request)
+        return unwrap_workflow_response(response)
 
-    def pause_workflow_scheduling(self,
-                                  namespace: Text,
-                                  workflow_name: Text = None) -> WorkflowProto:
-        """
-        Pause the ai flow workflow from the scheduler.
-        :param namespace:
-        :param workflow_name: The ai flow workflow identify.
-        :return: The result of the action.
-        """
-        request = scheduling_service_pb2.ScheduleWorkflowRequest()
-        request.namespace = namespace
-        request.workflow_name = workflow_name
-        response = self.scheduling_stub.pauseWorkflowScheduling(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow
+    def update_workflow(self, name, namespace, content: str, pickled_workflow: bytes, is_enabled: bool) -> Optional[
+        WorkflowMeta]:
+        workflow_identifier = WorkflowIdentifier(namespace=namespace, workflow_name=name)
+        request = UpdateWorkflowRequest(identifier=workflow_identifier, content=content,
+                                        pickled_workflow=pickled_workflow, is_enabled=is_enabled)
+        response = self.scheduler_stub.updateWorkflow(request)
+        return unwrap_workflow_response(response)
 
-    def resume_workflow_scheduling(self,
-                                   namespace: Text,
-                                   workflow_name: Text = None) -> WorkflowProto:
-        """
-        Resume the ai flow workflow from the scheduler.
-        :param namespace:
-        :param workflow_name: The ai flow workflow identify.
-        :return: The result of the action.
-        """
-        request = scheduling_service_pb2.ScheduleWorkflowRequest()
-        request.namespace = namespace
-        request.workflow_name = workflow_name
-        response = self.scheduling_stub.resumeWorkflowScheduling(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow
+    def delete_workflow(self, name, namespace) -> bool:
+        request = WorkflowIdentifier(namespace=namespace, workflow_name=name)
+        response = self.scheduler_stub.deleteWorkflow(request)
+        return unwrap_bool_response(response)
 
-    def get_workflow(self,
-                     namespace: Text,
-                     workflow_name: Text = None) -> WorkflowProto:
-        """
-        Return the workflow information.
-        :param namespace:
-        :param workflow_name: The ai flow workflow identify.
-        :return: the workflow information.
-        """
-        request = scheduling_service_pb2.ScheduleWorkflowRequest()
-        request.namespace = namespace
-        request.workflow_name = workflow_name
-        response = self.scheduling_stub.getWorkflow(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow
+    def list_workflows(self, namespace, page_size=None, offset=None) -> Optional[List[WorkflowMeta]]:
+        request = ListWorkflowsRequest(namespace=namespace,
+                                       page_size=page_size,
+                                       offset=offset)
+        response = self.scheduler_stub.listWorkflows(request)
+        return unwrap_workflow_list_response(response)
 
-    def list_workflows(self, namespace: Text) -> List[WorkflowProto]:
-        """
-        :return: All workflow information.
-        """
-        request = scheduling_service_pb2.ScheduleWorkflowRequest()
-        request.namespace = namespace
-        response = self.scheduling_stub.listWorkflows(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow_list
+    def disable_workflow(self, name, namespace) -> bool:
+        request = WorkflowIdentifier(namespace=namespace, workflow_name=name)
+        response = self.scheduler_stub.disableWorkflow(request)
+        return unwrap_bool_response(response)
 
-    def start_new_workflow_execution_on_events(self, namespace: Text, workflow_name: Text,
-                                               event_conditions: List[EventCondition]):
-        """
-        Start new workflow executions whenever any `EventCondition` in the given list is met. The context of the started
-        workflow execution is decided by the :class:`ContextExtractor` set to the workflow.
-        Multiple calls on the same workflow will change the event conditions list. To disable starting new workflow
-        execution on event, one could pass a empty list.
+    def enable_workflow(self, name, namespace) -> bool:
+        request = WorkflowIdentifier(namespace=namespace, workflow_name=name)
+        response = self.scheduler_stub.enableWorkflow(request)
+        return unwrap_bool_response(response)
 
-        :param namespace: namespace of the workflow.
-        :param workflow_name: name of the workflow.
-        :param event_conditions: The list of :class:`EventCondition`.
-        """
-        event_conditions_json = json_utils.dumps(event_conditions)
-        request = scheduling_service_pb2.WorkflowExecutionOnEventRequest(namespace=namespace,
-                                                                         workflow_name=workflow_name,
-                                                                         event_conditions_json=event_conditions_json)
-        response = self.scheduling_stub.startNewWorkflowExecutionOnEvent(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow
+    def start_workflow_execution(self, workflow_name, namespace):
+        request = WorkflowIdentifier(namespace=namespace, workflow_name=workflow_name)
+        self.scheduler_stub.startWorkflowExecution(request)
 
-    def stop_workflow_execution_on_events(self, namespace: Text, workflow_name: Text,
-                                          event_conditions: List[EventCondition]) -> WorkflowProto:
-        """
-        Stop new workflow executions whenever any `EventCondition` in the given list is met. The context of the workflow
-        execution to stop is decided by the :class:`ContextExtractor` set to the workflow.
-        Multiple calls on the same workflow will change the event conditions list. To disable stopping workflow
-        execution on event, one could pass a empty list.
-
-        :param namespace: namespace of the workflow.
-        :param workflow_name: name of the workflow.
-        :param event_conditions: The list of :class:`EventCondition`.
-        """
-        event_conditions_json = json_utils.dumps(event_conditions)
-        request = scheduling_service_pb2.WorkflowExecutionOnEventRequest(namespace=namespace,
-                                                                         workflow_name=workflow_name,
-                                                                         event_conditions_json=event_conditions_json)
-        response = self.scheduling_stub.killWorkflowExecutionOnEvent(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow
-
-    def start_new_workflow_execution(self,
-                                     namespace: Text,
-                                     workflow_name: Text,
-                                     context: Text = None) -> WorkflowExecutionProto:
-        """
-        Run the project under the current project path.
-        :param namespace:
-        :param workflow_name: The ai flow workflow identify.
-        :param context: The context of the new workflow execution.
-        :return: The result of the run action.
-        """
-        request = scheduling_service_pb2.WorkflowExecutionRequest(context=stringValue(context))
-        request.namespace = namespace
-        request.workflow_name = workflow_name
-        response = self.scheduling_stub.startNewWorkflowExecution(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow_execution
-
-    def kill_all_workflow_executions(self,
-                                     namespace: Text,
-                                     workflow_name: Text) -> List[WorkflowExecutionProto]:
-        """
-        Stop all instances of the workflow.
-        :param namespace:
-        :param workflow_name: The ai flow workflow identify.
-        :return: The result of the action.
-        """
-        request = scheduling_service_pb2.WorkflowExecutionRequest()
-        request.namespace = namespace
-        request.workflow_name = workflow_name
-        response = self.scheduling_stub.killAllWorkflowExecutions(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow_execution_list
-
-    def kill_workflow_execution(self,
-                                execution_id: Text) -> WorkflowExecutionProto:
-        """
-        Stop the instance of the workflow.
-        :param execution_id: The ai flow workflow execution identify.
-        :return: The result of the action.
-        """
-        request = scheduling_service_pb2.WorkflowExecutionRequest()
-        request.execution_id = execution_id
-        response = self.scheduling_stub.killWorkflowExecution(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow_execution
-
-    def get_workflow_execution(self,
-                               execution_id: Text) -> WorkflowExecutionProto:
-        """
-        Get the WorkflowExecutionInfo from scheduler.
-        :param execution_id:
-        :return: WorkflowExecutionInfo
-        """
-        request = scheduling_service_pb2.WorkflowExecutionRequest()
-        request.execution_id = execution_id
-        response = self.scheduling_stub.getWorkflowExecution(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow_execution
-
-    def list_workflow_executions(self,
-                                 namespace: Text,
-                                 workflow_name: Text) -> List[WorkflowExecutionProto]:
-        """
-        :param namespace:
-        :param workflow_name: The ai flow workflow identify.
-        :return: All workflow executions of the workflow.
-        """
-        request = scheduling_service_pb2.WorkflowExecutionRequest()
-        request.namespace = namespace
-        request.workflow_name = workflow_name
-        response = self.scheduling_stub.listWorkflowExecutions(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.workflow_execution_list
-
-    def start_job(self, job_name: Text,
-                  execution_id: Text) -> JobProto:
-        """
-        Start a job defined in the ai flow workflow.
-        :param job_name: The job name which task defined in workflow.
-        :param execution_id: The ai flow workflow execution identify.
-        :return: The result of the action.
-        """
-        request = scheduling_service_pb2.ScheduleJobRequest()
-        request.job_name = job_name
-        request.execution_id = execution_id
-        response = self.scheduling_stub.startJob(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.job
-
-    def stop_job(self, job_name: Text,
-                 execution_id: Text) -> JobProto:
-        """
-        Stop a job defined in the ai flow workflow.
-        :param job_name: The job name which task defined in workflow.
-        :param execution_id: The ai flow workflow execution identify.
-        :return: The result of the action.
-        """
-        request = scheduling_service_pb2.ScheduleJobRequest()
-        request.job_name = job_name
-        request.execution_id = execution_id
-        response = self.scheduling_stub.stopJob(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.job
-
-    def restart_job(self, job_name: Text,
-                    execution_id: Text) -> JobProto:
-        """
-        Restart a task defined in the ai flow workflow.
-        :param job_name: The job name which task defined in workflow.
-        :param execution_id: The ai flow workflow execution identify.
-        :return: The result of the action.
-        """
-        request = scheduling_service_pb2.ScheduleJobRequest()
-        request.job_name = job_name
-        request.execution_id = execution_id
-        response = self.scheduling_stub.restartJob(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.job
-
-    def get_job(self, job_name: Text,
-                execution_id: Text) -> JobProto:
-        """
-        Get job information by job name.
-        :param job_name:
-        :param execution_id:
-        :return:
-        """
-        request = scheduling_service_pb2.ScheduleJobRequest()
-        request.job_name = job_name
-        request.execution_id = execution_id
-        response = self.scheduling_stub.getJob(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.job_list
-
-    def list_jobs(self, execution_id: Text) -> List[JobProto]:
-        """
-        List the jobs of the workflow execution.
-        :param execution_id:
-        :return:
-        """
-        request = scheduling_service_pb2.ScheduleJobRequest()
-        request.execution_id = execution_id
-        response = self.scheduling_stub.listJobs(request)
-        if response.result.status != StatusProto.OK:
-            raise Exception(response.result.error_message)
-        return response.job_list
-
-    def stop_scheduling_job(self, execution_id: Text, job_name: Text):
-        """
-        Stop scheduling the job.
-        :param execution_id: The workflow execution id.
-        :param job_name: The job name.
-        """
-        request = scheduling_service_pb2.ScheduleJobRequest()
-        request.job_name = job_name
-        request.execution_id = execution_id
-        response = self.scheduling_stub.stopSchedulingJob(request)
-        if response.status != StatusProto.OK:
-            raise Exception(response.error_message)
-
-    def resume_scheduling_job(self, execution_id: Text, job_name: Text):
-        """
-        Resume scheduling the job.
-        :param execution_id: The workflow execution id.
-        :param job_name: The job name.
-        """
-        request = scheduling_service_pb2.ScheduleJobRequest()
-        request.job_name = job_name
-        request.execution_id = execution_id
-        response = self.scheduling_stub.resumeSchedulingJob(request)
-        if response.status != StatusProto.OK:
-            raise Exception(response.error_message)

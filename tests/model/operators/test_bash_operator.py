@@ -21,8 +21,8 @@ import time
 import unittest
 from subprocess import TimeoutExpired
 
+import cloudpickle
 import psutil
-from ai_flow.common.util.serialization_utils import serialize
 
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.operators.bash import BashOperator
@@ -81,5 +81,4 @@ class TestBashOperator(unittest.TestCase):
     def test_pickle(self):
         with Workflow(name='workflow') as workflow:
             self.bash_operator = BashOperator(name='test_pickle', bash_command='sleep 1')
-        serialize(workflow)
-        self.assertIsNotNone(serialize(workflow))
+        self.assertIsNotNone(cloudpickle.dumps(workflow))

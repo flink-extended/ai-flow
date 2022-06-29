@@ -24,7 +24,7 @@ SERVER_CONF = get_server_configuration()
 
 # Server Config
 
-LOG_DIR = SERVER_CONF.get_str('log_dir', fallback='/tmp')
+LOG_DIR = SERVER_CONF.get_str('log_dir', fallback='~/aiflow/logs')
 
 RPC_PORT = SERVER_CONF.get_str('rpc_port', fallback=50051)
 
@@ -46,8 +46,6 @@ TASK_EXECUTOR_HEARTBEAT_CHECK_INTERVAL = SERVER_CONF.get_int('task_executor_hear
 TASK_HEARTBEAT_TIMEOUT = SERVER_CONF.get_int('task_heartbeat_timeout', fallback=60)
 
 TASK_HEARTBEAT_INTERVAL = SERVER_CONF.get_int('task_heartbeat_interval', fallback=10)
-
-EXECUTE_TASKS_IN_NEW_INTERPRETER = SERVER_CONF.get_bool('execute_tasks_in_new_interpreter', fallback=False)
 
 LOCAL_TASK_EXECUTOR_PARALLELISM = SERVER_CONF.get_int('local_executor_parallelism', fallback=10)
 

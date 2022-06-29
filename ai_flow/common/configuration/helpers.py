@@ -80,3 +80,12 @@ def write_default_config(file_name):
         with open(default_config_path, 'w') as file:
             cfg = parameterized_config(config_str)
             file.write(cfg)
+    else:
+        logger.warning(f'Config {file_name} already exists at {default_config_path}')
+
+
+def get_server_configuration_file_path():
+    default_config_path = os.path.join(get_aiflow_home(), 'aiflow_server.yaml')
+    if not os.path.exists(default_config_path):
+        raise FileNotFoundError('Config file {} not found.'.format(default_config_path))
+    return default_config_path
