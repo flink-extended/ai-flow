@@ -27,7 +27,7 @@ class BaseUnitTest(unittest.TestCase):
         self._delete_db_file()
         self.url = 'sqlite:///{}'.format(self.file)
         init_db(self.url)
-        self.db_engine = create_sqlalchemy_engine(db_uri=self.url, connect_args={'check_same_thread': False})
+        self.db_engine = create_sqlalchemy_engine(db_uri=self.url)
         self.session = new_session(db_engine=self.db_engine)
         prepare_session(db_engine=self.db_engine)
 

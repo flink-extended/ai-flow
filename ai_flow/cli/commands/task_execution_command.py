@@ -28,13 +28,13 @@ from ai_flow.blob_manager.blob_manager_interface import BlobManagerFactory, Blob
 from ai_flow.common.exception.exceptions import TaskFailedException, TaskForceStoppedException
 from ai_flow.common.util import workflow_utils
 from ai_flow.model.context import Context
-from ai_flow.model.internal.events import TaskStatusEvent
+from ai_flow.model.internal.events import TaskStatusEvent, TaskStatusChangedEvent
 from ai_flow.model.operator import AIFlowOperator
 from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecutionKey
 from ai_flow.rpc.client.heartbeat_client import HeartbeatClient
 from ai_flow.common.configuration.helpers import AIFLOW_HOME
-
+from ai_flow.scheduler.runtime_context import TaskExecutionContextImpl
 
 logging.basicConfig(filename='/Users/alibaba/aiflow/logs/'+__name__+'.log',
                     format='[%(asctime)s-%(filename)s-%(levelname)s:%(message)s]',
@@ -70,6 +70,7 @@ class TaskManager(object):
                  notification_server_uri: str,
                  heartbeat_server_uri: str,
                  heartbeat_interval: int):
+        self.namespace = None
         self.workflow_name = workflow_name
         self.task_execution_key = task_execution_key
         self.workflow_snapshot_path = workflow_snapshot_path
@@ -83,14 +84,15 @@ class TaskManager(object):
 
     def run_task(self):
         try:
+            self._send_task_status_change(TaskStatus.RUNNING)
             self._execute()
         except TaskFailedException:
-            self._send_task_status_change(self.task_execution_key, TaskStatus.FAILED)
+            self._send_task_status_change(TaskStatus.FAILED)
             raise
         except TaskForceStoppedException:
-            self._send_task_status_change(self.task_execution_key, TaskStatus.STOPPED)
+            self._send_task_status_change(TaskStatus.STOPPED)
             raise
-        self._send_task_status_change(self.task_execution_key, TaskStatus.SUCCESS)
+        self._send_task_status_change(TaskStatus.SUCCESS)
 
     def _execute(self):
         task = self._get_task()
@@ -129,14 +131,22 @@ class TaskManager(object):
         workflows = workflow_utils.extract_workflows_from_zip(workflow_snapshot_zip, snapshot_repo)
         workflows = [x for x in workflows if x.name == self.workflow_name]
         assert len(workflows) == 1
-        return workflows[0].tasks.get(self.task_execution_key.task_name)
+        matched_workflow = workflows[0]
+        self.namespace = matched_workflow.namespace
+        return matched_workflow.tasks.get(self.task_execution_key.task_name)
 
-    def _send_task_status_change(self, key: TaskExecutionKey, status: TaskStatus):
-        event = TaskStatusEvent(workflow_execution_id=key.workflow_execution_id,
-                                task_name=key.task_name,
-                                sequence_number=key.seq_num,
-                                status=status)
-        self.notification_client.send_event(event)
+    def _send_task_status_change(self, status: TaskStatus):
+        event_for_meta = TaskStatusEvent(workflow_execution_id=self.task_execution_key.workflow_execution_id,
+                                         task_name=self.task_execution_key.task_name,
+                                         sequence_number=self.task_execution_key.seq_num,
+                                         status=status)
+        self.notification_client.send_event(event_for_meta)
+        event_for_schedule = TaskStatusChangedEvent(workflow_name=self.workflow_name,
+                                                    workflow_execution_id=self.task_execution_key.workflow_execution_id,
+                                                    task_name=self.task_execution_key.task_name,
+                                                    status=status,
+                                                    namespace=self.namespace)
+        self.notification_client.send_event(event_for_schedule)
 
     def _send_heartbeat(self):
         logger.debug("Sending heartbeat to task executor.")

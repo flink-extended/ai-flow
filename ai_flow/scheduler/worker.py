@@ -20,7 +20,6 @@ import queue
 import threading
 
 from notification_service.event import Event
-from notification_service.notification_client import NotificationClient
 
 from ai_flow.common.util.db_util.session import create_session
 from ai_flow.metadata.metadata_manager import MetadataManager
@@ -42,12 +41,10 @@ class Worker(threading.Thread):
 
     def __init__(self,
                  max_queue_size: int = 20,
-                 task_executor: TaskExecutor=None,
-                 notification_client: NotificationClient = None):
+                 task_executor: TaskExecutor = None):
         super().__init__()
         self.input_queue = queue.Queue(max_queue_size)
         self.task_executor = task_executor
-        self.notification_client = notification_client
 
     def add_unit(self, unit: SchedulingUnit):
         self.input_queue.put(unit)
@@ -107,8 +104,7 @@ class Worker(threading.Thread):
     def run(self) -> None:
         with create_session() as session:
             metadata_manager = MetadataManager(session=session)
-            scheduling_event_processor = SchedulingEventProcessor(metadata_manager=metadata_manager,
-                                                                  notification_client=self.notification_client)
+            scheduling_event_processor = SchedulingEventProcessor(metadata_manager=metadata_manager)
             workflow_executor = WorkflowExecutor(metadata_manager=metadata_manager)
             rule_executor = RuleExecutor(metadata_manager=metadata_manager)
             while True:

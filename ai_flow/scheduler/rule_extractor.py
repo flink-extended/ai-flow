@@ -182,6 +182,10 @@ class RuleExtractor(object):
     def update_workflow(self, workflow_id, pickled_workflow):
         self.workflow_dict[workflow_id] = cloudpickle.loads(pickled_workflow)
 
+    def delete_workflow(self, workflow_id):
+        if workflow_id in self.workflow_dict:
+            self.workflow_dict.pop(workflow_id)
+
     def extract_workflow_execution_rules(self, event: Event) -> List[WorkflowExecutionRuleWrapper]:
         """Extract rules for workflow execution"""
         workflow_execution_id = parse_workflow_execution_id(event.context)

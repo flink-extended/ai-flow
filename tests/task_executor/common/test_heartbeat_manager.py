@@ -34,7 +34,8 @@ class TestHeartbeatManager(unittest.TestCase):
     @mock.patch.object(config_constants, 'TASK_HEARTBEAT_TIMEOUT', 1)
     @mock.patch('ai_flow.task_executor.common.heartbeat_manager.HeartbeatManager._send_heartbeat_timeout')
     @mock.patch.object(heartbeat_manager, 'create_session')
-    def test_rpc_server(self, mock_session, mock_send_timeout):
+    @mock.patch('ai_flow.task_executor.common.heartbeat_manager.EmbeddedNotificationClient')
+    def test_rpc_server(self, mock_ns, mock_session, mock_send_timeout):
         manager = None
         try:
             expect_tasks = [
@@ -45,7 +46,7 @@ class TestHeartbeatManager(unittest.TestCase):
                 filter.return_value.all.return_value = expect_tasks
             mock_session.return_value.__enter__.return_value.query.return_value.\
                 filter.return_value.scalar.return_value = TaskStatus.SUCCESS
-            manager = HeartbeatManager(None)
+            manager = HeartbeatManager()
             manager.start()
             self.assertEqual(3, len(manager.task_dict))
 
@@ -91,15 +92,16 @@ class TestHeartbeatManager(unittest.TestCase):
         self.assertEqual('task_name', key.task_name)
         self.assertEqual('2', key.seq_num)
 
+    @mock.patch('ai_flow.task_executor.common.heartbeat_manager.EmbeddedNotificationClient')
     @mock.patch.object(heartbeat_manager, 'create_session')
-    def test__update_running_tasks(self, mock_session):
+    def test__update_running_tasks(self, mock_session, mock_ns):
         expect_tasks = [
             TaskExecutionMeta(i, f'task_{i}')
             for i in [1, 2, 3]
         ]
         mock_session.return_value.__enter__.return_value.query.return_value.\
             filter.return_value.all.return_value = expect_tasks
-        manager = HeartbeatManager(None)
+        manager = HeartbeatManager()
         manager._update_running_tasks()
         self.assertEqual(3, len(manager.task_dict))
         for t in expect_tasks:
@@ -119,11 +121,12 @@ class TestHeartbeatManager(unittest.TestCase):
     @mock.patch.object(config_constants, 'TASK_EXECUTOR_HEARTBEAT_CHECK_INTERVAL', 2)
     @mock.patch('ai_flow.task_executor.common.heartbeat_manager.HeartbeatManager._send_heartbeat_timeout')
     @mock.patch.object(heartbeat_manager, 'create_session')
-    def test_running_task_timeout(self, mock_session, mock_send_heartbeat):
+    @mock.patch('ai_flow.task_executor.common.heartbeat_manager.EmbeddedNotificationClient')
+    def test_running_task_timeout(self, mock_ns, mock_session, mock_send_heartbeat):
         mock_session.return_value.__enter__.return_value.query.return_value.\
             filter.return_value.scalar.return_value = TaskStatus.RUNNING
 
-        manager = HeartbeatManager(None)
+        manager = HeartbeatManager()
         manager.task_dict = {'1_t1_2': time.time() - 100}
 
         heartbeat_check_thread = StoppableThread(
@@ -137,11 +140,12 @@ class TestHeartbeatManager(unittest.TestCase):
     @mock.patch.object(config_constants, 'TASK_EXECUTOR_HEARTBEAT_CHECK_INTERVAL', 1)
     @mock.patch('ai_flow.task_executor.common.heartbeat_manager.HeartbeatManager._send_heartbeat_timeout')
     @mock.patch.object(heartbeat_manager, 'create_session')
-    def test_finished_task_timeout(self, mock_session, mock_send_heartbeat):
+    @mock.patch('ai_flow.task_executor.common.heartbeat_manager.EmbeddedNotificationClient')
+    def test_finished_task_timeout(self, mock_ns, mock_session, mock_send_heartbeat):
         mock_session.return_value.__enter__.return_value.query.return_value.\
             filter.return_value.scalar.return_value = TaskStatus.SUCCESS
 
-        manager = HeartbeatManager(None)
+        manager = HeartbeatManager()
         manager.task_dict = {
             '1_t1_2': time.time() - 100,
             '1_t2_2': time.time()

@@ -21,7 +21,7 @@ from typing import List
 
 from ai_flow.model.condition import Condition
 from ai_flow.model.context import Context
-from ai_flow.model.internal.events import TaskStatusChangedEventKey, TaskStatusChangedEvent, EventContextConstant
+from ai_flow.model.internal.events import TaskStatusChangedEventKey, EventContextConstant
 from ai_flow.model.state import ValueState, ValueStateDescriptor
 from ai_flow.model.status import TaskStatus
 
@@ -161,8 +161,6 @@ class TaskStatusAllMetCondition(Condition):
         self.condition_list = condition_list
 
     def is_met(self, event: Event, context: Context) -> bool:
-        # assert isinstance(event, TaskStatusChangedEvent)
-
         for condition in self.condition_list:
             namespace_name = context.workflow.namespace
             workflow_name = context.workflow.name

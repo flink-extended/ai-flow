@@ -13,6 +13,10 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from typing import List
+
+from notification_service.event import Event
+from notification_service.notification_client import ListenerProcessor
 
 from ai_flow.rpc.service.util.meta_to_proto import MetaToProto
 from notification_service.embedded_notification_client import EmbeddedNotificationClient
@@ -28,21 +32,37 @@ from ai_flow.rpc.protobuf import scheduler_service_pb2_grpc
 from ai_flow.scheduler.scheduler import EventDrivenScheduler
 
 
+class Processor(ListenerProcessor):
+    def __init__(self, scheduler):
+        self.scheduler = scheduler
+
+    def process(self, events: List[Event]):
+        for event in events:
+            self.scheduler.trigger(event)
+
+
 class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
 
     def __init__(self):
         db_engine = create_sqlalchemy_engine(config_constants.METADATA_BACKEND_URI)
-        self.notification_client = EmbeddedNotificationClient(
-            server_uri=config_constants.NOTIFICATION_SERVER_URI,
-            namespace='scheduler', sender='scheduler')
-        self.scheduler = EventDrivenScheduler(db_engine=db_engine,
-                                              notification_client=self.notification_client)
+        self.scheduler = EventDrivenScheduler(db_engine=db_engine)
+        self.notification_client = None
+        self.event_listener = None
 
     def start(self):
         self.scheduler.start()
+        self.notification_client = EmbeddedNotificationClient(
+            server_uri=config_constants.NOTIFICATION_SERVER_URI, namespace='scheduler', sender='scheduler')
+        self.event_listener = self.notification_client.register_listener(
+            listener_processor=Processor(self.scheduler), offset=self.get_last_committed_offset())
 
     def stop(self):
+        self.notification_client.unregister_listener(self.event_listener)
         self.scheduler.stop()
+
+    def get_last_committed_offset(self):
+        # metadata_manager = MetadataManager(self.session)
+        return 0
 
     @catch_exception
     def addWorkflow(self, request, context):
@@ -78,7 +98,10 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
                                                             content=request.content,
                                                             workflow_object=request.pickled_workflow,
                                                             is_enabled=request.is_enabled)
-                self.scheduler.dispatcher.rule_extractor.update_workflow(workflow.id, request.pickled_workflow)
+                if workflow.is_enabled:
+                    self.scheduler.dispatcher.rule_extractor.update_workflow(workflow.id, request.pickled_workflow)
+                else:
+                    self.scheduler.dispatcher.rule_extractor.delete_workflow(workflow.id)
                 response = MetaToProto.workflow_meta_to_proto(workflow)
             return wrap_data_response(response)
 
@@ -91,6 +114,7 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
                 return wrap_result_response(BaseResult(RetCode.ERROR, f'Workflow {request.workflow_name} not exists'))
             else:
                 metadata_manager.delete_workflow_by_name(request.namespace, request.workflow_name)
+                self.scheduler.dispatcher.rule_extractor.delete_workflow(workflow.id)
                 return wrap_result_response(BaseResult(RetCode.OK, None))
 
     @catch_exception
@@ -111,6 +135,7 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
                 return wrap_result_response(BaseResult(RetCode.ERROR, f'Workflow {request.workflow_name} not exists'))
             else:
                 metadata_manager.update_workflow(request.namespace, request.workflow_name, is_enabled=False)
+                self.scheduler.dispatcher.rule_extractor.delete_workflow(workflow.id)
                 return wrap_result_response(BaseResult(RetCode.OK, None))
 
     @catch_exception
@@ -122,6 +147,7 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
                 return wrap_result_response(BaseResult(RetCode.ERROR, f'Workflow {request.workflow_name} not exists'))
             else:
                 metadata_manager.update_workflow(request.namespace, request.workflow_name, is_enabled=True)
+                self.scheduler.dispatcher.rule_extractor.update_workflow(workflow.id, workflow.workflow_object)
                 return wrap_result_response(BaseResult(RetCode.OK, None))
 
     @catch_exception
