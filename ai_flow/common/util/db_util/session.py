@@ -70,7 +70,7 @@ def create_sqlalchemy_engine(db_uri, **kwargs):
         options['max_overflow'] = config_constants.SQLALCHEMY_MAX_OVERFLOW
     if 'sqlite' in db_uri:
         options['connect_args'] = {'check_same_thread': False}
-        logger.warning("SQLite can only be used in test mode with option `check_same_thread=False`")
+        logger.warning("SQLite should be only used in unittests.")
     for k, v in kwargs.items():
         options[k] = v
     logger.info("Create SQLAlchemy engine with options %s", options)

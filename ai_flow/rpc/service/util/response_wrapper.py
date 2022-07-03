@@ -22,12 +22,14 @@ from typing import List
 
 from google.protobuf.json_format import MessageToJson
 
-from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.common.result import BaseResult, RetCode
 from ai_flow.rpc.protobuf.message_pb2 import Response, SUCCESS, ReturnCode, RESOURCE_DOES_NOT_EXIST, NamespaceProto, \
-    INTERNAL_ERROR, WorkflowProto, WorkflowSnapshotProto
+    INTERNAL_ERROR, WorkflowProto, WorkflowSnapshotProto, WorkflowExecutionProto, WorkflowScheduleProto, \
+    WorkflowTriggerProto, TaskExecutionProto
 from ai_flow.rpc.protobuf.metadata_service_pb2 import NamespaceListProto, WorkflowSnapshotListProto
-from ai_flow.rpc.protobuf.scheduler_service_pb2 import WorkflowListProto
+from ai_flow.rpc.protobuf.scheduler_service_pb2 import WorkflowListProto, WorkflowExecutionListProto, \
+    WorkflowScheduleListProto, WorkflowTriggerListProto, TaskExecutionListProto
+from ai_flow.rpc.server.exception import AIFlowRpcServerException
 
 
 def catch_exception(func):
@@ -35,7 +37,7 @@ def catch_exception(func):
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except AIFlowException as e:
+        except AIFlowRpcServerException as e:
             return Response(return_code=str(e.error_code), error_msg=e.error_msg)
 
     return wrapper
@@ -95,5 +97,49 @@ def wrap_workflow_snapshot_list_response(workflow_snapshot_list: List[WorkflowSn
                         data=MessageToJson(list_proto, preserving_proto_field_name=True))
 
 
+def wrap_workflow_execution_list_response(workflow_execution_list: List[WorkflowExecutionProto]):
+    if workflow_execution_list is None or len(workflow_execution_list) == 0:
+        return Response(return_code=str(RESOURCE_DOES_NOT_EXIST),
+                        error_msg=ReturnCode.Name(RESOURCE_DOES_NOT_EXIST).lower(),
+                        data=None)
+    else:
+        list_proto = WorkflowExecutionListProto(workflow_executions=workflow_execution_list)
+        return Response(return_code=str(SUCCESS),
+                        error_msg=None,
+                        data=MessageToJson(list_proto, preserving_proto_field_name=True))
 
 
+def wrap_task_execution_list_response(task_execution_list: List[TaskExecutionProto]):
+    if task_execution_list is None or len(task_execution_list) == 0:
+        return Response(return_code=str(RESOURCE_DOES_NOT_EXIST),
+                        error_msg=ReturnCode.Name(RESOURCE_DOES_NOT_EXIST).lower(),
+                        data=None)
+    else:
+        list_proto = TaskExecutionListProto(task_executions=task_execution_list)
+        return Response(return_code=str(SUCCESS),
+                        error_msg=None,
+                        data=MessageToJson(list_proto, preserving_proto_field_name=True))
+
+
+def wrap_workflow_schedule_list_response(workflow_schedule_list: List[WorkflowScheduleProto]):
+    if workflow_schedule_list is None or len(workflow_schedule_list) == 0:
+        return Response(return_code=str(RESOURCE_DOES_NOT_EXIST),
+                        error_msg=ReturnCode.Name(RESOURCE_DOES_NOT_EXIST).lower(),
+                        data=None)
+    else:
+        list_proto = WorkflowScheduleListProto(workflow_schedules=workflow_schedule_list)
+        return Response(return_code=str(SUCCESS),
+                        error_msg=None,
+                        data=MessageToJson(list_proto, preserving_proto_field_name=True))
+
+
+def wrap_workflow_trigger_list_response(workflow_trigger_list: List[WorkflowTriggerProto]):
+    if workflow_trigger_list is None or len(workflow_trigger_list) == 0:
+        return Response(return_code=str(RESOURCE_DOES_NOT_EXIST),
+                        error_msg=ReturnCode.Name(RESOURCE_DOES_NOT_EXIST).lower(),
+                        data=None)
+    else:
+        list_proto = WorkflowTriggerListProto(workflow_triggers=workflow_trigger_list)
+        return Response(return_code=str(SUCCESS),
+                        error_msg=None,
+                        data=MessageToJson(list_proto, preserving_proto_field_name=True))

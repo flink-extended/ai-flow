@@ -16,12 +16,12 @@
 # under the License.
 import logging
 import json
+from datetime import datetime
 from typing import Union
 
 import cloudpickle
 from notification_service.event import Event
 
-from ai_flow.common.util.time_utils import utcnow
 from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.action import TaskAction
 from ai_flow.model.execution_type import ExecutionType
@@ -106,7 +106,7 @@ class SchedulingEventProcessor(object):
                                 .format(str(event), task_execution_meta.status))
             else:
                 if TaskStatus(status) in TASK_FINISHED_SET:
-                    end_date = utcnow()
+                    end_date = datetime.now()
                 else:
                     end_date = None
                 self.metadata_manager.update_task_execution(
@@ -131,7 +131,7 @@ class SchedulingEventProcessor(object):
                 self.metadata_manager.update_task_execution(
                     task_execution_id=task_execution_meta.id,
                     status=TaskStatus.FAILED.value,
-                    end_date=utcnow()
+                    end_date=datetime.now()
                 )
                 self.metadata_manager.flush()
                 self._set_workflow_execution_status(workflow_execution_id=workflow_execution_id)

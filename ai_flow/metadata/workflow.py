@@ -14,11 +14,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from datetime import datetime
+
 from sqlalchemy import Column, String, Integer, Binary, DateTime, Boolean, BigInteger, ForeignKey, UniqueConstraint, \
     Text
 from sqlalchemy.orm import relationship
-
-from ai_flow.common.util.time_utils import utcnow
 from ai_flow.metadata.base import Base
 
 
@@ -63,7 +63,7 @@ class WorkflowMeta(Base):
                  is_enabled=True,
                  event_offset=-1,
                  uuid=None) -> None:
-        current_dt = utcnow()
+        current_dt = datetime.now()
         self.name = name
         self.namespace = namespace
         self.content = content

@@ -15,6 +15,7 @@
 #
 from unittest import mock
 
+from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.rpc.client.aiflow_client import get_ai_flow_client
 from ai_flow.rpc.server.server import AIFlowServer
 from tests.test_utils.unittest_base import BaseUnitTest
@@ -60,7 +61,8 @@ class TestAIFlowServer(BaseUnitTest):
         self.assertEqual(1, len(namespaces))
         self.assertEqual('ns3', namespaces[0].name)
 
-        self.assertFalse(self.client.delete_namespace('non-exists'))
+        with self.assertRaisesRegex(AIFlowException, r"Namespace non-exists not exists"):
+            self.assertFalse(self.client.delete_namespace('non-exists'))
         self.client.delete_namespace('ns1')
         namespaces = self.client.list_namespaces()
         self.assertEqual(2, len(namespaces))
@@ -86,9 +88,5 @@ class TestAIFlowServer(BaseUnitTest):
 
         self.assertTrue(self.client.delete_workflow_snapshot(snapshot2.id))
         self.assertEqual(2, len(self.client.list_workflow_snapshots(workflow_meta.id)))
-        self.assertFalse(self.client.delete_workflow_snapshot(10000))
-
-
-
-
-
+        with self.assertRaisesRegex(AIFlowException, r"Workflow snapshot 10000 not exists"):
+            self.assertFalse(self.client.delete_workflow_snapshot(10000))

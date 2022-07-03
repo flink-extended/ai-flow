@@ -130,6 +130,7 @@ class TimerJobStore(BaseJobStore):
         r.next_run_time = datetime_to_utc_timestamp(job.next_run_time)
         r.job_state = pickle.dumps(job.__getstate__(), self.pickle_protocol)
         self.session.add(r)
+        self.session.commit()
 
     def update_job(self, job):
         """Uncommitted"""
@@ -148,6 +149,7 @@ class TimerJobStore(BaseJobStore):
     def remove_job(self, job_id):
         """Uncommitted"""
         self.session.query(TimerMeta).filter(TimerMeta.id == job_id).delete()
+        self.session.commit()
 
     def remove_all_jobs(self):
         self.session.query(TimerMeta).delete()

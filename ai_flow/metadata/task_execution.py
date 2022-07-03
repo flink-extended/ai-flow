@@ -18,6 +18,7 @@ from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, BigInteger
 from sqlalchemy.orm import relationship
 
 from ai_flow.metadata.base import Base
+from ai_flow.model.status import TaskStatus
 
 
 class TaskExecutionMeta(Base):
@@ -50,6 +51,18 @@ class TaskExecutionMeta(Base):
 
     def __init__(self,
                  workflow_execution_id,
-                 task_name):
+                 task_name,
+                 sequence_number=1,
+                 try_number=1,
+                 begin_date=None,
+                 end_date=None,
+                 status=TaskStatus.INIT.value,
+                 uuid=None):
         self.workflow_execution_id = workflow_execution_id
         self.task_name = task_name
+        self.sequence_number = sequence_number
+        self.try_number = try_number
+        self.begin_date = begin_date
+        self.end_date = end_date
+        self.status = status
+        self.id = uuid
