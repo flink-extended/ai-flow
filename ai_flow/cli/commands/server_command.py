@@ -22,9 +22,8 @@ import daemon
 from daemon.pidfile import TimeoutPIDLockFile
 
 import ai_flow.settings
-from ai_flow import AIFlowServerRunner
-from ai_flow.settings import get_configuration_file_path
-from ai_flow.util.process_utils import check_pid_exist, stop_process
+from ai_flow.common.util.process_utils import check_pid_exist, stop_process
+from ai_flow.rpc.server.server_runner import AIFlowServerRunner
 
 logger = logging.getLogger(__name__)
 
@@ -72,22 +71,19 @@ def server_start(args):
             }
         )
         with ctx:
-            config_file_path = get_configuration_file_path()
-            server_runner = AIFlowServerRunner(config_file_path)
+            server_runner = AIFlowServerRunner()
             server_runner.start(True)
 
         log.close()
     else:
-        """Start the AIFlow server"""
         signal.signal(signal.SIGTERM, sigterm_handler)
-        config_file_path = get_configuration_file_path()
 
         pid = os.getpid()
         logger.info("Starting AIFlow Server at pid: {}".format(pid))
         with open(pid_file_path, 'w') as f:
             f.write(str(pid))
         try:
-            server_runner = AIFlowServerRunner(config_file_path)
+            server_runner = AIFlowServerRunner()
             server_runner.start(True)
         finally:
             if os.path.exists(pid_file_path):
@@ -111,4 +107,4 @@ def server_stop(args):
         os.remove(pid_file_path)
         return
 
-    stop_process(pid, "AIFlow server")
+    stop_process(pid)
