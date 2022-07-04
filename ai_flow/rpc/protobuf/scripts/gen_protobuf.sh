@@ -21,86 +21,86 @@ set -e
 
 current_dir=$(cd "$(dirname "$0")";pwd)
 root_dir=${current_dir}/../..
-echo $root_dir
+proto_dir=${current_dir}/../proto
 
 #generate go file
-protoc -I/usr/local/include -I${current_dir} \
+protoc -I/usr/local/include -I${proto_dir} \
   -I$GOPATH/src \
   -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --go_out=Mgoogle/api/annotations.proto=github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis/google/api,plugins=grpc:${current_dir}/../go \
-  ${current_dir}/message.proto
+  ${proto_dir}/message.proto
 
-protoc -I/usr/local/include -I${current_dir} \
+protoc -I/usr/local/include -I${proto_dir} \
   -I$GOPATH/src \
   -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --go_out=Mgoogle/api/annotations.proto=github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis/google/api,plugins=grpc:${current_dir}/../go \
-  ${current_dir}/metadata_service.proto
+  ${proto_dir}/metadata_service.proto
 
-protoc -I/usr/local/include -I${current_dir} \
+protoc -I/usr/local/include -I${proto_dir} \
   -I$GOPATH/src -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --grpc-gateway_out=logtostderr=true:${current_dir}/../go \
-  ${current_dir}/metadata_service.proto
+  ${proto_dir}/metadata_service.proto
 
-protoc -I/usr/local/include -I${current_dir} \
+protoc -I/usr/local/include -I${proto_dir} \
   -I$GOPATH/src \
   -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --go_out=Mgoogle/api/annotations.proto=github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis/google/api,plugins=grpc:${current_dir}/../go \
-  ${current_dir}/scheduler_service.proto
+  ${proto_dir}/scheduler_service.proto
 
-protoc -I/usr/local/include -I${current_dir} \
+protoc -I/usr/local/include -I${proto_dir} \
   -I$GOPATH/src -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --grpc-gateway_out=logtostderr=true:${current_dir}/../go \
-  ${current_dir}/scheduler_service.proto
+  ${proto_dir}/scheduler_service.proto
 
 
 ##generate java file
-#protoc -I/usr/local/include -I${current_dir} \
+#protoc -I/usr/local/include -I${proto_dir} \
 #  -I$GOPATH/src -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 #  --java_out=${root_dir}/java/client/src/main/java \
 #  --proto_path=${current_dir} \
-#  ${current_dir}/message.proto
+#  ${proto_dir}/message.proto
 #
-#protoc -I/usr/local/include -I${current_dir} \
+#protoc -I/usr/local/include -I${proto_dir} \
 #  -I$GOPATH/src -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 #  --java_out=${root_dir}/java/client/src/main/java \
 #  --proto_path=${current_dir} \
-#  ${current_dir}/metadata_service.proto
+#  ${proto_dir}/metadata_service.proto
 #
-#protoc -I/usr/local/include -I${current_dir} \
+#protoc -I/usr/local/include -I${proto_dir} \
 #  -I$GOPATH/src -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 #  --plugin=protoc-gen-grpc-java \
 #  --grpc-java_out=${root_dir}/java/client/src/main/java \
 #  --proto_path=${current_dir} \
-#  ${current_dir}/metadata_service.proto
+#  ${proto_dir}/metadata_service.proto
 
 
 #generate python file
-python3 -m grpc.tools.protoc -I${current_dir} \
+python3 -m grpc.tools.protoc -I${proto_dir} \
   -I/usr/local/include \
   -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --python_out=${current_dir}/.. \
-  ${current_dir}/message.proto
+  ${proto_dir}/message.proto
 
-python3 -m grpc.tools.protoc -I${current_dir} \
+python3 -m grpc.tools.protoc -I${proto_dir} \
   -I/usr/local/include \
   -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --python_out=${current_dir}/.. \
   --grpc_python_out=${current_dir}/.. \
-  ${current_dir}/metadata_service.proto
+  ${proto_dir}/metadata_service.proto
 
-python3 -m grpc.tools.protoc -I${current_dir} \
+python3 -m grpc.tools.protoc -I${proto_dir} \
   -I/usr/local/include \
   -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --python_out=${current_dir}/.. \
   --grpc_python_out=${current_dir}/.. \
-  ${current_dir}/heartbeat_service.proto
+  ${proto_dir}/heartbeat_service.proto
 
-python3 -m grpc.tools.protoc -I${current_dir} \
+python3 -m grpc.tools.protoc -I${proto_dir} \
   -I/usr/local/include \
   -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
   --python_out=${current_dir}/.. \
   --grpc_python_out=${current_dir}/.. \
-  ${current_dir}/scheduler_service.proto
+  ${proto_dir}/scheduler_service.proto
 
 
 cd ${current_dir}/..

@@ -75,3 +75,18 @@ TASK_ALIVE_SET = frozenset(
         TaskStatus.RUNNING
     ]
 )
+
+WORKFLOW_FINISHED_SET = frozenset(
+[
+        WorkflowStatus.SUCCESS,
+        WorkflowStatus.FAILED,
+        WorkflowStatus.STOPPED,
+    ]
+)
+
+WORKFLOW_ALIVE_SET = frozenset(
+[
+        WorkflowStatus.INIT,
+        WorkflowStatus.RUNNING,
+    ]
+)
