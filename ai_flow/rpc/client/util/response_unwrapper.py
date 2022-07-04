@@ -21,10 +21,12 @@ import logging
 from google.protobuf.json_format import Parse
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.rpc.client.util.proto_to_meta import ProtoToMeta
-from ai_flow.rpc.protobuf.message_pb2 import SUCCESS, NamespaceProto, RESOURCE_DOES_NOT_EXIST, INTERNAL_ERROR, \
-    WorkflowProto, WorkflowSnapshotProto
+from ai_flow.rpc.protobuf.message_pb2 import SUCCESS, NamespaceProto, RESOURCE_DOES_NOT_EXIST, \
+    WorkflowProto, WorkflowSnapshotProto, WorkflowExecutionProto, WorkflowScheduleProto, WorkflowTriggerProto, \
+    TaskExecutionProto
 from ai_flow.rpc.protobuf.metadata_service_pb2 import NamespaceListProto, WorkflowSnapshotListProto
-from ai_flow.rpc.protobuf.scheduler_service_pb2 import WorkflowListProto
+from ai_flow.rpc.protobuf.scheduler_service_pb2 import WorkflowListProto, WorkflowExecutionListProto, \
+    WorkflowScheduleListProto, WorkflowTriggerListProto, TaskExecutionListProto
 
 logger = logging.getLogger(__name__)
 
@@ -32,9 +34,6 @@ logger = logging.getLogger(__name__)
 def unwrap_bool_response(response):
     if response.return_code == str(SUCCESS):
         return True
-    elif response.return_code == str(INTERNAL_ERROR):
-        logger.warning(response.error_msg)
-        return False
     else:
         raise AIFlowException(response.error_msg)
 
@@ -102,3 +101,78 @@ def unwrap_workflow_snapshot_list_response(response):
     else:
         raise AIFlowException(response.error_msg)
 
+
+def unwrap_workflow_execution_response(response):
+    if response.return_code == str(SUCCESS):
+        return ProtoToMeta.proto_to_workflow_execution_meta(Parse(response.data, WorkflowExecutionProto()))
+    elif response.return_code == str(RESOURCE_DOES_NOT_EXIST):
+        return None
+    else:
+        raise AIFlowException(response.error_msg)
+
+
+def unwrap_workflow_execution_list_response(response):
+    if response.return_code == str(SUCCESS):
+        execution_list_proto = Parse(response.data, WorkflowExecutionListProto())
+        return ProtoToMeta.proto_to_workflow_execution_meta_list(execution_list_proto.workflow_executions)
+    elif response.return_code == str(RESOURCE_DOES_NOT_EXIST):
+        return None
+    else:
+        raise AIFlowException(response.error_msg)
+
+
+def unwrap_task_execution_response(response):
+    if response.return_code == str(SUCCESS):
+        return ProtoToMeta.proto_to_task_execution_meta(Parse(response.data, TaskExecutionProto()))
+    elif response.return_code == str(RESOURCE_DOES_NOT_EXIST):
+        return None
+    else:
+        raise AIFlowException(response.error_msg)
+
+
+def unwrap_task_execution_list_response(response):
+    if response.return_code == str(SUCCESS):
+        execution_list_proto = Parse(response.data, TaskExecutionListProto())
+        return ProtoToMeta.proto_to_task_execution_meta_list(execution_list_proto.task_executions)
+    elif response.return_code == str(RESOURCE_DOES_NOT_EXIST):
+        return None
+    else:
+        raise AIFlowException(response.error_msg)
+
+
+def unwrap_workflow_schedule_response(response):
+    if response.return_code == str(SUCCESS):
+        return ProtoToMeta.proto_to_workflow_schedule_meta(Parse(response.data, WorkflowScheduleProto()))
+    elif response.return_code == str(RESOURCE_DOES_NOT_EXIST):
+        return None
+    else:
+        raise AIFlowException(response.error_msg)
+
+
+def unwrap_workflow_schedule_list_response(response):
+    if response.return_code == str(SUCCESS):
+        schedule_list_proto = Parse(response.data, WorkflowScheduleListProto())
+        return ProtoToMeta.proto_to_workflow_schedule_meta_list(schedule_list_proto.workflow_schedules)
+    elif response.return_code == str(RESOURCE_DOES_NOT_EXIST):
+        return None
+    else:
+        raise AIFlowException(response.error_msg)
+
+
+def unwrap_workflow_trigger_response(response):
+    if response.return_code == str(SUCCESS):
+        return ProtoToMeta.proto_to_workflow_trigger_meta(Parse(response.data, WorkflowTriggerProto()))
+    elif response.return_code == str(RESOURCE_DOES_NOT_EXIST):
+        return None
+    else:
+        raise AIFlowException(response.error_msg)
+
+
+def unwrap_workflow_trigger_list_response(response):
+    if response.return_code == str(SUCCESS):
+        trigger_list_proto = Parse(response.data, WorkflowTriggerListProto())
+        return ProtoToMeta.proto_to_workflow_trigger_meta_list(trigger_list_proto.workflow_triggers)
+    elif response.return_code == str(RESOURCE_DOES_NOT_EXIST):
+        return None
+    else:
+        raise AIFlowException(response.error_msg)

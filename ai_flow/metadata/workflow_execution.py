@@ -17,7 +17,6 @@
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, BigInteger
 from sqlalchemy.orm import relationship
 
-from ai_flow.common.util.time_utils import utcnow
 from ai_flow.metadata.base import Base
 from ai_flow.model.status import WorkflowStatus
 
@@ -52,9 +51,17 @@ class WorkflowExecutionMeta(Base):
     def __init__(self,
                  workflow_id,
                  run_type,
-                 snapshot_id):
+                 snapshot_id,
+                 begin_date=None,
+                 end_date=None,
+                 status=WorkflowStatus.INIT.value,
+                 event_offset=-1,
+                 uuid=None):
         self.workflow_id = workflow_id
         self.run_type = run_type
         self.snapshot_id = snapshot_id
-        self.status = WorkflowStatus.INIT.value
-        self.begin_date = utcnow()
+        self.begin_date = begin_date
+        self.end_date = end_date
+        self.status = status
+        self.event_offset = event_offset
+        self.id = uuid

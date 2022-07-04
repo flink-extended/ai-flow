@@ -29,7 +29,7 @@ from ai_flow.sdk import operation
 from tests.test_utils.unittest_base import BaseUnitTest
 
 
-@unittest.skip("This is an itest which is not ready")
+# @unittest.skip("This is an itest which is not ready")
 class OperationITest(BaseUnitTest):
 
     def setUp(self) -> None:

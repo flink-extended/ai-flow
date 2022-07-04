@@ -24,9 +24,8 @@ from ai_flow.common.util import time_utils
 
 class TestTimeUtils(unittest.TestCase):
 
-    def test_utc_date_parse(self):
+    def test_date_parse(self):
         time = datetime.datetime(2022, 1, 1, 1, 1, 1)
-        time = time.replace(tzinfo=datetime.timezone.utc)
         epoch = time_utils.datetime_to_epoch(time)
-        new_time = time_utils.parse_to_utc_date(epoch)
+        new_time = time_utils.epoch_to_datetime(epoch)
         self.assertEqual(time, new_time)

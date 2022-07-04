@@ -14,10 +14,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from datetime import datetime
+
 from sqlalchemy import Column,Integer, Binary, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
-from ai_flow.common.util.time_utils import utcnow
 from ai_flow.metadata.base import Base
 
 
@@ -43,9 +44,11 @@ class WorkflowEventTriggerMeta(Base):
     def __init__(self,
                  workflow_id,
                  rule,
-                 is_paused=False):
+                 is_paused=False,
+                 create_time=None,
+                 uuid=None):
         self.workflow_id = workflow_id
         self.rule = rule
         self.is_paused = is_paused
-        self.create_time = utcnow()
-        self.update_time = utcnow()
+        self.create_time = datetime.now() if create_time is None else create_time
+        self.id = uuid

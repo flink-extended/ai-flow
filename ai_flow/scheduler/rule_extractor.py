@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 import json
+import threading
+
 import cloudpickle
 from copy import deepcopy
 from typing import List, Dict, Set, Tuple
@@ -90,18 +92,25 @@ def build_task_rule_index(workflow_dict: Dict[int, Workflow]) -> Dict[EventTuple
     """Build the workflow index by task rules"""
     task_rule_index = {}
     for workflow_id, workflow in workflow_dict.items():
-        expect_keys = workflow_expect_event_tuples(workflow=workflow)
-        for key in expect_keys:
-            if key not in task_rule_index:
-                task_rule_index[key] = set()
-            task_rule_index[key].add(workflow_id)
+        append_task_rule_index(task_rule_index, workflow, workflow_id)
     return task_rule_index
 
 
-def build_workflow_rule_index(workflow_trigger_list: List[WorkflowEventTriggerMeta]) -> Dict[EventTuple, Set[int]]:
+def append_task_rule_index(task_rule_index: Dict[EventTuple, Set[int]], workflow: Workflow, workflow_id: int):
+    expect_keys = workflow_expect_event_tuples(workflow=workflow)
+    for key in expect_keys:
+        if key not in task_rule_index:
+            task_rule_index[key] = set()
+        task_rule_index[key].add(workflow_id)
+
+
+def build_workflow_rule_index(workflow_dict: Dict[int, Workflow],
+                              workflow_trigger_dict: Dict[int, WorkflowEventTriggerMeta]) -> Dict[EventTuple, Set[int]]:
     """Build the workflow index by workflow rules"""
     workflow_rule_index = {}
-    for workflow_trigger_meta in workflow_trigger_list:
+    for workflow_trigger_meta in workflow_trigger_dict.values():
+        if workflow_trigger_meta.workflow_id not in workflow_dict:
+            continue
         rule: WorkflowRule = cloudpickle.loads(workflow_trigger_meta.rule)
         expect_keys = expect_keys_to_tuple_set(rule.condition.expect_events)
         for key in expect_keys:
@@ -115,11 +124,12 @@ class RuleIndex(object):
     """Stores the index that the event triggers the workflow"""
     def __init__(self,
                  workflow_dict: Dict[int, Workflow],
-                 workflow_trigger_list: List[WorkflowEventTriggerMeta]):
+                 workflow_trigger_dict: Dict[int, WorkflowEventTriggerMeta]):
         self.task_rule_index: Dict[EventTuple, Set[int]] \
             = build_task_rule_index(workflow_dict=workflow_dict)
         self.workflow_rule_index: Dict[EventTuple, Set[int]] \
-            = build_workflow_rule_index(workflow_trigger_list=workflow_trigger_list)
+            = build_workflow_rule_index(workflow_dict=workflow_dict,
+                                        workflow_trigger_dict=workflow_trigger_dict)
 
     def affected_workflows_by_task_rule(self, event: Event) -> Set[int]:
         keys = gen_all_tuple_by_event_key(event.event_key)
@@ -164,27 +174,52 @@ class RuleExtractor(object):
     def __init__(self, metadata_manager: MetadataManager):
         self.metadata_manager = metadata_manager
         self.workflow_dict: Dict[int, Workflow] = self._load_workflows()
-        self.workflow_trigger_list: List[WorkflowEventTriggerMeta] = self._load_workflow_triggers()
-        self.event_workflow_index: RuleIndex \
-            = RuleIndex(workflow_dict=self.workflow_dict,
-                        workflow_trigger_list=self.workflow_trigger_list)
+        self.workflow_trigger_dict: Dict[int, WorkflowEventTriggerMeta] = self._load_workflow_triggers()
+        self.event_workflow_index: RuleIndex = self._load_rule_index()
+        self._lock = threading.RLock()
 
     def _load_workflows(self):
-        workflows = self.metadata_manager.list_workflows(namespace=None, page_size=None)
+        workflows = self.metadata_manager.list_workflows(namespace=None,
+                                                         filters=Filters(filters=[(FilterEqual('is_enabled'), True)]))
         workflow_dict = {}
         for w_m in workflows:
             workflow_dict[w_m.id] = cloudpickle.loads(w_m.workflow_object)
         return workflow_dict
 
     def _load_workflow_triggers(self):
-        return self.metadata_manager.list_all_workflow_triggers()
+        workflow_triggers =  self.metadata_manager.list_all_workflow_triggers(
+            filters=Filters(filters=[(FilterEqual('is_paused'), False)]))
+        trigger_dict = {}
+        for w_t in workflow_triggers:
+            trigger_dict[w_t.id] = w_t
+        return trigger_dict
+
+    def _load_rule_index(self):
+        return RuleIndex(workflow_dict=self.workflow_dict,
+                         workflow_trigger_dict=self.workflow_trigger_dict)
 
     def update_workflow(self, workflow_id, pickled_workflow):
-        self.workflow_dict[workflow_id] = cloudpickle.loads(pickled_workflow)
+        with self._lock:
+            self.workflow_dict[workflow_id] = cloudpickle.loads(pickled_workflow)
+            self.event_workflow_index = self._load_rule_index()
 
     def delete_workflow(self, workflow_id):
-        if workflow_id in self.workflow_dict:
-            self.workflow_dict.pop(workflow_id)
+        with self._lock:
+            if workflow_id in self.workflow_dict:
+                self.workflow_dict.pop(workflow_id)
+                self.event_workflow_index = self._load_rule_index()
+
+    def update_workflow_trigger(self, trigger: WorkflowEventTriggerMeta):
+        with self._lock:
+            self.workflow_trigger_dict[trigger.id] = trigger
+            self.event_workflow_index.workflow_rule_index = build_workflow_rule_index(
+                self.workflow_dict, self.workflow_trigger_dict)
+
+    def delete_workflow_trigger(self, trigger_id):
+        with self._lock:
+            self.workflow_trigger_dict.pop(trigger_id)
+            self.event_workflow_index.workflow_rule_index = build_workflow_rule_index(
+                self.workflow_dict, self.workflow_trigger_dict)
 
     def extract_workflow_execution_rules(self, event: Event) -> List[WorkflowExecutionRuleWrapper]:
         """Extract rules for workflow execution"""

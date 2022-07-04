@@ -18,7 +18,6 @@ from typing import Optional, Union
 
 import cloudpickle
 
-from ai_flow.common.util.time_utils import utcnow
 from ai_flow.metadata.metadata_manager import MetadataManager, Filters, FilterIn
 from ai_flow.model.action import TaskAction
 from ai_flow.model.status import TASK_ALIVE_SET, WorkflowStatus

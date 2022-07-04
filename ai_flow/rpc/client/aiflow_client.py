@@ -28,7 +28,7 @@ class AIFlowClient(MetadataClient, SchedulerClient):
         self.server_uri = server_uri
         MetadataClient.__init__(self, server_uri)
         SchedulerClient.__init__(self, server_uri)
-        self.wait_for_server_ready(60)   # TODO make it configurable
+        self.wait_for_server_ready(config_constants.SERVER_START_TIMEOUT)
 
     def wait_for_server_ready(self, timeout):
         channel = grpc.insecure_channel(self.server_uri)
