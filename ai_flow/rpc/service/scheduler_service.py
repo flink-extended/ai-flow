@@ -275,7 +275,7 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
             # TODO
             # Currently the MetadataManager and the Timer are not using the same session,
             # nor in the same transaction, so it is possible that the Timer successfully
-            # add schedule while the MetaDataManager                                `1failed to add meta.
+            # add schedule while the MetaDataManager failed to add meta.
             self.timer.add_workflow_schedule(schedule.id, expression)
         return wrap_data_response(MetaToProto.workflow_schedule_meta_to_proto(schedule))
 
