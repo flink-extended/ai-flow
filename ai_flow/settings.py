@@ -22,6 +22,7 @@ import os
 
 # We hard code the logging config, we should make it configurable in the future.
 from ai_flow.common.configuration import config_constants
+from ai_flow.common.env import get_aiflow_home
 
 logging.config.dictConfig({
     'version': 1,
@@ -44,5 +45,7 @@ logging.config.dictConfig({
     }
 })
 
+
+AIFLOW_HOME = get_aiflow_home()
 AIFLOW_PID_FILENAME = 'aiflow_server.pid'
 AIFLOW_WEBSERVER_PID_FILENAME = "aiflow_web_server.pid"

@@ -30,7 +30,6 @@ from ai_flow.rpc.protobuf.metadata_service_pb2 import ListWorkflowSnapshotsReque
 from ai_flow.rpc import string_value
 
 
-
 class MetadataClient(object):
     def __init__(self, server_uri):
         channel = grpc.insecure_channel(server_uri)

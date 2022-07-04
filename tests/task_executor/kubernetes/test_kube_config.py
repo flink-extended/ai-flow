@@ -18,9 +18,9 @@
 import os
 import unittest
 
-from ai_flow.common.configuration.helpers import expand_env_var
 
 from ai_flow.common.configuration import config_constants
+from ai_flow.common.env import expand_env_var
 from ai_flow.task_executor.kubernetes.kube_config import KubeConfig
 
 
