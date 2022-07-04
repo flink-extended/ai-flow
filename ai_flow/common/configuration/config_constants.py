@@ -61,6 +61,7 @@ SERVER_WORKER_QUEUE_SIZE = SERVER_CONF.get('server_worker_queue_size', fallback=
 
 SERVER_WORKER_NUMBER = SERVER_CONF.get('server_worker_number', fallback=5)
 
+SERVER_START_TIMEOUT = SERVER_CONF.get('server_start_timeout', fallback=60)
 
 # Client Config
 

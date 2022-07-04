@@ -17,6 +17,8 @@
 import os
 import unittest
 
+from ai_flow.common.util.db_util import session as db_session
+
 from ai_flow.common.util.db_util.db_migration import init_db
 from ai_flow.common.util.db_util.session import new_session, create_sqlalchemy_engine, prepare_session
 
@@ -37,4 +39,5 @@ class BaseUnitTest(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.session.close()
+        db_session.Session.remove()
         self._delete_db_file()

@@ -14,12 +14,12 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from datetime import datetime
 from typing import List, Optional, Tuple, Any
 
 from sqlalchemy.sql.functions import count
 
 from ai_flow.common.exception.exceptions import AIFlowException
-from ai_flow.common.util.time_utils import utcnow
 from ai_flow.metadata.namespace import NamespaceMeta
 from ai_flow.metadata.state import DBWorkflowValueState, DBWorkflowExecutionValueState
 from ai_flow.metadata.task_execution import TaskExecutionMeta
@@ -134,7 +134,11 @@ class MetadataManager(object):
         self.session = session
 
     def commit(self):
-        self.session.commit()
+        try:
+            self.session.commit()
+        except Exception:
+            self.session.rollback()
+            raise
 
     def rollback(self):
         self.session.rollback()
@@ -174,6 +178,7 @@ class MetadataManager(object):
         :param name: The name of the namespace.
         """
         self.session.query(NamespaceMeta).filter(NamespaceMeta.name == name).delete()
+        self.flush()
 
     def get_namespace(self, name) -> NamespaceMeta:
         """
@@ -281,6 +286,7 @@ class MetadataManager(object):
         """
         self.session.query(WorkflowMeta).filter(WorkflowMeta.namespace == namespace,
                                                 WorkflowMeta.name == workflow_name).delete()
+        self.flush()
 
     def delete_workflow_by_id(self, workflow_id):
         """
@@ -288,6 +294,7 @@ class MetadataManager(object):
         :param workflow_id: The unique id of the workflow.
         """
         self.session.query(WorkflowMeta).filter(WorkflowMeta.id == workflow_id).delete()
+        self.flush()
 
     def update_workflow(self, namespace, name, content=None, workflow_object=None, is_enabled=None) -> WorkflowMeta:
         """
@@ -303,12 +310,12 @@ class MetadataManager(object):
                                                                 WorkflowMeta.name == name).one()
         # todo maybe create workflow snapshot
         if content is not None:
-            workflow_meta.context = content
+            workflow_meta.content = content
         if workflow_object is not None:
             workflow_meta.workflow_object = workflow_object
         if is_enabled is not None:
             workflow_meta.is_enabled = is_enabled
-        workflow_meta.update_time = utcnow()
+        workflow_meta.update_time = datetime.now()
         self.session.merge(workflow_meta)
         self.flush()
         return workflow_meta
@@ -380,6 +387,7 @@ class MetadataManager(object):
         :param snapshot_id: The unique id of the workflow snapshot.
         """
         self.session.query(WorkflowSnapshotMeta).filter(WorkflowSnapshotMeta.id == snapshot_id).delete()
+        self.flush()
 
     # end workflow snapshot
 
@@ -461,6 +469,7 @@ class MetadataManager(object):
         :param schedule_id: The unique id of the workflow schedule.
         """
         self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).delete()
+        self.flush()
 
     # end workflow schedule
 
@@ -546,6 +555,7 @@ class MetadataManager(object):
         :param trigger_id: The unique id of the workflow trigger.
         """
         self.session.query(WorkflowEventTriggerMeta).filter(WorkflowEventTriggerMeta.id == trigger_id).delete()
+        self.flush()
 
     def list_all_workflow_triggers(self,
                                    page_size=None,
@@ -598,7 +608,7 @@ class MetadataManager(object):
         if status is not None:
             meta.status = status
         if TaskStatus(status) in TASK_FINISHED_SET:
-            meta.end_date = utcnow()
+            meta.end_date = datetime.now()
         self.session.merge(meta)
         self.flush()
         return meta
@@ -645,6 +655,7 @@ class MetadataManager(object):
         """
         self.session.query(WorkflowExecutionMeta) \
             .filter(WorkflowExecutionMeta.id == workflow_execution_id).delete()
+        self.flush()
 
     # end workflow execution
 
@@ -660,7 +671,7 @@ class MetadataManager(object):
         :return: The task execution metadata.
         """
         task_execution = TaskExecutionMeta(workflow_execution_id=workflow_execution_id, task_name=task_name)
-        task_execution.begin_date = utcnow()
+        task_execution.begin_date = datetime.now()
         task_execution.status = TaskStatus.INIT.value
         seq = self.get_latest_sequence_number(workflow_execution_id=workflow_execution_id, task_name=task_name)
         task_execution.sequence_number = seq + 1
@@ -765,8 +776,8 @@ class MetadataManager(object):
         Delete the task execution metadata from MetadataBackend.
         :param task_execution_id: The unique id of the task execution.
         """
-        self.session.query(TaskExecutionMeta) \
-            .filter(TaskExecutionMeta.id == task_execution_id).delete()
+        self.session.query(TaskExecutionMeta).filter(TaskExecutionMeta.id == task_execution_id).delete()
+        self.flush()
 
     # end task execution
 

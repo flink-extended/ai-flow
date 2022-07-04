@@ -44,58 +44,224 @@ message ListWorkflowsRequest {
     int64 offset = 3;
 }
 
-service SchedulerService {
+message ListWorkflowItemsRequest {
+    string namespace = 1;
+    string workflow_name = 2;
+    int64 page_size = 3;
+    int64 offset = 4;
+}
 
-    rpc startWorkflowExecution (WorkflowIdentifier) returns (Response) {
-        option (google.api.http) = {
-            post: "/scheduler/workflow_execution/start"
-            body: "*"
-        };
-    };
+message ListTaskExecutionsRequest {
+    int64 workflow_execution_id = 1;
+    int64 page_size = 2;
+    int64 offset = 3;
+}
+
+message WorkflowExecutionListProto {
+    repeated WorkflowExecutionProto workflow_executions = 1;
+}
+
+message TaskExecutionListProto {
+    repeated TaskExecutionProto task_executions = 1;
+}
+
+message WorkflowScheduleListProto {
+    repeated WorkflowScheduleProto workflow_schedules = 1;
+}
+
+message WorkflowTriggerListProto {
+    repeated WorkflowTriggerProto workflow_triggers = 1;
+}
+
+service SchedulerService {
 
     // begin workflow api
     rpc addWorkflow (WorkflowProto) returns (Response) {
         option (google.api.http) = {
-            post: "/metadata/workflow/add"
+            post: "/workflow/add"
             body: "*"
         };
     }
     rpc updateWorkflow (UpdateWorkflowRequest) returns (Response) {
         option (google.api.http) = {
-            post: "/metadata/workflow/update"
+            post: "/workflow/update"
             body: "*"
         };
     }
     rpc getWorkflow (WorkflowIdentifier) returns (Response) {
         option (google.api.http) = {
-            post: "/metadata/workflow/get"
+            post: "/workflow/get"
             body: "*"
         };
     }
     rpc deleteWorkflow (WorkflowIdentifier) returns (Response) {
         option (google.api.http) = {
-            post: "/metadata/workflow/delete"
+            post: "/workflow/delete"
             body: "*"
         };
     }
     rpc disableWorkflow (WorkflowIdentifier) returns (Response) {
         option (google.api.http) = {
-            post: "/metadata/workflow/disable"
+            post: "/workflow/disable"
             body: "*"
         };
     }
     rpc enableWorkflow (WorkflowIdentifier) returns (Response) {
         option (google.api.http) = {
-            post: "/metadata/workflow/enable"
+            post: "/workflow/enable"
             body: "*"
         };
     }
     rpc listWorkflows (ListWorkflowsRequest) returns (Response) {
         option (google.api.http) = {
-            post: "/metadata/workflow/list"
+            post: "/workflow/list"
             body: "*"
         };
     }
     // end workflow api
 
+    // begin workflow execution api
+    rpc startWorkflowExecution (WorkflowIdentifier) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_execution/start"
+            body: "*"
+        };
+    };
+    rpc stopWorkflowExecution (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_execution/stop"
+            body: "*"
+        };
+    };
+    rpc stopWorkflowExecutions (WorkflowIdentifier) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_execution/stop_all"
+            body: "*"
+        };
+    };
+    rpc getWorkflowExecution (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            get: "/workflow_execution/get/{id}"
+        };
+    };
+    rpc listWorkflowExecutions (ListWorkflowItemsRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_execution/list"
+            body: "*"
+        };
+    };
+    // end workflow execution api
+
+    // begin task execution api
+    rpc startTaskExecution (TaskExecutionIdentifier) returns (Response) {
+        option (google.api.http) = {
+            post: "/task_execution/start"
+            body: "*"
+        };
+    }
+    rpc stopTaskExecution (TaskExecutionIdentifier) returns (Response) {
+        option (google.api.http) = {
+            post: "/task_execution/stop"
+            body: "*"
+        };
+    }
+    rpc getTaskExecution (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            get: "/task_execution/get/{id}"
+        };
+    }
+    rpc listTaskExecutions (ListTaskExecutionsRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/task_execution/list"
+            body: "*"
+        };
+    }
+    // end task execution api
+
+    // begin workflow schedule api
+    rpc addWorkflowSchedule (WorkflowScheduleProto) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_schedule/add"
+            body: "*"
+        };
+    }
+    rpc getWorkflowSchedule (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            get: "/workflow_schedule/get/{id}"
+        };
+    }
+    rpc listWorkflowSchedules (ListWorkflowItemsRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_schedule/list"
+            body: "*"
+        };
+    }
+    rpc deleteWorkflowSchedule (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_schedule/delete"
+            body: "*"
+        };
+    }
+    rpc deleteWorkflowSchedules (WorkflowIdentifier) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_schedule/delete_all"
+            body: "*"
+        };
+    }
+    rpc pauseWorkflowSchedule (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_schedule/pause"
+            body: "*"
+        };
+    }
+    rpc resumeWorkflowSchedule (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_schedule/resume"
+            body: "*"
+        };
+    }
+
+    // begin workflow trigger api
+    rpc addWorkflowTrigger (WorkflowTriggerProto) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_trigger/add"
+            body: "*"
+        };
+    }
+    rpc getWorkflowTrigger (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            get: "/workflow_trigger/get/{id}"
+        };
+    }
+    rpc listWorkflowTriggers (ListWorkflowItemsRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_trigger/list"
+            body: "*"
+        };
+    }
+    rpc deleteWorkflowTrigger (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_trigger/delete"
+            body: "*"
+        };
+    }
+    rpc deleteWorkflowTriggers (WorkflowIdentifier) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_trigger/delete_all"
+            body: "*"
+        };
+    }
+    rpc pauseWorkflowTrigger (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_trigger/pause"
+            body: "*"
+        };
+    }
+    rpc resumeWorkflowTrigger (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_trigger/resume"
+            body: "*"
+        };
+    }
+    // end workflow trigger api
 }

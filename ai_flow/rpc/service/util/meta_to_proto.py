@@ -16,11 +16,16 @@
 #
 from typing import List
 
+from ai_flow.metadata.task_execution import TaskExecutionMeta
+from ai_flow.metadata.workflow_event_trigger import WorkflowEventTriggerMeta
+from ai_flow.metadata.workflow_schedule import WorkflowScheduleMeta
+from ai_flow.metadata.workflow_execution import WorkflowExecutionMeta
 from ai_flow.metadata.workflow_snapshot import WorkflowSnapshotMeta
 from ai_flow.common.util.time_utils import datetime_to_epoch
 from ai_flow.metadata.workflow import WorkflowMeta
 from ai_flow.metadata.namespace import NamespaceMeta
-from ai_flow.rpc.protobuf.message_pb2 import NamespaceProto, WorkflowProto, WorkflowSnapshotProto
+from ai_flow.rpc.protobuf.message_pb2 import NamespaceProto, WorkflowProto, WorkflowSnapshotProto, \
+    WorkflowExecutionProto, WorkflowScheduleProto, WorkflowTriggerProto, TaskExecutionProto
 from ai_flow.rpc import int64_value, string_value
 
 
@@ -81,110 +86,81 @@ class MetaToProto:
             workflow_snapshot_proto_list.append(MetaToProto.workflow_snapshot_meta_to_proto(snapshot))
         return workflow_snapshot_proto_list
 
+    @staticmethod
+    def workflow_execution_meta_to_proto(workflow_execution: WorkflowExecutionMeta) -> WorkflowExecutionProto:
+        if workflow_execution is None:
+            return None
+        else:
+            return WorkflowExecutionProto(uuid=workflow_execution.id,
+                                          workflow_id=workflow_execution.workflow_id,
+                                          begin_date=int64_value(datetime_to_epoch(workflow_execution.begin_date)),
+                                          end_date=int64_value(datetime_to_epoch(workflow_execution.end_date)),
+                                          status=string_value(workflow_execution.status),
+                                          run_type=string_value(workflow_execution.run_type),
+                                          snapshot_id=workflow_execution.snapshot_id,
+                                          event_offset=int64_value(workflow_execution.event_offset))
 
+    @staticmethod
+    def workflow_execution_meta_list_to_proto(executions: List[WorkflowExecutionMeta]) -> List[WorkflowExecutionProto]:
+        workflow_execution_proto_list = []
+        for we in executions:
+            workflow_execution_proto_list.append(MetaToProto.workflow_execution_meta_to_proto(we))
+        return workflow_execution_proto_list
 
-    # @staticmethod
-    # def dataset_meta_to_proto(dataset_mata) -> DatasetMeta:
-    #     if dataset_mata is None:
-    #         return None
-    #     else:
-    #         if dataset_mata.schema is not None:
-    #             name_list = dataset_mata.schema.name_list
-    #             type_list = dataset_mata.schema.type_list
-    #             data_type_list = []
-    #             if type_list is not None:
-    #                 for data_type in type_list:
-    #                     data_type_list.append(DataTypeProto.Value(data_type))
-    #             else:
-    #                 data_type_list = None
-    #         else:
-    #             name_list = None
-    #             data_type_list = None
-    #         schema = SchemaProto(name_list=name_list,
-    #                              type_list=data_type_list)
-    #     return DatasetProto(
-    #         uuid=dataset_mata.uuid,
-    #         name=dataset_mata.name,
-    #         properties=dataset_mata.properties,
-    #         data_format=stringValue(dataset_mata.data_format),
-    #         description=stringValue(dataset_mata.description),
-    #         uri=stringValue(dataset_mata.uri),
-    #         create_time=int64Value(dataset_mata.create_time),
-    #         update_time=int64Value(dataset_mata.update_time),
-    #         schema=schema,
-    #         catalog_name=stringValue(dataset_mata.catalog_name),
-    #         catalog_type=stringValue(dataset_mata.catalog_type),
-    #         catalog_database=stringValue(dataset_mata.catalog_database),
-    #         catalog_connection_uri=stringValue(dataset_mata.catalog_connection_uri),
-    #         catalog_table=stringValue(dataset_mata.catalog_table))
-    #
-    # @staticmethod
-    # def dataset_meta_list_to_proto(datasets: List[DatasetMeta]) -> List[DatasetProto]:
-    #     list_dataset_proto = []
-    #     for dataset in datasets:
-    #         list_dataset_proto.append(MetaToProto.dataset_meta_to_proto(dataset))
-    #     return list_dataset_proto
-    #
-    #
-    #
-    # @staticmethod
-    # def workflow_meta_to_proto(workflow_meta: WorkflowMeta) -> WorkflowMetaProto:
-    #     if workflow_meta is None:
-    #         return None
-    #     else:
-    #         return WorkflowMetaProto(name=workflow_meta.name,
-    #                                  project_id=int64Value(workflow_meta.project_id),
-    #                                  properties=workflow_meta.properties,
-    #                                  create_time=int64Value(workflow_meta.create_time),
-    #                                  update_time=int64Value(workflow_meta.update_time),
-    #                                  context_extractor_in_bytes=workflow_meta.context_extractor_in_bytes,
-    #                                  graph=stringValue(workflow_meta.graph),
-    #                                  uuid=workflow_meta.uuid)
-    #
-    # @staticmethod
-    # def workflow_meta_list_to_proto(workflows: List[WorkflowMeta]) -> List[WorkflowMetaProto]:
-    #     workflow_proto_list = []
-    #     for workflow in workflows:
-    #         workflow_proto_list.append(MetaToProto.workflow_meta_to_proto(workflow))
-    #     return workflow_proto_list
-    #
-    # @staticmethod
-    # def workflow_snapshot_meta_to_proto(workflow_snapshot_meta: WorkflowSnapshotMeta) -> WorkflowSnapshotProto:
-    #     if workflow_snapshot_meta is None:
-    #         return None
-    #     else:
-    #         return WorkflowSnapshotProto(workflow_id=int64Value(workflow_snapshot_meta.workflow_id),
-    #                                      uri=stringValue(workflow_snapshot_meta.uri),
-    #                                      signature=stringValue(workflow_snapshot_meta.signature),
-    #                                      create_time=int64Value(workflow_snapshot_meta.create_time),
-    #                                      uuid=workflow_snapshot_meta.uuid)
-    #
-    # @staticmethod
-    # def workflow_snapshot_meta_list_to_proto(snapshots: List[WorkflowSnapshotMeta]) -> List[WorkflowSnapshotProto]:
-    #     workflow_snapshot_list = []
-    #     for workflow_snapshot in snapshots:
-    #         workflow_snapshot_list.append(MetaToProto.workflow_snapshot_meta_to_proto(workflow_snapshot))
-    #     return workflow_snapshot_list
-    #
-    # @staticmethod
-    # def artifact_meta_to_proto(artifact_meta: ArtifactMeta) -> ArtifactProto:
-    #     if artifact_meta is None:
-    #         return None
-    #     else:
-    #         return ArtifactProto(
-    #             uuid=artifact_meta.uuid,
-    #             name=artifact_meta.name,
-    #             properties=artifact_meta.properties,
-    #             artifact_type=stringValue(artifact_meta.artifact_type),
-    #             description=stringValue(artifact_meta.description),
-    #             uri=stringValue(artifact_meta.uri),
-    #             create_time=int64Value(artifact_meta.create_time),
-    #             update_time=int64Value(artifact_meta.update_time))
-    #
-    # @staticmethod
-    # def artifact_meta_list_to_proto(artifacts: List[ArtifactMeta]) -> List[ArtifactProto]:
-    #     artifact_proto_list = []
-    #     for artifact in artifacts:
-    #         artifact_proto_list.append(MetaToProto.artifact_meta_to_proto(artifact))
-    #     return artifact_proto_list
+    @staticmethod
+    def task_execution_meta_to_proto(task_execution: TaskExecutionMeta) -> TaskExecutionProto:
+        if task_execution is None:
+            return None
+        else:
+            return TaskExecutionProto(uuid=task_execution.id,
+                                      workflow_execution_id=task_execution.workflow_execution_id,
+                                      task_name=task_execution.task_name,
+                                      sequence_number=task_execution.sequence_number,
+                                      try_number=task_execution.try_number,
+                                      begin_date=int64_value(datetime_to_epoch(task_execution.begin_date)),
+                                      end_date=int64_value(datetime_to_epoch(task_execution.end_date)),
+                                      status=string_value(task_execution.status))
+
+    @staticmethod
+    def task_execution_meta_list_to_proto(executions: List[TaskExecutionMeta]) -> List[TaskExecutionProto]:
+        task_execution_proto_list = []
+        for te in executions:
+            task_execution_proto_list.append(MetaToProto.task_execution_meta_to_proto(te))
+        return task_execution_proto_list
+
+    @staticmethod
+    def workflow_schedule_meta_to_proto(workflow_schedule: WorkflowScheduleMeta) -> WorkflowScheduleProto:
+        if workflow_schedule is None:
+            return None
+        else:
+            return WorkflowScheduleProto(uuid=workflow_schedule.id,
+                                         workflow_id=workflow_schedule.workflow_id,
+                                         expression=string_value(workflow_schedule.expression),
+                                         is_paused=workflow_schedule.is_paused,
+                                         create_time=int64_value(datetime_to_epoch(workflow_schedule.create_time)))
+
+    @staticmethod
+    def workflow_schedule_meta_list_to_proto(workflow_schedules: List[WorkflowScheduleMeta]) -> List[WorkflowScheduleProto]:
+        workflow_schedule_proto_list = []
+        for ws in workflow_schedules:
+            workflow_schedule_proto_list.append(MetaToProto.workflow_schedule_meta_to_proto(ws))
+        return workflow_schedule_proto_list
+
+    @staticmethod
+    def workflow_trigger_meta_to_proto(workflow_trigger: WorkflowEventTriggerMeta) -> WorkflowTriggerProto:
+        if workflow_trigger is None:
+            return None
+        else:
+            return WorkflowTriggerProto(uuid=workflow_trigger.id,
+                                        workflow_id=workflow_trigger.workflow_id,
+                                        rule=workflow_trigger.rule,
+                                        is_paused=workflow_trigger.is_paused,
+                                        create_time=int64_value(datetime_to_epoch(workflow_trigger.create_time)))
+
+    @staticmethod
+    def workflow_trigger_meta_list_to_proto(workflow_triggers: List[WorkflowEventTriggerMeta]) -> List[WorkflowTriggerProto]:
+        workflow_trigger_proto_list = []
+        for wt in workflow_triggers:
+            workflow_trigger_proto_list.append(MetaToProto.workflow_trigger_meta_to_proto(wt))
+        return workflow_trigger_proto_list
 

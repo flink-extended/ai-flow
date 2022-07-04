@@ -14,10 +14,10 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+from datetime import datetime
+
 from sqlalchemy import Column, String, Integer, Binary, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-
-from ai_flow.common.util.time_utils import utcnow
 from ai_flow.metadata.base import Base
 
 
@@ -53,5 +53,5 @@ class WorkflowSnapshotMeta(Base):
         self.workflow_object = workflow_object
         self.uri = uri
         self.signature = signature
-        self.create_time = utcnow() if create_time is None else create_time
+        self.create_time = datetime.now() if create_time is None else create_time
         self.id = uuid

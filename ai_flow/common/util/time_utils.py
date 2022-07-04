@@ -35,16 +35,5 @@ def datetime_to_epoch(d: datetime.datetime):
         return int(d.timestamp()*1000)
 
 
-def parse_to_utc_date(timestamp):
-    return datetime.datetime.utcfromtimestamp(timestamp/1000).replace(tzinfo=datetime.timezone.utc)
-
-
-def utcnow() -> datetime.datetime:
-    """
-    Get the current date and time in UTC
-
-    :return:
-    """
-    result = datetime.datetime.utcnow()
-    result = result.replace(tzinfo=datetime.timezone.utc)
-    return result
+def epoch_to_datetime(timestamp):
+    return datetime.datetime.fromtimestamp(timestamp / 1000)

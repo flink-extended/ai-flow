@@ -14,9 +14,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from typing import List
-
-from ai_flow.common.util.db_util import session
 from notification_service.event import Event
 
 from ai_flow.common.configuration import config_constants
@@ -28,12 +25,11 @@ from ai_flow.task_executor.task_executor import TaskExecutor, TaskExecutorFactor
 
 class EventDrivenScheduler(object):
     def __init__(self,
-                 db_engine,
+                 session,
                  schedule_worker_num: int = config_constants.SERVER_WORKER_NUMBER,
                  task_executor: TaskExecutor = None,
                  ):
-        self.db_engine = db_engine
-        self.session = session.new_session(db_engine=self.db_engine)
+        self.session = session
         self.task_executor = task_executor if task_executor is not None else \
             TaskExecutorFactory.get_task_executor(executor_type=config_constants.TASK_EXECUTOR)
         self.workers = []
@@ -53,8 +49,6 @@ class EventDrivenScheduler(object):
             self.workers[i].start()
 
     def stop(self):
-        self.session.close()
-        session.Session.remove()
         self.task_executor.stop()
         for w in self.workers:
             w.stop()
