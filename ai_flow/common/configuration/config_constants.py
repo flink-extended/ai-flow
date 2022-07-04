@@ -17,7 +17,7 @@
 # under the License.
 #
 from .configuration import get_client_configuration, get_server_configuration
-from .helpers import get_aiflow_home
+from ..env import get_aiflow_home
 
 CLIENT_CONF = get_client_configuration()
 SERVER_CONF = get_server_configuration()

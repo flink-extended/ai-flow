@@ -16,96 +16,48 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import argparse
 import grpc
-
-from typing import Text
-from ai_flow.endpoint.server.server import AIFlowServer
-from ai_flow.endpoint.server.server_config import AIFlowServerConfig
-from ai_flow.client.ai_flow_client import get_ai_flow_client
-from ai_flow.common.configuration.helpers import AIFLOW_HOME
-from ai_flow.util.net_utils import get_ip_addr
 import logging
 
-_SQLITE_DB_FILE = 'aiflow.db'
-_SQLITE_DB_URI = '%s%s' % ('sqlite:///', _SQLITE_DB_FILE)
-_MYSQL_DB_URI = 'mysql+pymysql://root:aliyunmysql@localhost:3306/aiflow'
-_PORT = '50051'
-GLOBAL_MASTER_CONFIG = {}
+from ai_flow.common.configuration import config_constants
+from ai_flow.rpc.server.server import AIFlowServer
 
 
 class AIFlowServerRunner(object):
     """
-    AI flow server runner. This class is the runner class for the AIFlowServer. It parse the server configuration and
-    manage the live cycle of the AIFlowServer.
+    This class is the runner class for the AIFlowServer. It meant to manage the lifecycle of the AIFlowServer
+    and high availability in the future.
     """
 
-    def __init__(self, config_file: Text = None, enable_ha=False, server_uri: str = None, ttl_ms=10000) -> None:
-        """
-        Set the server attribute according to the server config file.
+    def __init__(self) -> None:
+        self.server: AIFlowServer = None
 
-        :param config_file: server configuration file.
+    def start(self, is_block=False) -> None:
         """
-        super().__init__()
-        self.config_file = config_file
-        self.server = None
-        self.server_config = AIFlowServerConfig()
-        self.enable_ha = enable_ha
-        self.server_uri = server_uri
-        self.ttl_ms = ttl_ms
-
-    def start(self,
-              is_block=False) -> None:
-        """
-        Start the AI flow runner.
+        Start the AIFlow server.
 
         :param is_block: AI flow runner will run non-stop if True.
         """
-        if self.config_file is not None:
-            self.server_config.load_from_file(self.config_file)
-        else:
-            self.server_config.set_server_port(str(_PORT))
-        global GLOBAL_MASTER_CONFIG
-        GLOBAL_MASTER_CONFIG = self.server_config
-        logging.info("AIFlow Master Config {}".format(GLOBAL_MASTER_CONFIG))
-        self.server = AIFlowServer(
-            store_uri=self.server_config.get_db_uri(),
-            port=str(self.server_config.get_server_port()),
-            notification_server_uri=self.server_config.get_notification_server_uri(),
-            start_meta_service=self.server_config.start_meta_service(),
-            start_model_center_service=self.server_config.start_model_center_service(),
-            start_metric_service=self.server_config.start_metric_service(),
-            start_scheduler_service=self.server_config.start_scheduler_service(),
-            scheduler_service_config=self.server_config.get_scheduler_service_config(),
-            enabled_ha=self.server_config.get_enable_ha(),
-            ha_server_uri=get_ip_addr() + ":" + str(self.server_config.get_server_port()),
-            ttl_ms=self.server_config.get_ha_ttl_ms(),
-            base_log_folder=self.server_config.get_base_log_folder()
-            if self.server_config.get_base_log_folder()
-            else AIFLOW_HOME)
+        self.server = AIFlowServer()
         self.server.run(is_block=is_block)
         if not is_block:
-            self._wait_for_server_available(timeout=self.server_config.get_wait_for_server_started_timeout())
+            self._wait_for_server_available(timeout=config_constants.SERVER_START_TIMEOUT)
 
-    def stop(self, clear_sql_lite_db_file=True) -> None:
+    def stop(self) -> None:
         """
-        Stop the AI flow runner.
-
-        :param clear_sql_lite_db_file: If True, the sqlite database files will be deleted When the server stops working.
+        Stop the AIFlow server.
         """
-        self.server.stop(clear_sql_lite_db_file)
+        self.server.stop()
 
-    def _clear_db(self):
-        self.server._clear_db()
-
-    def _wait_for_server_available(self, timeout):
+    @staticmethod
+    def _wait_for_server_available(timeout):
         """
         Wait for server to be started and available.
 
         :param timeout: Float value. Seconds to wait for server available.
                         If None, wait forever until server started.
         """
-        server_uri = 'localhost:{}'.format(self.server_config.get_server_port())
+        server_uri = 'localhost:{}'.format(config_constants.RPC_PORT)
         try:
             channel = grpc.insecure_channel(server_uri)
             grpc.channel_ready_future(channel).result(timeout=timeout)
@@ -113,20 +65,3 @@ class AIFlowServerRunner(object):
         except grpc.FutureTimeoutError as e:
             logging.error('AIFlow Server is not available after waiting for {} seconds.'.format(timeout))
             raise e
-
-
-def set_master_config():
-    code, config, message = get_ai_flow_client().get_master_config()
-    for k, v in config.items():
-        GLOBAL_MASTER_CONFIG[k] = v
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', required=True, help='master config file')
-    args = parser.parse_args()
-    logging.info(args.config)
-    config_file = args.config
-    master = AIFlowServerRunner(
-        config_file=config_file)
-    master.start(is_block=True)

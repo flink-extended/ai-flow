@@ -19,30 +19,11 @@
 import logging
 import os
 
+from ai_flow.common.env import get_aiflow_home
+
 logger = logging.getLogger(__name__)
 TRUTH_TEXT = frozenset(("t", "true", "y", "yes", "on", "1"))
 FALSE_TEXT = frozenset(("f", "false", "n", "no", "off", "0", ""))
-
-
-def expand_env_var(env_var):
-    """
-    Expands (potentially nested) env vars by repeatedly applying
-    `expandvars` and `expanduser` until interpolation stops having
-    any effect.
-    """
-    if not env_var:
-        return env_var
-    while True:
-        interpolated = os.path.expanduser(os.path.expandvars(str(env_var)))
-        if interpolated == env_var:
-            return interpolated
-        else:
-            env_var = interpolated
-
-
-def get_aiflow_home():
-    """Get path to AIFlow Home"""
-    return expand_env_var(os.environ.get('AIFLOW_HOME', '~/aiflow'))
 
 
 # Set AIRFLOW_HOME to local() to effect in `parameterized_config`
