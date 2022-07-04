@@ -22,8 +22,8 @@ from unittest import mock
 from tempfile import TemporaryDirectory
 
 from ai_flow.common.configuration.configuration import Configuration, get_server_configuration, get_client_configuration
-from ai_flow.common.configuration.helpers import get_aiflow_home, expand_env_var, parameterized_config, \
-    write_default_config
+from ai_flow.common.configuration.helpers import write_default_config
+from ai_flow.common.env import expand_env_var, get_aiflow_home
 from ai_flow.common.exception.exceptions import AIFlowConfigException
 from ai_flow.common.util.file_util import yaml_utils
 

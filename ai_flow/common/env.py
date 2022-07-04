@@ -16,26 +16,25 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import grpc
-from ai_flow.rpc.client.scheduler_client import SchedulerClient
-
-from ai_flow.rpc.client.metadata_client import MetadataClient
-from ai_flow.common.configuration import config_constants
+import os
 
 
-class AIFlowClient(MetadataClient, SchedulerClient):
-    def __init__(self, server_uri):
-        self.server_uri = server_uri
-        MetadataClient.__init__(self, server_uri)
-        SchedulerClient.__init__(self, server_uri)
-        self.wait_for_server_ready(60)
+def expand_env_var(env_var):
+    """
+    Expands (potentially nested) env vars by repeatedly applying
+    `expandvars` and `expanduser` until interpolation stops having
+    any effect.
+    """
+    if not env_var:
+        return env_var
+    while True:
+        interpolated = os.path.expanduser(os.path.expandvars(str(env_var)))
+        if interpolated == env_var:
+            return interpolated
+        else:
+            env_var = interpolated
 
-    def wait_for_server_ready(self, timeout):
-        channel = grpc.insecure_channel(self.server_uri)
-        fut = grpc.channel_ready_future(channel)
-        fut.result(timeout)
 
-
-def get_ai_flow_client():
-    server_uri = config_constants.SERVER_ADDRESS
-    return AIFlowClient(server_uri=server_uri)
+def get_aiflow_home():
+    """Get path to AIFlow Home"""
+    return expand_env_var(os.environ.get('AIFLOW_HOME', '~/aiflow'))
