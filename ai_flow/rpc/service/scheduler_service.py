@@ -20,7 +20,7 @@ from notification_service.event import Event
 from notification_service.notification_client import ListenerProcessor
 
 from ai_flow.model.status import WORKFLOW_ALIVE_SET
-from ai_flow.rpc.server.exception import AIFlowRpcServerException
+from ai_flow.rpc.server.exceptions import AIFlowRpcServerException
 from ai_flow.rpc.service.util.meta_to_proto import MetaToProto
 from notification_service.embedded_notification_client import EmbeddedNotificationClient
 

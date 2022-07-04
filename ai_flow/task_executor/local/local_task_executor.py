@@ -23,7 +23,7 @@ from typing import Optional, Tuple
 from queue import Queue
 
 from ai_flow.common.configuration.config_constants import LOCAL_TASK_EXECUTOR_PARALLELISM
-from ai_flow.common.configuration.helpers import get_aiflow_home
+from ai_flow.common.env import get_aiflow_home
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.common.util.local_registry import LocalRegistry
 from ai_flow.common.util.process_utils import stop_process

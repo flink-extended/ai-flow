@@ -21,9 +21,10 @@ import os
 from copy import deepcopy
 from typing import Dict, Any
 
-from .helpers import expand_env_var, TRUTH_TEXT, FALSE_TEXT, write_default_config, get_aiflow_home, parameterized_config
+from .helpers import TRUTH_TEXT, FALSE_TEXT, get_aiflow_home, parameterized_config
 from ai_flow.common.exception.exceptions import AIFlowConfigException
 from ai_flow.common.util.file_util.yaml_utils import load_yaml_string
+from ..env import expand_env_var
 
 logger = logging.getLogger(__name__)
 

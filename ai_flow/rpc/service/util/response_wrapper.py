@@ -28,7 +28,7 @@ from ai_flow.rpc.protobuf.message_pb2 import Response, SUCCESS, ReturnCode, RESO
 from ai_flow.rpc.protobuf.metadata_service_pb2 import NamespaceListProto, WorkflowSnapshotListProto
 from ai_flow.rpc.protobuf.scheduler_service_pb2 import WorkflowListProto, WorkflowExecutionListProto, \
     WorkflowScheduleListProto, WorkflowTriggerListProto, TaskExecutionListProto
-from ai_flow.rpc.server.exception import AIFlowRpcServerException
+from ai_flow.rpc.server.exceptions import AIFlowRpcServerException
 
 
 def catch_exception(func):

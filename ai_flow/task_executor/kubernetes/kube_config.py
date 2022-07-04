@@ -16,8 +16,8 @@
 # under the License.
 import os
 from typing import Dict
-from ai_flow.common.configuration.helpers import expand_env_var, get_aiflow_home
 
+from ai_flow.common.env import expand_env_var
 from ai_flow.common.exception.exceptions import AIFlowConfigException
 
 
