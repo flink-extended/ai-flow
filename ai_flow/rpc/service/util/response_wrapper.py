@@ -16,7 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from enum import Enum
 from functools import wraps
 from typing import List
 

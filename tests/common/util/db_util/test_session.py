@@ -16,19 +16,15 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import threading
-import time
 import unittest
 from tempfile import TemporaryDirectory
 
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-from tests.test_utils.unittest_base import BaseUnitTest
 
 from ai_flow.common.configuration.config_constants import METADATA_BACKEND_URI
 from ai_flow.common.util.db_util.session import create_session, create_sqlalchemy_engine, provide_session, \
-    prepare_session, clear_engine_and_session, new_session
-from ai_flow.metadata.metadata_manager import MetadataManager
+    prepare_session, clear_engine_and_session
 
 TestBase = declarative_base()
 
@@ -43,13 +39,12 @@ class TestTable(TestBase):
         self.name = name
 
 
-class TestSession(BaseUnitTest):
+class TestSession(unittest.TestCase):
 
     def setUp(self):
-        super(TestSession, self).setUp()
+        pass
 
     def tearDown(self):
-        super(TestSession, self).tearDown()
         clear_engine_and_session()
 
     def test_create_session(self):
@@ -70,19 +65,3 @@ class TestSession(BaseUnitTest):
             self.assertIsNotNone(session)
             self.assertEqual(str(session.bind.url), METADATA_BACKEND_URI)
         session_op()
-
-    def test_session_in_threads(self):
-        def get_session():
-            session1 = new_session()
-            metadata_manager1 = MetadataManager(session1)
-            metadata_manager1.add_namespace('ns1', {})
-            time.sleep(10)
-            print(session1)
-            with create_session() as session2:
-                metadata_manager2 = MetadataManager(session1)
-                metadata_manager2.add_namespace('ns2', {})
-                print(session2)
-            time.sleep(10)
-        thread = threading.Thread(target=get_session)
-        thread.start()
-        time.sleep(25)
