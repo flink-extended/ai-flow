@@ -18,6 +18,9 @@
 #
 import time
 import datetime
+from calendar import timegm
+
+from pytz import utc
 
 
 def generate_local_time_str():
@@ -28,12 +31,37 @@ def parse_date(timestamp):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(timestamp) / 1000))
 
 
-def datetime_to_epoch(d: datetime.datetime):
+def datetime_to_timestamp(d: datetime.datetime):
     if d is None:
         return 0
     else:
         return int(d.timestamp()*1000)
 
 
-def epoch_to_datetime(timestamp):
+def timestamp_to_datetime(timestamp):
     return datetime.datetime.fromtimestamp(timestamp / 1000)
+
+
+def datetime_to_utc_timestamp(timeval: datetime.datetime):
+    """
+    Converts a datetime instance to a timestamp.
+
+    :type timeval: datetime
+    :rtype: float
+
+    """
+    if timeval is not None:
+        return timegm(timeval.utctimetuple()) + timeval.microsecond / 1000000
+
+
+def utc_timestamp_to_datetime(timestamp):
+    """
+    Converts the given timestamp to a datetime instance.
+
+    :type timestamp: float
+    :rtype: datetime
+
+    """
+    if timestamp is not None:
+        return datetime.datetime.fromtimestamp(timestamp, utc)
+

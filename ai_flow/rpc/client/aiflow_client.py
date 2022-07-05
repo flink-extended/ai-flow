@@ -17,6 +17,8 @@
 # under the License.
 #
 import grpc
+from notification_service.embedded_notification_client import EmbeddedNotificationClient
+
 from ai_flow.rpc.client.scheduler_client import SchedulerClient
 
 from ai_flow.rpc.client.metadata_client import MetadataClient
@@ -39,3 +41,10 @@ class AIFlowClient(MetadataClient, SchedulerClient):
 def get_ai_flow_client():
     server_uri = config_constants.SERVER_ADDRESS
     return AIFlowClient(server_uri=server_uri)
+
+
+def get_notification_client(namespace='default', sender=None):
+    return EmbeddedNotificationClient(
+        server_uri=config_constants.NOTIFICATION_SERVER_URI,
+        namespace=namespace,
+        sender=sender)

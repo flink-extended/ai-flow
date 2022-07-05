@@ -14,31 +14,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import os
-import unittest
-
-from ai_flow.common.util.db_util.db_migration import init_db
-from ai_flow.common.util.db_util.session import new_session, create_sqlalchemy_engine, prepare_session
+from tests.test_utils.unittest_base import BaseUnitTest
 from ai_flow.metadata.metadata_manager import MetadataManager
-
-
-class BaseUnitTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.file = 'test.db'
-        self._delete_db_file()
-        self.url = 'sqlite:///{}'.format(self.file)
-        init_db(self.url)
-        self.db_engine = create_sqlalchemy_engine(db_uri=self.url)
-        self.session = new_session(db_engine=self.db_engine)
-        prepare_session(db_engine=self.db_engine)
-
-    def _delete_db_file(self):
-        if os.path.exists(self.file):
-            os.remove(self.file)
-
-    def tearDown(self) -> None:
-        self.session.close()
-        self._delete_db_file()
 
 
 class UnitTestWithMetadataManager(BaseUnitTest):

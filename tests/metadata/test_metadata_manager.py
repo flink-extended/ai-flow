@@ -25,8 +25,10 @@ from ai_flow.common.util.db_util.db_migration import init_db
 from ai_flow.common.util.db_util.session import new_session
 from ai_flow.metadata.metadata_manager import MetadataManager, Filters, FilterEqual, Orders, OrderBy, FilterIn
 from ai_flow.model.execution_type import ExecutionType
+from ai_flow.model.operators.bash import BashOperator
 from ai_flow.model.state import ValueStateDescriptor, ValueState
 from ai_flow.model.status import WorkflowStatus, TaskStatus
+from ai_flow.model.workflow import Workflow
 
 
 class TestMetadataManager(unittest.TestCase):
@@ -201,7 +203,9 @@ class TestMetadataManager(unittest.TestCase):
     def test_workflow_schedule_operations(self):
         namespace_name = 'namespace'
         content = 'source of workflow'
-        workflow_object = cloudpickle.dumps(content)
+        with Workflow(name='workflow') as workflow:
+            BashOperator(name='bash1', bash_command='echo 1')
+        workflow_object = cloudpickle.dumps(workflow)
         namespace_meta = self.metadata_manager.add_namespace(name=namespace_name, properties={'a': 'a'})
         self.metadata_manager.commit()
         workflow_meta = self.metadata_manager.add_workflow(namespace=namespace_name,
@@ -211,10 +215,10 @@ class TestMetadataManager(unittest.TestCase):
         self.metadata_manager.commit()
         for i in range(3):
             self.metadata_manager.add_workflow_schedule(workflow_id=workflow_meta.id,
-                                                        expression=str(i))
+                                                        expression='cron@*/1 * * * * * * utc')
             self.metadata_manager.commit()
         meta = self.metadata_manager.get_workflow_schedule(1)
-        self.assertEqual('0', meta.expression)
+        self.assertEqual('cron@*/1 * * * * * * utc', meta.expression)
         metas = self.metadata_manager.list_workflow_schedules(workflow_id=workflow_meta.id)
         self.assertEqual(3, len(metas))
 
@@ -271,7 +275,9 @@ class TestMetadataManager(unittest.TestCase):
     def test_workflow_execution_operations(self):
         namespace_name = 'namespace'
         content = 'source of workflow'
-        workflow_object = cloudpickle.dumps(content)
+        with Workflow(name='workflow') as workflow:
+            BashOperator(name='bash1', bash_command='echo 1')
+        workflow_object = cloudpickle.dumps(workflow)
         namespace_meta = self.metadata_manager.add_namespace(name=namespace_name, properties={'a': 'a'})
         self.metadata_manager.commit()
         workflow_meta = self.metadata_manager.add_workflow(namespace=namespace_name,
@@ -353,11 +359,6 @@ class TestMetadataManager(unittest.TestCase):
         for i in range(3):
             self.assertEqual(i+1, metas[i].sequence_number)
         meta = self.metadata_manager.get_task_execution_by_id(task_execution_id=metas[0].id)
-        self.assertIsNone(meta.end_date)
-        self.metadata_manager.update_task_execution(task_execution_id=meta.id, end_date=datetime.now())
-        self.metadata_manager.commit()
-        meta = self.metadata_manager.get_task_execution_by_id(task_execution_id=meta.id)
-        self.assertIsNotNone(meta.end_date)
         self.assertEqual(TaskStatus.INIT.value, meta.status)
         self.assertEqual(1, meta.try_number)
 

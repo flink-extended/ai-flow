@@ -59,15 +59,15 @@ class MockTimer(Timer):
     def shutdown(self):
         pass
 
-    def add_workflow_schedule(self, schedule_id,  expression):
+    def add_workflow_schedule_with_session(self, session, schedule_id,  expression):
         build_trigger(expression)
         self.schedules[schedule_id] = 'active'
 
-    def delete_workflow_schedule(self, schedule_id):
+    def delete_workflow_schedule_with_session(self, session, schedule_id):
         self.schedules.pop(schedule_id)
 
-    def pause_workflow_schedule(self, schedule_id):
+    def pause_workflow_schedule_with_session(self, session, schedule_id):
         self.schedules[schedule_id] = 'paused'
 
-    def resume_workflow_schedule(self, schedule_id):
+    def resume_workflow_schedule_with_session(self, session, schedule_id):
         self.schedules[schedule_id] = 'active'

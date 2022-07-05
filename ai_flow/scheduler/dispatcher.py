@@ -18,7 +18,6 @@ import json
 from notification_service.event import Event
 from typing import List
 
-from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.internal.events import AIFlowEventType, SchedulingEventType, EventContextConstant
 from ai_flow.scheduler.rule_extractor import RuleExtractor
 from ai_flow.scheduler.worker import Worker
@@ -30,11 +29,10 @@ class Dispatcher(object):
     """
 
     def __init__(self,
-                 workers: List[Worker],
-                 metadata_manager: MetadataManager):
+                 workers: List[Worker]):
         self.workers = workers
         self.worker_num = len(workers)
-        self.rule_extractor = RuleExtractor(metadata_manager=metadata_manager)
+        self.rule_extractor = RuleExtractor()
 
     @staticmethod
     def _is_scheduling_event(event: Event) -> bool:

@@ -105,13 +105,8 @@ class SchedulingEventProcessor(object):
                 logging.warning("Ignore the task status scheduling event: {}, current status {}."
                                 .format(str(event), task_execution_meta.status))
             else:
-                if TaskStatus(status) in TASK_FINISHED_SET:
-                    end_date = datetime.now()
-                else:
-                    end_date = None
                 self.metadata_manager.update_task_execution(
                     task_execution_id=task_execution_meta.id,
-                    end_date=end_date,
                     status=status)
                 self.metadata_manager.flush()
                 self._set_workflow_execution_status(workflow_execution_id=workflow_execution_id)
@@ -130,9 +125,7 @@ class SchedulingEventProcessor(object):
             else:
                 self.metadata_manager.update_task_execution(
                     task_execution_id=task_execution_meta.id,
-                    status=TaskStatus.FAILED.value,
-                    end_date=datetime.now()
-                )
+                    status=TaskStatus.FAILED.value)
                 self.metadata_manager.flush()
                 self._set_workflow_execution_status(workflow_execution_id=workflow_execution_id)
         else:
