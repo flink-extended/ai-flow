@@ -15,15 +15,18 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import threading
+import time
 import unittest
 from datetime import datetime
 from typing import List
 
 from notification_service.event import Event, EventKey
 from notification_service.notification_client import NotificationClient, ListenerRegistrationId, ListenerProcessor
+from tests.test_utils.unittest_base import BaseUnitTest
 
+from ai_flow.common.util.db_util.session import new_session, create_session
 from ai_flow.scheduler.timer import Timer
-from tests.scheduler.test_utils import BaseUnitTest
 
 
 class MockNotificationClient(NotificationClient):
@@ -55,7 +58,7 @@ class TestTimer(BaseUnitTest):
         self.notification_client = MockNotificationClient()
 
     def test_workflow_schedule_cron_expression(self):
-        timer = Timer(notification_client=self.notification_client, session=self.session)
+        timer = Timer(notification_client=self.notification_client)
         timer.start()
 
         timer.add_workflow_schedule(schedule_id=1,
@@ -64,8 +67,10 @@ class TestTimer(BaseUnitTest):
         jobs = timer.store.get_all_jobs()
         self.assertEqual(1, len(jobs))
         timer.pause_workflow_schedule(schedule_id=1)
+        self.session.commit()
         self.assertEqual(None, timer.store.lookup_job(jobs[0].id).next_run_time)
         timer.resume_workflow_schedule(schedule_id=1)
+        self.session.commit()
         self.assertIsNotNone(timer.store.lookup_job(jobs[0].id).next_run_time)
         timer.delete_workflow_schedule(1)
         jobs = timer.store.get_all_jobs()
@@ -73,7 +78,7 @@ class TestTimer(BaseUnitTest):
         timer.shutdown()
 
     def test_workflow_schedule_interval_expression(self):
-        timer = Timer(notification_client=self.notification_client, session=self.session)
+        timer = Timer(notification_client=self.notification_client)
         timer.start()
 
         timer.add_workflow_schedule(schedule_id=1,
@@ -88,7 +93,7 @@ class TestTimer(BaseUnitTest):
         timer.shutdown()
 
     def test_task_schedule_cron_expression(self):
-        timer = Timer(notification_client=self.notification_client, session=self.session)
+        timer = Timer(notification_client=self.notification_client)
         timer.start()
 
         timer.add_task_schedule(workflow_execution_id=1,
@@ -104,7 +109,7 @@ class TestTimer(BaseUnitTest):
         timer.shutdown()
 
     def test_task_schedule_interval_expression(self):
-        timer = Timer(notification_client=self.notification_client, session=self.session)
+        timer = Timer(notification_client=self.notification_client)
         timer.start()
 
         timer.add_task_schedule(workflow_execution_id=1,
@@ -117,6 +122,54 @@ class TestTimer(BaseUnitTest):
         timer.delete_task_schedule(workflow_execution_id=1, task_name='task')
         jobs = timer.store.get_all_jobs()
         self.assertEqual(0, len(jobs))
+        timer.shutdown()
+
+    def test_update_schedule_in_multi_threads2(self):
+        timer = Timer(notification_client=self.notification_client)
+        timer.start()
+        timer.add_task_schedule(workflow_execution_id=1,
+                                task_name='task1',
+                                expression='interval@0 0 2 0')
+        jobs = timer.store.get_all_jobs()
+        self.assertEqual(1, len(jobs))
+
+        def update_schedule(seed):
+            for i in range(100):
+                with create_session() as session:
+                    timer.add_task_schedule_with_session(
+                        session, i+seed, 'task2', 'interval@0 0 1 0')
+        t1 = threading.Thread(target=update_schedule, args=(0,))
+        t1.start()
+        t2 = threading.Thread(target=update_schedule, args=(1000,))
+        t2.start()
+        t1.join()
+        t2.join()
+        jobs = timer.store.get_all_jobs()
+        self.assertEqual(201, len(jobs))
+        timer.shutdown()
+
+    def test_update_schedule_in_multi_threads(self):
+        timer = Timer(notification_client=self.notification_client)
+        timer.start()
+        timer.add_task_schedule(workflow_execution_id=1,
+                                task_name='task1',
+                                expression='interval@0 0 2 0')
+        jobs = timer.store.get_all_jobs()
+        self.assertEqual(1, len(jobs))
+
+        def update_schedule():
+            sub_timer = Timer(notification_client=None)
+            from apscheduler.schedulers.base import STATE_PAUSED
+            sub_timer.sc.state = STATE_PAUSED
+            sub_timer.add_task_schedule(workflow_execution_id=2,
+                                        task_name='task2',
+                                        expression='interval@0 0 1 0')
+        t = threading.Thread(target=update_schedule)
+        t.start()
+        t.join()
+        jobs = timer.store.get_all_jobs()
+        self.assertEqual(2, len(jobs))
+        time.sleep(80)
         timer.shutdown()
 
 

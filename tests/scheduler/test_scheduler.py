@@ -103,7 +103,7 @@ class TestEventDrivenScheduler(UnitTestWithNamespace):
 
     def test_scheduler_run(self):
         task_executor = MockTaskExecutor()
-        scheduler = EventDrivenScheduler(session=self.session, task_executor=task_executor, schedule_worker_num=3)
+        scheduler = EventDrivenScheduler(task_executor=task_executor, schedule_worker_num=3)
         try:
             scheduler.start()
             event: Event = StartWorkflowExecutionEvent(workflow_id=self.workflow_meta.id, snapshot_id=self.snapshot_meta.id)

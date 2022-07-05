@@ -81,7 +81,7 @@ class TestDispatcher(UnitTestWithNamespace):
         workers = []
         for i in range(worker_num):
             workers.append(Worker())
-        dispatcher = Dispatcher(workers=workers, metadata_manager=self.metadata_manager)
+        dispatcher = Dispatcher(workers=workers)
         event: Event = StartWorkflowExecutionEvent(workflow_id=self.workflow_meta.id, snapshot_id=self.snapshot_meta.id)
         dispatcher.dispatch(event)
         self.assertEqual(1, workers[1].input_queue.qsize())

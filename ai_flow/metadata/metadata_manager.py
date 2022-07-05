@@ -17,6 +17,7 @@
 from datetime import datetime
 from typing import List, Optional, Tuple, Any
 
+import cloudpickle
 from sqlalchemy.sql.functions import count
 
 from ai_flow.common.exception.exceptions import AIFlowException
@@ -30,8 +31,10 @@ from ai_flow.metadata.workflow_schedule import WorkflowScheduleMeta
 from ai_flow.metadata.workflow_snapshot import WorkflowSnapshotMeta
 from sqlalchemy import asc, desc
 
+from ai_flow.model.operator import OperatorConfigItem
 from ai_flow.model.state import StateDescriptor, State, ValueStateDescriptor
-from ai_flow.model.status import TaskStatus, TASK_FINISHED_SET
+from ai_flow.model.status import TaskStatus, TASK_FINISHED_SET, WorkflowStatus, WORKFLOW_FINISHED_SET
+from ai_flow.scheduler.timer import timer_instance
 
 
 class BaseFilter(object):
@@ -403,6 +406,7 @@ class MetadataManager(object):
                                                       expression=expression)
         self.session.add(workflow_schedule_meta)
         self.flush()
+        timer_instance.add_workflow_schedule_with_session(self.session, workflow_schedule_meta.id, expression)
         return workflow_schedule_meta
 
     def get_workflow_schedule(self, schedule_id) -> WorkflowScheduleMeta:
@@ -422,6 +426,7 @@ class MetadataManager(object):
         meta = self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).one()
         meta.is_paused = True
         self.session.merge(meta)
+        timer_instance.pause_workflow_schedule_with_session(self.session, schedule_id)
         self.flush()
         return meta
 
@@ -434,6 +439,7 @@ class MetadataManager(object):
         meta = self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).one()
         meta.is_paused = False
         self.session.merge(meta)
+        timer_instance.resume_workflow_schedule_with_session(self.session, schedule_id)
         self.flush()
         return meta
 
@@ -469,6 +475,7 @@ class MetadataManager(object):
         :param schedule_id: The unique id of the workflow schedule.
         """
         self.session.query(WorkflowScheduleMeta).filter(WorkflowScheduleMeta.id == schedule_id).delete()
+        timer_instance.delete_workflow_schedule_with_session(self.session, schedule_id)
         self.flush()
 
     # end workflow schedule
@@ -607,8 +614,20 @@ class MetadataManager(object):
             .filter(WorkflowExecutionMeta.id == workflow_execution_id).one()
         if status is not None:
             meta.status = status
-        if TaskStatus(status) in TASK_FINISHED_SET:
+
+        workflow = cloudpickle.loads(meta.workflow_snapshot.workflow_object)
+        if WorkflowStatus(status) == WorkflowStatus.RUNNING:
+            for task_name, task in workflow.tasks.items():
+                if OperatorConfigItem.PERIODIC_EXPRESSION in task.config \
+                        and task.config[OperatorConfigItem.PERIODIC_EXPRESSION] is not None:
+                    timer_instance.add_task_schedule_with_session(
+                        self.session, meta.id, task_name, task.config[OperatorConfigItem.PERIODIC_EXPRESSION])
+        elif WorkflowStatus(status) in WORKFLOW_FINISHED_SET:
             meta.end_date = datetime.now()
+            for task_name, task in workflow.tasks.items():
+                if OperatorConfigItem.PERIODIC_EXPRESSION in task.config \
+                        and task.config[OperatorConfigItem.PERIODIC_EXPRESSION] is not None:
+                    timer_instance.delete_task_schedule_with_session(self.session, meta.id, task_name)
         self.session.merge(meta)
         self.flush()
         return meta
@@ -700,14 +719,12 @@ class MetadataManager(object):
     def update_task_execution(self,
                               task_execution_id,
                               try_number=None,
-                              status=None,
-                              end_date=None) -> TaskExecutionMeta:
+                              status=None) -> TaskExecutionMeta:
         """
         Update the task execution metadata to MetadataBackend.
         :param task_execution_id: The unique id of the task execution.
         :param try_number: The run number of the task execution.
         :param status: The status(TaskStatus) of the task execution.
-        :param end_date: The end date the task execution.
         :return: The task execution metadata.
         """
         meta = self.session.query(TaskExecutionMeta) \
@@ -716,8 +733,8 @@ class MetadataManager(object):
             meta.try_number = try_number
         if status is not None:
             meta.status = status
-        if end_date is not None:
-            meta.end_date = end_date
+            if TaskStatus(status) in TASK_FINISHED_SET:
+                meta.end_date = datetime.now()
         self.session.merge(meta)
         self.flush()
         return meta

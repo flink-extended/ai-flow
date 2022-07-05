@@ -13,13 +13,14 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import threading
 from typing import List
 
-from ai_flow.common.util.db_util import session as db_session
 from notification_service.event import Event
 from notification_service.notification_client import ListenerProcessor
 
 from ai_flow.model.status import WORKFLOW_ALIVE_SET
+from ai_flow.rpc.client.aiflow_client import get_notification_client
 from ai_flow.rpc.server.exceptions import AIFlowRpcServerException
 from ai_flow.rpc.service.util.meta_to_proto import MetaToProto
 from notification_service.embedded_notification_client import EmbeddedNotificationClient
@@ -32,10 +33,9 @@ from ai_flow.rpc.service.util.response_wrapper import catch_exception, wrap_resu
     wrap_workflow_list_response, wrap_workflow_execution_list_response, wrap_workflow_schedule_list_response, \
     wrap_workflow_trigger_list_response, wrap_task_execution_list_response
 from ai_flow.metadata.metadata_manager import MetadataManager, Filters, FilterIn
-from ai_flow.common.util.db_util.session import new_session, create_session
+from ai_flow.common.util.db_util.session import create_session
 from ai_flow.rpc.protobuf import scheduler_service_pb2_grpc
 from ai_flow.scheduler.scheduler import EventDrivenScheduler
-from ai_flow.scheduler.timer import Timer
 
 
 class Processor(ListenerProcessor):
@@ -50,34 +50,23 @@ class Processor(ListenerProcessor):
 class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
 
     def __init__(self):
-        self.session = new_session()
-        self.scheduler = EventDrivenScheduler(session=self.session)
-        self.metadata_manager = MetadataManager(self.session)
-        self.timer = None
+        self.scheduler = EventDrivenScheduler()
         self.notification_client = None
         self.event_listener = None
 
     def start(self):
         self.scheduler.start()
-        self.notification_client = EmbeddedNotificationClient(
-            server_uri=config_constants.NOTIFICATION_SERVER_URI, namespace='scheduler', sender='scheduler')
+        self.notification_client = get_notification_client(namespace='scheduler', sender='scheduler')
         self.event_listener = self.notification_client.register_listener(
             listener_processor=Processor(self.scheduler), offset=self.get_last_committed_offset())
-        self.timer = Timer(notification_client=self.notification_client,
-                           session=self.session)
-        self.timer.start()
 
     def stop(self):
         self.notification_client.unregister_listener(self.event_listener)
-        self.timer.shutdown()
         self.scheduler.stop()
         self.notification_client.close()
-        self.session.close()
-        db_session.Session.remove()
 
     def get_last_committed_offset(self):
         # metadata_manager = MetadataManager(self.session)
-
         return 0
 
     @catch_exception
@@ -272,11 +261,6 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
             metadata_manager = MetadataManager(session)
             schedule = metadata_manager.add_workflow_schedule(workflow_id=request.workflow_id,
                                                               expression=expression)
-            # TODO
-            # Currently the MetadataManager and the Timer are not using the same session,
-            # nor in the same transaction, so it is possible that the Timer successfully
-            # add schedule while the MetaDataManager failed to add meta.
-            self.timer.add_workflow_schedule(schedule.id, expression)
         return wrap_data_response(MetaToProto.workflow_schedule_meta_to_proto(schedule))
 
     @catch_exception
@@ -310,7 +294,6 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
                 return wrap_result_response(BaseResult(RetCode.ERROR, f'Workflow schedule {request.id} not exists'))
             else:
                 metadata_manager.delete_workflow_schedule(schedule.id)
-                self.timer.delete_workflow_schedule(schedule.id)
         return wrap_result_response(BaseResult(RetCode.OK, None))
 
     @catch_exception
@@ -325,7 +308,6 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
             schedules = metadata_manager.list_workflow_schedules(workflow_id=workflow_meta.id)
             for schedule in schedules:
                 metadata_manager.delete_workflow_schedule(schedule.id)
-                self.timer.delete_workflow_schedule(schedule.id)
         return wrap_result_response(BaseResult(RetCode.OK, None))
 
     @catch_exception
@@ -337,7 +319,6 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
                 return wrap_result_response(BaseResult(RetCode.ERROR, f'Workflow schedule {request.id} not exists'))
             else:
                 metadata_manager.pause_workflow_schedule(schedule.id)
-                self.timer.pause_workflow_schedule(schedule.id)
         return wrap_result_response(BaseResult(RetCode.OK, None))
 
     @catch_exception
@@ -349,7 +330,6 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
                 return wrap_result_response(BaseResult(RetCode.ERROR, f'Workflow schedule {request.id} not exists'))
             else:
                 metadata_manager.resume_workflow_schedule(schedule.id)
-                self.timer.resume_workflow_schedule(schedule.id)
         return wrap_result_response(BaseResult(RetCode.OK, None))
 
     @catch_exception
@@ -377,9 +357,9 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
             workflow_meta = metadata_manager.get_workflow_by_name(namespace, workflow_name)
             if workflow_meta is None:
                 raise AIFlowRpcServerException(f'Workflow {namespace}.{workflow_name} not exists')
-            triggers = self.metadata_manager.list_workflow_triggers(workflow_id=workflow_meta.id,
-                                                                    page_size=request.page_size,
-                                                                    offset=request.offset)
+            triggers = metadata_manager.list_workflow_triggers(workflow_id=workflow_meta.id,
+                                                               page_size=request.page_size,
+                                                               offset=request.offset)
         return wrap_workflow_trigger_list_response(
             MetaToProto.workflow_trigger_meta_list_to_proto(triggers))
 

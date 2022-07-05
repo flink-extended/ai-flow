@@ -25,18 +25,16 @@ from ai_flow.task_executor.task_executor import TaskExecutor, TaskExecutorFactor
 
 class EventDrivenScheduler(object):
     def __init__(self,
-                 session,
                  schedule_worker_num: int = config_constants.SERVER_WORKER_NUMBER,
                  task_executor: TaskExecutor = None,
                  ):
-        self.session = session
         self.task_executor = task_executor if task_executor is not None else \
             TaskExecutorFactory.get_task_executor(executor_type=config_constants.TASK_EXECUTOR)
         self.workers = []
         for i in range(schedule_worker_num):
             self.workers.append(Worker(max_queue_size=config_constants.SERVER_WORKER_QUEUE_SIZE,
                                        task_executor=self.task_executor))
-        self.dispatcher = Dispatcher(workers=self.workers, metadata_manager=MetadataManager(session=self.session))
+        self.dispatcher = Dispatcher(workers=self.workers)
 
     def trigger(self, event: Event):
         self.dispatcher.dispatch(event=event)

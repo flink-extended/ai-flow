@@ -190,7 +190,7 @@ class TestRuleExtractor(UnitTestWithNamespace):
 
         build_workflows()
 
-        rule_extractor = RuleExtractor(metadata_manager=self.metadata_manager)
+        rule_extractor = RuleExtractor()
 
         event = Event(event_key=EventKey(namespace='namespace',
                                          name='event_1',
@@ -282,7 +282,7 @@ class TestRuleExtractor(UnitTestWithNamespace):
 
         build_workflows()
 
-        rule_extractor = RuleExtractor(metadata_manager=self.metadata_manager)
+        rule_extractor = RuleExtractor()
 
         event = Event(event_key=EventKey(namespace='namespace',
                                          name='event_1',
