@@ -26,15 +26,19 @@ import threading
 from concurrent import futures
 
 import grpc
+
 from ai_flow.common.configuration import config_constants
 from grpc import _common, _server
 from grpc._cython.cygrpc import StatusCode
 from grpc._server import _serialize_response, _status, _abort, _Context, _unary_request, \
     _select_thread_pool_for_behavior, _unary_response_in_pool
 
+from ai_flow.common.util.db_util import session as db_session
+from ai_flow.rpc.client.aiflow_client import get_notification_client
 from ai_flow.rpc.protobuf import metadata_service_pb2_grpc, scheduler_service_pb2_grpc
 from ai_flow.rpc.service.metadata_service import MetadataService
 from ai_flow.rpc.service.scheduler_service import SchedulerService
+from ai_flow.scheduler.timer import Timer, timer_instance
 
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../../..")))
 
@@ -53,11 +57,15 @@ class AIFlowServer(object):
         scheduler_service_pb2_grpc.add_SchedulerServiceServicer_to_server(self.scheduler_service, self.server)
         self.server.add_insecure_port('[::]:{}'.format(config_constants.RPC_PORT))
         self._stop = threading.Event()
+        self.notification_client = None
 
     def run(self, is_block=False):
         self.server.start()
         logging.info('AIFlow server started.')
         self.scheduler_service.start()
+        self.notification_client = get_notification_client(namespace='Timer', sender='Timer')
+        timer_instance.set_notification_client(self.notification_client)
+        timer_instance.start()
         if is_block:
             try:
                 while not self._stop.is_set():
@@ -73,6 +81,9 @@ class AIFlowServer(object):
         self.scheduler_service.stop()
         self.server.stop(0)
         self.executor.shutdown()
+        timer_instance.shutdown()
+        self.notification_client.close()
+        db_session.Session.remove()
         self._stop.set()
         logging.info('AIFlow server stopped.')
 

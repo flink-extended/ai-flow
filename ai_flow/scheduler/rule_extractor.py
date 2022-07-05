@@ -23,6 +23,7 @@ from typing import List, Dict, Set, Tuple
 
 from notification_service.event import Event, EventKey
 
+from ai_flow.common.util.db_util.session import create_session
 from ai_flow.metadata.metadata_manager import MetadataManager, Filters, FilterEqual
 from ai_flow.metadata.workflow_event_trigger import WorkflowEventTriggerMeta
 from ai_flow.model.internal.conditions import match_events
@@ -171,24 +172,29 @@ class RuleExtractor(object):
     1. Rules for workflow.
     2. Rules for workflow execution.
     """
-    def __init__(self, metadata_manager: MetadataManager):
-        self.metadata_manager = metadata_manager
+    def __init__(self):
         self.workflow_dict: Dict[int, Workflow] = self._load_workflows()
         self.workflow_trigger_dict: Dict[int, WorkflowEventTriggerMeta] = self._load_workflow_triggers()
         self.event_workflow_index: RuleIndex = self._load_rule_index()
         self._lock = threading.RLock()
 
-    def _load_workflows(self):
-        workflows = self.metadata_manager.list_workflows(namespace=None,
-                                                         filters=Filters(filters=[(FilterEqual('is_enabled'), True)]))
+    @staticmethod
+    def _load_workflows():
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            workflows = metadata_manager.list_workflows(
+                namespace=None, filters=Filters(filters=[(FilterEqual('is_enabled'), True)]))
         workflow_dict = {}
         for w_m in workflows:
             workflow_dict[w_m.id] = cloudpickle.loads(w_m.workflow_object)
         return workflow_dict
 
-    def _load_workflow_triggers(self):
-        workflow_triggers =  self.metadata_manager.list_all_workflow_triggers(
-            filters=Filters(filters=[(FilterEqual('is_paused'), False)]))
+    @staticmethod
+    def _load_workflow_triggers():
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            workflow_triggers = metadata_manager.list_all_workflow_triggers(
+                filters=Filters(filters=[(FilterEqual('is_paused'), False)]))
         trigger_dict = {}
         for w_t in workflow_triggers:
             trigger_dict[w_t.id] = w_t
@@ -231,17 +237,21 @@ class RuleExtractor(object):
                 workflow = self.workflow_dict[workflow_id]
                 task_rule_list = extract_task_rules_from_workflow_by_event(event=event, workflow=workflow)
                 if len(task_rule_list) > 0:
-                    workflow_executions = self.metadata_manager.list_workflow_executions(
-                        workflow_id=workflow_id,
-                        page_size=None,
-                        filters=Filters(filters=[(FilterEqual('status'), WorkflowStatus.RUNNING.value)]))
+                    with create_session() as session:
+                        metadata_manager = MetadataManager(session)
+                        workflow_executions = metadata_manager.list_workflow_executions(
+                            workflow_id=workflow_id,
+                            page_size=None,
+                            filters=Filters(filters=[(FilterEqual('status'), WorkflowStatus.RUNNING.value)]))
                     for workflow_execution in workflow_executions:
                         results.append(WorkflowExecutionRuleWrapper(workflow_execution_id=workflow_execution.id,
                                                                     task_rule_wrappers=task_rule_list))
             return results
         else:
-            workflow_execution = self.metadata_manager.get_workflow_execution(
-                workflow_execution_id=workflow_execution_id)
+            with create_session() as session:
+                metadata_manager = MetadataManager(session)
+                workflow_execution = metadata_manager.get_workflow_execution(
+                    workflow_execution_id=workflow_execution_id)
             workflow = self.workflow_dict[workflow_execution.workflow_id]
             task_rule_list = extract_task_rules_from_workflow_by_event(event=event, workflow=workflow)
 
@@ -256,14 +266,16 @@ class RuleExtractor(object):
         """Extract rules for workflow"""
         results = []
         workflow_id_list = self.event_workflow_index.affected_workflows_by_workflow_rule(event=event)
-        for workflow_id in workflow_id_list:
-            rules = []
-            metas = self.metadata_manager.list_workflow_triggers(workflow_id=workflow_id)
-            for meta in metas:
-                rule = cloudpickle.loads(meta.rule)
-                if match_events(rule.condition.expect_events, event):
-                    rules.append(cloudpickle.loads(meta.rule))
-            if len(rules) > 0:
-                results.append(WorkflowRuleWrapper(workflow_id=workflow_id, rules=rules))
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            for workflow_id in workflow_id_list:
+                rules = []
+                metas = metadata_manager.list_workflow_triggers(workflow_id=workflow_id)
+                for meta in metas:
+                    rule = cloudpickle.loads(meta.rule)
+                    if match_events(rule.condition.expect_events, event):
+                        rules.append(cloudpickle.loads(meta.rule))
+                if len(rules) > 0:
+                    results.append(WorkflowRuleWrapper(workflow_id=workflow_id, rules=rules))
         return results
 

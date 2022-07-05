@@ -22,7 +22,7 @@ from ai_flow.metadata.workflow_event_trigger import WorkflowEventTriggerMeta
 from ai_flow.metadata.workflow_schedule import WorkflowScheduleMeta
 from ai_flow.metadata.workflow_execution import WorkflowExecutionMeta
 from ai_flow.metadata.workflow_snapshot import WorkflowSnapshotMeta
-from ai_flow.common.util.time_utils import epoch_to_datetime
+from ai_flow.common.util.time_utils import timestamp_to_datetime
 from ai_flow.metadata.workflow import WorkflowMeta
 from ai_flow.metadata.namespace import NamespaceMeta
 from ai_flow.rpc.protobuf.message_pb2 import NamespaceProto, WorkflowProto, WorkflowSnapshotProto, \
@@ -56,8 +56,8 @@ class ProtoToMeta:
                             namespace=workflow_proto.namespace,
                             content=workflow_proto.content,
                             workflow_object=workflow_proto.pickled_workflow,
-                            create_time=epoch_to_datetime(create_time_epoch),
-                            update_time=epoch_to_datetime(update_time_epoch),
+                            create_time=timestamp_to_datetime(create_time_epoch),
+                            update_time=timestamp_to_datetime(update_time_epoch),
                             is_enabled=workflow_proto.is_enabled,
                             event_offset=event_offset,
                             uuid=workflow_proto.uuid)
@@ -80,7 +80,7 @@ class ProtoToMeta:
                                     workflow_object=workflow_snapshot_proto.workflow_object,
                                     uri=uri,
                                     signature=signature,
-                                    create_time=epoch_to_datetime(create_time_epoch),
+                                    create_time=timestamp_to_datetime(create_time_epoch),
                                     uuid=workflow_snapshot_proto.uuid)
 
     @staticmethod
@@ -101,8 +101,8 @@ class ProtoToMeta:
         return WorkflowExecutionMeta(workflow_id=proto.workflow_id,
                                      run_type=run_type,
                                      snapshot_id=proto.snapshot_id,
-                                     begin_date=epoch_to_datetime(begin_date_epoch),
-                                     end_date=epoch_to_datetime(end_date_epoch),
+                                     begin_date=timestamp_to_datetime(begin_date_epoch),
+                                     end_date=timestamp_to_datetime(end_date_epoch),
                                      status=status,
                                      event_offset=event_offset,
                                      uuid=proto.uuid)
@@ -124,8 +124,8 @@ class ProtoToMeta:
                                  task_name=proto.task_name,
                                  sequence_number=proto.sequence_number,
                                  try_number=proto.try_number,
-                                 begin_date=epoch_to_datetime(begin_date_epoch),
-                                 end_date=epoch_to_datetime(end_date_epoch),
+                                 begin_date=timestamp_to_datetime(begin_date_epoch),
+                                 end_date=timestamp_to_datetime(end_date_epoch),
                                  status=status,
                                  uuid=proto.uuid)
 
@@ -143,7 +143,7 @@ class ProtoToMeta:
         return WorkflowScheduleMeta(workflow_id=proto.workflow_id,
                                     expression=expression,
                                     is_paused=proto.is_paused,
-                                    create_time=epoch_to_datetime(create_time_epoch),
+                                    create_time=timestamp_to_datetime(create_time_epoch),
                                     uuid=proto.uuid)
 
     @staticmethod
@@ -160,7 +160,7 @@ class ProtoToMeta:
         return WorkflowEventTriggerMeta(workflow_id=proto.workflow_id,
                                         rule=proto.rule,
                                         is_paused=proto.is_paused,
-                                        create_time=epoch_to_datetime(create_time_epoch),
+                                        create_time=timestamp_to_datetime(create_time_epoch),
                                         uuid=proto.uuid)
 
     @staticmethod

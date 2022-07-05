@@ -21,7 +21,7 @@ from ai_flow.metadata.workflow_event_trigger import WorkflowEventTriggerMeta
 from ai_flow.metadata.workflow_schedule import WorkflowScheduleMeta
 from ai_flow.metadata.workflow_execution import WorkflowExecutionMeta
 from ai_flow.metadata.workflow_snapshot import WorkflowSnapshotMeta
-from ai_flow.common.util.time_utils import datetime_to_epoch
+from ai_flow.common.util.time_utils import datetime_to_timestamp
 from ai_flow.metadata.workflow import WorkflowMeta
 from ai_flow.metadata.namespace import NamespaceMeta
 from ai_flow.rpc.protobuf.message_pb2 import NamespaceProto, WorkflowProto, WorkflowSnapshotProto, \
@@ -55,8 +55,8 @@ class MetaToProto:
                                  namespace=workflow.namespace,
                                  content=workflow.content,
                                  pickled_workflow=workflow.workflow_object,
-                                 create_time=int64_value(datetime_to_epoch(workflow.create_time)),
-                                 update_time=int64_value(datetime_to_epoch(workflow.update_time)),
+                                 create_time=int64_value(datetime_to_timestamp(workflow.create_time)),
+                                 update_time=int64_value(datetime_to_timestamp(workflow.update_time)),
                                  is_enabled=workflow.is_enabled,
                                  event_offset=int64_value(workflow.event_offset))
 
@@ -74,7 +74,7 @@ class MetaToProto:
         else:
             return WorkflowSnapshotProto(uuid=workflow_snapshot.id,
                                          workflow_id=workflow_snapshot.workflow_id,
-                                         create_time=int64_value(datetime_to_epoch(workflow_snapshot.create_time)),
+                                         create_time=int64_value(datetime_to_timestamp(workflow_snapshot.create_time)),
                                          workflow_object=workflow_snapshot.workflow_object,
                                          uri=string_value(workflow_snapshot.uri),
                                          signature=string_value(workflow_snapshot.signature))
@@ -93,8 +93,8 @@ class MetaToProto:
         else:
             return WorkflowExecutionProto(uuid=workflow_execution.id,
                                           workflow_id=workflow_execution.workflow_id,
-                                          begin_date=int64_value(datetime_to_epoch(workflow_execution.begin_date)),
-                                          end_date=int64_value(datetime_to_epoch(workflow_execution.end_date)),
+                                          begin_date=int64_value(datetime_to_timestamp(workflow_execution.begin_date)),
+                                          end_date=int64_value(datetime_to_timestamp(workflow_execution.end_date)),
                                           status=string_value(workflow_execution.status),
                                           run_type=string_value(workflow_execution.run_type),
                                           snapshot_id=workflow_execution.snapshot_id,
@@ -117,8 +117,8 @@ class MetaToProto:
                                       task_name=task_execution.task_name,
                                       sequence_number=task_execution.sequence_number,
                                       try_number=task_execution.try_number,
-                                      begin_date=int64_value(datetime_to_epoch(task_execution.begin_date)),
-                                      end_date=int64_value(datetime_to_epoch(task_execution.end_date)),
+                                      begin_date=int64_value(datetime_to_timestamp(task_execution.begin_date)),
+                                      end_date=int64_value(datetime_to_timestamp(task_execution.end_date)),
                                       status=string_value(task_execution.status))
 
     @staticmethod
@@ -137,7 +137,7 @@ class MetaToProto:
                                          workflow_id=workflow_schedule.workflow_id,
                                          expression=string_value(workflow_schedule.expression),
                                          is_paused=workflow_schedule.is_paused,
-                                         create_time=int64_value(datetime_to_epoch(workflow_schedule.create_time)))
+                                         create_time=int64_value(datetime_to_timestamp(workflow_schedule.create_time)))
 
     @staticmethod
     def workflow_schedule_meta_list_to_proto(workflow_schedules: List[WorkflowScheduleMeta]) -> List[WorkflowScheduleProto]:
@@ -155,7 +155,7 @@ class MetaToProto:
                                         workflow_id=workflow_trigger.workflow_id,
                                         rule=workflow_trigger.rule,
                                         is_paused=workflow_trigger.is_paused,
-                                        create_time=int64_value(datetime_to_epoch(workflow_trigger.create_time)))
+                                        create_time=int64_value(datetime_to_timestamp(workflow_trigger.create_time)))
 
     @staticmethod
     def workflow_trigger_meta_list_to_proto(workflow_triggers: List[WorkflowEventTriggerMeta]) -> List[WorkflowTriggerProto]:

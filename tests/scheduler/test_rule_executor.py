@@ -198,7 +198,7 @@ class TestRuleExecutor(UnitTestWithNamespace):
         self.assertIsNone(result)
 
     def exec_event_on_workflow_execution(self, event):
-        rule_extractor = RuleExtractor(metadata_manager=self.metadata_manager)
+        rule_extractor = RuleExtractor()
         rule_executor = RuleExecutor(metadata_manager=self.metadata_manager)
         results = rule_extractor.extract_workflow_execution_rules(event=event)
         result = rule_executor.execute_workflow_execution_rule(event=event,
@@ -312,7 +312,7 @@ class TestRuleExecutor(UnitTestWithNamespace):
         self.assertIsNotNone(result)
 
     def exec_event_on_workflow(self, event):
-        rule_extractor = RuleExtractor(metadata_manager=self.metadata_manager)
+        rule_extractor = RuleExtractor()
         rule_executor = RuleExecutor(metadata_manager=self.metadata_manager)
         results = rule_extractor.extract_workflow_rules(event=event)
         result = rule_executor.execute_workflow_rule(event=event,
