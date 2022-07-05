@@ -99,7 +99,7 @@ class TestWorker(UnitTestWithNamespace):
 
     def test_worker_run(self):
         task_executor = MockTaskExecutor()
-        rule_extractor = RuleExtractor(metadata_manager=self.metadata_manager)
+        rule_extractor = RuleExtractor()
         worker = Worker(task_executor=task_executor)
         try:
             worker.start()

@@ -14,8 +14,10 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import threading
+
 from apscheduler.job import Job
-from apscheduler.jobstores.base import BaseJobStore, JobLookupError
+from apscheduler.jobstores.base import BaseJobStore, JobLookupError, ConflictingIdError
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.base import BaseTrigger
 from apscheduler.triggers.cron import CronTrigger
@@ -23,8 +25,10 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.util import datetime_to_utc_timestamp, utc_timestamp_to_datetime
 from notification_service.notification_client import NotificationClient
 
+from ai_flow.common.util.db_util.session import create_session
 from ai_flow.metadata.timer import TimerMeta
 from ai_flow.model.internal.events import PeriodicRunWorkflowEvent, PeriodicRunTaskEvent
+from ai_flow.rpc.client.aiflow_client import get_notification_client
 
 try:
     import cPickle as pickle
@@ -94,18 +98,31 @@ def build_trigger(expression: str) -> BaseTrigger:
 
 class TimerJobStore(BaseJobStore):
     """ The class saves the scheduling information of periodic workflows/tasks to database."""
-    def __init__(self, session, pickle_protocol=pickle.HIGHEST_PROTOCOL):
+    def __init__(self, pickle_protocol=pickle.HIGHEST_PROTOCOL):
         super(TimerJobStore, self).__init__()
         self.pickle_protocol = pickle_protocol
+        self.session = None
+
+    def set_session(self, session):
+        """
+        If you set an external session, after calling the interfaces(add_job, update_job, remove_job, remove_all_jobs),
+        you need to call session.commit() to update to the database.
+        """
         self.session = session
+
+    def unset_session(self):
+        self.session = None
 
     def lookup_job(self, job_id):
         def _internal_lookup_job(job_id, session):
             job_state = session.query(TimerMeta.job_state).filter(TimerMeta.id == job_id).scalar()
             return self._reconstitute_job(job_state) if job_state else None
 
-        job_state = _internal_lookup_job(job_id, self.session)
-        return job_state
+        if self.session is None:
+            with create_session() as session:
+                return _internal_lookup_job(job_id, session)
+        else:
+            return _internal_lookup_job(job_id, self.session)
 
     def get_due_jobs(self, now):
         timestamp = datetime_to_utc_timestamp(now)
@@ -116,7 +133,11 @@ class TimerJobStore(BaseJobStore):
             next_run_time = session.query(TimerMeta.next_run_time).filter(
                 TimerMeta.next_run_time != null()).order_by(TimerMeta.next_run_time).limit(1).scalar()
             return utc_timestamp_to_datetime(next_run_time)
-        return _internal_get_next_run_time(self.session)
+        if self.session is None:
+            with create_session() as session:
+                return _internal_get_next_run_time(session)
+        else:
+            return _internal_get_next_run_time(self.session)
 
     def get_all_jobs(self):
         jobs = self._get_jobs()
@@ -129,8 +150,14 @@ class TimerJobStore(BaseJobStore):
         r.id = job.id
         r.next_run_time = datetime_to_utc_timestamp(job.next_run_time)
         r.job_state = pickle.dumps(job.__getstate__(), self.pickle_protocol)
-        self.session.add(r)
-        self.session.commit()
+        if self.session is None:
+            with create_session() as session:
+                try:
+                    session.add(r)
+                except IntegrityError:
+                    raise ConflictingIdError(job.id)
+        else:
+            self.session.add(r)
 
     def update_job(self, job):
         """Uncommitted"""
@@ -142,18 +169,27 @@ class TimerJobStore(BaseJobStore):
                 timer_meta.next_run_time = datetime_to_utc_timestamp(job.next_run_time)
                 timer_meta.job_state = pickle.dumps(job.__getstate__(), self.pickle_protocol)
                 session.merge(timer_meta)
-                session.commit()
 
-        _internal_update_job(self.session)
+        if self.session is None:
+            with create_session() as session:
+                _internal_update_job(session)
+        else:
+            _internal_update_job(self.session)
 
     def remove_job(self, job_id):
         """Uncommitted"""
-        self.session.query(TimerMeta).filter(TimerMeta.id == job_id).delete()
-        self.session.commit()
+        if self.session is None:
+            with create_session() as session:
+                session.query(TimerMeta).filter(TimerMeta.id == job_id).delete()
+        else:
+            self.session.query(TimerMeta).filter(TimerMeta.id == job_id).delete()
 
     def remove_all_jobs(self):
-        self.session.query(TimerMeta).delete()
-        self.session.commit()
+        if self.session is None:
+            with create_session() as session:
+                session.query(TimerMeta).delete()
+        else:
+            self.session.query(TimerMeta).delete()
 
     def _reconstitute_job(self, job_state):
         job_state = pickle.loads(job_state)
@@ -165,7 +201,11 @@ class TimerJobStore(BaseJobStore):
         return job
 
     def _get_jobs(self, *conditions):
-        return self._internal_get_jobs(conditions, self.session)
+        if self.session is None:
+            with create_session() as session:
+                return self._internal_get_jobs(conditions, session)
+        else:
+            return self._internal_get_jobs(conditions, self.session)
 
     def _internal_get_jobs(self, conditions, session):
         jobs = []
@@ -188,20 +228,24 @@ class TimerJobStore(BaseJobStore):
 
 
 class Timer(object):
-    def __init__(self, notification_client: NotificationClient, session):
+    def __init__(self, notification_client: NotificationClient):
         super().__init__()
         self.notification_client = notification_client
-        self.store = TimerJobStore(session=session)
+        self.store = TimerJobStore()
         jobstores = {
             'default': self.store
         }
         self.sc = BackgroundScheduler(jobstores=jobstores)
+        self._lock = threading.RLock()
 
     def start(self):
         self.sc.start()
 
     def shutdown(self):
         self.sc.shutdown()
+
+    def set_notification_client(self, notification_client):
+        self.notification_client = notification_client
 
     @classmethod
     def generate_workflow_job_id(cls, schedule_id):
@@ -216,19 +260,43 @@ class Timer(object):
                         func=send_start_workflow_event, args=(self.notification_client, schedule_id),
                         trigger=build_trigger(expression=expression))
 
+    def add_workflow_schedule_with_session(self, session, schedule_id,  expression):
+        with self._lock:
+            self.store.set_session(session)
+            self.add_workflow_schedule(schedule_id, expression)
+            self.store.unset_session()
+
     def delete_workflow_schedule(self, schedule_id):
         job_id = self.generate_workflow_job_id(schedule_id=schedule_id)
         job = self.sc.get_job(job_id)
         if job is not None:
             self.sc.remove_job(job_id=job_id)
 
+    def delete_workflow_schedule_with_session(self, session, schedule_id):
+        with self._lock:
+            self.store.set_session(session)
+            self.delete_workflow_schedule(schedule_id)
+            self.store.unset_session()
+
     def pause_workflow_schedule(self, schedule_id):
         job_id = self.generate_workflow_job_id(schedule_id=schedule_id)
         self.sc.pause_job(job_id)
 
+    def pause_workflow_schedule_with_session(self, session, schedule_id):
+        with self._lock:
+            self.store.set_session(session)
+            self.pause_workflow_schedule(schedule_id)
+            self.store.unset_session()
+
     def resume_workflow_schedule(self, schedule_id):
         job_id = self.generate_workflow_job_id(schedule_id=schedule_id)
         self.sc.resume_job(job_id)
+
+    def resume_workflow_schedule_with_session(self, session, schedule_id):
+        with self._lock:
+            self.store.set_session(session)
+            self.resume_workflow_schedule(schedule_id)
+            self.store.unset_session()
 
     def add_task_schedule(self, workflow_execution_id, task_name, expression):
         self.sc.add_job(id=self.generate_task_job_id(workflow_execution_id=workflow_execution_id, task_name=task_name),
@@ -237,8 +305,23 @@ class Timer(object):
                                                           task_name),
                         trigger=build_trigger(expression=expression))
 
+    def add_task_schedule_with_session(self, session, workflow_execution_id, task_name, expression):
+        with self._lock:
+            self.store.set_session(session)
+            self.add_task_schedule(workflow_execution_id, task_name, expression)
+            self.store.unset_session()
+
     def delete_task_schedule(self, workflow_execution_id, task_name):
         job_id = self.generate_task_job_id(workflow_execution_id=workflow_execution_id, task_name=task_name)
         job = self.sc.get_job(job_id)
         if job is not None:
             self.sc.remove_job(job_id=job_id)
+
+    def delete_task_schedule_with_session(self, session, workflow_execution_id, task_name):
+        with self._lock:
+            self.store.set_session(session)
+            self.delete_task_schedule(workflow_execution_id, task_name)
+            self.store.unset_session()
+
+
+timer_instance = Timer(notification_client=None)

@@ -21,13 +21,14 @@ from ai_flow.rpc.server.server import AIFlowServer
 from tests.test_utils.unittest_base import BaseUnitTest
 
 
-class TestAIFlowServer(BaseUnitTest):
+class TestMetadataService(BaseUnitTest):
     def setUp(self) -> None:
         super().setUp()
         with mock.patch("ai_flow.task_executor.common.task_executor_base.HeartbeatManager"):
-            with mock.patch('ai_flow.rpc.service.scheduler_service.EmbeddedNotificationClient'):
-                self.server = AIFlowServer()
-                self.server.run(is_block=False)
+            with mock.patch('ai_flow.rpc.service.scheduler_service.get_notification_client'):
+                with mock.patch('ai_flow.rpc.server.server.get_notification_client'):
+                    self.server = AIFlowServer()
+                    self.server.run(is_block=False)
         self.client = get_ai_flow_client()
 
     def tearDown(self) -> None:

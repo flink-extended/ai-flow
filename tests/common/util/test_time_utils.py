@@ -19,6 +19,8 @@
 import unittest
 import datetime
 
+import pendulum
+
 from ai_flow.common.util import time_utils
 
 
@@ -26,6 +28,16 @@ class TestTimeUtils(unittest.TestCase):
 
     def test_date_parse(self):
         time = datetime.datetime(2022, 1, 1, 1, 1, 1)
-        epoch = time_utils.datetime_to_epoch(time)
-        new_time = time_utils.epoch_to_datetime(epoch)
+        epoch = time_utils.datetime_to_timestamp(time)
+        print(epoch)
+        new_time = time_utils.timestamp_to_datetime(epoch)
+        print(new_time)
+        self.assertEqual(time, new_time)
+
+    def test_utc_date_parse(self):
+        time = datetime.datetime(2022, 1, 1, 1, 1, 1, tzinfo=pendulum.tz.timezone('UTC'))
+        epoch = time_utils.datetime_to_utc_timestamp(time)
+        print(epoch)
+        new_time = time_utils.utc_timestamp_to_datetime(epoch)
+        print(new_time)
         self.assertEqual(time, new_time)
