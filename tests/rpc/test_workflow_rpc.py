@@ -26,13 +26,13 @@ from ai_flow.model.operators.bash import BashOperator
 from ai_flow.model.rule import WorkflowRule
 from ai_flow.model.status import TaskStatus
 from ai_flow.model.workflow import Workflow
-from ai_flow.rpc.client.aiflow_client import get_ai_flow_client
+from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 from ai_flow.rpc.server.server import AIFlowServer
 from tests.test_utils.mock_utils import MockNotificationClient
 from tests.test_utils.unittest_base import BaseUnitTest
 
 
-class TestWorkflowOperations(BaseUnitTest):
+class TestWorkflowRpc(BaseUnitTest):
     def setUp(self) -> None:
         super().setUp()
         with mock.patch("ai_flow.task_executor.common.task_executor_base.HeartbeatManager"):
@@ -40,7 +40,7 @@ class TestWorkflowOperations(BaseUnitTest):
                 with mock.patch('ai_flow.rpc.server.server.get_notification_client', MockNotificationClient):
                     self.server = AIFlowServer()
                     self.server.run(is_block=False)
-        self.client = get_ai_flow_client()
+        self.client = get_scheduler_client()
         self.rule_extractor = self.server.scheduler_service.scheduler.dispatcher.rule_extractor
 
     def tearDown(self) -> None:

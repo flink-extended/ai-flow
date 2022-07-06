@@ -16,31 +16,16 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import grpc
 from notification_service.embedded_notification_client import EmbeddedNotificationClient
 
 from ai_flow.rpc.client.scheduler_client import SchedulerClient
 
-from ai_flow.rpc.client.metadata_client import MetadataClient
 from ai_flow.common.configuration import config_constants
 
 
-class AIFlowClient(MetadataClient, SchedulerClient):
-    def __init__(self, server_uri):
-        self.server_uri = server_uri
-        MetadataClient.__init__(self, server_uri)
-        SchedulerClient.__init__(self, server_uri)
-        self.wait_for_server_ready(60)
-
-    def wait_for_server_ready(self, timeout):
-        channel = grpc.insecure_channel(self.server_uri)
-        fut = grpc.channel_ready_future(channel)
-        fut.result(timeout)
-
-
-def get_ai_flow_client():
+def get_scheduler_client():
     server_uri = config_constants.SERVER_ADDRESS
-    return AIFlowClient(server_uri=server_uri)
+    return SchedulerClient(server_uri=server_uri)
 
 
 def get_notification_client(namespace='default', sender=None):
