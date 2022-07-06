@@ -10,7 +10,6 @@ source =
     ai_flow
     ai_flow_plugins
     lib/notification_service
-    lib/airflow/airflow/contrib/jobs
 
 omit =
     ai_flow/test/*
