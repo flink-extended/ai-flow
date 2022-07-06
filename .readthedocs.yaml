@@ -34,7 +34,5 @@ python:
     - method: pip
       path: lib/notification_service
     - method: pip
-      path: lib/airflow
-    - method: pip
       path: .
     - requirements: docs/requirements.txt
