@@ -23,7 +23,7 @@ from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 from notification_service.util import db
 
-from ai_flow.rpc.client.aiflow_client import get_ai_flow_client
+from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 from ai_flow.rpc.server.server import AIFlowServer
 from ai_flow.sdk import operation
 from tests.test_utils.unittest_base import BaseUnitTest
@@ -45,7 +45,7 @@ class OperationITest(BaseUnitTest):
         self.start_notification_server()
         self.server = AIFlowServer()
         self.server.run(is_block=False)
-        self.client = get_ai_flow_client()
+        self.client = get_scheduler_client()
         self.client.add_namespace('default')
 
     def tearDown(self) -> None:
