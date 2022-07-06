@@ -20,7 +20,7 @@ from typing import List, Optional
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.metadata.workflow_execution import WorkflowExecutionMeta
 
-from ai_flow.rpc.client.aiflow_client import get_ai_flow_client
+from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ def start_workflow_execution(workflow_name: str,
     :param namespace: The namespace which contains the workflow.
     :raises: AIFlowException if failed to start workflow execution.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.start_workflow_execution(workflow_name, namespace)
     except AIFlowException as e:
@@ -50,7 +50,7 @@ def stop_workflow_execution(workflow_execution_id: int):
     :param workflow_execution_id: The id of workflow execution to be stopped.
     :raises: AIFlowException if failed to stop the workflow execution.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.stop_workflow_execution(workflow_execution_id)
     except AIFlowException as e:
@@ -67,7 +67,7 @@ def stop_workflow_executions(workflow_name: str, namespace: str = 'default'):
     :param namespace: The namespace which contains the workflow.
     :raises: AIFlowException if failed to stop workflow executions.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.stop_workflow_executions(namespace=namespace, workflow_name=workflow_name)
     except AIFlowException as e:
@@ -83,7 +83,7 @@ def get_workflow_execution(workflow_execution_id: int) -> Optional[WorkflowExecu
     :param workflow_execution_id: The id of the workflow execution.
     :return: The WorkflowExecutionMeta instance, return None if no execution found.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.get_workflow_execution(workflow_execution_id)
 
 
@@ -101,7 +101,7 @@ def list_workflow_executions(workflow_name: str,
     :return: The WorkflowExecutionMeta list, return None if no workflow execution found.
     """
 
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.list_workflow_executions(namespace=namespace,
                                            workflow_name=workflow_name,
                                            page_size=limit,
@@ -116,7 +116,7 @@ def delete_workflow_execution(workflow_execution_id: int):
     :param workflow_execution_id: The id of the workflow execution.
     :raises: AIFlowException if failed to delete the workflow execution.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.delete_workflow_execution(workflow_execution_id)
     except AIFlowException as e:

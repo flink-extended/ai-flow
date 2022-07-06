@@ -25,7 +25,7 @@ from ai_flow.model.internal.events import SchedulingEventType
 from ai_flow.model.operators.bash import BashOperator
 from ai_flow.model.status import WorkflowStatus
 from ai_flow.model.workflow import Workflow
-from ai_flow.rpc.client.aiflow_client import get_ai_flow_client
+from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 from ai_flow.rpc.server.server import AIFlowServer
 from tests.test_utils.mock_utils import MockNotificationClient, MockTimer
 from tests.test_utils.unittest_base import BaseUnitTest
@@ -39,7 +39,7 @@ class TestTaskExecutionRpc(BaseUnitTest):
                 with mock.patch('ai_flow.rpc.server.server.get_notification_client'):
                     self.server = AIFlowServer()
                     self.server.run(is_block=False)
-        self.client = get_ai_flow_client()
+        self.client = get_scheduler_client()
         self.notification_client = self.server.scheduler_service.notification_client
         self.workflow_meta = self.prepare_workflow()
         self.workflow_execution = self.prepare_workflow_execution(1, 1)

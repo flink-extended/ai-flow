@@ -1,4 +1,3 @@
-#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,21 +14,3 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-from notification_service.embedded_notification_client import EmbeddedNotificationClient
-
-from ai_flow.rpc.client.scheduler_client import SchedulerClient
-
-from ai_flow.common.configuration import config_constants
-
-
-def get_scheduler_client():
-    server_uri = config_constants.SERVER_ADDRESS
-    return SchedulerClient(server_uri=server_uri)
-
-
-def get_notification_client(namespace='default', sender=None):
-    return EmbeddedNotificationClient(
-        server_uri=config_constants.NOTIFICATION_SERVER_URI,
-        namespace=namespace,
-        sender=sender)

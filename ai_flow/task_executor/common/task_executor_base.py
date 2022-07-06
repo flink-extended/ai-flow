@@ -18,6 +18,13 @@ import logging
 import threading
 from abc import abstractmethod
 from queue import Empty
+from typing import Optional
+
+from ai_flow.common.util.db_util.session import create_session
+from ai_flow.metadata.metadata_manager import MetadataManager
+from ai_flow.metadata.workflow import WorkflowMeta
+
+from ai_flow.metadata.workflow_snapshot import WorkflowSnapshotMeta
 
 from ai_flow.common.configuration.config_constants import NOTIFICATION_SERVER_URI, INTERNAL_RPC_PORT, \
     TASK_HEARTBEAT_INTERVAL
@@ -108,12 +115,11 @@ class TaskExecutorBase(TaskExecutor):
         Stop the task execution by key.
         """
 
-    @staticmethod
-    def generate_command(key: TaskExecutionKey):
-        workflow = workflow_utils.get_workflow(key.workflow_execution_id)
+    def generate_command(self, key: TaskExecutionKey):
+        workflow = self._get_workflow(key.workflow_execution_id)
         if workflow is None:
             raise AIFlowException(f'Cannot find corresponding workflow for task {key}.')
-        workflow_snapshot = workflow_utils.get_workflow_snapshot(workflow.id)
+        workflow_snapshot = self._get_workflow_snapshot(workflow.id)
         if workflow_snapshot is None:
             raise AIFlowException(f'Cannot find workflow snapshot for task {key}.')
         return ["aiflow",
@@ -128,3 +134,33 @@ class TaskExecutorBase(TaskExecutor):
                 '{}:{}'.format(get_ip_addr(), INTERNAL_RPC_PORT),
                 '--heartbeat-interval', str(TASK_HEARTBEAT_INTERVAL)
                 ]
+
+    @staticmethod
+    def _get_workflow_snapshot(workflow_id) -> Optional[WorkflowSnapshotMeta]:
+        """
+        Get the location of the snapshot of the workflow execution
+
+        :param workflow_id: Id of the workflow
+        :return: The WorkflowSnapshotMeta
+        """
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            snapshot = metadata_manager.get_latest_snapshot(workflow_id)
+            return snapshot
+
+    @staticmethod
+    def _get_workflow(workflow_execution_id) -> Optional[WorkflowMeta]:
+        """
+        Get the name of the workflow by the execution id
+
+        :param workflow_execution_id: Id of the workflow execution
+        :return: The WorkflowMeta
+        """
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            workflow_execution = metadata_manager.get_workflow_execution(workflow_execution_id)
+            if workflow_execution is not None:
+                workflow = metadata_manager.get_workflow_by_id(workflow_execution.workflow_id)
+                return workflow
+            else:
+                return None

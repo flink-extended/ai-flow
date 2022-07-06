@@ -16,7 +16,7 @@
 from unittest import mock
 
 from ai_flow.common.exception.exceptions import AIFlowException
-from ai_flow.rpc.client.aiflow_client import get_ai_flow_client
+from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 from ai_flow.rpc.server.server import AIFlowServer
 from tests.test_utils.unittest_base import BaseUnitTest
 
@@ -29,7 +29,7 @@ class TestNamespaceRpc(BaseUnitTest):
                 with mock.patch('ai_flow.rpc.server.server.get_notification_client'):
                     self.server = AIFlowServer()
                     self.server.run(is_block=False)
-        self.client = get_ai_flow_client()
+        self.client = get_scheduler_client()
 
     def tearDown(self) -> None:
         self.server.stop()

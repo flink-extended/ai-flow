@@ -18,7 +18,7 @@ import logging
 from typing import Optional, List
 
 from ai_flow.common.exception.exceptions import AIFlowException
-from ai_flow.rpc.client.aiflow_client import get_ai_flow_client
+from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 
 from ai_flow.metadata.namespace import NamespaceMeta
 
@@ -33,7 +33,7 @@ def add_namespace(name: str, properties: dict) -> NamespaceMeta:
     :param properties: The properties of namespace.
     :return: The NamespaceMeta instance just added.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.add_namespace(name, properties)
 
 
@@ -44,7 +44,7 @@ def get_namespace(name: str) -> Optional[NamespaceMeta]:
     :param name: The name of namespace.
     :return: The NamespaceMeta instance, return None if no namespace found.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.get_namespace(name)
 
 
@@ -56,7 +56,7 @@ def update_namespace(name: str, properties: dict) -> Optional[NamespaceMeta]:
     :param properties: The properties of namespace.
     :return: The NamespaceMeta instance just updated, return None if no namespace found.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.update_namespace(name=name, properties=properties)
 
 
@@ -68,7 +68,7 @@ def list_namespace(limit: int = None, offset: int = None) -> Optional[List[Names
     :param offset: The offset to start to list.
     :return: The NamespaceMeta list, return None if no namespace found.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.list_namespaces(page_size=limit, offset=offset)
 
 
@@ -79,7 +79,7 @@ def delete_namespace(name: str):
     :param name: The name of namespace.
     :raises: AIFlowException if failed to delete namespace.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.delete_namespace(name)
     except AIFlowException as e:

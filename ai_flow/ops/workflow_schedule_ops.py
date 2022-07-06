@@ -18,7 +18,7 @@ import logging
 from typing import Optional, List
 
 from ai_flow.common.exception.exceptions import AIFlowException
-from ai_flow.rpc.client.aiflow_client import get_ai_flow_client
+from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 
 from ai_flow.metadata.workflow_schedule import WorkflowScheduleMeta
 
@@ -38,7 +38,7 @@ def add_workflow_schedule(expression: str, workflow_name: str,
     :param namespace: The namespace of the workflow.
     :return: The WorkflowScheduleMeta instance just added.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.add_workflow_schedule(namespace=namespace,
                                         workflow_name=workflow_name,
                                         expression=expression)
@@ -51,7 +51,7 @@ def get_workflow_schedule(schedule_id: int) -> Optional[WorkflowScheduleMeta]:
     :param schedule_id: The id of the schedule.
     :return: The WorkflowScheduleMeta instance, return None if no schedule found.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.get_workflow_schedule(schedule_id)
 
 
@@ -68,7 +68,7 @@ def list_workflow_schedules(workflow_name: str,
     :param offset: The offset to start to list.
     :return: The WorkflowScheduleMeta list, return None if no workflow schedules found.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.list_workflow_schedules(namespace=namespace,
                                           workflow_name=workflow_name,
                                           limit=limit,
@@ -82,7 +82,7 @@ def delete_workflow_schedule(schedule_id):
     :param schedule_id: The id of the workflow schedule.
     :raises: AIFlowException if failed to delete the workflow schedule.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.delete_workflow_schedule(schedule_id)
     except AIFlowException as e:
@@ -99,7 +99,7 @@ def delete_workflow_schedules(workflow_name: str, namespace: str = 'default'):
     :param namespace: The namespace which contains the workflow.
     :raises: AIFlowException if failed to delete workflow schedules.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.delete_workflow_schedules(namespace=namespace, workflow_name=workflow_name)
     except AIFlowException as e:
@@ -115,7 +115,7 @@ def pause_workflow_schedule(schedule_id: int):
     :param schedule_id: The id of the workflow schedule.
     :raises: AIFlowException if failed to pause the workflow schedule.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.pause_workflow_schedule(schedule_id)
     except AIFlowException as e:
@@ -131,7 +131,7 @@ def resume_workflow_schedule(schedule_id: int):
     :param schedule_id: The id of the workflow schedule.
     :raises: AIFlowException if failed to resume the workflow schedule.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.resume_workflow_schedule(schedule_id)
     except AIFlowException as e:

@@ -20,7 +20,7 @@ from typing import Optional, List
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.metadata.workflow_snapshot import WorkflowSnapshotMeta
 
-from ai_flow.rpc.client.aiflow_client import get_ai_flow_client
+from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ def get_workflow_snapshot(snapshot_id: int) -> Optional[WorkflowSnapshotMeta]:
     :param snapshot_id: The id of the snapshot.
     :return: The WorkflowSnapshotMeta instance, return None if no snapshot found.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.get_workflow_snapshot(snapshot_id)
 
 
@@ -49,7 +49,7 @@ def list_workflow_snapshots(workflow_name: str,
     :param offset: The offset to start to list.
     :return: The WorkflowSnapshotMeta list, return None if no workflow snapshots found.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.list_workflow_snapshots(namespace=namespace,
                                           workflow_name=workflow_name,
                                           limit=limit,
@@ -63,7 +63,7 @@ def delete_workflow_snapshot(snapshot_id: int):
     :param snapshot_id: The id of the workflow snapshot.
     :raises: AIFlowException if failed to delete the workflow snapshot.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.delete_workflow_snapshot(snapshot_id)
     except AIFlowException as e:
@@ -80,7 +80,7 @@ def delete_workflow_snapshots(workflow_name: str, namespace: str = 'default'):
     :param namespace: The namespace which contains the workflow.
     :raises: AIFlowException if failed to delete workflow snapshots.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.delete_workflow_snapshots(namespace=namespace, workflow_name=workflow_name)
     except AIFlowException as e:

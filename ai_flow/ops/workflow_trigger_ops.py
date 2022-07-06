@@ -22,7 +22,7 @@ import cloudpickle
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.metadata.workflow_event_trigger import WorkflowEventTriggerMeta
 
-from ai_flow.rpc.client.aiflow_client import get_ai_flow_client
+from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 
 from ai_flow.model.rule import WorkflowRule
 
@@ -39,7 +39,7 @@ def add_workflow_trigger(rule: WorkflowRule, workflow_name: str,
     :param namespace: The namespace of the workflow.
     :return: The WorkflowEventTriggerMeta instance just added.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     rule_bytes = cloudpickle.dumps(rule)
     client.add_workflow_trigger(namespace=namespace, workflow_name=workflow_name, rule=rule_bytes)
 
@@ -51,7 +51,7 @@ def get_workflow_trigger(trigger_id: int) -> Optional[WorkflowEventTriggerMeta]:
     :param trigger_id: The id of the trigger.
     :return: The WorkflowEventTriggerMeta instance, return None if no trigger found.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.get_workflow_trigger(trigger_id)
 
 
@@ -68,7 +68,7 @@ def list_workflow_triggers(workflow_name: str,
     :param offset: The offset to start to list.
     :return: The WorkflowEventTriggerMeta list, return None if no workflow trigger found.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.list_workflow_triggers(namespace=namespace,
                                          workflow_name=workflow_name,
                                          limit=limit,
@@ -82,7 +82,7 @@ def delete_workflow_trigger(trigger_id):
     :param trigger_id: The id of the workflow trigger.
     :raises: AIFlowException if failed to delete the workflow trigger.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.delete_workflow_trigger(trigger_id)
     except AIFlowException as e:
@@ -99,7 +99,7 @@ def delete_workflow_triggers(workflow_name: str, namespace: str = 'default'):
     :param namespace: The namespace which contains the workflow.
     :raises: AIFlowException if failed to delete workflow triggers.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.delete_workflow_triggers(namespace=namespace, workflow_name=workflow_name)
     except AIFlowException as e:
@@ -115,7 +115,7 @@ def pause_workflow_trigger(trigger_id: int):
     :param trigger_id: The id of the workflow trigger.
     :raises: AIFlowException if failed to pause the workflow trigger.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.pause_workflow_trigger(trigger_id)
     except AIFlowException as e:
@@ -131,7 +131,7 @@ def resume_workflow_trigger(trigger_id: int):
     :param trigger_id: The id of the workflow trigger.
     :raises: AIFlowException if failed to resume the workflow trigger.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.resume_workflow_trigger(trigger_id)
     except AIFlowException as e:

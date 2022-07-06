@@ -22,7 +22,7 @@ from ai_flow.common.util.workflow_utils import upload_workflow_snapshot, extract
 from ai_flow.metadata import WorkflowMeta
 
 from ai_flow.common.exception.exceptions import AIFlowException
-from ai_flow.rpc.client.aiflow_client import get_ai_flow_client
+from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def upload_workflows(workflow_file_path: str,
     if not workflows:
         raise AIFlowException(f'No workflow objects found in {workflow_file_path}, failed to upload workflow.')
     file_hash, uploaded_path = upload_workflow_snapshot(workflow_file_path, artifacts)
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     ret = []
     for workflow in workflows:
         pickled_workflow = cloudpickle.dumps(workflow)
@@ -72,7 +72,7 @@ def get_workflow(workflow_name: str, namespace: str = 'default') -> Optional[Wor
     :param namespace: The namespace of the workflow.
     :return: The WorkflowMeta instance, return None if no workflow found.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.get_workflow(workflow_name, namespace)
 
 
@@ -87,7 +87,7 @@ def list_workflows(namespace: str = 'default',
     :param offset: The offset to start to list.
     :return: The WorkflowMeta list, return None if no workflow found.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     return client.list_workflows(namespace, page_size=limit, offset=offset)
 
 
@@ -100,24 +100,26 @@ def delete_workflow(workflow_name: str, namespace: str = 'default'):
     :param namespace: The namespace of the workflow.
     :raises: AIFlowException if failed to delete the workflow.
     """
-    client = get_ai_flow_client()
-    while True:
-        executions = client.list_workflow_executions(namespace=namespace,
-                                                     workflow_name=workflow_name,
-                                                     page_size=10)
-        if executions is not None:
-            for e in executions:
-                logger.info(f"Removing workflow execution {e.id}")
-                client.delete_workflow_execution(e.id)
-        else:
-            break
-    logger.info("Cascade deleting workflow schedules...")
-    client.delete_workflow_schedules(namespace=namespace, workflow_name=workflow_name)
-    logger.info('Cascade deleting workflow triggers...')
-    client.delete_workflow_triggers(namespace=namespace, workflow_name=workflow_name)
-    logger.info('Cascade deleting workflow snapshots...')
-    client.delete_workflow_snapshots(namespace=namespace, workflow_name=workflow_name)
+    client = get_scheduler_client()
     try:
+        while True:
+            executions = client.list_workflow_executions(namespace=namespace,
+                                                         workflow_name=workflow_name,
+                                                         page_size=10)
+            if executions is not None:
+                for e in executions:
+                    logger.info(f"Removing workflow execution {e.id}")
+                    client.delete_workflow_execution(e.id)
+            else:
+                break
+        logger.info("Cascade deleting workflow schedules...")
+        client.delete_workflow_schedules(namespace=namespace, workflow_name=workflow_name)
+
+        logger.info('Cascade deleting workflow triggers...')
+        client.delete_workflow_triggers(namespace=namespace, workflow_name=workflow_name)
+
+        logger.info('Cascade deleting workflow snapshots...')
+        client.delete_workflow_snapshots(namespace=namespace, workflow_name=workflow_name)
         client.delete_workflow(name=workflow_name, namespace=namespace)
     except AIFlowException as e:
         logger.exception("Failed to delete workflow %s with exception %s", f'{namespace}.{workflow_name}', str(e))
@@ -133,7 +135,7 @@ def disable_workflow(workflow_name: str, namespace: str = 'default'):
     :param namespace: The namespace of the workflow.
     :raises: AIFlowException if failed to disable workflow.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.disable_workflow(name=workflow_name, namespace=namespace)
     except AIFlowException as e:
@@ -149,7 +151,7 @@ def enable_workflow(workflow_name: str, namespace: str = 'default'):
     :param namespace: The namespace of the workflow.
     :raises: AIFlowException if failed to enable workflow.
     """
-    client = get_ai_flow_client()
+    client = get_scheduler_client()
     try:
         client.enable_workflow(name=workflow_name, namespace=namespace)
     except AIFlowException as e:
