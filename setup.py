@@ -88,27 +88,9 @@ def remove_if_exists(file_path):
             assert os.path.isdir(file_path)
             rmtree(file_path)
 
-
-def remove_installed_airflow():
-    from distutils.sysconfig import get_python_lib
-
-    local_site_package = get_python_lib()
-    installed_airflow_path = os.path.join(local_site_package, "airflow")
-    for file in os.listdir(installed_airflow_path):
-        abs_path = os.path.join(installed_airflow_path, file)
-        if os.path.isdir(abs_path) and file == 'providers':
-            print("Airflow providers are not being removed.")
-        else:
-            remove_if_exists(abs_path)
-
 def compile_frontend():  # noqa
     # """Run a command to compile and build aiflow frontend."""
     subprocess.check_call('./ai_flow/frontend/compile_frontend.sh')
-
-
-def compile_assets():  # noqa
-    # """Run a command to compile and build airflow assets."""
-    subprocess.check_call('./lib/airflow/airflow/www/compile_assets.sh')
 
 
 def get_script():
@@ -128,17 +110,6 @@ VERSION = __version__ # noqa
 
 
 try:
-    if in_source:
-        if os.getenv('INSTALL_AIRFLOW_WITHOUT_FRONTEND') != 'true':
-            compile_assets()
-        AIRFLOW_DIR = CURRENT_DIR + "/lib/airflow"
-        try:
-            os.symlink(AIRFLOW_DIR + "/airflow", CURRENT_DIR + "/airflow")
-        except BaseException:  # pylint: disable=broad-except
-            copytree(AIRFLOW_DIR + "/airflow", CURRENT_DIR + "/airflow")
-    else:
-        remove_installed_airflow()
-
     if os.getenv('INSTALL_AIFLOW_WITHOUT_FRONTEND') != 'true':
         compile_frontend()
 
@@ -176,5 +147,4 @@ try:
         }
     )
 finally:
-    if in_source:
-        remove_if_exists(CURRENT_DIR + "/airflow")
+    pass

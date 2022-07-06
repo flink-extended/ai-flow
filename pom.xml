@@ -100,8 +100,6 @@
                         <exclude>examples/simple_examples/temp/*</exclude>
                         <exclude>resources/auto_build/sources.list</exclude>
                         <exclude>lib/notification_service/.idea/*</exclude>
-                        <exclude>lib/airflow/*</exclude>
-                        <exclude>lib/airflow/**/*</exclude>
                         <!-- generated files -->
                         <exclude>ai_flow/protobuf/go/*.go</exclude>
                         <exclude>lib/**/*</exclude>
