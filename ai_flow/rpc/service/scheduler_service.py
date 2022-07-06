@@ -19,7 +19,7 @@ from typing import List
 from notification_service.event import Event
 from notification_service.notification_client import ListenerProcessor
 
-from ai_flow.model.status import WORKFLOW_ALIVE_SET
+from ai_flow.model.status import WORKFLOW_ALIVE_SET, WorkflowStatus, WORKFLOW_FINISHED_SET
 from ai_flow.rpc.client.aiflow_client import get_notification_client
 from ai_flow.rpc.server.exceptions import AIFlowRpcServerException
 from ai_flow.rpc.service.util.meta_to_proto import MetaToProto
@@ -31,7 +31,8 @@ from ai_flow.model.internal.events import StartWorkflowExecutionEvent, StopWorkf
     StartTaskExecutionEvent, StopTaskExecutionEvent
 from ai_flow.rpc.service.util.response_wrapper import catch_exception, wrap_result_response, wrap_data_response, \
     wrap_workflow_list_response, wrap_workflow_execution_list_response, wrap_workflow_schedule_list_response, \
-    wrap_workflow_trigger_list_response, wrap_task_execution_list_response
+    wrap_workflow_trigger_list_response, wrap_task_execution_list_response, wrap_namespace_list_response, \
+    wrap_workflow_snapshot_list_response
 from ai_flow.metadata.metadata_manager import MetadataManager, Filters, FilterIn
 from ai_flow.common.util.db_util.session import create_session
 from ai_flow.rpc.protobuf import scheduler_service_pb2_grpc
@@ -68,6 +69,65 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
     def get_last_committed_offset(self):
         # metadata_manager = MetadataManager(self.session)
         return 0
+
+    # begin rpc interface implementation
+    @catch_exception
+    def addNamespace(self, request, context):
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            properties = {}
+            if request.properties is not None:
+                for key, val in request.properties.items():
+                    properties.update({key: val})
+            namespace = metadata_manager.add_namespace(request.name, properties)
+            return wrap_data_response(MetaToProto.namespace_meta_to_proto(namespace))
+
+    @catch_exception
+    def getNamespace(self, request, context):
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            namespace = metadata_manager.get_namespace(request.name)
+            return wrap_data_response(MetaToProto.namespace_meta_to_proto(namespace))
+
+    @catch_exception
+    def updateNamespace(self, request, context):
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            namespace = metadata_manager.get_namespace(request.name)
+            if namespace is None:
+                response = None
+            else:
+                properties = {}
+                if request.properties is not None:
+                    for key, val in request.properties.items():
+                        properties.update({key: val})
+                namespace = metadata_manager.update_namespace(request.name, properties)
+                response = MetaToProto.namespace_meta_to_proto(namespace)
+            return wrap_data_response(response)
+
+    @catch_exception
+    def listNamespaces(self, request, context):
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            namespaces = metadata_manager.list_namespace(page_size=request.page_size,
+                                                         offset=request.offset)
+            return wrap_namespace_list_response(MetaToProto.namespace_meta_list_to_proto(namespaces))
+
+    @catch_exception
+    def deleteNamespace(self, request, context):
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            namespace = metadata_manager.get_namespace(request.name)
+            if namespace is None:
+                return wrap_result_response(BaseResult(RetCode.ERROR, f'Namespace {request.name} not exists.'))
+            else:
+                workflows = metadata_manager.list_workflows(namespace=request.name, page_size=5)
+                if len(workflows) > 0:
+                    return wrap_result_response(BaseResult(
+                        RetCode.ERROR,
+                        f'Namespace: {namespace.name} is not empty, please remove all its workflows first.'))
+                metadata_manager.delete_namespace(request.name)
+        return wrap_result_response(BaseResult(RetCode.OK, None))
 
     @catch_exception
     def addWorkflow(self, request, context):
@@ -160,6 +220,66 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
         return wrap_result_response(BaseResult(RetCode.OK, None))
 
     @catch_exception
+    def addWorkflowSnapshot(self, request, context):
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            uri = request.uri.value if request.HasField('uri') else None
+            signature = request.signature.value if request.HasField('signature') else None
+            workflow_snapshot = metadata_manager.add_workflow_snapshot(
+                request.workflow_id, uri, request.workflow_object, signature)
+            return wrap_data_response(MetaToProto.workflow_snapshot_meta_to_proto(workflow_snapshot))
+
+    @catch_exception
+    def getWorkflowSnapshot(self, request, context):
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            workflow_snapshot = metadata_manager.get_workflow_snapshot(request.id)
+            return wrap_data_response(MetaToProto.workflow_snapshot_meta_to_proto(workflow_snapshot))
+
+    @catch_exception
+    def listWorkflowSnapshots(self, request, context):
+        namespace = request.namespace
+        workflow_name = request.workflow_name
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            workflow_meta = metadata_manager.get_workflow_by_name(namespace, workflow_name)
+            if workflow_meta is None:
+                raise AIFlowRpcServerException(f'Workflow {namespace}.{workflow_name} not exists')
+            workflow_snapshots = metadata_manager.list_workflow_snapshots(workflow_id=workflow_meta.id,
+                                                                          page_size=request.page_size,
+                                                                          offset=request.offset)
+            return wrap_workflow_snapshot_list_response(
+                MetaToProto.workflow_snapshot_meta_list_to_proto(workflow_snapshots))
+
+    @catch_exception
+    def deleteWorkflowSnapshot(self, request, context):
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            snapshot = metadata_manager.get_workflow_snapshot(request.id)
+            if snapshot is None:
+                return wrap_result_response(BaseResult(RetCode.ERROR, f'Workflow snapshot {request.id} not exists'))
+            else:
+                metadata_manager.delete_workflow_snapshot(request.id)
+                # Also need to delete snapshot files after blob manager refactoring
+                return wrap_result_response(BaseResult(RetCode.OK, None))
+
+    @catch_exception
+    def deleteWorkflowSnapshots(self, request, context):
+        namespace = request.namespace
+        workflow_name = request.workflow_name
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            workflow_meta = metadata_manager.get_workflow_by_name(namespace, workflow_name)
+            if workflow_meta is None:
+                return wrap_result_response(
+                    BaseResult(RetCode.ERROR, f'Workflow {namespace}.{workflow_name} not exists'))
+            snapshots = metadata_manager.list_workflow_snapshots(workflow_id=workflow_meta.id)
+            for snapshot in snapshots:
+                metadata_manager.delete_workflow_snapshot(snapshot.id)
+                # Also need to delete snapshot files after blob manager refactoring
+        return wrap_result_response(BaseResult(RetCode.OK, None))
+
+    @catch_exception
     def startWorkflowExecution(self, request, context):
         namespace = request.namespace
         workflow_name = request.workflow_name
@@ -191,6 +311,27 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
             for we in workflow_executions:
                 event = StopWorkflowExecutionEvent(we.id)
                 self.notification_client.send_event(event)
+        return wrap_result_response(BaseResult(RetCode.OK, None))
+
+    @catch_exception
+    def deleteWorkflowExecution(self, request, context):
+        with create_session() as session:
+            metadata_manager = MetadataManager(session)
+            execution = metadata_manager.get_workflow_execution(request.id)
+            if execution is None:
+                return wrap_result_response(BaseResult(RetCode.ERROR, f'Workflow execution {request.id} not exists'))
+            elif WorkflowStatus(execution.status) not in WORKFLOW_FINISHED_SET:
+                return wrap_result_response(BaseResult(
+                    RetCode.ERROR, f'Workflow execution {request.id} is not finished, cannot be removed.'))
+            else:
+                while True:
+                    task_executions = metadata_manager.list_task_executions(execution.id, page_size=10)
+                    if len(task_executions) > 0:
+                        for te in task_executions:
+                            metadata_manager.delete_task_execution(te.id)
+                    else:
+                        break
+                metadata_manager.delete_workflow_execution(execution.id)
         return wrap_result_response(BaseResult(RetCode.OK, None))
 
     @catch_exception

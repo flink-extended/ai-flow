@@ -34,10 +34,6 @@ message UpdateWorkflowRequest {
     bool is_enabled = 4;
 }
 
-message WorkflowListProto {
-    repeated WorkflowProto workflows = 1;
-}
-
 message ListWorkflowsRequest {
     string namespace = 1;
     int64 page_size = 2;
@@ -57,6 +53,18 @@ message ListTaskExecutionsRequest {
     int64 offset = 3;
 }
 
+message NamespaceListProto {
+    repeated NamespaceProto namespaces = 1;
+}
+
+message WorkflowListProto {
+    repeated WorkflowProto workflows = 1;
+}
+
+message WorkflowSnapshotListProto {
+    repeated WorkflowSnapshotProto workflow_snapshots = 1;
+}
+
 message WorkflowExecutionListProto {
     repeated WorkflowExecutionProto workflow_executions = 1;
 }
@@ -74,6 +82,37 @@ message WorkflowTriggerListProto {
 }
 
 service SchedulerService {
+
+    // begin namespace api
+    rpc addNamespace (NamespaceProto) returns (Response) {
+        option (google.api.http) = {
+            post: "/namespace/add"
+            body: "*"
+        };
+    };
+    rpc getNamespace (NameRequest) returns (Response) {
+        option (google.api.http) = {
+            get: "/namespace/get/{name}"
+        };
+    };
+    rpc updateNamespace (NamespaceProto) returns (Response) {
+        option (google.api.http) = {
+            post: "/namespace/update"
+            body: "*"
+        };
+    };
+    rpc listNamespaces (ListRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/namespace/list"
+            body: "*"
+        };
+    };
+    rpc deleteNamespace (NameRequest) returns (Response) {
+        option (google.api.http) = {
+            get: "/namespace/delete/{name}"
+        };
+    };
+    // end namespace api
 
     // begin workflow api
     rpc addWorkflow (WorkflowProto) returns (Response) {
@@ -120,6 +159,37 @@ service SchedulerService {
     }
     // end workflow api
 
+    // begin workflow snapshot api
+    rpc addWorkflowSnapshot (WorkflowSnapshotProto) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_snapshot/add"
+            body: "*"
+        };
+    }
+    rpc getWorkflowSnapshot (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            get: "/workflow_snapshot/get/{id}"
+        };
+    }
+    rpc listWorkflowSnapshots (ListWorkflowItemsRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_snapshot/list"
+            body: "*"
+        };
+    }
+    rpc deleteWorkflowSnapshot (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            get: "/workflow_snapshot/delete/{id}"
+        };
+    }
+    rpc deleteWorkflowSnapshots (WorkflowIdentifier) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_snapshot/delete_all"
+            body: "*"
+        };
+    }
+    // end workflow snapshot api
+
     // begin workflow execution api
     rpc startWorkflowExecution (WorkflowIdentifier) returns (Response) {
         option (google.api.http) = {
@@ -136,6 +206,12 @@ service SchedulerService {
     rpc stopWorkflowExecutions (WorkflowIdentifier) returns (Response) {
         option (google.api.http) = {
             post: "/workflow_execution/stop_all"
+            body: "*"
+        };
+    };
+    rpc deleteWorkflowExecution (IdRequest) returns (Response) {
+        option (google.api.http) = {
+            post: "/workflow_execution/delete"
             body: "*"
         };
     };

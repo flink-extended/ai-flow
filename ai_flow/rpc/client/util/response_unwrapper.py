@@ -24,9 +24,9 @@ from ai_flow.rpc.client.util.proto_to_meta import ProtoToMeta
 from ai_flow.rpc.protobuf.message_pb2 import SUCCESS, NamespaceProto, RESOURCE_DOES_NOT_EXIST, \
     WorkflowProto, WorkflowSnapshotProto, WorkflowExecutionProto, WorkflowScheduleProto, WorkflowTriggerProto, \
     TaskExecutionProto
-from ai_flow.rpc.protobuf.metadata_service_pb2 import NamespaceListProto, WorkflowSnapshotListProto
 from ai_flow.rpc.protobuf.scheduler_service_pb2 import WorkflowListProto, WorkflowExecutionListProto, \
-    WorkflowScheduleListProto, WorkflowTriggerListProto, TaskExecutionListProto
+    WorkflowScheduleListProto, WorkflowTriggerListProto, TaskExecutionListProto, WorkflowSnapshotListProto, \
+    NamespaceListProto
 
 logger = logging.getLogger(__name__)
 

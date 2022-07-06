@@ -25,9 +25,9 @@ from ai_flow.common.result import BaseResult, RetCode
 from ai_flow.rpc.protobuf.message_pb2 import Response, SUCCESS, ReturnCode, RESOURCE_DOES_NOT_EXIST, NamespaceProto, \
     INTERNAL_ERROR, WorkflowProto, WorkflowSnapshotProto, WorkflowExecutionProto, WorkflowScheduleProto, \
     WorkflowTriggerProto, TaskExecutionProto
-from ai_flow.rpc.protobuf.metadata_service_pb2 import NamespaceListProto, WorkflowSnapshotListProto
 from ai_flow.rpc.protobuf.scheduler_service_pb2 import WorkflowListProto, WorkflowExecutionListProto, \
-    WorkflowScheduleListProto, WorkflowTriggerListProto, TaskExecutionListProto
+    WorkflowScheduleListProto, WorkflowTriggerListProto, TaskExecutionListProto, WorkflowSnapshotListProto, \
+    NamespaceListProto
 from ai_flow.rpc.server.exceptions import AIFlowRpcServerException
 
 

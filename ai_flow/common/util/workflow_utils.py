@@ -42,36 +42,6 @@ from ai_flow.model.workflow import Workflow
 logger = logging.getLogger(__name__)
 
 
-def get_workflow_snapshot(workflow_id) -> Optional[WorkflowSnapshotMeta]:
-    """
-    Get the location of the snapshot of the workflow execution
-
-    :param workflow_id: Id of the workflow
-    :return: The WorkflowSnapshotMeta
-    """
-    with create_session() as session:
-        metadata_manager = MetadataManager(session)
-        snapshot = metadata_manager.get_latest_snapshot(workflow_id)
-        return snapshot
-
-
-def get_workflow(workflow_execution_id) -> Optional[WorkflowMeta]:
-    """
-    Get the name of the workflow by the execution id
-
-    :param workflow_execution_id: Id of the workflow execution
-    :return: The WorkflowMeta
-    """
-    with create_session() as session:
-        metadata_manager = MetadataManager(session)
-        workflow_execution = metadata_manager.get_workflow_execution(workflow_execution_id)
-        if workflow_execution is not None:
-            workflow = metadata_manager.get_workflow_by_id(workflow_execution.workflow_id)
-            return workflow
-        else:
-            return None
-
-
 def upload_workflow_snapshot(file_path: str, artifacts: List[str] = None):
     """
     Uploads the given workflow file along with artifacts to blob server.
