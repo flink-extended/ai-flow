@@ -28,7 +28,7 @@ from tests.test_utils.mock_utils import MockNotificationClient, MockTimer
 from tests.test_utils.unittest_base import BaseUnitTest
 
 
-class TestWorkflowScheduleOperations(BaseUnitTest):
+class TestWorkflowScheduleRpc(BaseUnitTest):
     def setUp(self) -> None:
         super().setUp()
         self.mock_timer = MockTimer()

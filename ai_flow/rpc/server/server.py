@@ -35,8 +35,7 @@ from grpc._server import _serialize_response, _status, _abort, _Context, _unary_
 
 from ai_flow.common.util.db_util import session as db_session
 from ai_flow.rpc.client.aiflow_client import get_notification_client
-from ai_flow.rpc.protobuf import metadata_service_pb2_grpc, scheduler_service_pb2_grpc
-from ai_flow.rpc.service.metadata_service import MetadataService
+from ai_flow.rpc.protobuf import scheduler_service_pb2_grpc
 from ai_flow.rpc.service.scheduler_service import SchedulerService
 from ai_flow.scheduler.timer import Timer, timer_instance
 
@@ -53,7 +52,6 @@ class AIFlowServer(object):
         self.executor = Executor(futures.ThreadPoolExecutor(max_workers=10))
         self.server = grpc.server(self.executor)
         self.scheduler_service = SchedulerService()
-        metadata_service_pb2_grpc.add_MetadataServiceServicer_to_server(MetadataService(), self.server)
         scheduler_service_pb2_grpc.add_SchedulerServiceServicer_to_server(self.scheduler_service, self.server)
         self.server.add_insecure_port('[::]:{}'.format(config_constants.RPC_PORT))
         self._stop = threading.Event()

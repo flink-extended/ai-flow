@@ -21,7 +21,7 @@ from ai_flow.rpc.server.server import AIFlowServer
 from tests.test_utils.unittest_base import BaseUnitTest
 
 
-class TestMetadataService(BaseUnitTest):
+class TestWorkflowSnapshotRpc(BaseUnitTest):
     def setUp(self) -> None:
         super().setUp()
         with mock.patch("ai_flow.task_executor.common.task_executor_base.HeartbeatManager"):
@@ -50,8 +50,7 @@ class TestMetadataService(BaseUnitTest):
         snapshot3 = self.client.add_workflow_snapshot(workflow_meta.id, 'new_uri', b'111', 'new_md5')
         snapshots = self.client.list_workflow_snapshots(workflow_meta.namespace, workflow_meta.name)
         self.assertEqual(3, len(snapshots))
-        snapshots = self.client.list_workflow_snapshots(workflow_meta.namespace, workflow_meta.name,
-                                                        page_size=1, offset=2)
+        snapshots = self.client.list_workflow_snapshots(workflow_meta.namespace, workflow_meta.name, page_size=1, offset=2)
         self.assertEqual(1, len(snapshots))
         self.assertEqual('new_uri', snapshots[0].uri)
 

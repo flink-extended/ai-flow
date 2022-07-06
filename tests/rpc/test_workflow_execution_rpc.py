@@ -30,7 +30,7 @@ from tests.test_utils.mock_utils import MockNotificationClient, MockTimer
 from tests.test_utils.unittest_base import BaseUnitTest
 
 
-class TestWorkflowExecutionOperations(BaseUnitTest):
+class TestWorkflowExecutionRpc(BaseUnitTest):
     def setUp(self) -> None:
         super().setUp()
         with mock.patch("ai_flow.task_executor.common.task_executor_base.HeartbeatManager"):
@@ -90,6 +90,16 @@ class TestWorkflowExecutionOperations(BaseUnitTest):
                          self.notification_client.list_events()[0].event_key.name)
         self.assertEqual(json.dumps({'workflow_execution_id': 2}),
                          self.notification_client.list_events()[0].context)
+
+    def test_delete_workflow_execution(self):
+        self.prepare_workflow_execution(1, 1)
+        self.assertEqual(2, len(self.client.list_workflow_executions(
+            workflow_name=self.workflow_meta.name, namespace=self.workflow_meta.namespace)))
+        self.client.delete_workflow_execution(1)
+        self.assertEqual(1, len(self.client.list_workflow_executions(
+            workflow_name=self.workflow_meta.name, namespace=self.workflow_meta.namespace)))
+        with self.assertRaisesRegex(AIFlowException, r'not finished, cannot be removed'):
+            self.client.delete_workflow_execution(2)
 
     def test_get_workflow_execution(self):
         self.prepare_workflow_execution(1, 1)

@@ -32,7 +32,7 @@ from tests.test_utils.mock_utils import MockNotificationClient
 from tests.test_utils.unittest_base import BaseUnitTest
 
 
-class TestWorkflowOperations(BaseUnitTest):
+class TestWorkflowRpc(BaseUnitTest):
     def setUp(self) -> None:
         super().setUp()
         with mock.patch("ai_flow.task_executor.common.task_executor_base.HeartbeatManager"):
