@@ -18,12 +18,32 @@
 """Namespace command"""
 import json
 
-from ai_flow.sdk import operation
+from ai_flow import ops
+from ai_flow.cli.simple_table import AIFlowConsole
 
 
 def add_namespace(args):
-    """Uploads the workflow by workflow name."""
+    """Uploads the namespace by name."""
     properties = json.loads(args.properties) if args.properties is not None else {}
-    namespace = operation.add_namespace(name=args.namespace_name,
-                                        properties=properties)
-    print("Namespace: {}, submitted.".format(namespace.name))
+    namespace = ops.add_namespace(name=args.namespace_name, properties=properties)
+    print("Namespace: {}, created.".format(namespace.name))
+
+
+def delete_namespace(args):
+    """Deletes the namespace by name."""
+    ops.delete_namespace(args.namespace_name)
+    print("Namespace: {}, deleted.".format(args.namespace_name))
+
+
+def list_namespaces(args):
+    """Lists all namespaces."""
+    namespaces = ops.list_namespace()
+    AIFlowConsole().print_as(
+        data=sorted(namespaces, key=lambda w: w.name),
+        output=args.output,
+        mapper=lambda x: {
+            'name': x.name,
+            'properties': x.properties
+        },
+    )
+

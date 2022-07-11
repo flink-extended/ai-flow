@@ -19,7 +19,6 @@ import logging
 import os
 
 import pygments
-import yaml
 from pygments.lexers.configs import IniLexer
 
 from ai_flow.common.configuration.configuration import get_server_configuration

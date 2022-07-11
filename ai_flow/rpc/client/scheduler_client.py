@@ -51,7 +51,7 @@ class SchedulerClient(object):
         self.server_uri = server_uri
         channel = grpc.insecure_channel(server_uri)
         self.scheduler_stub = scheduler_service_pb2_grpc.SchedulerServiceStub(channel)
-        self._wait_for_server_ready(60)
+        self._wait_for_server_ready(10)
 
     def _wait_for_server_ready(self, timeout):
         channel = grpc.insecure_channel(self.server_uri)

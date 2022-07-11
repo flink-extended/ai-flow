@@ -34,9 +34,9 @@ class TestWorkflowScheduleRpc(BaseUnitTest):
         self.mock_timer = MockTimer()
         with mock.patch("ai_flow.task_executor.common.task_executor_base.HeartbeatManager"):
             with mock.patch('ai_flow.rpc.service.scheduler_service.get_notification_client', MockNotificationClient):
-                with mock.patch('ai_flow.rpc.server.server.get_notification_client'):
-                    self.server = AIFlowServer()
-                    self.server.run(is_block=False)
+                # with mock.patch('ai_flow.rpc.server.server.get_notification_client'):
+                self.server = AIFlowServer()
+                self.server.run(is_block=False)
         self.client = get_scheduler_client()
         self.workflow_meta = self.prepare_workflow()
 
@@ -52,16 +52,14 @@ class TestWorkflowScheduleRpc(BaseUnitTest):
         return workflow_meta
 
     def test_add_workflow_schedule(self):
-        with mock.patch('ai_flow.metadata.metadata_manager.timer_instance', self.mock_timer):
-            schedule = self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
-                                                         workflow_name=self.workflow_meta.name,
-                                                         expression='cron@*/1 * * * * * * utc')
+        schedule = self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
+                                                     workflow_name=self.workflow_meta.name,
+                                                     expression='cron@*/1 * * * * * * utc')
         self.assertEqual(1, schedule.id)
         self.assertEqual(self.workflow_meta.id, schedule.workflow_id)
         self.assertFalse(schedule.is_paused)
         self.assertEqual('cron@*/1 * * * * * * utc', schedule.expression)
         self.assertIsNotNone(schedule.create_time)
-        print(timer_instance.store.get_all_jobs())
         self.assertEqual(1, len(self.mock_timer.schedules))
         self.assertEqual('active', self.mock_timer.schedules[schedule.id])
 

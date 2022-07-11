@@ -61,7 +61,8 @@ class TestTimer(BaseUnitTest):
         timer = Timer(notification_client=self.notification_client)
         timer.start()
 
-        timer.add_workflow_schedule(schedule_id=1,
+        timer.add_workflow_schedule(workflow_id=None,
+                                    schedule_id=1,
                                     expression='cron@*/1 * * * * * * utc')
         self.session.commit()
         jobs = timer.store.get_all_jobs()
@@ -81,7 +82,8 @@ class TestTimer(BaseUnitTest):
         timer = Timer(notification_client=self.notification_client)
         timer.start()
 
-        timer.add_workflow_schedule(schedule_id=1,
+        timer.add_workflow_schedule(workflow_id=None,
+                                    schedule_id=1,
                                     expression='interval@0 0 0 1')
         self.session.commit()
         jobs = timer.store.get_all_jobs()
@@ -124,7 +126,7 @@ class TestTimer(BaseUnitTest):
         self.assertEqual(0, len(jobs))
         timer.shutdown()
 
-    def test_update_schedule_in_multi_threads2(self):
+    def test_update_schedule_in_multi_threads(self):
         timer = Timer(notification_client=self.notification_client)
         timer.start()
         timer.add_task_schedule(workflow_execution_id=1,
@@ -148,29 +150,6 @@ class TestTimer(BaseUnitTest):
         self.assertEqual(201, len(jobs))
         timer.shutdown()
 
-    def test_update_schedule_in_multi_threads(self):
-        timer = Timer(notification_client=self.notification_client)
-        timer.start()
-        timer.add_task_schedule(workflow_execution_id=1,
-                                task_name='task1',
-                                expression='interval@0 0 2 0')
-        jobs = timer.store.get_all_jobs()
-        self.assertEqual(1, len(jobs))
-
-        def update_schedule():
-            sub_timer = Timer(notification_client=None)
-            from apscheduler.schedulers.base import STATE_PAUSED
-            sub_timer.sc.state = STATE_PAUSED
-            sub_timer.add_task_schedule(workflow_execution_id=2,
-                                        task_name='task2',
-                                        expression='interval@0 0 1 0')
-        t = threading.Thread(target=update_schedule)
-        t.start()
-        t.join()
-        jobs = timer.store.get_all_jobs()
-        self.assertEqual(2, len(jobs))
-        time.sleep(80)
-        timer.shutdown()
 
 
 if __name__ == '__main__':

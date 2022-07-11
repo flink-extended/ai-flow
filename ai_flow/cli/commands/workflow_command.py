@@ -16,31 +16,58 @@
 # under the License.
 
 """Workflow command"""
-import sys
+from typing import List
 
 import cloudpickle
+from ai_flow.metadata.workflow import WorkflowMeta
+
+from ai_flow import ops
 from ai_flow.cli.simple_table import AIFlowConsole
-from ai_flow.sdk import operation
 
 
-def workflow_list(args):
+def upload_workflows(args):
+    """Uploads the workflow by workflow name."""
+    artifacts = args.files.split(',') if args.files is not None else None
+    workflows = ops.upload_workflows(workflow_file_path=args.file_path,
+                                     artifacts=artifacts)
+    for w in workflows:
+        print(f"Workflow: {w.namespace}.{w.name}, submitted.")
+
+
+def list_workflow(args):
     """Lists all the workflows."""
-    workflows = operation.list_workflows(sys.maxsize, 0)
+    namespace = args.namespace if args.namespace is not None else 'default'
+    workflows: List[WorkflowMeta] = []
+    offset = 0
+    while True:
+        res = ops.list_workflows(namespace=namespace,
+                                 limit=10,
+                                 offset=offset)
+        if res is None:
+            break
+        else:
+            offset += len(res)
+            workflows.extend(res)
     AIFlowConsole().print_as(
-        data=sorted(workflows, key=lambda w: w.workflow_name),
+        data=sorted(workflows, key=lambda w: w.id),
         output=args.output,
         mapper=lambda x: {
+            'id': x.id,
+            'workflow_name': x.name,
             'namespace': x.namespace,
-            'workflow_name': x.workflow_name,
-            'properties': x.properties,
-            'scheduling_rules': x.scheduling_rules
+            'create_time': x.create_time,
+            'update_time': x.update_time,
+            'is_enabled': x.is_enabled,
+            'event_offset': x.event_offset
         },
     )
 
 
-def workflow_show(args):
+def show_workflow(args):
     """Shows the workflow by workflow name."""
-    workflow = operation.get_workflow(args.namespace, args.workflow_name)
+    namespace = args.namespace if args.namespace is not None else 'default'
+    workflow = ops.get_workflow(workflow_name=args.workflow_name,
+                                namespace=namespace)
     if workflow is None:
         print("No such workflow.")
     else:
@@ -49,8 +76,13 @@ def workflow_show(args):
             data=[workflow],
             output=args.output,
             mapper=lambda x: {
+                'id': x.id,
+                'workflow_name': x.name,
                 'namespace': x.namespace,
-                'workflow_name': x.workflow_name,
+                'create_time': x.create_time,
+                'update_time': x.update_time,
+                'is_enabled': x.is_enabled,
+                'event_offset': x.event_offset,
                 'content': x.content,
                 'config': workflow_obj.config,
                 'tasks': workflow_obj.tasks,
@@ -59,11 +91,25 @@ def workflow_show(args):
         )
 
 
-def workflow_upload(args):
-    """Uploads the workflow by workflow name."""
+def delete_workflow(args):
     namespace = args.namespace if args.namespace is not None else 'default'
-    artifacts = args.files.split(',') if args.files is not None else None
-    workflows = operation.upload_workflows(workflow_file_path=args.file_path,
-                                           artifacts=artifacts)
-    for w in workflows:
-        print("Workflow: {}, submitted.".format(w.name))
+    workflow_name = args.workflow_name
+    ops.delete_workflow(workflow_name=workflow_name,
+                        namespace=namespace)
+    print(f"Workflow: {namespace}.{workflow_name} deleted.")
+
+
+def disable_workflow(args):
+    namespace = args.namespace if args.namespace is not None else 'default'
+    workflow_name = args.workflow_name
+    ops.disable_workflow(workflow_name=workflow_name,
+                         namespace=namespace)
+    print(f"Workflow: {namespace}.{workflow_name} disabled.")
+
+
+def enable_workflow(args):
+    namespace = args.namespace if args.namespace is not None else 'default'
+    workflow_name = args.workflow_name
+    ops.enable_workflow(workflow_name=workflow_name,
+                        namespace=namespace)
+    print(f"Workflow: {namespace}.{workflow_name} enabled.")
