@@ -56,6 +56,7 @@ class TaskExecutorBase(TaskExecutor):
         self.command_queue.put(command)
 
     def start(self):
+        logging.info("starting task executor.")
         self.command_queue = PersistentQueue(maxsize=MAX_QUEUE_SIZE)
         self.command_processor.start()
         self.heartbeat_manager = HeartbeatManager()
@@ -80,7 +81,7 @@ class TaskExecutorBase(TaskExecutor):
                     current_task = schedule_command.current_task_execution
                     new_task = schedule_command.new_task_execution
                     action = schedule_command.action
-                    logger.info("Running {} command on {}".format(action, current_task))
+                    logger.info("Running {} command on {}".format(action, new_task))
 
                     if action == TaskAction.START:
                         self.start_task_execution(new_task)
@@ -123,7 +124,7 @@ class TaskExecutorBase(TaskExecutor):
         if workflow_snapshot is None:
             raise AIFlowException(f'Cannot find workflow snapshot for task {key}.')
         return ["aiflow",
-                "task-execution",
+                "taskmanager",
                 "run",
                 str(workflow.name),
                 str(key.workflow_execution_id),

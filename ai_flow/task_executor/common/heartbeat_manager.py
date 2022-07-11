@@ -51,12 +51,13 @@ class HeartbeatManager(object):
         self.grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=5))
         heartbeat_service_pb2_grpc.add_HeartbeatServiceServicer_to_server(self.service, self.grpc_server)
         self.grpc_server.add_insecure_port('[::]:{}'.format(config_constants.INTERNAL_RPC_PORT))
-
+        self.notification_client = None
         self.heartbeat_check_thread = StoppableThread(target=self._check_heartbeat_timeout)
+
+    def start(self):
         self.notification_client = EmbeddedNotificationClient(
             server_uri=NOTIFICATION_SERVER_URI, namespace='task_status_change', sender='task_executor')
 
-    def start(self):
         self.grpc_server.start()
         logger.info('Heartbeat Service started.')
         self.heartbeat_check_thread.start()

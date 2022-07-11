@@ -14,10 +14,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import logging
+
 from notification_service.event import Event
 
 from ai_flow.common.configuration import config_constants
-from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.scheduler.dispatcher import Dispatcher
 from ai_flow.scheduler.worker import Worker
 from ai_flow.task_executor.task_executor import TaskExecutor, TaskExecutorFactory

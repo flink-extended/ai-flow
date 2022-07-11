@@ -23,9 +23,9 @@ from notification_service.server import NotificationServer
 from notification_service.service import NotificationService
 from notification_service.util import db
 
+from ai_flow import ops
 from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 from ai_flow.rpc.server.server import AIFlowServer
-from ai_flow.sdk import operation
 from tests.test_utils.unittest_base import BaseUnitTest
 
 
@@ -54,8 +54,8 @@ class OperationITest(BaseUnitTest):
         super().tearDown()
 
     def test_upload_workflows(self):
-        operation.upload_workflows(os.path.join(os.path.dirname(__file__), 'test_workflow.py'))
-        operation.start_workflow_execution(workflow_name='workflow1', namespace='default')
+        ops.upload_workflows(os.path.join(os.path.dirname(__file__), 'test_workflow.py'))
+        ops.start_workflow_execution(workflow_name='workflow1', namespace='default')
         time.sleep(20)
 
     def start_notification_server(self):

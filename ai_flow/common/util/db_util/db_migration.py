@@ -18,7 +18,6 @@ import os
 import logging
 import sqlalchemy
 
-
 _logger = logging.getLogger(__name__)
 
 

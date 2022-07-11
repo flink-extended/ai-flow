@@ -101,7 +101,8 @@ class TestSchedulingEventProcessor(UnitTestWithNamespace):
         schedule_meta = self.metadata_manager.add_workflow_schedule(workflow_id=self.workflow_meta.id,
                                                                     expression='interval@0 0 0 1')
         self.metadata_manager.flush()
-        event = PeriodicRunWorkflowEvent(schedule_id=schedule_meta.id)
+        event = PeriodicRunWorkflowEvent(workflow_id=schedule_meta.workflow_id,
+                                         schedule_id=schedule_meta.id)
         command = scheduling_event_processor.process(event)
         self.assertTrue(isinstance(command, WorkflowExecutionStartCommand))
         self.assertEquals(self.snapshot_meta.id, command.snapshot_id)

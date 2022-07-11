@@ -87,6 +87,10 @@ class Arg:
 ARG_NAMESPACE_NAME = Arg(('namespace_name',), help='The name of the namespace')
 ARG_WORKFLOW_NAME = Arg(('workflow_name',), help='The name of the workflow')
 ARG_WORKFLOW_EXECUTION_ID = Arg(('workflow_execution_id',), help='The id of the workflow execution')
+ARG_WORKFLOW_SCHEDULE_EXPRESSION = Arg(('expression',), help='The expression of the workflow schedule')
+ARG_WORKFLOW_SCHEDULE_ID = Arg(('workflow_schedule_id',), help='The id of the workflow schedule')
+ARG_WORKFLOW_TRIGGER_ID = Arg(('workflow_trigger_id',), help='The id of the workflow trigger')
+ARG_TASK_EXECUTION_ID = Arg(('task_execution_id',), help='The id of the task execution')
 ARG_TASK_NAME = Arg(('task_name',), help='The name of the task')
 ARG_SEQUENCE_NUM = Arg(('sequence_number',), help='The sequence number of the task execution')
 ARG_OPTION = Arg(('option',), help='The option name of the configuration', )
@@ -100,10 +104,6 @@ ARG_DB_VERSION = Arg(
     ("-v", "--version"),
     help='The version corresponding to the database',
     default='heads',
-)
-ARG_CONTEXT = Arg(
-    ('-c', '--context'),
-    help='The context of the workflow execution to start'
 )
 ARG_YES = Arg(
     ('-y', '--yes'),
@@ -139,7 +139,7 @@ OPTION_NAMESPACE = Arg(
 )
 OPTION_PROPERTIES = Arg(
     ("--properties",),
-    help="Properties of namespace",
+    help="Properties of namespace, which is a string in json format",
 )
 OPTION_HEARTBEAT_INTERVAL = Arg(
     ("--heartbeat-interval",),
@@ -201,85 +201,200 @@ WORKFLOW_COMMANDS = (
     ActionCommand(
         name='delete',
         help='Deletes all DB records related to the specified workflow.',
-        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_delete'),
-        args=(ARG_WORKFLOW_NAME, ARG_YES),
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.delete_workflow'),
+        args=(ARG_WORKFLOW_NAME, OPTION_NAMESPACE, ARG_YES),
     ),
     ActionCommand(
         name='list',
         help='Lists all the workflows.',
-        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_list'),
-        args=(ARG_OUTPUT,),
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.list_workflow'),
+        args=(OPTION_NAMESPACE, ARG_OUTPUT,),
     ),
     ActionCommand(
-        name='pause-scheduling',
-        help='Pauses a workflow scheduling.',
-        func=lazy_load_command('ai_flow.cli.commands.workflow_command.worfklow_pause_scheduling'),
-        args=(ARG_WORKFLOW_NAME,),
+        name='disable',
+        help='Disables the workflow so that no more executions would be scheduled.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.disable_workflow'),
+        args=(ARG_WORKFLOW_NAME, OPTION_NAMESPACE,),
     ),
     ActionCommand(
-        name='resume-scheduling',
-        help='Resumes a paused workflow scheduling.',
-        func=lazy_load_command('ai_flow.cli.commands.workflow_command.worfklow_resume_scheduling'),
-        args=(ARG_WORKFLOW_NAME,),
+        name='enable',
+        help='Enables the workflow which is disabled before.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.enable_workflow'),
+        args=(ARG_WORKFLOW_NAME, OPTION_NAMESPACE,),
     ),
     ActionCommand(
         name='show',
-        help='Shows the workflow by workflow name.',
-        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_show'),
-        args=(ARG_WORKFLOW_NAME, ARG_OUTPUT,),
+        help='Shows the details of the workflow by workflow name.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.show_workflow'),
+        args=(ARG_WORKFLOW_NAME, OPTION_NAMESPACE, ARG_OUTPUT,),
     ),
     ActionCommand(
         name='upload',
         help='Submits the workflow by workflow name.',
-        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_upload'),
+        func=lazy_load_command('ai_flow.cli.commands.workflow_command.upload_workflows'),
         args=(ARG_FILE_PATH, OPTION_FILES,),
     )
 )
 
+WORKFLOW_SCHEDULE_COMMANDS = (
+    ActionCommand(
+        name='add',
+        help='Creates a new schedule for workflow.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_schedule_command.add_workflow_schedule'),
+        args=(ARG_WORKFLOW_NAME, ARG_WORKFLOW_SCHEDULE_EXPRESSION, OPTION_NAMESPACE,),
+    ),
+    ActionCommand(
+        name='delete',
+        help='Deletes the workflow schedule by id.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_schedule_command.delete_workflow_schedule'),
+        args=(ARG_WORKFLOW_SCHEDULE_ID, ARG_YES,),
+    ),
+    ActionCommand(
+        name='delete-all',
+        help='Deletes all schedules of the workflow.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_schedule_command.delete_workflow_schedules'),
+        args=(ARG_WORKFLOW_NAME, OPTION_NAMESPACE, ARG_YES,),
+    ),
+    ActionCommand(
+        name='show',
+        help='Shows the details of the workflow schedule by id.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_schedule_command.show_workflow_schedule'),
+        args=(ARG_WORKFLOW_SCHEDULE_ID, ARG_OUTPUT,),
+    ),
+    ActionCommand(
+        name='list',
+        help='Lists all schedules of the workflow.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_schedule_command.list_workflow_schedules'),
+        args=(ARG_WORKFLOW_NAME, OPTION_NAMESPACE, ARG_OUTPUT,),
+    ),
+    ActionCommand(
+        name='pause',
+        help='Pauses the schedule and the workflow would not periodically execute anymore.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_schedule_command.pause_workflow_schedule'),
+        args=(ARG_WORKFLOW_SCHEDULE_ID,),
+    ),
+    ActionCommand(
+        name='resume',
+        help='Resumes the schedule which is paused before.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_schedule_command.resume_workflow_schedule'),
+        args=(ARG_WORKFLOW_SCHEDULE_ID,),
+    ),
+)
+
+WORKFLOW_TRIGGER_COMMANDS = (
+    ActionCommand(
+        name='delete',
+        help='Deletes the workflow event trigger by id.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_trigger_command.delete_workflow_trigger'),
+        args=(ARG_WORKFLOW_TRIGGER_ID, ARG_YES,),
+    ),
+    ActionCommand(
+        name='delete-all',
+        help='Deletes all event triggers of the workflow.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_trigger_command.delete_workflow_triggers'),
+        args=(ARG_WORKFLOW_NAME, OPTION_NAMESPACE, ARG_YES,),
+    ),
+    ActionCommand(
+        name='show',
+        help='Shows the details of the workflow event trigger by id.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_trigger_command.show_workflow_trigger'),
+        args=(ARG_WORKFLOW_TRIGGER_ID, ARG_OUTPUT,),
+    ),
+    ActionCommand(
+        name='list',
+        help='Lists all event triggers of the workflow.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_trigger_command.list_workflow_triggers'),
+        args=(ARG_WORKFLOW_NAME, OPTION_NAMESPACE, ARG_OUTPUT,),
+    ),
+    ActionCommand(
+        name='pause',
+        help='Pauses the event trigger by id.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_trigger_command.pause_workflow_trigger'),
+        args=(ARG_WORKFLOW_TRIGGER_ID,),
+    ),
+    ActionCommand(
+        name='resume',
+        help='Resumes the event trigger by id.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_trigger_command.resume_workflow_trigger'),
+        args=(ARG_WORKFLOW_TRIGGER_ID,),
+    ),
+)
 
 WORKFLOW_EXECUTION_COMMANDS = (
     ActionCommand(
         name='list',
-        help='Lists all workflow executions of the workflow by workflow name.',
-        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_list_executions'),
-        args=(ARG_WORKFLOW_NAME, ARG_OUTPUT),
+        help='Lists all workflow executions of the workflow.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_execution_command.list_workflow_executions'),
+        args=(ARG_WORKFLOW_NAME, OPTION_NAMESPACE, ARG_OUTPUT),
     ),
     ActionCommand(
         name='show',
-        help='Shows the workflow execution by workflow execution id.',
-        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_show_execution'),
+        help='Shows the details of the workflow execution by execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_execution_command.show_workflow_execution'),
         args=(ARG_WORKFLOW_EXECUTION_ID, ARG_OUTPUT),
     ),
     ActionCommand(
         name='start',
-        help='Starts a new workflow execution by workflow name.',
-        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_start_execution'),
-        args=(ARG_WORKFLOW_NAME, ARG_CONTEXT),
+        help='Starts a new execution of the workflow.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_execution_command.start_workflow_execution'),
+        args=(ARG_WORKFLOW_NAME, OPTION_NAMESPACE),
     ),
     ActionCommand(
         name='stop',
-        help='Stops the workflow execution by workflow execution id.',
-        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_stop_execution'),
+        help='Stops the workflow execution by execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_execution_command.stop_workflow_execution'),
         args=(ARG_WORKFLOW_EXECUTION_ID,),
     ),
     ActionCommand(
         name='stop-all',
-        help='Stops all workflow executions by workflow name.',
-        func=lazy_load_command('ai_flow.cli.commands.workflow_command.workflow_stop_executions'),
-        args=(ARG_WORKFLOW_NAME,),
+        help='Stops all workflow executions of the workflow.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_execution_command.stop_workflow_executions'),
+        args=(ARG_WORKFLOW_NAME, OPTION_NAMESPACE, ARG_YES,),
+    ),
+    ActionCommand(
+        name='delete',
+        help='Deletes the workflow execution by execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.workflow_execution_command.delete_workflow_execution'),
+        args=(ARG_WORKFLOW_EXECUTION_ID, ARG_YES,),
     ),
 )
 
 TASK_EXECUTION_COMMANDS = (
     ActionCommand(
+        name='list',
+        help='Lists all task executions of the workflow execution.',
+        func=lazy_load_command('ai_flow.cli.commands.task_execution_command.list_task_executions'),
+        args=(ARG_WORKFLOW_EXECUTION_ID, ARG_OUTPUT,),
+    ),
+    ActionCommand(
+        name='show',
+        help='Shows the details of the task execution by execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.task_execution_command.show_task_execution'),
+        args=(ARG_TASK_EXECUTION_ID, ARG_OUTPUT,),
+    ),
+    ActionCommand(
+        name='start',
+        help='Starts a new execution of the task of the workflow execution.',
+        func=lazy_load_command('ai_flow.cli.commands.task_execution_command.start_task_execution'),
+        args=(ARG_WORKFLOW_EXECUTION_ID, ARG_TASK_NAME,),
+    ),
+    ActionCommand(
+        name='stop',
+        help='Stops the task execution by execution id.',
+        func=lazy_load_command('ai_flow.cli.commands.task_execution_command.stop_task_execution'),
+        args=(ARG_WORKFLOW_EXECUTION_ID, ARG_TASK_NAME,),
+    ),
+)
+
+TASK_MANAGER_COMMANDS = (
+    ActionCommand(
         name='run',
-        help='Run specific task execution on the worker.',
-        func=lazy_load_command('ai_flow.cli.commands.task_execution_command.run_task_execution'),
+        help='Run the task manager for specific task execution on the worker.',
+        func=lazy_load_command('ai_flow.cli.commands.task_manager_command.run_task_manager'),
         args=(ARG_WORKFLOW_NAME, ARG_WORKFLOW_EXECUTION_ID, ARG_TASK_NAME, ARG_SEQUENCE_NUM, ARG_WORKFLOW_SNAPSHOT_PATH,
               ARG_NOTIFICATION_SERVER_URI, ARG_AIFLOW_SERVER_URI, OPTION_HEARTBEAT_INTERVAL)
     ),
 )
-
 
 SERVER_COMMANDS = (
     ActionCommand("start",
@@ -331,10 +446,23 @@ CONFIG_COMMANDS = (
 NAMESPACE_COMMANDS = (
     ActionCommand(
         name='add',
-        help='Add a namespace with specific name.',
+        help='Creates a namespace with specific name.',
         func=lazy_load_command('ai_flow.cli.commands.namespace_command.add_namespace'),
         args=(ARG_NAMESPACE_NAME, OPTION_PROPERTIES,),
     ),
+    ActionCommand(
+        name='delete',
+        help='Deletes a namespace with specific name.',
+        func=lazy_load_command('ai_flow.cli.commands.namespace_command.delete_namespace'),
+        args=(ARG_NAMESPACE_NAME, ARG_YES,),
+    ),
+    ActionCommand(
+        name='list',
+        help='Lists all the namespaces.',
+        func=lazy_load_command('ai_flow.cli.commands.namespace_command.list_namespaces'),
+        args=(ARG_OUTPUT,),
+    ),
+
 )
 
 ai_flow_commands: List[CLICommand] = [
@@ -361,22 +489,42 @@ ai_flow_commands: List[CLICommand] = [
     ),
     GroupCommand(
         name='workflow',
-        help='Manages workflows of the given project',
+        help='Workflow related operations',
         subcommands=WORKFLOW_COMMANDS,
     ),
     GroupCommand(
+        name='workflow-schedule',
+        help='Manages the periodic schedules of the workflow',
+        subcommands=WORKFLOW_SCHEDULE_COMMANDS,
+    ),
+    GroupCommand(
+        name='workflow-trigger',
+        help='Manages the event triggers of the workflow',
+        subcommands=WORKFLOW_TRIGGER_COMMANDS,
+    ),
+    GroupCommand(
       name='namespace',
-      help='Manages namespaces',
+      help='Namespace related operations',
       subcommands=NAMESPACE_COMMANDS,
     ),
     GroupCommand(
+        name='workflow-execution',
+        help='Workflow execution related operations',
+        subcommands=WORKFLOW_EXECUTION_COMMANDS,
+    ),
+    GroupCommand(
         name='task-execution',
-        help='Manages task executions of AIFlow',
+        help='Task execution related operations',
         subcommands=TASK_EXECUTION_COMMANDS,
     ),
     GroupCommand(
+        name='taskmanager',
+        help='Starts a taskmanager to execute a task execution',
+        subcommands=TASK_MANAGER_COMMANDS,
+    ),
+    GroupCommand(
         name="config",
-        help='Manage configuration',
+        help='Manages configuration',
         subcommands=CONFIG_COMMANDS
     ),
 ]

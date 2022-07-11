@@ -16,7 +16,6 @@
 from unittest import mock
 
 import cloudpickle
-from grpc._channel import _InactiveRpcError
 from notification_service.event import EventKey
 
 from ai_flow.common.exception.exceptions import AIFlowException
@@ -35,9 +34,8 @@ class TestWorkflowTriggerRpc(BaseUnitTest):
         super().setUp()
         with mock.patch("ai_flow.task_executor.common.task_executor_base.HeartbeatManager"):
             with mock.patch('ai_flow.rpc.service.scheduler_service.get_notification_client', MockNotificationClient):
-                with mock.patch('ai_flow.rpc.server.server.get_notification_client'):
-                    self.server = AIFlowServer()
-                    self.server.run(is_block=False)
+                self.server = AIFlowServer()
+                self.server.run(is_block=False)
         self.client = get_scheduler_client()
         self.rule_extractor = self.server.scheduler_service.scheduler.dispatcher.rule_extractor
         self.workflow_meta = self.prepare_workflow()
@@ -150,11 +148,11 @@ class TestWorkflowTriggerRpc(BaseUnitTest):
         print(self.rule_extractor.event_workflow_index.workflow_rule_index)
         self.rule_extractor.workflow_trigger_dict.clear()
         print(self.rule_extractor.event_workflow_index.workflow_rule_index)
-        with self.assertRaises(_InactiveRpcError):
+        with self.assertRaises(AIFlowException):
             self.assertTrue(self.client.delete_workflow_trigger(trigger.id))
         self.assertEqual(2, len(self.client.list_workflow_triggers(namespace=self.workflow_meta.namespace,
                                                                    workflow_name=self.workflow_meta.name)))
-        with self.assertRaises(_InactiveRpcError):
+        with self.assertRaises(AIFlowException):
             self.assertTrue(self.client.delete_workflow_triggers(namespace=self.workflow_meta.namespace,
                                                                  workflow_name=self.workflow_meta.name))
         self.assertEqual(2, len(self.client.list_workflow_triggers(namespace=self.workflow_meta.namespace,

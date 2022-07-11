@@ -14,6 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import logging
 import threading
 
 from apscheduler.job import Job
@@ -23,7 +24,6 @@ from apscheduler.triggers.base import BaseTrigger
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.util import datetime_to_utc_timestamp, utc_timestamp_to_datetime
-from notification_service.notification_client import NotificationClient
 
 from ai_flow.common.util.db_util.session import create_session
 from ai_flow.metadata.timer import TimerMeta
@@ -42,32 +42,29 @@ except ImportError:  # pragma: nocover
     raise ImportError('SQLAlchemyJobStore requires SQLAlchemy installed')
 
 
-def send_start_workflow_event(client: NotificationClient, schedule_id):
-    client.send_event(PeriodicRunWorkflowEvent(schedule_id=schedule_id))
+def send_start_workflow_event(workflow_id, schedule_id):
+    notification_client = get_notification_client(namespace='Timer', sender='Timer')
+    try:
+        notification_client.send_event(PeriodicRunWorkflowEvent(workflow_id=workflow_id,
+                                                                schedule_id=schedule_id))
+    finally:
+        notification_client.close()
 
 
-def send_start_task_event(client: NotificationClient, workflow_execution_id, task_name):
-    client.send_event(PeriodicRunTaskEvent(workflow_execution_id=workflow_execution_id,
-                                           task_name=task_name))
+def send_start_task_event(workflow_execution_id, task_name):
+    notification_client = get_notification_client(namespace='Timer', sender='Timer')
+    try:
+        notification_client.send_event(PeriodicRunTaskEvent(
+            workflow_execution_id=workflow_execution_id, task_name=task_name))
+    finally:
+        notification_client.close()
 
 
 def build_trigger(expression: str) -> BaseTrigger:
     index = expression.index('@')
     head = expression[: index]
     if 'cron' == head:
-        cron_items = expression[index+1:].split(' ')
-        if len(cron_items) == 8:
-            time_zone = cron_items[7]
-        else:
-            time_zone = None
-        return CronTrigger(second=cron_items[0],
-                           minute=cron_items[1],
-                           hour=cron_items[2],
-                           day=cron_items[3],
-                           month=cron_items[4],
-                           day_of_week=cron_items[5],
-                           year=cron_items[6],
-                           timezone=time_zone)
+        return CronTrigger.from_crontab(expression[index+1:])
     elif 'interval' == head:
         interval_items = expression[index + 1:].split(' ')
         if len(interval_items) != 4:
@@ -228,9 +225,8 @@ class TimerJobStore(BaseJobStore):
 
 
 class Timer(object):
-    def __init__(self, notification_client: NotificationClient):
+    def __init__(self):
         super().__init__()
-        self.notification_client = notification_client
         self.store = TimerJobStore()
         jobstores = {
             'default': self.store
@@ -244,9 +240,6 @@ class Timer(object):
     def shutdown(self):
         self.sc.shutdown()
 
-    def set_notification_client(self, notification_client):
-        self.notification_client = notification_client
-
     @classmethod
     def generate_workflow_job_id(cls, schedule_id):
         return 'workflow:{}'.format(schedule_id)
@@ -255,15 +248,15 @@ class Timer(object):
     def generate_task_job_id(cls, workflow_execution_id, task_name):
         return 'task:{}:{}'.format(workflow_execution_id, task_name)
 
-    def add_workflow_schedule(self, schedule_id,  expression):
+    def add_workflow_schedule(self, workflow_id, schedule_id,  expression):
         self.sc.add_job(id=self.generate_workflow_job_id(schedule_id=schedule_id),
-                        func=send_start_workflow_event, args=(self.notification_client, schedule_id),
+                        func=send_start_workflow_event, args=(workflow_id, schedule_id,),
                         trigger=build_trigger(expression=expression))
 
-    def add_workflow_schedule_with_session(self, session, schedule_id,  expression):
+    def add_workflow_schedule_with_session(self, session, workflow_id, schedule_id, expression):
         with self._lock:
             self.store.set_session(session)
-            self.add_workflow_schedule(schedule_id, expression)
+            self.add_workflow_schedule(workflow_id, schedule_id, expression)
             self.store.unset_session()
 
     def delete_workflow_schedule(self, schedule_id):
@@ -300,8 +293,7 @@ class Timer(object):
 
     def add_task_schedule(self, workflow_execution_id, task_name, expression):
         self.sc.add_job(id=self.generate_task_job_id(workflow_execution_id=workflow_execution_id, task_name=task_name),
-                        func=send_start_task_event, args=(self.notification_client,
-                                                          workflow_execution_id,
+                        func=send_start_task_event, args=(workflow_execution_id,
                                                           task_name),
                         trigger=build_trigger(expression=expression))
 
@@ -324,4 +316,4 @@ class Timer(object):
             self.store.unset_session()
 
 
-timer_instance = Timer(notification_client=None)
+timer_instance = Timer()

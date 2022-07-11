@@ -16,7 +16,6 @@
 from unittest import mock
 
 import cloudpickle
-from grpc._channel import _InactiveRpcError
 from notification_service.event import EventKey
 
 from ai_flow.common.exception.exceptions import AIFlowException
@@ -37,9 +36,8 @@ class TestWorkflowRpc(BaseUnitTest):
         super().setUp()
         with mock.patch("ai_flow.task_executor.common.task_executor_base.HeartbeatManager"):
             with mock.patch('ai_flow.rpc.service.scheduler_service.get_notification_client', MockNotificationClient):
-                with mock.patch('ai_flow.rpc.server.server.get_notification_client', MockNotificationClient):
-                    self.server = AIFlowServer()
-                    self.server.run(is_block=False)
+                self.server = AIFlowServer()
+                self.server.run(is_block=False)
         self.client = get_scheduler_client()
         self.rule_extractor = self.server.scheduler_service.scheduler.dispatcher.rule_extractor
 
@@ -77,7 +75,7 @@ class TestWorkflowRpc(BaseUnitTest):
 
     def test_rollback_adding_invalid_workflow(self):
         self.client.add_namespace('default')
-        with self.assertRaises(_InactiveRpcError):
+        with self.assertRaises(AIFlowException):
             self.client.add_workflow('workflow', 'default', 'mock_content', b'invalid')
         self.assertEqual('default', self.client.get_namespace('default').name)
         self.assertIsNone(self.client.get_workflow('workflow', 'namespace'))
@@ -115,7 +113,7 @@ class TestWorkflowRpc(BaseUnitTest):
 
     def test_rollback_updating_workflow(self):
         _, workflow = self.prepare_workflow('workflow1')
-        with self.assertRaises(_InactiveRpcError):
+        with self.assertRaises(AIFlowException):
             self.client.update_workflow(workflow.name, workflow.namespace, 'new_content', b'invalid', True)
         workflow_meta = self.client.get_workflow(workflow.name, workflow.namespace)
         self.assertTrue(isinstance(cloudpickle.loads(workflow_meta.workflow_object), Workflow))
@@ -141,7 +139,7 @@ class TestWorkflowRpc(BaseUnitTest):
     def test_rollback_disable_workflow(self):
         _, workflow = self.prepare_workflow('workflow1')
         self.rule_extractor.workflow_dict = None
-        with self.assertRaises(_InactiveRpcError):
+        with self.assertRaises(AIFlowException):
             self.client.disable_workflow(workflow.name, workflow.namespace)
         self.assertTrue(self.client.get_workflow(workflow.name, workflow.namespace).is_enabled)
 
@@ -150,7 +148,7 @@ class TestWorkflowRpc(BaseUnitTest):
         self.client.disable_workflow(workflow.name, workflow.namespace)
         self.assertFalse(self.client.get_workflow(workflow.name, workflow.namespace).is_enabled)
         self.rule_extractor.workflow_dict = None
-        with self.assertRaises(_InactiveRpcError):
+        with self.assertRaises(AIFlowException):
             self.client.enable_workflow(workflow.name, workflow.namespace)
         self.assertFalse(self.client.get_workflow(workflow.name, workflow.namespace).is_enabled)
 

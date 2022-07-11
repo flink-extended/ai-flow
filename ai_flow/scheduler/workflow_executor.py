@@ -18,6 +18,7 @@ from typing import Optional, Union
 
 import cloudpickle
 
+from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.metadata.metadata_manager import MetadataManager, Filters, FilterIn
 from ai_flow.model.action import TaskAction
 from ai_flow.model.status import TASK_ALIVE_SET, WorkflowStatus
@@ -40,6 +41,8 @@ class WorkflowExecutor(object):
         """
         if isinstance(schedule_cmd, WorkflowExecutionStartCommand):
             snapshot_meta = self.metadata_manager.get_workflow_snapshot(snapshot_id=schedule_cmd.snapshot_id)
+            if not snapshot_meta:
+                raise AIFlowException(f"Cannot find workflow snapshot with id: {schedule_cmd.snapshot_id}")
             workflow_execution_meta = self.metadata_manager.add_workflow_execution(workflow_id=snapshot_meta.workflow_id,
                                                                                    run_type=schedule_cmd.run_type.value,
                                                                                    snapshot_id=schedule_cmd.snapshot_id)
