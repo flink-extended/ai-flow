@@ -406,7 +406,8 @@ class MetadataManager(object):
                                                       expression=expression)
         self.session.add(workflow_schedule_meta)
         self.flush()
-        timer_instance.add_workflow_schedule_with_session(self.session, workflow_schedule_meta.id, expression)
+        timer_instance.add_workflow_schedule_with_session(self.session, workflow_schedule_meta.workflow_id,
+                                                          workflow_schedule_meta.id, expression)
         return workflow_schedule_meta
 
     def get_workflow_schedule(self, schedule_id) -> WorkflowScheduleMeta:

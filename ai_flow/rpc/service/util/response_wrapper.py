@@ -38,6 +38,8 @@ def catch_exception(func):
             return func(*args, **kwargs)
         except AIFlowRpcServerException as e:
             return Response(return_code=str(e.error_code), error_msg=e.error_msg)
+        except Exception as ex:
+            return Response(return_code=str(INTERNAL_ERROR), error_msg=str(ex))
 
     return wrapper
 

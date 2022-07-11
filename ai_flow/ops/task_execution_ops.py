@@ -25,8 +25,8 @@ from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 logger = logging.getLogger(__name__)
 
 
-def start_workflow_execution(workflow_execution_id: int,
-                             task_name: str):
+def start_task_execution(workflow_execution_id: int,
+                         task_name: str):
     """
     Asynchronously start a new execution of the task.
 
@@ -85,5 +85,5 @@ def list_task_executions(workflow_execution_id: int,
     """
     client = get_scheduler_client()
     return client.list_task_executions(workflow_execution_id=workflow_execution_id,
-                                       limit=limit,
+                                       page_size=limit,
                                        offset=offset)

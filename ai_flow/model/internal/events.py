@@ -183,12 +183,14 @@ class PeriodicRunWorkflowEvent(SchedulingEvent):
     """PeriodicRunWorkflowEvent is an event of periodically starting a workflow."""
 
     def __init__(self,
+                 workflow_id: int,
                  schedule_id: int):
         """
         :param schedule_id: The unique id of workflow schedule.
         """
         super().__init__(SchedulingEventType.PERIODIC_RUN_WORKFLOW, None)
-        self.context = json.dumps({EventContextConstant.WORKFLOW_SCHEDULE_ID: schedule_id})
+        self.context = json.dumps({EventContextConstant.WORKFLOW_ID: workflow_id,
+                                   EventContextConstant.WORKFLOW_SCHEDULE_ID: schedule_id})
 
 
 class TaskStatusEvent(SchedulingEvent):

@@ -13,7 +13,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import threading
+import logging
 from typing import List
 
 from notification_service.event import Event
@@ -23,9 +23,6 @@ from ai_flow.model.status import WORKFLOW_ALIVE_SET, WorkflowStatus, WORKFLOW_FI
 from ai_flow.rpc.client.aiflow_client import get_notification_client
 from ai_flow.rpc.server.exceptions import AIFlowRpcServerException
 from ai_flow.rpc.service.util.meta_to_proto import MetaToProto
-from notification_service.embedded_notification_client import EmbeddedNotificationClient
-
-from ai_flow.common.configuration import config_constants
 from ai_flow.common.result import BaseResult, RetCode
 from ai_flow.model.internal.events import StartWorkflowExecutionEvent, StopWorkflowExecutionEvent, \
     StartTaskExecutionEvent, StopTaskExecutionEvent
@@ -56,6 +53,7 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
         self.event_listener = None
 
     def start(self):
+        logging.info('Starting scheduler service.')
         self.scheduler.start()
         self.notification_client = get_notification_client(namespace='scheduler', sender='scheduler')
         self.event_listener = self.notification_client.register_listener(
@@ -133,6 +131,8 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
     def addWorkflow(self, request, context):
         with create_session() as session:
             metadata_manager = MetadataManager(session)
+            if metadata_manager.get_namespace(request.namespace) is None:
+                raise AIFlowRpcServerException(f'Namespace {request.namespace} not exists')
             workflow = metadata_manager.add_workflow(namespace=request.namespace,
                                                      name=request.name,
                                                      content=request.content,
