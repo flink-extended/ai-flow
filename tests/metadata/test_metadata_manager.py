@@ -215,10 +215,10 @@ class TestMetadataManager(unittest.TestCase):
         self.metadata_manager.commit()
         for i in range(3):
             self.metadata_manager.add_workflow_schedule(workflow_id=workflow_meta.id,
-                                                        expression='cron@*/1 * * * * * * utc')
+                                                        expression='cron@*/1 * * * *')
             self.metadata_manager.commit()
         meta = self.metadata_manager.get_workflow_schedule(1)
-        self.assertEqual('cron@*/1 * * * * * * utc', meta.expression)
+        self.assertEqual('cron@*/1 * * * *', meta.expression)
         metas = self.metadata_manager.list_workflow_schedules(workflow_id=workflow_meta.id)
         self.assertEqual(3, len(metas))
 
