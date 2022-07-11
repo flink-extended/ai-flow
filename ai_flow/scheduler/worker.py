@@ -90,9 +90,8 @@ class Worker(threading.Thread):
             workflow_id = context[EventContextConstant.WORKFLOW_ID]
             metadata_manager.set_workflow_event_offset(workflow_id=workflow_id, event_offset=event.offset)
         elif SchedulingEventType.PERIODIC_RUN_WORKFLOW == scheduling_event_type:
-            schedule_id = context[EventContextConstant.WORKFLOW_SCHEDULE_ID]
-            schedule_meta = metadata_manager.get_workflow_schedule(schedule_id=schedule_id)
-            metadata_manager.set_workflow_event_offset(workflow_id=schedule_meta.workflow_id,
+            workflow_id = context[EventContextConstant.WORKFLOW_ID]
+            metadata_manager.set_workflow_event_offset(workflow_id=workflow_id,
                                                        event_offset=event.offset)
         elif scheduling_event_type in HAS_WORKFLOW_EXECUTION_ID_SET:
             workflow_execution_id = context[EventContextConstant.WORKFLOW_EXECUTION_ID]
@@ -137,7 +136,7 @@ class Worker(threading.Thread):
                     metadata_manager.commit()
                 except Exception as e:
                     session.rollback()
-                    logging.exception("Can not handle event {}, exception {}".format(str(event), str(e)))
+                    logging.exception("Can not handle event: {}, exception: {}".format(str(event), str(e)))
                 finally:
                     self.input_queue.task_done()
 

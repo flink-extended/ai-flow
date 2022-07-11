@@ -204,3 +204,11 @@ def dumps(obj: Any) -> Text:
 def loads(s: Text) -> Any:
     """Loads a JSON into an object with Jsonable decoding."""
     return json.loads(s, cls=_DefaultDecoder)
+
+
+def is_valid_json(string) -> bool:
+    try:
+        json.loads(string)
+    except ValueError:
+        return False
+    return True

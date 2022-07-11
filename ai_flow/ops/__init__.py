@@ -17,7 +17,7 @@
 # under the License.
 #
 from .namespace_ops import add_namespace, get_namespace, list_namespace, delete_namespace, update_namespace
-from .task_execution_ops import start_workflow_execution, stop_task_execution, get_task_execution, list_task_executions
+from .task_execution_ops import start_task_execution, stop_task_execution, get_task_execution, list_task_executions
 from .workflow_execution_ops import start_workflow_execution, stop_workflow_execution, stop_workflow_executions,\
     get_workflow_execution, list_workflow_executions, delete_workflow_execution
 from .workflow_ops import upload_workflows, get_workflow, list_workflows, delete_workflow, disable_workflow, \

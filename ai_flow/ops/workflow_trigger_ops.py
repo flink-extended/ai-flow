@@ -71,7 +71,7 @@ def list_workflow_triggers(workflow_name: str,
     client = get_scheduler_client()
     return client.list_workflow_triggers(namespace=namespace,
                                          workflow_name=workflow_name,
-                                         limit=limit,
+                                         page_size=limit,
                                          offset=offset)
 
 

@@ -14,16 +14,12 @@
 # under the License.
 #
 from unittest import mock
-
 import cloudpickle
-from grpc._channel import _InactiveRpcError
-
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.operators.bash import BashOperator
 from ai_flow.model.workflow import Workflow
 from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 from ai_flow.rpc.server.server import AIFlowServer
-from ai_flow.scheduler.timer import timer_instance
 from tests.test_utils.mock_utils import MockNotificationClient, MockTimer
 from tests.test_utils.unittest_base import BaseUnitTest
 
@@ -34,9 +30,8 @@ class TestWorkflowScheduleRpc(BaseUnitTest):
         self.mock_timer = MockTimer()
         with mock.patch("ai_flow.task_executor.common.task_executor_base.HeartbeatManager"):
             with mock.patch('ai_flow.rpc.service.scheduler_service.get_notification_client', MockNotificationClient):
-                with mock.patch('ai_flow.rpc.server.server.get_notification_client'):
-                    self.server = AIFlowServer()
-                    self.server.run(is_block=False)
+                self.server = AIFlowServer()
+                self.server.run(is_block=False)
         self.client = get_scheduler_client()
         self.workflow_meta = self.prepare_workflow()
 
@@ -55,18 +50,17 @@ class TestWorkflowScheduleRpc(BaseUnitTest):
         with mock.patch('ai_flow.metadata.metadata_manager.timer_instance', self.mock_timer):
             schedule = self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
                                                          workflow_name=self.workflow_meta.name,
-                                                         expression='cron@*/1 * * * * * * utc')
+                                                         expression='cron@*/1 * * * *')
         self.assertEqual(1, schedule.id)
         self.assertEqual(self.workflow_meta.id, schedule.workflow_id)
         self.assertFalse(schedule.is_paused)
-        self.assertEqual('cron@*/1 * * * * * * utc', schedule.expression)
+        self.assertEqual('cron@*/1 * * * *', schedule.expression)
         self.assertIsNotNone(schedule.create_time)
-        print(timer_instance.store.get_all_jobs())
         self.assertEqual(1, len(self.mock_timer.schedules))
         self.assertEqual('active', self.mock_timer.schedules[schedule.id])
 
     def test_add_invalid_workflow_schedule(self):
-        with self.assertRaises(_InactiveRpcError):
+        with self.assertRaises(AIFlowException):
             self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
                                               workflow_name=self.workflow_meta.name,
                                               expression='invalid')
@@ -77,7 +71,7 @@ class TestWorkflowScheduleRpc(BaseUnitTest):
         with mock.patch('ai_flow.metadata.metadata_manager.timer_instance', self.mock_timer):
             schedule = self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
                                                          workflow_name=self.workflow_meta.name,
-                                                         expression='cron@*/1 * * * * * * utc')
+                                                         expression='cron@*/1 * * * *')
         retrieved_schedule = self.client.get_workflow_schedule(schedule.id)
         self.assertEqual(schedule.id, retrieved_schedule.id)
         self.assertEqual(schedule.workflow_id, retrieved_schedule.workflow_id)
@@ -96,24 +90,24 @@ class TestWorkflowScheduleRpc(BaseUnitTest):
         with mock.patch('ai_flow.metadata.metadata_manager.timer_instance', self.mock_timer):
             self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
                                               workflow_name=self.workflow_meta.name,
-                                              expression='cron@*/1 * * * * * * utc')
+                                              expression='cron@*/1 * * * *')
             self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
                                               workflow_name=self.workflow_meta.name,
-                                              expression='cron@*/2 * * * * * * utc')
+                                              expression='cron@*/2 * * * *')
         schedules = self.client.list_workflow_schedules(self.workflow_meta.namespace, self.workflow_meta.name)
         self.assertEqual(2, len(schedules))
-        self.assertEqual('cron@*/1 * * * * * * utc', schedules[0].expression)
-        self.assertEqual('cron@*/2 * * * * * * utc', schedules[1].expression)
+        self.assertEqual('cron@*/1 * * * *', schedules[0].expression)
+        self.assertEqual('cron@*/2 * * * *', schedules[1].expression)
 
         second = self.client.list_workflow_schedules(self.workflow_meta.namespace, self.workflow_meta.name,
                                                      page_size=1, offset=1)[0]
-        self.assertEqual('cron@*/2 * * * * * * utc', second.expression)
+        self.assertEqual('cron@*/2 * * * *', second.expression)
 
     def test_delete_workflow_schedule(self):
         with mock.patch('ai_flow.metadata.metadata_manager.timer_instance', self.mock_timer):
             schedule = self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
                                                          workflow_name=self.workflow_meta.name,
-                                                         expression='cron@*/1 * * * * * * utc')
+                                                         expression='cron@*/1 * * * *')
             self.assertEqual(1, len(self.client.list_workflow_schedules(self.workflow_meta.namespace,
                                                                         self.workflow_meta.name)))
             self.assertEqual(1, len(self.mock_timer.schedules))
@@ -130,10 +124,10 @@ class TestWorkflowScheduleRpc(BaseUnitTest):
         with mock.patch('ai_flow.metadata.metadata_manager.timer_instance', self.mock_timer):
             self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
                                               workflow_name=self.workflow_meta.name,
-                                              expression='cron@*/1 * * * * * * utc')
+                                              expression='cron@*/1 * * * *')
             self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
                                               workflow_name=self.workflow_meta.name,
-                                              expression='cron@*/2 * * * * * * utc')
+                                              expression='cron@*/2 * * * *')
             schedules = self.client.list_workflow_schedules(self.workflow_meta.namespace, self.workflow_meta.name)
             self.assertEqual(2, len(schedules))
             self.assertEqual(2, len(self.mock_timer.schedules))
@@ -146,16 +140,16 @@ class TestWorkflowScheduleRpc(BaseUnitTest):
         with mock.patch('ai_flow.metadata.metadata_manager.timer_instance', self.mock_timer):
             schedule = self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
                                                          workflow_name=self.workflow_meta.name,
-                                                         expression='cron@*/1 * * * * * * utc')
+                                                         expression='cron@*/1 * * * *')
             self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
                                               workflow_name=self.workflow_meta.name,
-                                              expression='cron@*/2 * * * * * * utc')
+                                              expression='cron@*/2 * * * *')
             self.mock_timer.schedules.clear()
-            with self.assertRaises(_InactiveRpcError):
+            with self.assertRaises(AIFlowException):
                 self.assertTrue(self.client.delete_workflow_schedule(schedule.id))
             self.assertEqual(2, len(self.client.list_workflow_schedules(namespace=self.workflow_meta.namespace,
                                                                         workflow_name=self.workflow_meta.name)))
-            with self.assertRaises(_InactiveRpcError):
+            with self.assertRaises(AIFlowException):
                 self.assertTrue(self.client.delete_workflow_schedules(namespace=self.workflow_meta.namespace,
                                                                       workflow_name=self.workflow_meta.name))
             self.assertEqual(2, len(self.client.list_workflow_schedules(namespace=self.workflow_meta.namespace,
@@ -165,7 +159,7 @@ class TestWorkflowScheduleRpc(BaseUnitTest):
         with mock.patch('ai_flow.metadata.metadata_manager.timer_instance', self.mock_timer):
             schedule = self.client.add_workflow_schedule(namespace=self.workflow_meta.namespace,
                                                          workflow_name=self.workflow_meta.name,
-                                                         expression='cron@*/1 * * * * * * utc')
+                                                         expression='cron@*/1 * * * *')
             self.assertFalse(schedule.is_paused)
             self.assertEqual('active', self.mock_timer.schedules[schedule.id])
 

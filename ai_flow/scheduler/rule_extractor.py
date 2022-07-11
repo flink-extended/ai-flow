@@ -24,6 +24,7 @@ from typing import List, Dict, Set, Tuple
 from notification_service.event import Event, EventKey
 
 from ai_flow.common.util.db_util.session import create_session
+from ai_flow.common.util.json_utils import is_valid_json
 from ai_flow.metadata.metadata_manager import MetadataManager, Filters, FilterEqual
 from ai_flow.metadata.workflow_event_trigger import WorkflowEventTriggerMeta
 from ai_flow.model.internal.conditions import match_events
@@ -39,7 +40,7 @@ EventTuple = Tuple[str, str, str, str]
 
 def parse_workflow_execution_id(context):
     """Parse the workflow execution id from the context"""
-    if context is not None:
+    if context is not None and is_valid_json(context):
         context_dict = json.loads(context)
         if EventContextConstant.WORKFLOW_EXECUTION_ID in context_dict:
             return context_dict[EventContextConstant.WORKFLOW_EXECUTION_ID]

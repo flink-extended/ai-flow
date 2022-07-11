@@ -85,9 +85,8 @@ class SchedulingEventProcessor(object):
                                                             task_name=task_execution.task_name,
                                                             seq_num=task_execution.sequence_number))])
         elif SchedulingEventType.PERIODIC_RUN_WORKFLOW == scheduling_event_type:
-            schedule_id = context[EventContextConstant.WORKFLOW_SCHEDULE_ID]
-            workflow_schedule = self.metadata_manager.get_workflow_schedule(schedule_id=schedule_id)
-            snapshot = self.metadata_manager.get_latest_snapshot(workflow_id=workflow_schedule.workflow_id)
+            workflow_id = context[EventContextConstant.WORKFLOW_ID]
+            snapshot = self.metadata_manager.get_latest_snapshot(workflow_id=workflow_id)
             return WorkflowExecutionStartCommand(snapshot_id=snapshot.id,
                                                  run_type=ExecutionType.PERIODIC)
         elif SchedulingEventType.PERIODIC_RUN_TASK == scheduling_event_type:
