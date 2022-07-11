@@ -58,12 +58,12 @@ class TestTimer(BaseUnitTest):
         self.notification_client = MockNotificationClient()
 
     def test_workflow_schedule_cron_expression(self):
-        timer = Timer(notification_client=self.notification_client)
+        timer = Timer()
         timer.start()
 
         timer.add_workflow_schedule(workflow_id=None,
                                     schedule_id=1,
-                                    expression='cron@*/1 * * * * * * utc')
+                                    expression='cron@*/1 * * * *')
         self.session.commit()
         jobs = timer.store.get_all_jobs()
         self.assertEqual(1, len(jobs))
@@ -79,7 +79,7 @@ class TestTimer(BaseUnitTest):
         timer.shutdown()
 
     def test_workflow_schedule_interval_expression(self):
-        timer = Timer(notification_client=self.notification_client)
+        timer = Timer()
         timer.start()
 
         timer.add_workflow_schedule(workflow_id=None,
@@ -95,12 +95,12 @@ class TestTimer(BaseUnitTest):
         timer.shutdown()
 
     def test_task_schedule_cron_expression(self):
-        timer = Timer(notification_client=self.notification_client)
+        timer = Timer()
         timer.start()
 
         timer.add_task_schedule(workflow_execution_id=1,
                                 task_name='task',
-                                expression='cron@*/1 * * * * * * utc')
+                                expression='cron@*/1 * * * *')
         self.session.commit()
         jobs = timer.store.get_all_jobs()
         self.assertEqual(1, len(jobs))
@@ -111,7 +111,7 @@ class TestTimer(BaseUnitTest):
         timer.shutdown()
 
     def test_task_schedule_interval_expression(self):
-        timer = Timer(notification_client=self.notification_client)
+        timer = Timer()
         timer.start()
 
         timer.add_task_schedule(workflow_execution_id=1,
@@ -127,7 +127,7 @@ class TestTimer(BaseUnitTest):
         timer.shutdown()
 
     def test_update_schedule_in_multi_threads(self):
-        timer = Timer(notification_client=self.notification_client)
+        timer = Timer()
         timer.start()
         timer.add_task_schedule(workflow_execution_id=1,
                                 task_name='task1',

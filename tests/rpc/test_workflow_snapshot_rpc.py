@@ -26,9 +26,8 @@ class TestWorkflowSnapshotRpc(BaseUnitTest):
         super().setUp()
         with mock.patch("ai_flow.task_executor.common.task_executor_base.HeartbeatManager"):
             with mock.patch('ai_flow.rpc.service.scheduler_service.get_notification_client'):
-                with mock.patch('ai_flow.rpc.server.server.get_notification_client'):
-                    self.server = AIFlowServer()
-                    self.server.run(is_block=False)
+                self.server = AIFlowServer()
+                self.server.run(is_block=False)
         self.client = get_scheduler_client()
 
     def tearDown(self) -> None:
