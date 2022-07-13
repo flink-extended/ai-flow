@@ -16,6 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import os
+
 from .configuration import get_client_configuration, get_server_configuration
 from ..env import get_aiflow_home
 
@@ -62,6 +64,9 @@ SERVER_WORKER_QUEUE_SIZE = SERVER_CONF.get('server_worker_queue_size', fallback=
 SERVER_WORKER_NUMBER = SERVER_CONF.get('server_worker_number', fallback=5)
 
 SERVER_START_TIMEOUT = SERVER_CONF.get('server_start_timeout', fallback=60)
+
+LOCAL_REGISTRY_PATH = SERVER_CONF.get('local_registry_path',
+                                      fallback=os.path.join(get_aiflow_home(), ".local_registry"))
 
 # Client Config
 

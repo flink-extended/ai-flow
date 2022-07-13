@@ -23,7 +23,8 @@ from notification_service.event import EventKey, Event
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
 from ai_flow.model.execution_type import ExecutionType
-from ai_flow.model.internal.events import StartWorkflowExecutionEvent, StartTaskExecutionEvent
+from ai_flow.model.internal.events import StartWorkflowExecutionEvent, StartTaskExecutionEvent, \
+    StopWorkflowExecutionEvent
 from ai_flow.model.operator import Operator
 from ai_flow.model.rule import WorkflowRule
 from ai_flow.model.status import WorkflowStatus
@@ -83,10 +84,12 @@ class TestDispatcher(UnitTestWithNamespace):
             workers.append(Worker())
         dispatcher = Dispatcher(workers=workers)
         event: Event = StartWorkflowExecutionEvent(workflow_id=self.workflow_meta.id, snapshot_id=self.snapshot_meta.id)
+        event.offset = 1
         dispatcher.dispatch(event)
         self.assertEqual(1, workers[1].input_queue.qsize())
 
         event = StartTaskExecutionEvent(workflow_execution_id=2, task_name='op')
+        event.offset = 1
         dispatcher.dispatch(event)
         self.assertEqual(1, workers[2].input_queue.qsize())
 
@@ -94,6 +97,7 @@ class TestDispatcher(UnitTestWithNamespace):
                                          name='event_1',
                                          event_type='event_type',
                                          sender='sender'), message='')
+        event.offset = 1
         dispatcher.dispatch(event)
         self.assertEqual(2, workers[1].input_queue.qsize())
 
@@ -101,8 +105,74 @@ class TestDispatcher(UnitTestWithNamespace):
                                          name='event_2',
                                          event_type='event_type',
                                          sender='sender'), message='')
+        event.offset = 1
         dispatcher.dispatch(event)
         self.assertEqual(3, workers[1].input_queue.qsize())
+
+    def test__get_max_committed_offset(self):
+        self.assertEqual(-1, Dispatcher._get_max_committed_offset())
+        self.metadata_manager.set_workflow_event_offset(self.workflow_meta.id, 10)
+        self.assertEqual(10, Dispatcher._get_max_committed_offset())
+        self.metadata_manager.set_workflow_execution_event_offset(self.workflow_execution_meta.id, 11)
+        self.assertEqual(11, Dispatcher._get_max_committed_offset())
+
+    def test_scheduling_event_in_recovery_mode(self):
+        worker_num = 3
+        workers = []
+        for i in range(worker_num):
+            workers.append(Worker())
+        event1: Event = StartWorkflowExecutionEvent(self.workflow_meta.id, self.snapshot_meta.id)
+        event1.offset = 1
+        event2: Event = StartWorkflowExecutionEvent(self.workflow_meta.id, self.snapshot_meta.id)
+        event2.offset = 2
+        event3: Event = StopWorkflowExecutionEvent(self.workflow_execution_meta.id)
+        event3.offset = 1
+        event4: Event = StopWorkflowExecutionEvent(self.workflow_execution_meta.id)
+        event4.offset = 3
+
+        self.metadata_manager.set_workflow_execution_event_offset(self.workflow_execution_meta.id, 2)
+        self.metadata_manager.set_workflow_event_offset(self.workflow_meta.id, 1)
+        self.metadata_manager.commit()
+
+        dispatcher = Dispatcher(workers=workers)
+        dispatcher.dispatch(event1)
+        self.assertEqual(0, workers[1].input_queue.qsize())
+        dispatcher.dispatch(event2)
+        self.assertEqual(1, workers[1].input_queue.qsize())
+        dispatcher.dispatch(event3)
+        self.assertEqual(1, workers[1].input_queue.qsize())
+        dispatcher.dispatch(event4)
+        self.assertEqual(2, workers[1].input_queue.qsize())
+
+    def test_non_scheduling_event_in_recovery_mode(self):
+        worker_num = 3
+        workers = []
+        for i in range(worker_num):
+            workers.append(Worker())
+        event_key1 = EventKey(namespace='namespace', name='event_1', event_type='event_type', sender='sender')
+        event1: Event = Event(event_key=event_key1, message=None)
+        event1.offset = 1
+        event2: Event = Event(event_key=event_key1, message=None)
+        event2.offset = 3
+        event_key2 = EventKey(namespace='namespace', name='event_2', event_type='event_type', sender='sender')
+        event3: Event = Event(event_key=event_key2, message=None)
+        event3.offset = 1
+        event4: Event = Event(event_key=event_key2, message=None)
+        event4.offset = 2
+
+        self.metadata_manager.set_workflow_execution_event_offset(self.workflow_execution_meta.id, 2)
+        self.metadata_manager.set_workflow_event_offset(self.workflow_meta.id, 1)
+        self.metadata_manager.commit()
+
+        dispatcher = Dispatcher(workers=workers)
+        dispatcher.dispatch(event1)
+        self.assertEqual(0, workers[1].input_queue.qsize())
+        dispatcher.dispatch(event2)
+        self.assertEqual(1, workers[1].input_queue.qsize())
+        dispatcher.dispatch(event3)
+        self.assertEqual(1, workers[1].input_queue.qsize())
+        dispatcher.dispatch(event4)
+        self.assertEqual(2, workers[1].input_queue.qsize())
 
 
 if __name__ == '__main__':

@@ -16,12 +16,13 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import logging
 import os
 import shutil
 from typing import Dict, Any
 
 from ai_flow.blob_manager.blob_manager_interface import BlobManager
-from ai_flow.common.exception.exceptions import AIFlowException, AIFlowConfigException
+from ai_flow.common.exception.exceptions import AIFlowConfigException
 
 
 class LocalBlobManager(BlobManager):
@@ -35,7 +36,8 @@ class LocalBlobManager(BlobManager):
         if not self.root_dir:
             raise AIFlowConfigException('`root_directory` option of blob manager config is not configured.')
         if not os.path.isdir(self.root_dir):
-            raise AIFlowException(f'Root dir: {self.root_dir} is not a directory.')
+            logging.warning(f'Root dir: {self.root_dir} is not a directory.')
+            os.makedirs(self.root_dir)
 
     def upload(self, local_file_path: str) -> str:
         """

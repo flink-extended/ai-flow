@@ -148,6 +148,7 @@ class TestEventDrivenScheduler(UnitTestWithNamespace):
                                              name='event_2',
                                              event_type='event_type',
                                              sender='sender'), message='')
+            event.offset = 4
             scheduler.trigger(event)
             wait_scheduler_done(scheduler)
             self.assertEqual(4, len(task_executor.commands))
