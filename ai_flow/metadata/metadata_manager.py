@@ -18,7 +18,7 @@ from datetime import datetime
 from typing import List, Optional, Tuple, Any
 
 import cloudpickle
-from sqlalchemy.sql.functions import count
+from sqlalchemy.sql.functions import count, func
 
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.metadata.namespace import NamespaceMeta
@@ -869,3 +869,9 @@ class MetadataManager(object):
         else:
             raise AIFlowException("Now AIFlow only support value state.")
     # end state
+
+    def get_max_event_offset_of_workflow(self):
+        return self.session.query(func.max(WorkflowMeta.event_offset)).scalar()
+
+    def get_max_event_offset_of_workflow_execution(self):
+        return self.session.query(func.max(WorkflowExecutionMeta.event_offset)).scalar()

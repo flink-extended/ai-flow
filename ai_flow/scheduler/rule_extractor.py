@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import json
+import logging
 import threading
 
 import cloudpickle
@@ -253,6 +254,9 @@ class RuleExtractor(object):
                 metadata_manager = MetadataManager(session)
                 workflow_execution = metadata_manager.get_workflow_execution(
                     workflow_execution_id=workflow_execution_id)
+            if not workflow_execution:
+                logging.warning(f'Workflow execution {workflow_execution_id} not exists.')
+                return []
             workflow = self.workflow_dict[workflow_execution.workflow_id]
             task_rule_list = extract_task_rules_from_workflow_by_event(event=event, workflow=workflow)
 

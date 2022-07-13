@@ -20,7 +20,6 @@ import queue
 import threading
 
 from notification_service.event import Event
-
 from ai_flow.common.util.db_util.session import create_session
 from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.action import TaskAction
@@ -45,9 +44,14 @@ class Worker(threading.Thread):
         super().__init__()
         self.input_queue = queue.Queue(max_queue_size)
         self.task_executor = task_executor
+        self._last_committed_offset = None
 
     def add_unit(self, unit: SchedulingUnit):
         self.input_queue.put(unit)
+
+    @property
+    def last_committed_offset(self):
+        return self._last_committed_offset
 
     def _execute_workflow_execution_schedule_command(self,
                                                      command: WorkflowExecutionScheduleCommand,
@@ -134,6 +138,7 @@ class Worker(threading.Thread):
                         self._execute_workflow_execution_schedule_command(command=schedule_command,
                                                                           metadata_manager=metadata_manager)
                     metadata_manager.commit()
+                    self._last_committed_offset = event.offset
                 except Exception as e:
                     session.rollback()
                     logging.exception("Can not handle event: {}, exception: {}".format(str(event), str(e)))

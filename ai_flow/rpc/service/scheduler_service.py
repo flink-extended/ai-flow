@@ -14,11 +14,14 @@
 # under the License.
 #
 import logging
+import os
+import time
 from typing import List
 
 from notification_service.event import Event
 from notification_service.notification_client import ListenerProcessor
 
+from ai_flow.common.env import get_aiflow_home
 from ai_flow.model.status import WORKFLOW_ALIVE_SET, WorkflowStatus, WORKFLOW_FINISHED_SET
 from ai_flow.rpc.client.aiflow_client import get_notification_client
 from ai_flow.rpc.server.exceptions import AIFlowRpcServerException
@@ -37,12 +40,24 @@ from ai_flow.scheduler.scheduler import EventDrivenScheduler
 
 
 class Processor(ListenerProcessor):
-    def __init__(self, scheduler):
+    def __init__(self, scheduler, checkpoint_file):
         self.scheduler = scheduler
+        self.checkpoint_file = checkpoint_file
+        self.last_ckp_time = time.monotonic()
 
     def process(self, events: List[Event]):
         for event in events:
             self.scheduler.trigger(event)
+        now = time.monotonic()
+        if now - self.last_ckp_time > 5:
+            self.do_checkpoint()
+            self.last_ckp_time = now
+
+    def do_checkpoint(self):
+        offset = self.scheduler.get_minimum_committed_offset()
+        if offset > 0:
+            with open(self.checkpoint_file, 'w') as f:
+                f.write(str(offset))
 
 
 class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
@@ -51,22 +66,29 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
         self.scheduler = EventDrivenScheduler()
         self.notification_client = None
         self.event_listener = None
+        self.checkpoint_file = os.path.join(get_aiflow_home(), '.checkpoint')
 
     def start(self):
         logging.info('Starting scheduler service.')
         self.scheduler.start()
         self.notification_client = get_notification_client(namespace='scheduler', sender='scheduler')
         self.event_listener = self.notification_client.register_listener(
-            listener_processor=Processor(self.scheduler), offset=self.get_last_committed_offset())
+            listener_processor=Processor(self.scheduler, self.checkpoint_file),
+            offset=self._get_last_committed_offset())
 
     def stop(self):
         self.notification_client.unregister_listener(self.event_listener)
         self.scheduler.stop()
         self.notification_client.close()
 
-    def get_last_committed_offset(self):
-        # metadata_manager = MetadataManager(self.session)
-        return 0
+    def _get_last_committed_offset(self):
+        if not os.path.isfile(self.checkpoint_file):
+            offset = 0
+        else:
+            with open(self.checkpoint_file, 'r') as f:
+                offset = int(f.read())
+        logging.info(f"Start scheduler since offset: {offset}")
+        return offset
 
     # begin rpc interface implementation
     @catch_exception
