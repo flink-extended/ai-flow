@@ -14,7 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-import logging
+import sys
 
 from notification_service.event import Event
 
@@ -39,6 +39,14 @@ class EventDrivenScheduler(object):
 
     def trigger(self, event: Event):
         self.dispatcher.dispatch(event=event)
+
+    def get_minimum_committed_offset(self):
+        result = sys.maxsize
+        for i in range(len(self.workers)):
+            offset = self.workers[i].last_committed_offset
+            if offset is not None:
+                result = min(int(offset), result)
+        return result if result != sys.maxsize else 0
 
     def start(self):
         self.task_executor.start()
