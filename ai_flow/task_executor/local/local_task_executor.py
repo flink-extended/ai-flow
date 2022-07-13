@@ -22,8 +22,7 @@ from multiprocessing.managers import SyncManager
 from typing import Optional, Tuple
 from queue import Queue
 
-from ai_flow.common.configuration.config_constants import LOCAL_TASK_EXECUTOR_PARALLELISM
-from ai_flow.common.env import get_aiflow_home
+from ai_flow.common.configuration.config_constants import LOCAL_TASK_EXECUTOR_PARALLELISM, LOCAL_REGISTRY_PATH
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.common.util.local_registry import LocalRegistry
 from ai_flow.common.util.process_utils import stop_process
@@ -36,14 +35,14 @@ from ai_flow.task_executor.local.worker import CommandType, Worker
 logger = logging.getLogger(__name__)
 TaskExecutionCommandType = Tuple[TaskExecutionKey, CommandType]
 MAX_QUEUE_SIZE = 10 * 1024
-LOCAL_REGISTRY_PATH = os.path.join(get_aiflow_home(), ".pid_registry")
+PID_REGISTRY_PATH = os.path.join(LOCAL_REGISTRY_PATH, "pid_registry")
 
 
 class LocalTaskExecutor(TaskExecutorBase):
 
     def __init__(self,
                  parallelism: int = LOCAL_TASK_EXECUTOR_PARALLELISM,
-                 registry_path: str = LOCAL_REGISTRY_PATH):
+                 registry_path: str = PID_REGISTRY_PATH):
         self.manager: Optional[SyncManager] = None
         self.task_queue: Optional['Queue[TaskExecutionCommandType]'] = None
         self.parallelism = parallelism
@@ -56,6 +55,8 @@ class LocalTaskExecutor(TaskExecutorBase):
             raise AIFlowException("Parallelism of LocalTaskExecutor should be a positive integer.")
         self.manager = Manager()
         self.task_queue = self.manager.Queue(maxsize=MAX_QUEUE_SIZE)
+        if not os.path.isdir(LOCAL_REGISTRY_PATH):
+            os.makedirs(LOCAL_REGISTRY_PATH)
         self.workers = [
             Worker(self.task_queue, self.registry_path)
             for _ in range(self.parallelism)

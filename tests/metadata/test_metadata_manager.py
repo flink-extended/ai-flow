@@ -454,6 +454,31 @@ class TestMetadataManager(unittest.TestCase):
         state.update('xx')
         self.assertEqual('xx', state.value())
 
+    def test_max_event_offset(self):
+        namespace_name = 'namespace'
+        content = 'source of workflow'
+        workflow_object = cloudpickle.dumps(content)
+        self.metadata_manager.add_namespace(name=namespace_name, properties={'a': 'a'})
+        workflow_meta1 = self.metadata_manager.add_workflow(namespace=namespace_name, name='workflow_1',
+                                                            content=content, workflow_object=workflow_object)
+        self.metadata_manager.set_workflow_event_offset(workflow_meta1.id, 1)
+        snapshot1 = self.metadata_manager.add_workflow_snapshot(
+            workflow_id=workflow_meta1.id, workflow_object=workflow_meta1.workflow_object, uri='url', signature='xxx')
+        workflow_meta2 = self.metadata_manager.add_workflow(namespace=namespace_name, name='workflow_2',
+                                                            content=content, workflow_object=workflow_object)
+        self.metadata_manager.set_workflow_event_offset(workflow_meta2.id, 2)
+        snapshot2 = self.metadata_manager.add_workflow_snapshot(
+            workflow_id=workflow_meta2.id, workflow_object=workflow_meta2.workflow_object, uri='url', signature='xxx')
+
+        execution_meta1 = self.metadata_manager.add_workflow_execution(
+            workflow_id=workflow_meta1.id, snapshot_id=snapshot1.id, run_type=ExecutionType.MANUAL.value)
+        self.metadata_manager.set_workflow_execution_event_offset(execution_meta1.id, 3)
+        execution_meta2 = self.metadata_manager.add_workflow_execution(
+            workflow_id=workflow_meta2.id, snapshot_id=snapshot2.id, run_type=ExecutionType.MANUAL.value)
+        self.metadata_manager.set_workflow_execution_event_offset(execution_meta2.id, 4)
+        self.assertEqual(2, self.metadata_manager.get_max_event_offset_of_workflow())
+        self.assertEqual(4, self.metadata_manager.get_max_event_offset_of_workflow_execution())
+
 
 if __name__ == '__main__':
     unittest.main()
