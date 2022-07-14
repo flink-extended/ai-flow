@@ -22,7 +22,7 @@ from notification_service.event import Event
 from notification_service.notification_client import ListenerProcessor
 
 from ai_flow.common.env import get_aiflow_home
-from ai_flow.model.status import WORKFLOW_ALIVE_SET, WorkflowStatus, WORKFLOW_FINISHED_SET
+from ai_flow.model.status import WORKFLOW_ALIVE_SET, WorkflowStatus, WORKFLOW_FINISHED_SET, TaskStatus
 from ai_flow.rpc.client.aiflow_client import get_notification_client
 from ai_flow.rpc.server.exceptions import AIFlowRpcServerException
 from ai_flow.rpc.service.util.meta_to_proto import MetaToProto
@@ -36,7 +36,10 @@ from ai_flow.rpc.service.util.response_wrapper import catch_exception, wrap_resu
 from ai_flow.metadata.metadata_manager import MetadataManager, Filters, FilterIn
 from ai_flow.common.util.db_util.session import create_session
 from ai_flow.rpc.protobuf import scheduler_service_pb2_grpc
+from ai_flow.scheduler.schedule_command import WorkflowExecutionScheduleCommand
 from ai_flow.scheduler.scheduler import EventDrivenScheduler
+from ai_flow.scheduler.scheduling_event_processor import SchedulingEventProcessor
+from ai_flow.scheduler.workflow_executor import WorkflowExecutor
 
 
 class Processor(ListenerProcessor):
@@ -306,12 +309,29 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
         namespace = request.namespace
         workflow_name = request.workflow_name
         with create_session() as session:
-            metadata_manager = MetadataManager(session)
+            metadata_manager = MetadataManager(session=session)
+            scheduling_event_processor = SchedulingEventProcessor(metadata_manager=metadata_manager)
+            workflow_executor = WorkflowExecutor(metadata_manager=metadata_manager)
+
             workflow_meta = metadata_manager.get_workflow_by_name(namespace, workflow_name)
             latest_snapshot = metadata_manager.get_latest_snapshot(workflow_meta.id)
             event = StartWorkflowExecutionEvent(workflow_meta.id, latest_snapshot.id)
-            self.notification_client.send_event(event)
-        return wrap_result_response(BaseResult(RetCode.OK, None))
+            workflow_execution_start_command = scheduling_event_processor.process(event=event)
+            workflow_execution_schedule_command = workflow_executor.execute(workflow_execution_start_command)
+            if workflow_execution_schedule_command is not None:
+                for c in workflow_execution_schedule_command.task_schedule_commands:
+                    self.scheduler.task_executor.schedule_task(c)
+                    task_execution_meta = metadata_manager.get_task_execution(
+                        workflow_execution_id=c.new_task_execution.workflow_execution_id,
+                        task_name=c.new_task_execution.task_name,
+                        sequence_number=c.new_task_execution.seq_num)
+                    if TaskStatus.INIT == TaskStatus(task_execution_meta.status):
+                        metadata_manager.update_task_execution(task_execution_id=task_execution_meta.id,
+                                                               status=TaskStatus.QUEUED.value)
+                return wrap_result_response(BaseResult(RetCode.OK,
+                                                       str(workflow_execution_schedule_command.workflow_execution_id)))
+            else:
+                return wrap_result_response(BaseResult(RetCode.ERROR, 'Start workflow execution failed.'))
 
     @catch_exception
     def stopWorkflowExecution(self, request, context):
@@ -379,10 +399,31 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
             MetaToProto.workflow_execution_meta_list_to_proto(workflow_executions))
 
     @catch_exception
-    def startTaskExecution(self, request, context):
+    def startTaskExecution2(self, request, context):
         event = StartTaskExecutionEvent(request.workflow_execution_id, request.task_name)
         self.notification_client.send_event(event)
         return wrap_result_response(BaseResult(RetCode.OK, None))
+
+    @catch_exception
+    def startTaskExecution(self, request, context):
+        with create_session() as session:
+            metadata_manager = MetadataManager(session=session)
+            scheduling_event_processor = SchedulingEventProcessor(metadata_manager=metadata_manager)
+            event = StartTaskExecutionEvent(request.workflow_execution_id, request.task_name)
+            workflow_execution_schedule_command = scheduling_event_processor.process(event=event)
+            if isinstance(workflow_execution_schedule_command, WorkflowExecutionScheduleCommand):
+                command = workflow_execution_schedule_command.task_schedule_commands[0]
+                self.scheduler.task_executor.schedule_task(command)
+                task_execution_meta = metadata_manager.get_task_execution(
+                    workflow_execution_id=command.new_task_execution.workflow_execution_id,
+                    task_name=command.new_task_execution.task_name,
+                    sequence_number=command.new_task_execution.seq_num)
+                if TaskStatus.INIT == TaskStatus(task_execution_meta.status):
+                    metadata_manager.update_task_execution(task_execution_id=task_execution_meta.id,
+                                                           status=TaskStatus.QUEUED.value)
+                return wrap_result_response(BaseResult(RetCode.OK, str(command.new_task_execution)))
+            else:
+                return wrap_result_response(BaseResult(RetCode.ERROR, 'Start task execution failed.'))
 
     @catch_exception
     def stopTaskExecution(self, request, context):

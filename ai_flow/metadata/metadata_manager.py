@@ -618,6 +618,7 @@ class MetadataManager(object):
 
         workflow = cloudpickle.loads(meta.workflow_snapshot.workflow_object)
         if WorkflowStatus(status) == WorkflowStatus.RUNNING:
+            meta.begin_date = datetime.now()
             for task_name, task in workflow.tasks.items():
                 if OperatorConfigItem.PERIODIC_EXPRESSION in task.config \
                         and task.config[OperatorConfigItem.PERIODIC_EXPRESSION] is not None:

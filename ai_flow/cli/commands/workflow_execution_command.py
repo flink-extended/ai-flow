@@ -27,9 +27,8 @@ from ai_flow.cli.simple_table import AIFlowConsole
 def start_workflow_execution(args):
     namespace = args.namespace if args.namespace is not None else 'default'
     workflow_name = args.workflow_name
-    ops.start_workflow_execution(workflow_name=workflow_name,
-                                 namespace=namespace)
-    print(f"Submitting a new execution of Workflow: {namespace}.{workflow_name}.")
+    execution_id = ops.start_workflow_execution(workflow_name=workflow_name, namespace=namespace)
+    print(f"Workflow execution: {execution_id} submitted.")
 
 
 def stop_workflow_execution(args):

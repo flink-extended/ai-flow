@@ -38,7 +38,7 @@ from ai_flow.rpc.client.util.response_unwrapper import unwrap_workflow_list_resp
     unwrap_workflow_schedule_response, unwrap_workflow_schedule_list_response, \
     unwrap_workflow_trigger_response, unwrap_workflow_trigger_list_response, unwrap_task_execution_response, \
     unwrap_task_execution_list_response, unwrap_workflow_snapshot_response, unwrap_workflow_snapshot_list_response, \
-    unwrap_namespace_response, unwrap_namespace_list_response
+    unwrap_namespace_response, unwrap_namespace_list_response, unwrap_string_response
 from ai_flow.rpc.protobuf import scheduler_service_pb2_grpc
 from ai_flow.rpc.protobuf.message_pb2 import WorkflowIdentifier, WorkflowProto, IdRequest, WorkflowScheduleProto, \
     WorkflowTriggerProto, TaskExecutionIdentifier, WorkflowSnapshotProto, NamespaceProto, NameRequest, ListRequest
@@ -153,10 +153,10 @@ class SchedulerClient(object):
         response = self.scheduler_stub.deleteWorkflowSnapshots(request)
         return unwrap_bool_response(response)
 
-    def start_workflow_execution(self, workflow_name, namespace) -> bool:
+    def start_workflow_execution(self, workflow_name, namespace) -> int:
         request = WorkflowIdentifier(namespace=namespace, workflow_name=workflow_name)
         response = self.scheduler_stub.startWorkflowExecution(request)
-        return unwrap_bool_response(response)
+        return int(unwrap_string_response(response))
 
     def stop_workflow_execution(self, workflow_execution_id) -> bool:
         request = IdRequest(id=workflow_execution_id)
@@ -185,11 +185,11 @@ class SchedulerClient(object):
         response = self.scheduler_stub.listWorkflowExecutions(request)
         return unwrap_workflow_execution_list_response(response)
 
-    def start_task_execution(self, workflow_execution_id, task_name) -> bool:
+    def start_task_execution(self, workflow_execution_id, task_name) -> str:
         request = TaskExecutionIdentifier(workflow_execution_id=workflow_execution_id,
                                           task_name=task_name)
         response = self.scheduler_stub.startTaskExecution(request)
-        return unwrap_bool_response(response)
+        return unwrap_string_response(response)
 
     def stop_task_execution(self, workflow_execution_id, task_name) -> bool:
         request = TaskExecutionIdentifier(workflow_execution_id=workflow_execution_id,
