@@ -37,7 +37,9 @@ class TestSchedulingEventProcessor(UnitTestWithNamespace):
     def setUp(self) -> None:
         super().setUp()
         with Workflow(name='workflow') as workflow:
-            op = Operator(name='op')
+            task1 = Operator(name='task1')
+            task2 = Operator(name='task2')
+            task2.action_on_task_status(TaskAction.START, {task1: TaskStatus.SUCCESS})
 
         self.workflow_meta = self.metadata_manager.add_workflow(namespace=self.namespace_name,
                                                                 name=workflow.name,
@@ -67,11 +69,11 @@ class TestSchedulingEventProcessor(UnitTestWithNamespace):
                                                                 page_size=None)
         self.assertEqual(1, len(task_metas))
 
-        event = StartTaskExecutionEvent(workflow_execution_id=workflow_execution_id, task_name='op')
+        event = StartTaskExecutionEvent(workflow_execution_id=workflow_execution_id, task_name='task1')
         command = scheduling_event_processor.process(event)
         self.assertIsNone(command)
 
-        event = ReStartTaskExecutionEvent(workflow_execution_id=workflow_execution_id, task_name='op')
+        event = ReStartTaskExecutionEvent(workflow_execution_id=workflow_execution_id, task_name='task1')
         command = scheduling_event_processor.process(event)
         self.assertTrue(isinstance(command, WorkflowExecutionScheduleCommand))
         self.assertEqual(1, len(command.task_schedule_commands))
@@ -112,7 +114,7 @@ class TestSchedulingEventProcessor(UnitTestWithNamespace):
         self.assertEqual(1, len(command.task_schedule_commands))
         self.assertEqual(TaskAction.START, command.task_schedule_commands[0].action)
 
-        event = PeriodicRunTaskEvent(workflow_execution_id=workflow_execution_id, task_name='op')
+        event = PeriodicRunTaskEvent(workflow_execution_id=workflow_execution_id, task_name='task1')
         command = scheduling_event_processor.process(event)
         self.metadata_manager.flush()
         self.assertTrue(isinstance(command, WorkflowExecutionScheduleCommand))
@@ -129,25 +131,25 @@ class TestSchedulingEventProcessor(UnitTestWithNamespace):
         workflow_execution_id = command.workflow_execution_id
         seq_num = command.task_schedule_commands[0].new_task_execution.seq_num
         event = TaskStatusEvent(workflow_execution_id=workflow_execution_id,
-                                task_name='op',
+                                task_name='task1',
                                 sequence_number=seq_num,
                                 status=TaskStatus.RUNNING)
         command = scheduling_event_processor.process(event)
         self.metadata_manager.flush()
         self.assertIsNone(command)
         task_meta = self.metadata_manager.get_task_execution(workflow_execution_id=workflow_execution_id,
-                                                             task_name='op',
+                                                             task_name='task1',
                                                              sequence_number=seq_num)
         self.assertEqual(TaskStatus.RUNNING, TaskStatus(task_meta.status))
 
         event = TaskHeartbeatTimeoutEvent(workflow_execution_id=workflow_execution_id,
-                                          task_name='op',
+                                          task_name='task1',
                                           sequence_number=seq_num)
         command = scheduling_event_processor.process(event)
         self.metadata_manager.flush()
         self.assertIsNone(command)
         task_meta = self.metadata_manager.get_task_execution(workflow_execution_id=workflow_execution_id,
-                                                             task_name='op',
+                                                             task_name='task1',
                                                              sequence_number=seq_num)
         self.assertEqual(TaskStatus.FAILED, TaskStatus(task_meta.status))
 
@@ -163,12 +165,18 @@ class TestSchedulingEventProcessor(UnitTestWithNamespace):
         command = workflow_executor.execute(command)
         self.metadata_manager.flush()
         workflow_execution_id = command.workflow_execution_id
+        self.metadata_manager.add_task_execution(workflow_execution_id, 'task2')
         seq_num = command.task_schedule_commands[0].new_task_execution.seq_num
         event = TaskStatusEvent(workflow_execution_id=workflow_execution_id,
-                                task_name='op',
+                                task_name='task1',
                                 sequence_number=seq_num,
                                 status=TaskStatus.SUCCESS)
+        event2 = TaskStatusEvent(workflow_execution_id=workflow_execution_id,
+                                 task_name='task2',
+                                 sequence_number=seq_num,
+                                 status=TaskStatus.SUCCESS)
         command = scheduling_event_processor.process(event)
+        scheduling_event_processor.process(event2)
         workflow_execution_meta = self.metadata_manager.get_workflow_execution(
             workflow_execution_id=workflow_execution_id)
         self.assertEqual(WorkflowStatus.SUCCESS, WorkflowStatus(workflow_execution_meta.status))
