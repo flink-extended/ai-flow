@@ -26,17 +26,18 @@ logger = logging.getLogger(__name__)
 
 
 def start_task_execution(workflow_execution_id: int,
-                         task_name: str):
+                         task_name: str) -> str:
     """
-    Asynchronously start a new execution of the task.
+    Start a new execution of the task.
 
     :param workflow_execution_id: The workflow execution contains the task.
     :param task_name: The name of the task to be started.
+    :return: The TaskExecutionKey str.
     :raises: AIFlowException if failed to start task execution.
     """
     client = get_scheduler_client()
     try:
-        client.start_task_execution(workflow_execution_id, task_name)
+        return client.start_task_execution(workflow_execution_id, task_name)
     except AIFlowException as e:
         logger.exception("Failed to start execution for task %s with exception %s",
                          f'{workflow_execution_id}.{task_name}', str(e))

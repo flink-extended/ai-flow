@@ -26,17 +26,18 @@ logger = logging.getLogger(__name__)
 
 
 def start_workflow_execution(workflow_name: str,
-                             namespace: str = 'default'):
+                             namespace: str = 'default') -> int:
     """
-    Asynchronously start a new execution of the workflow.
+    Start a new execution of the workflow.
 
     :param workflow_name: The workflow to be executed.
     :param namespace: The namespace which contains the workflow.
+    :return: Id of the workflow execution just started.
     :raises: AIFlowException if failed to start workflow execution.
     """
     client = get_scheduler_client()
     try:
-        client.start_workflow_execution(workflow_name, namespace)
+        return client.start_workflow_execution(workflow_name, namespace)
     except AIFlowException as e:
         logger.exception("Failed to start execution for workflow %s with exception %s",
                          f'{namespace}.{workflow_name}', str(e))

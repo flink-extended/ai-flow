@@ -62,7 +62,7 @@ class WorkflowExecutionMeta(Base):
         self.workflow_id = workflow_id
         self.run_type = run_type
         self.snapshot_id = snapshot_id
-        self.begin_date = datetime.now() if begin_date is None else begin_date
+        self.begin_date = begin_date
         self.end_date = end_date
         self.status = status
         self.event_offset = event_offset
