@@ -35,8 +35,9 @@ class TestWorkflowExecutionRpc(BaseUnitTest):
         super().setUp()
         with mock.patch("ai_flow.task_executor.common.task_executor_base.HeartbeatManager"):
             with mock.patch('ai_flow.rpc.service.scheduler_service.get_notification_client', MockNotificationClient):
-                self.server = AIFlowServer()
-                self.server.run(is_block=False)
+                with mock.patch('ai_flow.task_executor.task_executor.TaskExecutorFactory.get_task_executor'):
+                    self.server = AIFlowServer()
+                    self.server.run(is_block=False)
         self.client = get_scheduler_client()
         self.notification_client = self.server.scheduler_service.notification_client
         self.workflow_meta = self.prepare_workflow()
@@ -66,13 +67,9 @@ class TestWorkflowExecutionRpc(BaseUnitTest):
             metadata_manager.update_workflow_execution(1, WorkflowStatus.FAILED)
 
     def test_start_workflow_execution(self):
-        self.client.start_workflow_execution(workflow_name=self.workflow_meta.name,
-                                             namespace=self.workflow_meta.namespace)
-        self.assertEqual(SchedulingEventType.START_WORKFLOW_EXECUTION,
-                         self.notification_client.list_events()[0].event_key.name)
-
-        self.assertEqual(json.dumps({'workflow_id': 1, 'workflow_snapshot_id': 1}),
-                         self.notification_client.list_events()[0].context)
+        id = self.client.start_workflow_execution(workflow_name=self.workflow_meta.name,
+                                                  namespace=self.workflow_meta.namespace)
+        self.assertEqual(1, id)
 
     def test_stop_workflow_execution(self):
         self.client.stop_workflow_execution(1)
