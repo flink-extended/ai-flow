@@ -145,9 +145,8 @@ class SchedulingEventProcessor(object):
             task_execution = self.metadata_manager.get_latest_task_execution(
                 workflow_execution_id=workflow_execution_id,
                 task_name=task_name)
-            if task_execution is None:
-                return
-            task_executions.append(task_execution)
+            if task_execution is not None:
+                task_executions.append(task_execution)
         is_success = True
         for te in task_executions:
             if TaskStatus(te.status) == TaskStatus.FAILED:
