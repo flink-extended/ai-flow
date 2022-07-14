@@ -27,8 +27,8 @@ from ai_flow.cli.simple_table import AIFlowConsole
 def start_task_execution(args):
     workflow_execution_id = int(args.workflow_execution_id)
     task_name = args.task_name
-    ops.start_task_execution(workflow_execution_id=workflow_execution_id, task_name=task_name)
-    print(f"Submitting a new execution of task: {task_name} of workflow execution: {workflow_execution_id}.")
+    key = ops.start_task_execution(workflow_execution_id=workflow_execution_id, task_name=task_name)
+    print(f"Task execution: {key} submitted.")
 
 
 def stop_task_execution(args):

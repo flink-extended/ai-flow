@@ -36,8 +36,9 @@ class TestTaskExecutionRpc(BaseUnitTest):
         super().setUp()
         with mock.patch("ai_flow.task_executor.common.task_executor_base.HeartbeatManager"):
             with mock.patch('ai_flow.rpc.service.scheduler_service.get_notification_client', MockNotificationClient):
-                self.server = AIFlowServer()
-                self.server.run(is_block=False)
+                with mock.patch('ai_flow.task_executor.task_executor.TaskExecutorFactory.get_task_executor'):
+                    self.server = AIFlowServer()
+                    self.server.run(is_block=False)
         self.client = get_scheduler_client()
         self.notification_client = self.server.scheduler_service.notification_client
         self.workflow_meta = self.prepare_workflow()
@@ -72,13 +73,9 @@ class TestTaskExecutionRpc(BaseUnitTest):
             metadata_manager.add_task_execution(workflow_execution_id, 'task2')
 
     def test_start_task_execution(self):
-        self.client.start_task_execution(workflow_execution_id=self.workflow_execution.id,
-                                         task_name='bash')
-        self.assertEqual(SchedulingEventType.START_TASK_EXECUTION,
-                         self.notification_client.list_events()[0].event_key.name)
-
-        self.assertEqual(json.dumps({"workflow_execution_id": 1, "task_name": "bash"}),
-                         self.notification_client.list_events()[0].context)
+        key = self.client.start_task_execution(
+            workflow_execution_id=self.workflow_execution.id, task_name='bash')
+        self.assertEqual(f'{self.workflow_execution.id}_bash_1', key)
 
     def test_stop_task_execution(self):
         self.prepare_task_execution(self.workflow_execution.id)
