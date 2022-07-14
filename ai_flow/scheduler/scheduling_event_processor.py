@@ -108,7 +108,8 @@ class SchedulingEventProcessor(object):
                     task_execution_id=task_execution_meta.id,
                     status=status)
                 self.metadata_manager.flush()
-                self._set_workflow_execution_status(workflow_execution_id=workflow_execution_id)
+                if TaskStatus(status) in TASK_FINISHED_SET:
+                    self._set_workflow_execution_status(workflow_execution_id=workflow_execution_id)
 
         elif SchedulingEventType.TASK_HEARTBEAT_TIMEOUT == scheduling_event_type:
             workflow_execution_id = context[EventContextConstant.WORKFLOW_EXECUTION_ID]
@@ -134,8 +135,6 @@ class SchedulingEventProcessor(object):
         workflow_execution = \
             self.metadata_manager.get_workflow_execution(workflow_execution_id=workflow_execution_id)
         workflow: Workflow = cloudpickle.loads(workflow_execution.workflow_snapshot.workflow_object)
-        if workflow.rules is not None and len(workflow.rules) != 0:
-            return
         for op in workflow.tasks.values():
             if OperatorConfigItem.PERIODIC_EXPRESSION in op.config \
                     and op.config[OperatorConfigItem.PERIODIC_EXPRESSION] is not None:
@@ -146,7 +145,8 @@ class SchedulingEventProcessor(object):
             task_execution = self.metadata_manager.get_latest_task_execution(
                 workflow_execution_id=workflow_execution_id,
                 task_name=task_name)
-            task_executions.append(task_execution)
+            if task_execution is not None:
+                task_executions.append(task_execution)
         is_success = True
         for te in task_executions:
             if TaskStatus(te.status) == TaskStatus.FAILED:
