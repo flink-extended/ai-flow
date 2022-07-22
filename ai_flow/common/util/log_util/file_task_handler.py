@@ -30,7 +30,7 @@ class FileTaskHandler(logging.Handler):
         self.local_base = base_log_folder
         self.filename_jinja_template = Template(filename_template)
 
-    def set_context(self, workflow_name: str, task_execution_key: "TaskExecutionKey"):
+    def set_context(self, workflow_name: str, task_execution_key):
         local_loc = self._init_file(workflow_name, task_execution_key)
         self.handler = logging.FileHandler(local_loc, encoding='utf-8')
         if self.formatter:
