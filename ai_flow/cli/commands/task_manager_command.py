@@ -123,7 +123,9 @@ class TaskManager(object):
         # to get config about blob manager, in the future we can download file according to path schema,
         # so that we can save this config file on worker.
         blob_manager = BlobManagerFactory.create_blob_manager(BlobManagerConfig(config_constants.BLOB_MANAGER))
-        snapshot_repo = os.path.join(AIFLOW_HOME, 'workflows')
+        snapshot_repo = os.path.join(AIFLOW_HOME, 'snapshots')
+        if not os.path.isdir(snapshot_repo):
+            os.makedirs(snapshot_repo)
 
         # TODO download only if we don't have the same snapshot by checking md5
         workflow_snapshot_zip = blob_manager.download(
