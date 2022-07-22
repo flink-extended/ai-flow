@@ -17,6 +17,7 @@
 # under the License.
 #
 from notification_service.embedded_notification_client import EmbeddedNotificationClient
+from notification_service.event import DEFAULT_NAMESPACE
 
 from ai_flow.rpc.client.scheduler_client import SchedulerClient
 
@@ -28,7 +29,7 @@ def get_scheduler_client():
     return SchedulerClient(server_uri=server_uri)
 
 
-def get_notification_client(namespace='default', sender=None):
+def get_notification_client(namespace=DEFAULT_NAMESPACE, sender=None):
     return EmbeddedNotificationClient(
         server_uri=config_constants.NOTIFICATION_SERVER_URI,
         namespace=namespace,

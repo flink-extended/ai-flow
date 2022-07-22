@@ -399,12 +399,6 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
             MetaToProto.workflow_execution_meta_list_to_proto(workflow_executions))
 
     @catch_exception
-    def startTaskExecution2(self, request, context):
-        event = StartTaskExecutionEvent(request.workflow_execution_id, request.task_name)
-        self.notification_client.send_event(event)
-        return wrap_result_response(BaseResult(RetCode.OK, None))
-
-    @catch_exception
     def startTaskExecution(self, request, context):
         with create_session() as session:
             metadata_manager = MetadataManager(session=session)

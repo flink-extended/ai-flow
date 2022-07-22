@@ -17,8 +17,14 @@
 # under the License.
 #
 import logging.config
+import os
+
 from ai_flow.common.env import get_aiflow_home
 
+
+AIFLOW_HOME = get_aiflow_home()
+AIFLOW_PID_FILENAME = 'aiflow_server.pid'
+AIFLOW_WEBSERVER_PID_FILENAME = "aiflow_web_server.pid"
 
 # We hard code the logging config, we should make it configurable in the future.
 logging.config.dictConfig({
@@ -34,15 +40,23 @@ logging.config.dictConfig({
             'class': 'logging.StreamHandler',
             'stream': 'ext://sys.stderr',
             'formatter': 'default'
-        }
+        },
+        'task': {
+            'class': 'ai_flow.common.util.log_util.file_task_handler.FileTaskHandler',
+            'formatter': 'default',
+            'base_log_folder': os.path.join(AIFLOW_HOME, 'logs'),
+            'filename_template': '{{ workflow_name }}/{{ execution_id }}/{{ task_name }}/{{ seq_number }}.log',
+        },
+    },
+    'loggers': {
+        'aiflow.task': {
+            'handlers': ['task'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
     'root': {
         'level': 'INFO',
         'handlers': ['console']
     }
 })
-
-
-AIFLOW_HOME = get_aiflow_home()
-AIFLOW_PID_FILENAME = 'aiflow_server.pid'
-AIFLOW_WEBSERVER_PID_FILENAME = "aiflow_web_server.pid"

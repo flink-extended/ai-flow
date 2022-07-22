@@ -16,7 +16,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import logging
 import os
 import signal
 import threading
@@ -28,8 +27,6 @@ from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.common.util.thread_utils import StoppableThread
 from ai_flow.model.context import Context
 from ai_flow.model.operator import AIFlowOperator
-
-logger = logging.getLogger(__name__)
 
 
 class BashOperator(AIFlowOperator):
@@ -52,7 +49,7 @@ class BashOperator(AIFlowOperator):
                         signal.signal(getattr(signal, sig), signal.SIG_DFL)
                 os.setsid()
 
-            logger.info('Running command: %s', self.bash_command)
+            self.log.info('Running command: %s', self.bash_command)
             self.sub_process = Popen(
                 ['bash', "-c", self.bash_command],
                 stdout=PIPE,
@@ -64,7 +61,7 @@ class BashOperator(AIFlowOperator):
         self.log_reader.start()
 
     def stop(self, context: Context):
-        logger.info('Sending SIGTERM signal to bash process group')
+        self.log.info('Sending SIGTERM signal to bash process group')
         try:
             if self.sub_process and hasattr(self.sub_process, 'pid'):
                 os.killpg(os.getpgid(self.sub_process.pid), signal.SIGTERM)
@@ -77,19 +74,19 @@ class BashOperator(AIFlowOperator):
         try:
             self.sub_process.wait(timeout=timeout)
 
-            logger.info('Command exited with return code %s', self.sub_process.returncode)
+            self.log.info('Command exited with return code %s', self.sub_process.returncode)
 
             if self.sub_process.returncode != 0:
                 raise AIFlowException('Bash command failed. The command returned a non-zero exit code.')
         except TimeoutExpired:
-            logger.error("Timeout to wait bash operator to be finished in {} seconds".format(timeout))
+            self.log.error("Timeout to wait bash operator to be finished in {} seconds".format(timeout))
             raise
         finally:
             self.log_reader.stop()
 
     def _read_output(self):
-        logger.info('Output:')
+        self.log.info('Output:')
         for raw_line in iter(self.sub_process.stdout.readline, b''):
             if not threading.current_thread().stopped():
                 line = raw_line.decode('utf-8').rstrip()
-                logger.info("%s", line)
+                self.log.info("%s", line)
