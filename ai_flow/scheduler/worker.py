@@ -67,7 +67,7 @@ class Worker(threading.Thread):
                 if TaskStatus.INIT == TaskStatus(task_execution_meta.status):
                     metadata_manager.update_task_execution(task_execution_id=task_execution_meta.id,
                                                            status=TaskStatus.QUEUED.value)
-            if TaskAction.STOP == c.action or TaskAction.RESTART == c.action:
+            if TaskAction.STOP == c.action or (TaskAction.RESTART == c.action and c.current_task_execution is not None):
                 task_execution_meta = metadata_manager.get_task_execution(
                     workflow_execution_id=c.current_task_execution.workflow_execution_id,
                     task_name=c.current_task_execution.task_name,
