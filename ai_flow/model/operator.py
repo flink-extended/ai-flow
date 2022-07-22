@@ -14,6 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import logging
 from abc import abstractmethod
 
 from typing import Dict, Optional
@@ -65,11 +66,11 @@ class Operator(object):
         """
         self.workflow.action_on_condition(task_name=self.name, action=action, condition=condition)
 
-    def action_on_event_received(self, event_key: EventKey, action: TaskAction):
+    def action_on_event_received(self, action: TaskAction, event_key: EventKey):
         """
         When the specified event is received, the task is scheduled.
-        :param event_key: The event for scheduling the task to depend on.
         :param action: The action for scheduling the task.
+        :param event_key: The event for scheduling the task to depend on.
         """
         self.workflow.action_on_event_received(task_name=self.name, event_key=event_key, action=action)
 
@@ -96,6 +97,7 @@ class AIFlowOperator(Operator):
                  task_name: str,
                  **kwargs):
         super().__init__(task_name, **kwargs)
+        self.log = logging.getLogger('aiflow.task.operator')
 
     @abstractmethod
     def start(self, context: Context):

@@ -155,7 +155,7 @@ class TestSchedulingEventProcessor(UnitTestWithNamespace):
 
         workflow_execution_meta = self.metadata_manager.get_workflow_execution(
             workflow_execution_id=workflow_execution_id)
-        self.assertEqual(WorkflowStatus.FAILED, WorkflowStatus(workflow_execution_meta.status))
+        self.assertEqual(WorkflowStatus.RUNNING, WorkflowStatus(workflow_execution_meta.status))
 
     def test_task_success_event(self):
         scheduling_event_processor = SchedulingEventProcessor(metadata_manager=self.metadata_manager)

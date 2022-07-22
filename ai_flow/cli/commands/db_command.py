@@ -16,6 +16,8 @@
 # under the License.
 
 import logging
+import os
+import shutil
 
 from ai_flow.metadata.base import Base
 from ai_flow.common.util.db_util import db_migration
@@ -36,6 +38,8 @@ def reset(args):
     _logger.info('Reset the database, db uri: {}'.format(db_uri))
     if args.yes or input("This will drop existing tables if they exist. Proceed? (y/n)").upper() == "Y":
         db_migration.reset_db(url=db_uri, metadata=Base.metadata)
+        if os.path.isdir(config_constants.LOCAL_REGISTRY_PATH):
+            shutil.rmtree(config_constants.LOCAL_REGISTRY_PATH)
     else:
         _logger.info('Cancel reset the database, db uri: {}'.format(db_uri))
 

@@ -35,18 +35,19 @@ from ai_flow.model.task_execution import TaskExecutionKey
 from ai_flow.rpc.client.heartbeat_client import HeartbeatClient
 from ai_flow.common.configuration.helpers import AIFLOW_HOME
 
-logging.basicConfig(filename='/Users/alibaba/aiflow/logs/'+__name__+'.log',
-                    format='[%(asctime)s-%(filename)s-%(levelname)s:%(message)s]',
-                    level=logging.INFO,
-                    filemode='a',
-                    datefmt='%Y-%m-%d %I:%M:%S %p')
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('aiflow.task')
+
+
+def set_logger_context(logger, workflow_name, task_execution_key):
+    for i in logger.handlers:
+        i.set_context(workflow_name, task_execution_key)
 
 
 def run_task_manager(args):
     key = TaskExecutionKey(workflow_execution_id=int(args.workflow_execution_id),
                            task_name=str(args.task_name),
                            seq_num=int(args.sequence_number))
+    set_logger_context(logger, args.workflow_name, key)
     heartbeat_interval = 10 if args.heartbeat_interval is None else int(args.heartbeat_interval)
     task_manager = TaskManager(workflow_name=args.workflow_name,
                                task_execution_key=key,
@@ -91,7 +92,8 @@ class TaskManager(object):
         except TaskForceStoppedException:
             self._send_task_status_change(TaskStatus.STOPPED)
             raise
-        self._send_task_status_change(TaskStatus.SUCCESS)
+        else:
+            self._send_task_status_change(TaskStatus.SUCCESS)
 
     def _execute(self):
         task = self._get_task()
@@ -110,6 +112,7 @@ class TaskManager(object):
         except TaskForceStoppedException:
             raise
         except (Exception, KeyboardInterrupt) as e:
+            logger.exception(e)
             raise TaskFailedException(e)
         finally:
             logger.info(f'Task execution {self.task_execution_key} finished, ')

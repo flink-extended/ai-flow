@@ -44,7 +44,7 @@ class PythonOperator(AIFlowOperator):
     def start(self, context: Context):
         self.process = Process(target=self.python_callable, args=self.callable_args)
         self.process.start()
-        logger.info('Running python process on pid: %s', self.process.pid)
+        self.log.info('Running python process on pid: %s', self.process.pid)
 
     def stop(self, context: Context):
         self.process.terminate()

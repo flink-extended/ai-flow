@@ -90,7 +90,8 @@ class LocalTaskExecutor(TaskExecutorBase):
         """
         try:
             registry = LocalRegistry(self.registry_path)
-            pid = int(registry.get(str(key)))
+            pid = registry.get(str(key))
+            if pid:
+                stop_process(int(pid))
         except ValueError:
             logger.exception('Failed to convert pid with value {}'.format(pid))
-        stop_process(pid)
