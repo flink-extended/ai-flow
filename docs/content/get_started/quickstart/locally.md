@@ -7,79 +7,110 @@ Please make sure that you have installed AIFlow refer to [installation guide](..
 
 
 ## Starting AIFlow 
+### Starting Notification Server
+AIFlow depends on notification service as an event dispatcher. Before running AIFlow, you need to start notification server.
+```shell script
+# Initialize configuration
+notification config init 
 
-AIFlow contains three long-running servers, AIFlow Server, Notification server and Scheduler(Apache Airflow by default).
-You can start all servers with a single script `start-all-aiflow-services.sh` as below:.
+# Initialize database and tables
+notification db init
 
-```shell
-start-all-aiflow-services.sh
-```
+# Start notification server as a daemon
+notification server start -d
+``` 
 
-It will take a few minutes to start all servers for the first time. Once all servers have started, you will get the output like:
+### Starting AIFlow Server
+```shell script
+# Initialize configuration
+aiflow config init
 
-```text
-...
-...
-All services have been started!
-```
+# Initialize database and tables
+aiflow db init
+
+# Start AIFlow server as a daemon
+aiflow server start -d
+
 ```{note}
 You may run into issues caused by different operating systems or versions, 
 please refer to [Troubleshooting](./troubleshooting.md) section to get solutions.
 ```
-## Viewing Web Server
 
-Once all servers started, you can visit the AIFlow Web [[http://127.0.0.1:8000](http://127.0.0.1:8000)] with the default username(admin) and password(admin):
+## Running a Workflow
 
-![aiflow login ui](../../images/ai_flow_webui.jpg)
+### Defining a Workflow
+Below is a typically event-driven workflow. The workflow contains four tasks, task3 is triggered once task1 and task2 finished and will send a custom event which would trigger task4.
 
-Since Apache Airflow is the [Scheduler](../architecture/overview.md) by default, you can visit the Airflow Web [[http://127.0.0.1:8080](http://127.0.0.1:8080)] 
-with the default username(admin) and password(admin) to view the execution of workflows:
+```python
+import time
 
-![airflow login ui](../../images/airflow_login_ui.png)
+from ai_flow.rpc.client.aiflow_client import get_notification_client
+from notification_service.event import EventKey, Event
 
-## Downloading the Quickstart
-Download the quickstart code by cloning AIFlow via 
+from ai_flow.model.action import TaskAction
+from ai_flow.model.operators.bash import BashOperator
+from ai_flow.model.operators.python import PythonOperator
+from ai_flow.model.status import TaskStatus
+
+from ai_flow.model.workflow import Workflow
+
+EVENT_KEY = EventKey(name='quickstart_key',
+                     event_type='quickstart_type')
+
+
+def func():
+    time.sleep(5)
+    notification_client = get_notification_client()
+    event = Event(event_key=EVENT_KEY, message='This is a custom message.')
+    notification_client.send_event(event)
+
+
+with Workflow(name='quickstart_workflow') as w1:
+    task1 = BashOperator(name='task1', bash_command='echo I am 1st task.')
+    task2 = BashOperator(name='task2', bash_command='echo I am 2nd task.')
+    task3 = PythonOperator(name='task3', python_callable=func)
+    task4 = BashOperator(name='task4', bash_command='echo I an 4th task.')
+
+    task3.action_on_task_status(TaskAction.START, {
+        task1: TaskStatus.SUCCESS,
+        task2: TaskStatus.SUCCESS
+    })
+
+    task4.action_on_event_received(action=TaskAction.RESTART, event_key=EVENT_KEY)
+```
+You can save the above workflow as a python file on your workstation.
+
+### Uploading the Workflow
+
+Each workflow belongs to a namespace, before uploading the workflow you need to create a namespace. 
 
 ```shell
-git clone https://github.com/flink-extended/ai-flow.git
+aiflow namespace add default
 ```
-Now cd into the `examples` subdirectory of the repository. We’ll use this working directory for running the quickstart.
 
-## Installing Extra Dependencies
-To run the quickstart and other examples, we need to install some extra dependencies by following command:
+Now you can upload the workflow with the path of the file you just saved.
+```
+aiflow workflow upload ${path_of_the_workflow_file}
+```
+
+### Start an Execution
+The workflow you uploaded can be executed as an instance which is called execution. You can start a new execution by the following command.
+```
+aiflow workflow-execution start quickstart_workflow
+```
+
+### Viewing the Results
+You can view the workflow execution you just started by the following command.
 ```shell script
-pip install 'ai-flow[example_requires]'
+aiflow workflow-execution list quickstart_workflow
 ```
-
-## Running the Quickstart
-
-Now you can run following commands to submit a machine learning project to AIFlow server.
-
-```{note}
-AIFlow will search the project in current directory when submit workflow, so before running following commands, please make sure you are in the `examples` directory of the repository you just cloned.
+The result shows `id`, `status` and other information of the workflow execution.
+You can then list tasks of workflow execution with id 1 by the following command.
+```shell script
+aiflow task-execution list 1
 ```
+Also you can check the log under `${HOME}/aiflow/logs` to view the outputs of tasks.
 
-```shell
-# Submit workflow to AIFlow Server
-aiflow workflow submit sklearn_examples batch_train_stream_predict
-
-## Force start an execution
-aiflow workflow start-execution sklearn_examples batch_train_stream_predict
-```
-
-The example shows how to define an entire machine learning workflow through AIFlow. You can view the workflow definition in [batch_train_stream_predict.py](https://github.com/flink-extended/ai-flow/tree/master/examples/sklearn_examples/workflows/batch_train_stream_predict). The workflow contains four jobs, including sklearn model batch training, batch validation, model pushing and streaming prediction.
-
-You can see the workflow metadata, and the graph of the workflow on the AIFlow web frontend: [http://127.0.0.1:8000](http://127.0.0.1:8000).
-
-![The metadata of the workflow](../../images/sklearn_batch_train_stream_predict_meta.png)
-
-![The graph of the workflow](../../images/sklearn_batch_train_stream_predict_graph.png)
-
-You can click task view to jump to the workflow execution page:
-![The execution of the workflow](../../images/sklearn_batch_train_stream_predict_execution.png)
-
-In the above figure, you can see that the model batch training triggers the model validation with the `MODEL_GENERATED` 
-event after the sklearn model generated. After passing the model validation, the model pushing is triggered by the `MODEL_VALIDATED` event. The model streaming prediction is triggered by the `MODEL_DEPLOYED` event.
 
 ## What’s Next?
 

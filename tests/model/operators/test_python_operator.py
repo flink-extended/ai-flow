@@ -41,45 +41,15 @@ class TestPythonOperator(unittest.TestCase):
             python_operator = PythonOperator(
                 name='test_python_operator',
                 python_callable=func,
-                callable_args=[1, 'any'],
+                op_args=[1, 'any'],
             )
         python_operator.start(context=None)
-
-    def test_await_termination(self):
-        with Workflow(name='workflow'):
-            python_operator = PythonOperator(
-                name='test_await_termination',
-                python_callable=func,
-                callable_args=[1],
-            )
-            python_operator.start(context=None)
-        python_operator.await_termination(context=None, timeout=0.1)
-        ps = psutil.Process(python_operator.process.pid)
-        self.assertEqual('running', ps.status())
-
-    def test_stop(self):
-        self.python_operator = None
-
-        def python_op():
-            with Workflow(name='workflow'):
-                self.python_operator = PythonOperator(name='test_await_termination',
-                                                      python_callable=func,
-                                                      callable_args=[100],)
-            self.python_operator.start(context={})
-        _thread = threading.Thread(target=python_op, daemon=True)
-        _thread.start()
-        time.sleep(0.1)
-        self.python_operator.stop(context={})
-
-        time.sleep(0.1)
-        with self.assertRaises(psutil.NoSuchProcess):
-            psutil.Process(self.python_operator.process.pid)
 
     def test_pickle(self):
         with Workflow(name='workflow') as workflow:
             python_operator = PythonOperator(
                 name='test_await_termination',
                 python_callable=func,
-                callable_args=[1],
+                op_args=[1],
             )
         self.assertIsNotNone(cloudpickle.dumps(workflow))

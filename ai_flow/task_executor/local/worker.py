@@ -16,14 +16,11 @@
 # under the License.
 #
 import logging
-import os
 import subprocess
 from abc import abstractmethod
 from multiprocessing import Process
 from typing import List
-from setproctitle import setproctitle
 
-from ai_flow.common.configuration import config_constants
 from ai_flow.common.util.local_registry import LocalRegistry
 from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecutionKey
@@ -66,8 +63,11 @@ class Worker(Process):
         stdout, stderr = process.communicate()
         retcode = process.poll()
         if retcode:
-            logger.error("Return code {} on {} with stdout: {}, stderr: {}".format(
-                retcode, " ".join(command), stdout, stderr))
+            command = ' '.join(command)
+            stacktrace = '\n'.join(stderr)
+            logger.error(f"Return code {retcode} on {command}")
+            logger.error(f"stdout: {stdout}")
+            logger.error(f"stderr: {stacktrace}")
             return TaskStatus.FAILED
         else:
             return TaskStatus.SUCCESS

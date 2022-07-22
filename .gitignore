@@ -44,6 +44,7 @@ ai_flow/test/common/test.yaml
 examples/**/generated/*
 venv/*
 dist/*
+lib/notification_service/dist/*
 
 **/logs/
 **/saved_model/
