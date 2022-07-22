@@ -88,12 +88,13 @@ class TaskExecutorBase(TaskExecutor):
                     elif action == TaskAction.STOP:
                         self.stop_task_execution(current_task)
                     elif action == TaskAction.RESTART:
-                        self.stop_task_execution(current_task)
+                        if current_task is not None:
+                            self.stop_task_execution(current_task)
                         self.start_task_execution(new_task)
-                    self.command_queue.remove_expired()
                 except Exception as e:
                     logger.exception("Error occurred while processing command queue, {}".format(e))
                 finally:
+                    self.command_queue.remove_expired()
                     self.command_queue.task_done()
             except Empty:
                 pass

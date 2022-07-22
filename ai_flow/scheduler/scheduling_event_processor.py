@@ -147,12 +147,13 @@ class SchedulingEventProcessor(object):
                 task_name=task_name)
             if task_execution is not None:
                 task_executions.append(task_execution)
+            else:
+                return
         is_success = True
         for te in task_executions:
             if TaskStatus(te.status) == TaskStatus.FAILED:
                 self.metadata_manager.update_workflow_execution(workflow_execution_id=workflow_execution_id,
                                                                 status=WorkflowStatus.FAILED.value)
-                self.metadata_manager.flush()
                 is_success = False
                 break
             if TaskStatus(te.status) not in TASK_FINISHED_SET:
