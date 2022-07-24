@@ -30,6 +30,7 @@ aiflow db init
 
 # Start AIFlow server as a daemon
 aiflow server start -d
+```
 
 ```{note}
 You may run into issues caused by different operating systems or versions, 
@@ -88,21 +89,26 @@ Each workflow belongs to a namespace, before uploading the workflow you need to 
 aiflow namespace add default
 ```
 
-Now you can upload the workflow with the path of the file you just saved.
+Then you can upload the workflow with the path of the file you just saved.
 ```
 aiflow workflow upload ${path_of_the_workflow_file}
+```
+
+You can view the workflow you uploaded by the following command.
+```shell script
+aiflow workflow list --namespace default
 ```
 
 ### Start an Execution
 The workflow you uploaded can be executed as an instance which is called execution. You can start a new execution by the following command.
 ```
-aiflow workflow-execution start quickstart_workflow
+aiflow workflow-execution start quickstart_workflow --namespace default
 ```
 
 ### Viewing the Results
 You can view the workflow execution you just started by the following command.
 ```shell script
-aiflow workflow-execution list quickstart_workflow
+aiflow workflow-execution list quickstart_workflow --namespace default
 ```
 The result shows `id`, `status` and other information of the workflow execution.
 You can then list tasks of workflow execution with id 1 by the following command.
