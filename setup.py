@@ -110,8 +110,8 @@ VERSION = __version__ # noqa
 
 
 try:
-    if os.getenv('INSTALL_AIFLOW_WITHOUT_FRONTEND') != 'true':
-        compile_frontend()
+    # if os.getenv('INSTALL_AIFLOW_WITHOUT_FRONTEND') != 'true':
+    #     compile_frontend()
 
     require_file = '{}/{}'.format(os.path.dirname(os.path.abspath(__file__)), "requirements.txt")
     with open(require_file) as f:
@@ -136,7 +136,7 @@ try:
         packages=find_packages(),
         install_requires=require_packages,
         extras_require=EXTRAS_REQUIREMENTS,
-        python_requires='>=3.6, <3.8' if os.getenv('BUILD_MINI_AI_FLOW_PACKAGE') == 'true' else '>=3.7, <3.8',
+        python_requires='>=3.6, <=3.8',
         include_package_data=True,
         scripts=get_script(),
         package_data={'ai_flow': ['alembic.ini']},
