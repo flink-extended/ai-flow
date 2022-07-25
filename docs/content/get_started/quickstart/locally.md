@@ -99,7 +99,7 @@ You can view the workflow you uploaded by the following command.
 aiflow workflow list --namespace default
 ```
 
-### Start an Execution
+### Starting an Execution
 The workflow you uploaded can be executed as an instance which is called execution. You can start a new execution by the following command.
 ```
 aiflow workflow-execution start quickstart_workflow --namespace default

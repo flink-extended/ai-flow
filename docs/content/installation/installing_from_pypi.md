@@ -10,7 +10,7 @@ AIFlow is tested with:
 * Pip: 20.0.0+
 * SQLite: 3.15.0+
 
-**Note:** SQLite is only used in tests and getting started. To use AIFlow in production, please [set up MySQL as the backend](./how_to_guides/set_up_mysql_as_backend.md).
+**Note:** SQLite is only used in tests and getting started. To use AIFlow in production, please [set up MySQL as the backend](../how_to_guides/set_up_mysql_as_backend.md).
 
 ## Installing AIFlow
 
@@ -27,7 +27,7 @@ Now you can install AIFlow by running:
 python3 -m pip install ai-flow
 ```
 
-Congrats, you are ready to run AIFlow and try core features following the [quickstart](./get_started/quickstart/locally.md).
+Congrats, you are ready to run AIFlow and try core features following the [quickstart](../get_started/quickstart/locally.md).
 
 ## Extra Dependencies
 
@@ -37,4 +37,4 @@ The `ai-flow` PyPI basic package only installs what's needed to get started. Add
 python -m pip install 'ai-flow[mysql]'
 ```
 
-For the list of the extras and what they enable, see: [Reference for package extras](../reference/extra_packages.md).
+For the list of the extras and what they enable, see: [Reference for package extras](../../reference/extra_packages.md).
