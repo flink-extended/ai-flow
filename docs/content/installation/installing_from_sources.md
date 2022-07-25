@@ -1,11 +1,11 @@
 # Installing from Sources
 
-This page describes installations using the `ai-flow` package [published in PyPI](https://pypi.org/project/ai-flow/).
+This page describes installations from ai-flow source code.
 
 ## Prerequisites
 
-* git
-* Python: 3.6,3.7,3.8
+* Git
+* Python: >=3.6, <=3.8
 * Pip: 20.0.0+
 * SQLite: 3.15.0+
 
