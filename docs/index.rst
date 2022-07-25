@@ -29,6 +29,7 @@ Welcome to AIFlow's Documentation!
    :caption: Contents
 
    content/get_started/index
+   content/installation/index
    content/tutorial_and_examples/index
    content/concepts
    content/installation
