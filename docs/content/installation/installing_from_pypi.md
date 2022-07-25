@@ -1,4 +1,4 @@
-# Installation
+# Installing from PyPI
 
 This page describes installations using the `ai-flow` package [published in PyPI](https://pypi.org/project/ai-flow/).
 
@@ -6,14 +6,15 @@ This page describes installations using the `ai-flow` package [published in PyPI
 
 AIFlow is tested with:
 
-* Python: 3.7
+* Python: 3.6,3.7,3.8
+* Pip: 20.0.0+
 * SQLite: 3.15.0+
 
 **Note:** SQLite is only used in tests and getting started. To use AIFlow in production, please [set up MySQL as the backend](./how_to_guides/set_up_mysql_as_backend.md).
 
 ## Installing AIFlow
 
-[Optional] To avoid dependencies conflict, we strongly recommend using [venv](https://docs.python.org/3.7/library/venv.html) or other similar tools for an isolated Python environment like below:
+**[Optional]** To avoid dependencies conflict, we strongly recommend using [venv](https://docs.python.org/3.7/library/venv.html) or other similar tools for an isolated Python environment like below:
 
 ```shell
 python3 -m venv venv_for_aiflow
