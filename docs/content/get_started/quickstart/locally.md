@@ -3,7 +3,7 @@
 This section will show you how to install and start AIFlow on your local workstation.
 
 ## Installing AIFlow
-Please make sure that you have installed AIFlow refer to [installation guide](../../installation.md).
+Please make sure that you have installed AIFlow refer to [installation guide](../../installation/index.md).
 
 
 ## Starting AIFlow 
