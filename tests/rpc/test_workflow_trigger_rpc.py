@@ -20,7 +20,7 @@ from notification_service.event import EventKey
 
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.internal.conditions import SingleEventCondition
-from ai_flow.model.operators.bash import BashOperator
+from ai_flow.operators.bash import BashOperator
 from ai_flow.model.rule import WorkflowRule
 from ai_flow.model.workflow import Workflow
 from ai_flow.rpc.client.aiflow_client import get_scheduler_client

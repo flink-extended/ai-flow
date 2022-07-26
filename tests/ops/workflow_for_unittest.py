@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 from ai_flow.model.action import TaskAction
-from ai_flow.model.operators.bash import BashOperator
+from ai_flow.operators.bash import BashOperator
 from ai_flow.model.status import TaskStatus
 
 from ai_flow.model.workflow import Workflow

@@ -156,6 +156,11 @@ class SchedulingEventProcessor(object):
                                                                 status=WorkflowStatus.FAILED.value)
                 is_success = False
                 break
+            if TaskStatus(te.status) == TaskStatus.STOPPED:
+                self.metadata_manager.update_workflow_execution(workflow_execution_id=workflow_execution_id,
+                                                                status=WorkflowStatus.STOPPED.value)
+                is_success = False
+                break
             if TaskStatus(te.status) not in TASK_FINISHED_SET:
                 is_success = False
                 break

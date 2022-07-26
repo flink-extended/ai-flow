@@ -19,7 +19,6 @@
 import logging
 import os
 import signal
-import threading
 
 from notification_service.embedded_notification_client import EmbeddedNotificationClient
 
@@ -27,6 +26,7 @@ from ai_flow.common.configuration import config_constants
 from ai_flow.blob_manager.blob_manager_interface import BlobManagerFactory, BlobManagerConfig
 from ai_flow.common.exception.exceptions import TaskFailedException, TaskForceStoppedException
 from ai_flow.common.util import workflow_utils
+from ai_flow.common.util.thread_utils import RepeatedTimer
 from ai_flow.model.context import Context
 from ai_flow.model.internal.events import TaskStatusEvent, TaskStatusChangedEvent
 from ai_flow.model.operator import AIFlowOperator
@@ -77,7 +77,7 @@ class TaskManager(object):
         self.notification_client = EmbeddedNotificationClient(
             server_uri=notification_server_uri, namespace='task_status_change', sender='task_manager')
         self.heartbeat_client = HeartbeatClient(heartbeat_server_uri)
-        self.heartbeat_thread = threading.Timer(heartbeat_interval, self._send_heartbeat)
+        self.heartbeat_thread = RepeatedTimer(heartbeat_interval, self._send_heartbeat)
 
     def start(self):
         self.heartbeat_thread.start()
@@ -151,8 +151,12 @@ class TaskManager(object):
         self.notification_client.send_event(event_for_schedule)
 
     def _send_heartbeat(self):
-        logger.debug("Sending heartbeat to task executor.")
-        self.heartbeat_client.send_heartbeat(self.task_execution_key)
+        logger.info("Sending heartbeat to task executor.")
+        try:
+            self.heartbeat_client.send_heartbeat(self.task_execution_key)
+        except Exception as e:
+            logger.exception(e)
+            raise e
 
     def stop(self):
         self.heartbeat_thread.cancel()

@@ -16,7 +16,7 @@
 from unittest import mock
 import cloudpickle
 from ai_flow.common.exception.exceptions import AIFlowException
-from ai_flow.model.operators.bash import BashOperator
+from ai_flow.operators.bash import BashOperator
 from ai_flow.model.workflow import Workflow
 from ai_flow.rpc.client.aiflow_client import get_scheduler_client
 from ai_flow.rpc.server.server import AIFlowServer
