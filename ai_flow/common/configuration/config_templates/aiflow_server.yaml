@@ -60,10 +60,6 @@ task_heartbeat_timeout: 60
 # the interval in seconds that the task executions send heartbeats
 task_heartbeat_interval: 10
 
-# should tasks be executed via forking of the parent process ("False",
-# the speedier option) or by spawning a new python process ("True")
-execute_tasks_in_new_interpreter: False
-
 # num of workers of local task executor
 local_executor_parallelism: 10
 

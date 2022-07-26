@@ -20,8 +20,8 @@ from ai_flow.rpc.client.aiflow_client import get_notification_client
 from notification_service.event import EventKey, Event
 
 from ai_flow.model.action import TaskAction
-from ai_flow.model.operators.bash import BashOperator
-from ai_flow.model.operators.python import PythonOperator
+from ai_flow.operators.bash import BashOperator
+from ai_flow.operators.python import PythonOperator
 from ai_flow.model.status import TaskStatus
 
 from ai_flow.model.workflow import Workflow

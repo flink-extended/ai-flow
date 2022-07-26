@@ -16,7 +16,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import logging
 import os
+import shutil
 import zipfile
 import time
 import fcntl
@@ -43,11 +45,13 @@ def make_file_zipfile(source_file, output_filename):
 
 
 def extract_zip_file(zip_file_path: Text,
-                     extract_path: Text = None) -> str:
+                     extract_path: Text = None,
+                     override: bool = False) -> str:
     """
     :param zip_file_path: The zip file path.
     :param extract_path: The decompression path of the project zip file. If None,
                          extract to the same directory as zip_file_path.
+    :param override: Whether to override if the dest directory already exists.
     :return: The project path.
     """
     file_dir = os.path.dirname(zip_file_path)
@@ -64,17 +68,21 @@ def extract_zip_file(zip_file_path: Text,
                 time.sleep(1)
             return downloaded_local_path
         else:
-            if not os.path.exists(downloaded_local_path):
-                f = open(lock_file, 'w')
-                try:
-                    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-                    if not os.path.exists(downloaded_local_path):
-                        zip_ref.extractall(dest_path)
-                finally:
-                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-                f.close()
-                try:
-                    os.remove(lock_file)
-                except OSError:
-                    pass
+            f = open(lock_file, 'w')
+            try:
+                fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+                if os.path.exists(downloaded_local_path):
+                    logging.info(f'Extract directory {downloaded_local_path} already exists.')
+                    if override:
+                        shutil.rmtree(downloaded_local_path)
+                    else:
+                        return downloaded_local_path
+                zip_ref.extractall(dest_path)
+            finally:
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+            f.close()
+            try:
+                os.remove(lock_file)
+            except OSError:
+                pass
             return downloaded_local_path

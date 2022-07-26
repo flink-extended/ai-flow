@@ -20,8 +20,6 @@ import asyncio
 import functools
 import inspect
 import logging
-import os
-import sys
 import threading
 from concurrent import futures
 
@@ -36,9 +34,7 @@ from grpc._server import _serialize_response, _status, _abort, _Context, _unary_
 from ai_flow.common.util.db_util import session as db_session
 from ai_flow.rpc.protobuf import scheduler_service_pb2_grpc
 from ai_flow.rpc.service.scheduler_service import SchedulerService
-from ai_flow.scheduler.timer import Timer, timer_instance
-
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../../..")))
+from ai_flow.scheduler.timer import timer_instance
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
