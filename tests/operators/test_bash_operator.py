@@ -25,7 +25,7 @@ import cloudpickle
 import psutil
 
 from ai_flow.common.exception.exceptions import AIFlowException
-from ai_flow.model.operators.bash import BashOperator
+from ai_flow.operators.bash import BashOperator
 from ai_flow.model.workflow import Workflow
 
 

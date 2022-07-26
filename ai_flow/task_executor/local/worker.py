@@ -64,10 +64,9 @@ class Worker(Process):
         retcode = process.poll()
         if retcode:
             command = ' '.join(command)
-            stacktrace = '\n'.join(stderr)
             logger.error(f"Return code {retcode} on {command}")
             logger.error(f"stdout: {stdout}")
-            logger.error(f"stderr: {stacktrace}")
+            logger.error(f"stderr: {stderr}")
             return TaskStatus.FAILED
         else:
             return TaskStatus.SUCCESS

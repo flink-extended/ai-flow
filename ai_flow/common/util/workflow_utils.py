@@ -92,7 +92,7 @@ def extract_workflows_from_zip(file_path: str, extract_path: str) -> List[Workfl
     :return: The list of workflow objects
     """
     workflows = []
-    root_path = extract_zip_file(file_path, extract_path)
+    root_path = extract_zip_file(file_path, extract_path, True)
     for file in os.listdir(root_path):
         abs_path = os.path.join(root_path, file)
         if os.path.isfile(abs_path):

@@ -5,8 +5,8 @@ This page describes installations from ai-flow source code.
 ## Prerequisites
 
 * Git
-* Python: >=3.6, <=3.8
-* Pip: 20.0.0+
+* Python: 3.7,3.8
+* Pip: 19.0.0+
 * SQLite: 3.15.0+
 
 ## Downloading Source Code

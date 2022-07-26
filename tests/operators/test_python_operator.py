@@ -22,7 +22,7 @@ import unittest
 import cloudpickle
 import psutil
 
-from ai_flow.model.operators.python import PythonOperator
+from ai_flow.operators.python import PythonOperator
 from ai_flow.model.workflow import Workflow
 
 

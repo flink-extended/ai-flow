@@ -142,8 +142,7 @@ class Worker(threading.Thread):
                 except Exception as e:
                     session.rollback()
                     logging.exception(
-                        "Can not handle event: {}, exception: {}, put back in the queue".format(str(event), str(e)))
-                    self.add_unit((event, rule))
+                        "Can not handle event: {}, exception: {}".format(str(event), str(e)))
                 finally:
                     self.input_queue.task_done()
 

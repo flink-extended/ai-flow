@@ -21,7 +21,7 @@ from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.common.util.db_util.session import create_session
 from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.internal.events import SchedulingEventType
-from ai_flow.model.operators.bash import BashOperator
+from ai_flow.operators.bash import BashOperator
 from ai_flow.model.status import WorkflowStatus
 from ai_flow.model.workflow import Workflow
 from ai_flow.rpc.client.aiflow_client import get_scheduler_client

@@ -81,13 +81,14 @@ class TaskExecutorBase(TaskExecutor):
                     current_task = schedule_command.current_task_execution
                     new_task = schedule_command.new_task_execution
                     action = schedule_command.action
-                    logger.info("Running {} command on {}".format(action, new_task))
-
                     if action == TaskAction.START:
+                        logger.info("Running {} command on {}".format(action, new_task))
                         self.start_task_execution(new_task)
                     elif action == TaskAction.STOP:
+                        logger.info("Running {} command on {}".format(action, current_task))
                         self.stop_task_execution(current_task)
                     elif action == TaskAction.RESTART:
+                        logger.info("Running {} command on {}".format(action, current_task))
                         if current_task is not None:
                             self.stop_task_execution(current_task)
                         self.start_task_execution(new_task)
