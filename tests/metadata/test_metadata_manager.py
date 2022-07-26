@@ -25,7 +25,7 @@ from ai_flow.common.util.db_util.db_migration import init_db
 from ai_flow.common.util.db_util.session import new_session
 from ai_flow.metadata.metadata_manager import MetadataManager, Filters, FilterEqual, Orders, OrderBy, FilterIn
 from ai_flow.model.execution_type import ExecutionType
-from ai_flow.model.operators.bash import BashOperator
+from ai_flow.operators.bash import BashOperator
 from ai_flow.model.state import ValueStateDescriptor, ValueState
 from ai_flow.model.status import WorkflowStatus, TaskStatus
 from ai_flow.model.workflow import Workflow

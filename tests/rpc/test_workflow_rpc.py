@@ -21,7 +21,7 @@ from notification_service.event import EventKey
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.action import TaskAction
 from ai_flow.model.internal.conditions import SingleEventCondition
-from ai_flow.model.operators.bash import BashOperator
+from ai_flow.operators.bash import BashOperator
 from ai_flow.model.rule import WorkflowRule
 from ai_flow.model.status import TaskStatus
 from ai_flow.model.workflow import Workflow
