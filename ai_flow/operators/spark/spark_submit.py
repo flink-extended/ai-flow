@@ -19,7 +19,6 @@
 import os
 import re
 import subprocess
-import time
 from typing import List, Optional, Dict, Any, Union, Iterator
 
 from ai_flow.common.env import expand_env_var
@@ -36,7 +35,7 @@ class SparkSubmitOperator(AIFlowOperator):
     :param application: The application file to be submitted, like app jar, python file or R file.
     :param application_args: Args of the application.
     :param executable_path: The path of spark-submit command.
-    :param master: spark://host:port, mesos://host:port, yarn, k8s://https://host:port, or local.
+    :param master: spark://host:port, yarn, mesos://host:port, k8s://https://host:port, or local.
     :param deploy_mode: Launch the program in client(by default) mode or cluster mode.
     :param application_name: The name of spark application.
     :param submit_options: The options that passes to command-line, e.g. --conf, --class and --files
@@ -82,7 +81,8 @@ class SparkSubmitOperator(AIFlowOperator):
         self._driver_id = None
         self._driver_status = None
         self._spark_exit_code = None
-        self._should_track_driver_status = self._resolve_should_track_driver_status()
+
+        self._validate_parameters()
 
     def start(self, context: Context):
         self.spark_submit_cmd = self._build_spark_submit_command()
@@ -119,32 +119,11 @@ class SparkSubmitOperator(AIFlowOperator):
                         self._mask_cmd(self.spark_submit_cmd), return_code
                     )
                 )
-        if self._should_track_driver_status:
-            if self._driver_id is None:
-                raise AIFlowException(
-                    "No driver id is known: something went wrong when executing the spark submit command"
-                )
-            self._driver_status = "SUBMITTED"
-            self._start_driver_status_tracking()
-            if self._driver_status != "FINISHED":
-                raise AIFlowException(
-                    "ERROR : Driver {} badly exited with status {}".format(
-                        self._driver_id, self._driver_status
-                    )
-                )
 
     def stop(self, context: Context):
-        if self._should_track_driver_status:
-            if self._driver_id:
-                kill_cmd = self._build_spark_driver_kill_command()
-                driver_kill = subprocess.Popen(kill_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                self.log.info(
-                    "Spark driver %s killed with return code: %s", self._driver_id, driver_kill.wait()
-                )
         if self._process and self._process.poll() is None:
             self._process.kill()
 
-            self.log.info(f"application id is {self._yarn_application_id}")
             if self._yarn_application_id:
                 kill_cmd = f"yarn application -kill {self._yarn_application_id}".split()
                 yarn_kill = subprocess.Popen(
@@ -173,8 +152,15 @@ class SparkSubmitOperator(AIFlowOperator):
                     self.log.error("Exception when attempting to kill Spark on K8s:")
                     self.log.exception(e)
 
-    def _resolve_should_track_driver_status(self) -> bool:
-        return 'spark://' in self._master and self.deploy_mode == 'cluster'
+    def _validate_parameters(self):
+        is_standalone = 'spark://' in self._master
+        is_mesos = 'mesos' in self._master
+        if is_standalone and self._deploy_mode == 'cluster':
+            raise AIFlowException('Only client mode is supported with standalone cluster.')
+        if is_mesos and self._deploy_mode == 'cluster':
+            raise AIFlowException('Only client mode is supported with mesos cluster.')
+        if self._is_kubernetes and not self._kubernetes_namespace:
+            raise AIFlowException("Param k8s_namespace must be set when submit to k8s.")
 
     def _get_executable_path(self):
         if self._executable_path:
@@ -202,12 +188,8 @@ class SparkSubmitOperator(AIFlowOperator):
             for key in self._env_vars:
                 spark_submit_command += ["--conf", tmpl.format(key, str(self._env_vars[key]))]
         elif self._env_vars and self._deploy_mode == "client":
-            self._env = self._env_vars  # Do it on Popen of the process
-        elif self._env_vars and self._deploy_mode == "cluster":
-            raise AIFlowException("SparkSubmitOperator env_vars is not supported in standalone-cluster mode.")
+            self._env = self._env_vars
         if self._is_kubernetes:
-            if not self._kubernetes_namespace:
-                raise AIFlowException("Param k8s_namespace must be set when submit to k8s.")
             spark_submit_command += [
                 "--conf", f"spark.kubernetes.namespace={self._kubernetes_namespace}",
             ]
@@ -263,81 +245,4 @@ class SparkSubmitOperator(AIFlowOperator):
                 match_exit_code = re.search(r'\s*[eE]xit code: (\d+)', line)
                 if match_exit_code:
                     self._spark_exit_code = int(match_exit_code.groups()[0])
-            elif self._should_track_driver_status and not self._driver_id:
-                match_driver_id = re.search(r'(driver-[0-9\-]+)', line)
-                if match_driver_id:
-                    self._driver_id = match_driver_id.groups()[0]
-                    self.log.info("identified spark driver id: %s", self._driver_id)
             self.log.info(line)
-
-    def _start_driver_status_tracking(self) -> None:
-        missed_job_status_reports = 0
-        max_missed_job_status_reports = 10
-
-        while self._driver_status not in ["FINISHED", "UNKNOWN", "KILLED", "FAILED", "ERROR"]:
-            time.sleep(self._status_poll_interval)
-            poll_drive_status_cmd = self._build_track_driver_status_command()
-            status_process: Any = subprocess.Popen(
-                poll_drive_status_cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                bufsize=-1,
-                universal_newlines=True,
-            )
-            self._process_spark_status_log(iter(status_process.stdout))
-            ret_code = status_process.wait()
-
-            if ret_code:
-                if missed_job_status_reports < max_missed_job_status_reports:
-                    missed_job_status_reports += 1
-                else:
-                    raise AIFlowException(
-                        "Failed to poll for the driver status {} times: return code = {}".format(
-                            max_missed_job_status_reports, ret_code
-                        )
-                    )
-
-    def _build_track_driver_status_command(self) -> List[str]:
-        curl_max_wait_time = 30
-        if self._master.endswith(':6066'):
-            spark_host = self._master.replace("spark://", "http://")
-            status_command = [
-                "/usr/bin/curl",
-                "--max-time",
-                str(curl_max_wait_time),
-                f"{spark_host}/v1/submissions/status/{self._driver_id}",
-            ]
-            if not self._driver_id:
-                raise AIFlowException(
-                    "Invalid status: attempted to poll driver "
-                    + "status but no driver id is known. Giving up."
-                )
-        else:
-            status_command = self.executable_path + ["--master", self._master]
-            if self._driver_id:
-                status_command += ["--status", self._driver_id]
-            else:
-                raise AIFlowException(
-                    "Invalid status: attempted to poll driver "
-                    + "status but no driver id is known. Giving up."
-                )
-        self.log.debug("Poll driver status cmd: %s", status_command)
-        return status_command
-
-    def _process_spark_status_log(self, itr: Iterator[Any]) -> None:
-        driver_found = False
-        for line in itr:
-            line = line.strip()
-            if "driverState" in line:
-                self._driver_status = line.split(' : ')[1].replace(',', '').replace('\"', '').strip()
-                driver_found = True
-            self.log.debug("spark driver status log: %s", line)
-        if not driver_found:
-            self._driver_status = "UNKNOWN"
-
-    def _build_spark_driver_kill_command(self) -> List[str]:
-        spark_kill_command = [self._get_executable_path()]
-        spark_kill_command += ["--master", self._master]
-        if self._driver_id:
-            spark_kill_command += ["--kill", self._driver_id]
-        return spark_kill_command
