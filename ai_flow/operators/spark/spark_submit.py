@@ -19,7 +19,7 @@
 import os
 import re
 import subprocess
-from typing import List, Optional, Dict, Any, Union, Iterator
+from typing import List, Optional, Dict, Any, Iterator
 
 from ai_flow.common.env import expand_env_var
 from ai_flow.common.exception.exceptions import AIFlowException
@@ -204,29 +204,6 @@ class SparkSubmitOperator(AIFlowOperator):
         self.log.info("Spark-Submit cmd: %s", self._mask_cmd(spark_submit_command))
 
         return spark_submit_command
-
-    @staticmethod
-    def _mask_cmd(cmd: Union[str, List[str]]) -> str:
-        cmd_masked = re.sub(
-            r"("
-            r"\S*?"  # Match all non-whitespace characters before...
-            r"(?:secret|password)"  # ...literally a "secret" or "password"
-            # word (not capturing them).
-            r"\S*?"  # All non-whitespace characters before either...
-            r"(?:=|\s+)"  # ...an equal sign or whitespace characters
-            # (not capturing them).
-            r"(['\"]?)"  # An optional single or double quote.
-            r")"  # This is the end of the first capturing group.
-            r"(?:(?!\2\s).)*"  # All characters between optional quotes
-            # (matched above); if the value is quoted,
-            # it may contain whitespace.
-            r"(\2)",  # Optional matching quote.
-            r'\1******\3',
-            ' '.join(cmd),
-            flags=re.I,
-        )
-
-        return cmd_masked
 
     def _process_spark_submit_log(self, itr: Iterator[Any]) -> None:
         for line in itr:

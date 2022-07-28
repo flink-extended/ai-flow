@@ -76,10 +76,6 @@ class TestSparkSubmitOperator(unittest.TestCase):
         with self.assertRaisesRegex(AIFlowException, 'Param k8s_namespace must be set when submit to k8s'):
             self.op._validate_parameters()
 
-    def test_masks_passwords(self) -> None:
-        command_masked = self.op._mask_cmd(["spark-submit", "foo", "--bar", "baz", '--password=secret'])
-        self.assertEqual('spark-submit foo --bar baz --password=******', command_masked)
-
     def test_process_spark_submit_log_yarn(self):
         log_lines = [
             '...',
