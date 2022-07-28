@@ -18,6 +18,7 @@
 #
 import os
 import re
+import shutil
 import subprocess
 from typing import List, Optional, Dict, Any, Iterator
 
@@ -165,10 +166,13 @@ class SparkSubmitOperator(AIFlowOperator):
     def _get_executable_path(self):
         if self._executable_path:
             spark_submit = self._executable_path
+        elif shutil.which('spark-submit') is not None:
+            spark_submit = shutil.which('spark_submit')
+            self.log.info(f"Using {spark_submit} in PATH")
         else:
             spark_submit = expand_env_var('${SPARK_HOME}/bin/spark-submit')
-        if not os.path.exists(spark_submit):
-            raise AIFlowException(f'Cannot find spark-submit at {spark_submit}')
+            if not os.path.exists(spark_submit):
+                raise AIFlowException(f'Cannot find spark-submit at {spark_submit}')
         return spark_submit
 
     def _build_spark_submit_command(self) -> List[str]:

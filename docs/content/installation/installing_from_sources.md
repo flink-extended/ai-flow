@@ -16,13 +16,21 @@ git clone https://github.com/flink-extended/ai-flow.git
 
 ## Installing
 
-**[Optional]** To avoid dependencies conflict, we strongly recommend using [venv](https://docs.python.org/3.7/library/venv.html) or other similar tools for an isolated Python environment like below:
+### Preparing Environment [Optional] 
+To avoid dependencies conflict, we strongly recommend using [venv](https://docs.python.org/3.7/library/venv.html) or other similar tools for an isolated Python environment like below:
 
 ```shell
 python3 -m venv venv_for_aiflow
 source venv_for_aiflow/bin/activate
 ```
 
+### Installing wheel
+AIFlow would add some entrypoints to `PATH` during installation, which requires package `wheel` installed.
+```shell script
+pip install wheel
+``` 
+
+### Installing AIFlow
 Now you can install AIFlow by running:
 ```shell script
 # checkout active branch

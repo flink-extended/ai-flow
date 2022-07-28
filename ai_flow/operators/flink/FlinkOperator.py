@@ -16,6 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import os
+import shutil
 import subprocess
 from typing import List, Optional, Any, Iterator
 
@@ -91,14 +93,23 @@ class FlinkOperator(AIFlowOperator):
             kill_process.wait()
 
     def _get_executable_path(self):
-        return self._executable_path or expand_env_var('${FLINK_HOME}/bin/flink')
+        if self._executable_path:
+            executable = self._executable_path
+        elif shutil.which('flink') is not None:
+            executable = shutil.which('flink')
+            self.log.info(f"Using {executable} in PATH")
+        else:
+            executable = expand_env_var('${FLINK_HOME}/bin/flink')
+            if not os.path.exists(executable):
+                raise AIFlowException(f'Cannot find flink command at {executable}')
+        return executable
 
     def _build_flink_command(self):
         command = [self._get_executable_path()]
         if self._application_mode:
-            command += ["run"]
-        else:
             command += ["run-application"]
+        else:
+            command += ["run"]
         if self._target:
             command += ["--target", self._target]
         if self._command_options:
