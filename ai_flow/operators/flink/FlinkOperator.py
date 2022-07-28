@@ -40,7 +40,7 @@ class FlinkOperator(AIFlowOperator):
                  application_args: Optional[List[Any]] = None,
                  executable_path: Optional[str] = None,
                  application_mode: bool = False,
-                 target: str = 'local',
+                 target: Optional[str] = None,
                  stop_with_savepoint: bool = True,
                  command_options: Optional[str] = None,
                  **kwargs):
@@ -73,8 +73,8 @@ class FlinkOperator(AIFlowOperator):
 
         if return_code:
             raise AIFlowException(
-                "Cannot execute: {}. Error code is: {}. ".format(
-                    mask_cmd(self._flink_run_cmd), return_code
+                "Cannot execute: {}. Error code is: {}. Exception: {}".format(
+                    mask_cmd(self._flink_run_cmd), return_code, self._process.stderr
                 )
             )
 
