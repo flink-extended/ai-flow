@@ -17,6 +17,7 @@
 # under the License.
 #
 import os
+import re
 import shutil
 import subprocess
 from typing import List, Optional, Any, Iterator
@@ -73,8 +74,8 @@ class FlinkOperator(AIFlowOperator):
 
         if return_code:
             raise AIFlowException(
-                "Cannot execute: {}. Error code is: {}. Exception: {}".format(
-                    mask_cmd(self._flink_run_cmd), return_code, self._process.stderr
+                "Cannot execute: {}. Error code is: {}.".format(
+                    mask_cmd(self._flink_run_cmd), return_code
                 )
             )
 
@@ -125,9 +126,10 @@ class FlinkOperator(AIFlowOperator):
     def _process_flink_run_log(self, itr: Iterator[Any]) -> None:
         for line in itr:
             line = line.strip()
-            if line.startswith("Job has been submitted with JobID"):
-                self._flink_job_id = line.split(' ')[6][:-1]
-                self.log.info('Flink job id {}'.format(self._flink_job_id))
 
+            match = re.search(r'^Job has been submitted with JobID ([a-z0-9]+)', line)
+            if match:
+                self._flink_job_id = match.groups()[0]
+                self.log.info('Identified flink job id {}'.format(self._flink_job_id))
             self.log.info(line)
 
