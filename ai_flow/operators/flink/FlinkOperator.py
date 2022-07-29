@@ -94,17 +94,14 @@ class FlinkOperator(AIFlowOperator):
         if self._process and self._process.poll() is None:
             self._process.kill()
 
-        if self._is_yarn_per_job or self._is_yarn_session:
-            if not self._flink_job_id:
-                raise AIFlowException("Flink job id not found.")
-            if not self._yarn_application_id:
-                raise AIFlowException("Yarn application id not found.")
-            if self._stop_with_savepoint:
-                kill_cmd = f"flink stop -yid {self._yarn_application_id} {self._flink_job_id}".split()
-            else:
-                kill_cmd = f"flink cancel -yid {self.__yarn_application_id} {self._flink_job_id}".split()
-
-
+        kill_cmd = [self._get_executable_path()]
+        if self._stop_with_savepoint:
+            kill_cmd += ["stop"]
+        else:
+            kill_cmd += ["cancel"]
+        if self._yarn_application_id:
+            kill_cmd += ["-yid", self._yarn_application_id]
+        kill_cmd += [self._flink_job_id]
 
         kill_process = subprocess.Popen(
             kill_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
