@@ -57,6 +57,17 @@ class FlinkOperator(AIFlowOperator):
         self._flink_run_cmd = None
         self._process = None
         self._flink_job_id = None
+        self._yarn_application_id = None
+
+        self._is_yarn_application_mode = False
+        self._is_kubernetes_application_mode = False
+        self._is_yarn_per_job = False
+        self._is_yarn_session = False
+        self._is_remote = False
+        self._is_local = False
+        self._is_kubernetes_session = False
+
+        self._validate_parameters()
 
     def start(self, context: Context):
         self._flink_run_cmd = self._build_flink_command()
@@ -83,15 +94,22 @@ class FlinkOperator(AIFlowOperator):
         if self._process and self._process.poll() is None:
             self._process.kill()
 
-        if self._flink_job_id:
+        if self._is_yarn_per_job or self._is_yarn_session:
+            if not self._flink_job_id:
+                raise AIFlowException("Flink job id not found.")
+            if not self._yarn_application_id:
+                raise AIFlowException("Yarn application id not found.")
             if self._stop_with_savepoint:
-                kill_cmd = f"flink stop {self._flink_job_id}".split()
+                kill_cmd = f"flink stop -yid {self._yarn_application_id} {self._flink_job_id}".split()
             else:
-                kill_cmd = f"flink cancel {self._flink_job_id}".split()
-            kill_process = subprocess.Popen(
-                kill_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            )
-            kill_process.wait()
+                kill_cmd = f"flink cancel -yid {self.__yarn_application_id} {self._flink_job_id}".split()
+
+
+
+        kill_process = subprocess.Popen(
+            kill_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        kill_process.wait()
 
     def _get_executable_path(self):
         if self._executable_path:
@@ -123,13 +141,46 @@ class FlinkOperator(AIFlowOperator):
         self.log.info("flink run cmd: %s", mask_cmd(command))
         return command
 
+    def _validate_parameters(self):
+        if self._application_mode:
+            if self._target == "yarn-application":
+                self._is_yarn_application_mode = True
+            elif self._target == "kubernetes-application":
+                self._is_kubernetes_application_mode = True
+            else:
+                raise AIFlowException(
+                    f'Invalid --target option: {self._target} set to `flink run-application`'
+                )
+        else:
+            if self._target is None:
+                pass
+            elif self._target == 'yarn-per-job':
+                self._is_yarn_per_job = True
+            elif self._target == 'yarn-session':
+                self._is_yarn_session = True
+            elif self._target == 'remote':
+                self._is_remote = True
+            elif self._target == 'local':
+                self._is_local = True
+            elif self._target == 'kubernetes-session':
+                self._is_kubernetes_session = True
+            else:
+                raise AIFlowException(
+                    f'Invalid --target option: {self._target} set to `flink run`'
+                )
+
     def _process_flink_run_log(self, itr: Iterator[Any]) -> None:
         for line in itr:
             line = line.strip()
-
-            match = re.search(r'^Job has been submitted with JobID ([a-z0-9]+)', line)
-            if match:
-                self._flink_job_id = match.groups()[0]
-                self.log.info('Identified flink job id {}'.format(self._flink_job_id))
+            if not self._flink_job_id:
+                match_job_id = re.search(r'^Job has been submitted with JobID ([a-z0-9]+)', line)
+                if match_job_id:
+                    self._flink_job_id = match_job_id.groups()[0]
+                    self.log.info('Identified flink job id {}'.format(self._flink_job_id))
+            if not self._yarn_application_id:
+                match_yarn_app_id = re.search('(application[0-9_]+)', line)
+                if match_yarn_app_id:
+                    self._yarn_application_id = match_yarn_app_id.groups()[0]
+                    self.log.info("Identified yarn application id: %s", self._yarn_application_id)
             self.log.info(line)
 

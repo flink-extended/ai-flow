@@ -55,12 +55,12 @@ def stop_process(pid, timeout_sec: int = 60):
     """
 
     try:
+        os.kill(pid, signal.SIGTERM)
         start_time = time.monotonic()
         while check_pid_exist(pid):
             if time.monotonic() - start_time > timeout_sec:
                 raise RuntimeError(
                     "pid: {} does not exit after {} seconds.".format(pid, timeout_sec))
-            os.kill(pid, signal.SIGTERM)
             time.sleep(1)
     except Exception:
         logger.warning("Failed to stop pid: {} with SIGTERM. Try to send SIGKILL".format(pid))

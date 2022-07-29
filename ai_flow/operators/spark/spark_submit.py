@@ -216,7 +216,7 @@ class SparkSubmitOperator(AIFlowOperator):
                 match = re.search('(application[0-9_]+)', line)
                 if match:
                     self._yarn_application_id = match.groups()[0]
-                    self.log.info("Identified spark driver id: %s", self._yarn_application_id)
+                    self.log.info("Identified yarn application id: %s", self._yarn_application_id)
             elif self._is_kubernetes:
                 match = re.search(r'\s*pod name: ((.+?)-([a-z0-9]+)-driver)', line)
                 if match:
