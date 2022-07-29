@@ -15,11 +15,20 @@
 # under the License.
 #
 from ai_flow.common.env import expand_env_var
+from ai_flow.model.action import TaskAction
+from ai_flow.model.status import TaskStatus
 from ai_flow.model.workflow import Workflow
 from ai_flow.operators.flink.FlinkOperator import FlinkOperator
 
+
 with Workflow(name='flink_workflow') as workflow:
-    application_path = expand_env_var('${FLINK_HOME}/examples/streaming/TopSpeedWindowing.jar')
-    task = FlinkOperator(name='spark-submit-example-task',
-                         application=application_path,
-                         executable_path='flink')
+    batch_jar = expand_env_var('${FLINK_HOME}/examples/batch/WordCount.jar')
+    streaming_jar = expand_env_var('${FLINK_HOME}/examples/streaming/TopSpeedWindowing.jar')
+
+    batch_task = FlinkOperator(name='flink-batch-task',
+                               application=batch_jar)
+    streaming_task = FlinkOperator(name='flink-streaming-task',
+                                   application=streaming_jar,
+                                   target='yarn-per-job')
+
+    streaming_task.action_on_task_status(TaskAction.START, {batch_task: TaskStatus.SUCCESS})

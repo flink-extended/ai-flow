@@ -37,11 +37,11 @@ class FlinkOperator(AIFlowOperator):
 
     def __init__(self,
                  name: str,
+                 target: str,
                  application: str,
                  application_args: Optional[List[Any]] = None,
                  executable_path: Optional[str] = None,
                  application_mode: bool = False,
-                 target: Optional[str] = None,
                  stop_with_savepoint: bool = True,
                  command_options: Optional[str] = None,
                  **kwargs):
@@ -63,8 +63,6 @@ class FlinkOperator(AIFlowOperator):
         self._is_kubernetes_application_mode = False
         self._is_yarn_per_job = False
         self._is_yarn_session = False
-        self._is_remote = False
-        self._is_local = False
         self._is_kubernetes_session = False
 
         self._validate_parameters()
@@ -99,21 +97,53 @@ class FlinkOperator(AIFlowOperator):
             kill_cmd += ["stop"]
         else:
             kill_cmd += ["cancel"]
-        if self._yarn_application_id:
+        if self._is_yarn_session or self._is_yarn_per_job:
             kill_cmd += ["-yid", self._yarn_application_id]
+        elif self._is_yarn_application_mode:
+            self._get_job_id_in_application_mode()
+            kill_cmd += ["-t", "yarn-application", f"-Dyarn.application.id={self._yarn_application_id}"]
+
         kill_cmd += [self._flink_job_id]
 
+        self.log.info(f"Stopping task with command: {kill_cmd}")
         kill_process = subprocess.Popen(
             kill_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         kill_process.wait()
+
+    def _get_job_id_in_application_mode(self):
+        if not self._yarn_application_id:
+            raise AIFlowException("Yarn application id has not been obtained.")
+
+        list_cmd = [self._get_executable_path(),
+                    'list',
+                    '-t',
+                    'yarn-application',
+                    f'-Dyarn.application.id={self._yarn_application_id}'
+                    ]
+        self.log.info(f"Getting flink job with command: {list_cmd}")
+        list_process = subprocess.Popen(
+            list_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            bufsize=-1,
+            universal_newlines=True,
+        )
+        outputs = iter(list_process.stdout)
+        for line in outputs:
+            line = line.strip()
+            if not self._flink_job_id:
+                match_job_id = re.search(r': ([a-z0-9]+) :', line)
+                if match_job_id:
+                    self._flink_job_id = match_job_id.groups()[0]
+                    self.log.info('Identified flink job id {}'.format(self._flink_job_id))
+
 
     def _get_executable_path(self):
         if self._executable_path:
             executable = self._executable_path
         elif shutil.which('flink') is not None:
             executable = shutil.which('flink')
-            self.log.info(f"Using {executable} in PATH")
         else:
             executable = expand_env_var('${FLINK_HOME}/bin/flink')
             if not os.path.exists(executable):
@@ -155,10 +185,6 @@ class FlinkOperator(AIFlowOperator):
                 self._is_yarn_per_job = True
             elif self._target == 'yarn-session':
                 self._is_yarn_session = True
-            elif self._target == 'remote':
-                self._is_remote = True
-            elif self._target == 'local':
-                self._is_local = True
             elif self._target == 'kubernetes-session':
                 self._is_kubernetes_session = True
             else:
@@ -179,5 +205,6 @@ class FlinkOperator(AIFlowOperator):
                 if match_yarn_app_id:
                     self._yarn_application_id = match_yarn_app_id.groups()[0]
                     self.log.info("Identified yarn application id: %s", self._yarn_application_id)
+
             self.log.info(line)
 
