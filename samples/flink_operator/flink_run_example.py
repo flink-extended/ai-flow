@@ -26,9 +26,10 @@ with Workflow(name='flink_workflow') as workflow:
     streaming_jar = expand_env_var('${FLINK_HOME}/examples/streaming/TopSpeedWindowing.jar')
 
     batch_task = FlinkOperator(name='flink-batch-task',
+                               target='yarn-per-job',
                                application=batch_jar)
     streaming_task = FlinkOperator(name='flink-streaming-task',
-                                   application=streaming_jar,
-                                   target='yarn-per-job')
+                                   target='yarn-per-job',
+                                   application=streaming_jar)
 
     streaming_task.action_on_task_status(TaskAction.START, {batch_task: TaskStatus.SUCCESS})

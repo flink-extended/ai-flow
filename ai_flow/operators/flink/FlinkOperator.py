@@ -88,6 +88,9 @@ class FlinkOperator(AIFlowOperator):
                 )
             )
 
+        if self._is_yarn_application_mode:
+            self._start_tracking_status_for_application_mode()
+
     def stop(self, context: Context):
         if self._process and self._process.poll() is None:
             self._process.kill()
@@ -111,17 +114,57 @@ class FlinkOperator(AIFlowOperator):
         )
         kill_process.wait()
 
-    def _get_job_id_in_application_mode(self):
-        if not self._yarn_application_id:
-            raise AIFlowException("Yarn application id has not been obtained.")
+    def _start_tracking_status_for_application_mode(self):
+        """
+        Polls the job status every 5 seconds.
 
+        Possible status:
+
+        INITIALIZING
+            The job has been received by the Dispatcher, and is waiting for the job manager
+            to receive leadership and to be created.
+        CREATED
+            Job is newly created, no task has started to run.
+        RUNNING
+            Some tasks are scheduled or running, some may be pending, some may be finished.
+        FAILING
+            The job has failed and is currently waiting for the cleanup to complete.
+        FAILED
+            The job has failed with a non-recoverable task failure.
+        CANCELLING
+            Job is being cancelled.
+        CANCELED
+            Job has been cancelled.
+        FINISHED
+            All of the job's tasks have successfully finished.
+        RESTARTING
+            The job is currently undergoing a reset and total restart.
+        SUSPENDED
+            The job has been suspended which means that it has been stopped
+            but not been removed from a potential HA job store.
+        RECONCILING
+            The job is currently reconciling and waits for task execution report to recover state.
+        """
+        while self._job_status not in ["FAILED", "CANCELED", "FINISHED", "SUSPENDED"]:
+            if not self._yarn_application_id:
+                raise AIFlowException("Yarn application id has not been obtained.")
+            outputs = self._list_jobs()
+            for line in outputs:
+                line = line.strip()
+                match_job_id = re.search(r': ([a-z0-9]+) : ', line)
+                if match_job_id:
+                    self._flink_job_id = match_job_id.group(1)
+                    self.log.info('Identified flink job id {}'.format(self._flink_job_id))
+                    match_status = re.search(r'^\((.*)\)$', line.split()[-1])
+                    if match_status:
+                        self._job_status = match_status.group(1)
+
+    def _list_jobs(self) -> Iterator[Any]:
         list_cmd = [self._get_executable_path(),
                     'list',
-                    '-t',
-                    'yarn-application',
+                    '-t', 'yarn-application',
                     f'-Dyarn.application.id={self._yarn_application_id}'
                     ]
-        self.log.info(f"Getting flink job with command: {list_cmd}")
         list_process = subprocess.Popen(
             list_cmd,
             stdout=subprocess.PIPE,
@@ -130,14 +173,8 @@ class FlinkOperator(AIFlowOperator):
             universal_newlines=True,
         )
         outputs = iter(list_process.stdout)
-        for line in outputs:
-            line = line.strip()
-            if not self._flink_job_id:
-                match_job_id = re.search(r': ([a-z0-9]+) :', line)
-                if match_job_id:
-                    self._flink_job_id = match_job_id.groups()[0]
-                    self.log.info('Identified flink job id {}'.format(self._flink_job_id))
-
+        list_process.wait()
+        return outputs
 
     def _get_executable_path(self):
         if self._executable_path:
@@ -207,4 +244,6 @@ class FlinkOperator(AIFlowOperator):
                     self.log.info("Identified yarn application id: %s", self._yarn_application_id)
 
             self.log.info(line)
+
+
 
