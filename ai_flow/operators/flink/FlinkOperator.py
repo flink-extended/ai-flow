@@ -59,7 +59,7 @@ class FlinkOperator(AIFlowOperator):
         self._flink_job_id = None
         self._job_status = None
         self._yarn_application_id = None
-        self._yarn_application_final_status = None
+        self._yarn_application_final_status = 'UNDEFINED'
 
         self._is_yarn_application_mode = False
         self._is_kubernetes_application_mode = False
@@ -122,10 +122,9 @@ class FlinkOperator(AIFlowOperator):
         kill_process.wait()
 
     def _start_tracking_yarn_application_status(self):
-        while self._yarn_application_final_status is not None \
-                and self._yarn_application_final_status == 'UNDEFINED':
-            if not self._yarn_application_id:
-                raise AIFlowException("Yarn application id has not been obtained.")
+        if not self._yarn_application_id:
+            raise AIFlowException("Yarn application id has not been obtained.")
+        while self._yarn_application_final_status == 'UNDEFINED':
             status_cmd = f"yarn application --status {self._yarn_application_id}".split()
             status_process = subprocess.Popen(
                 status_cmd,
