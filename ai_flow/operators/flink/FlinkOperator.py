@@ -92,7 +92,7 @@ class FlinkOperator(AIFlowOperator):
 
         if self._is_yarn_application_mode:
             self._start_tracking_yarn_application_status()
-            if self._yarn_application_final_status != "FINISHED":
+            if self._yarn_application_final_status != "SUCCEEDED":
                 raise AIFlowException(
                     f"ERROR: Application {self._yarn_application_id} "
                     f"exited exited with status {self._yarn_application_final_status}"
@@ -122,7 +122,7 @@ class FlinkOperator(AIFlowOperator):
         kill_process.wait()
 
     def _start_tracking_yarn_application_status(self):
-        while self._yarn_application_final_status not in ["FAILED", "KILLED", "FINISHED"]:
+        while self._yarn_application_final_status == 'UNDEFINED':
             if not self._yarn_application_id:
                 raise AIFlowException("Yarn application id has not been obtained.")
             status_cmd = f"yarn application --status {self._yarn_application_id}".split()
