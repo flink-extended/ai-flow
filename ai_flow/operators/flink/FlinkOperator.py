@@ -59,6 +59,7 @@ class FlinkOperator(AIFlowOperator):
         self._flink_job_id = None
         self._job_status = None
         self._yarn_application_id = None
+        self._yarn_application_final_status = None
 
         self._is_yarn_application_mode = False
         self._is_kubernetes_application_mode = False
@@ -90,10 +91,11 @@ class FlinkOperator(AIFlowOperator):
             )
 
         if self._is_yarn_application_mode:
-            self._start_tracking_status_for_application_mode()
-            if self._job_status != "FINISHED":
+            self._start_tracking_yarn_application_status()
+            if self._yarn_application_final_status != "FINISHED":
                 raise AIFlowException(
-                    f"ERROR: Job {self._flink_job_id} in application mode exited exited with status {self._job_status}"
+                    f"ERROR: Application {self._yarn_application_id} "
+                    f"exited exited with status {self._yarn_application_final_status}"
                 )
 
     def stop(self, context: Context):
@@ -118,6 +120,24 @@ class FlinkOperator(AIFlowOperator):
             kill_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         kill_process.wait()
+
+    def _start_tracking_yarn_application_status(self):
+        while self._yarn_application_final_status not in ["FAILED", "KILLED", "FINISHED"]:
+            if not self._yarn_application_id:
+                raise AIFlowException("Yarn application id has not been obtained.")
+            status_cmd = f"yarn application --status {self._yarn_application_id}".split()
+            status_process = subprocess.Popen(
+                status_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                bufsize=-1,
+                universal_newlines=True,
+            )
+            for line in iter(status_process.stdout):
+                if "Final-State" in line:
+                    self._yarn_application_final_status = line.split(":")[1].strip()
+                    self.log.info(f"Yarn application status is {self._yarn_application_final_status}")
+            status_process.wait()
 
     def _start_tracking_status_for_application_mode(self):
         """
@@ -163,6 +183,15 @@ class FlinkOperator(AIFlowOperator):
                     match_status = re.search(r'^\((.*)\)$', line.split()[-1])
                     if match_status:
                         self._job_status = match_status.group(1)
+
+    def _get_job_id_in_application_mode(self):
+        outputs = self._list_jobs()
+        for line in outputs:
+            line = line.strip()
+            match_job_id = re.search(r': ([a-z0-9]+) : ', line)
+            if match_job_id:
+                self._flink_job_id = match_job_id.group(1)
+                self.log.info('Identified flink job id {}'.format(self._flink_job_id))
 
     def _list_jobs(self) -> Iterator[Any]:
         list_cmd = [self._get_executable_path(),
