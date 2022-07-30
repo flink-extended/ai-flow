@@ -90,6 +90,10 @@ class FlinkOperator(AIFlowOperator):
 
         if self._is_yarn_application_mode:
             self._start_tracking_status_for_application_mode()
+            if self._job_status != "FINISHED":
+                raise AIFlowException(
+                    f"ERROR: Job {self._flink_job_id} in application mode exited exited with status {self._job_status}"
+                )
 
     def stop(self, context: Context):
         if self._process and self._process.poll() is None:
