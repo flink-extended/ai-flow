@@ -57,6 +57,7 @@ class FlinkOperator(AIFlowOperator):
         self._flink_run_cmd = None
         self._process = None
         self._flink_job_id = None
+        self._job_status = None
         self._yarn_application_id = None
 
         self._is_yarn_application_mode = False
