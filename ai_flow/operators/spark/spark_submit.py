@@ -18,8 +18,11 @@
 #
 import os
 import re
+import shutil
 import subprocess
-from typing import List, Optional, Dict, Any, Union, Iterator
+from typing import List, Optional, Dict, Any, Iterator
+
+from ai_flow.common.util.string_utils import mask_cmd
 
 from ai_flow.common.env import expand_env_var
 from ai_flow.common.exception.exceptions import AIFlowException
@@ -55,7 +58,6 @@ class SparkSubmitOperator(AIFlowOperator):
                  submit_options: Optional[str] = None,
                  k8s_namespace: Optional[str] = None,
                  env_vars: Optional[Dict[str, Any]] = None,
-                 status_poll_interval: int = 1,
                  **kwargs):
         super().__init__(name, **kwargs)
         self._application = application
@@ -66,7 +68,6 @@ class SparkSubmitOperator(AIFlowOperator):
         self._env_vars = env_vars
         self._submit_options = submit_options
         self._application_args = application_args
-        self._status_poll_interval = status_poll_interval
 
         self._is_yarn = self._master is not None and 'yarn' in self._master
         self._is_kubernetes = self._master is not None and 'k8s' in self._master
@@ -110,13 +111,13 @@ class SparkSubmitOperator(AIFlowOperator):
             if self._is_kubernetes:
                 raise AIFlowException(
                     "Cannot execute: {}. Error code is: {}. Kubernetes spark exit code is: {}".format(
-                        self._mask_cmd(self.spark_submit_cmd), return_code, self._spark_exit_code
+                        mask_cmd(self.spark_submit_cmd), return_code, self._spark_exit_code
                     )
                 )
             else:
                 raise AIFlowException(
                     "Cannot execute: {}. Error code is: {}.".format(
-                        self._mask_cmd(self.spark_submit_cmd), return_code
+                        mask_cmd(self.spark_submit_cmd), return_code
                     )
                 )
 
@@ -165,10 +166,13 @@ class SparkSubmitOperator(AIFlowOperator):
     def _get_executable_path(self):
         if self._executable_path:
             spark_submit = self._executable_path
+        elif shutil.which('spark-submit') is not None:
+            spark_submit = shutil.which('spark_submit')
+            self.log.info(f"Using {spark_submit} in PATH")
         else:
             spark_submit = expand_env_var('${SPARK_HOME}/bin/spark-submit')
-        if not os.path.exists(spark_submit):
-            raise AIFlowException(f'Cannot find spark-submit at {spark_submit}')
+            if not os.path.exists(spark_submit):
+                raise AIFlowException(f'Cannot find spark-submit at {spark_submit}')
         return spark_submit
 
     def _build_spark_submit_command(self) -> List[str]:
@@ -201,32 +205,9 @@ class SparkSubmitOperator(AIFlowOperator):
         if self._application_args:
             spark_submit_command += self._application_args
 
-        self.log.info("Spark-Submit cmd: %s", self._mask_cmd(spark_submit_command))
+        self.log.info("Spark-Submit cmd: %s", mask_cmd(spark_submit_command))
 
         return spark_submit_command
-
-    @staticmethod
-    def _mask_cmd(cmd: Union[str, List[str]]) -> str:
-        cmd_masked = re.sub(
-            r"("
-            r"\S*?"  # Match all non-whitespace characters before...
-            r"(?:secret|password)"  # ...literally a "secret" or "password"
-            # word (not capturing them).
-            r"\S*?"  # All non-whitespace characters before either...
-            r"(?:=|\s+)"  # ...an equal sign or whitespace characters
-            # (not capturing them).
-            r"(['\"]?)"  # An optional single or double quote.
-            r")"  # This is the end of the first capturing group.
-            r"(?:(?!\2\s).)*"  # All characters between optional quotes
-            # (matched above); if the value is quoted,
-            # it may contain whitespace.
-            r"(\2)",  # Optional matching quote.
-            r'\1******\3',
-            ' '.join(cmd),
-            flags=re.I,
-        )
-
-        return cmd_masked
 
     def _process_spark_submit_log(self, itr: Iterator[Any]) -> None:
         for line in itr:
@@ -235,7 +216,7 @@ class SparkSubmitOperator(AIFlowOperator):
                 match = re.search('(application[0-9_]+)', line)
                 if match:
                     self._yarn_application_id = match.groups()[0]
-                    self.log.info("Identified spark driver id: %s", self._yarn_application_id)
+                    self.log.info("Identified yarn application id: %s", self._yarn_application_id)
             elif self._is_kubernetes:
                 match = re.search(r'\s*pod name: ((.+?)-([a-z0-9]+)-driver)', line)
                 if match:

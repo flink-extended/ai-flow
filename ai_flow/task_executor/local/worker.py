@@ -58,7 +58,12 @@ class Worker(Process):
         self._execute_in_subprocess(key, command)
 
     def _execute_in_subprocess(self, key, command: CommandType) -> TaskStatus:
-        process = subprocess.Popen(args=command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+        process = subprocess.Popen(args=command,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
+                                   close_fds=True,
+                                   bufsize=-1,
+                                   universal_newlines=True)
         LocalRegistry(self.registry_path).set(str(key), process.pid)
         stdout, stderr = process.communicate()
         retcode = process.poll()
