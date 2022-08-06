@@ -20,6 +20,8 @@ from abc import abstractmethod
 from queue import Empty
 from typing import Optional
 
+from notification_service.embedded_notification_client import EmbeddedNotificationClient
+
 from ai_flow.common.util.db_util.session import create_session
 from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.metadata.workflow import WorkflowMeta
@@ -29,11 +31,12 @@ from ai_flow.metadata.workflow_snapshot import WorkflowSnapshotMeta
 from ai_flow.common.configuration.config_constants import NOTIFICATION_SERVER_URI, INTERNAL_RPC_PORT, \
     TASK_HEARTBEAT_INTERVAL
 from ai_flow.common.exception.exceptions import AIFlowException
-from ai_flow.common.util import workflow_utils
 from ai_flow.common.util.net_utils import get_ip_addr
 from ai_flow.common.util.thread_utils import StoppableThread
 from ai_flow.metadata.message import PersistentQueue
 from ai_flow.model.action import TaskAction
+from ai_flow.model.internal.events import TaskStatusEvent, TaskStatusChangedEvent
+from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecutionKey
 from ai_flow.scheduler.schedule_command import TaskScheduleCommand
 from ai_flow.task_executor.common.heartbeat_manager import HeartbeatManager
@@ -49,6 +52,7 @@ class TaskExecutorBase(TaskExecutor):
         self.command_queue: PersistentQueue = None
         self.command_processor = StoppableThread(target=self._process_command)
         self.heartbeat_manager: HeartbeatManager = None
+        self.notification_client = None
 
     def schedule_task(self, command: TaskScheduleCommand):
         if not self.command_queue:
@@ -57,6 +61,9 @@ class TaskExecutorBase(TaskExecutor):
 
     def start(self):
         logging.info("starting task executor.")
+        self.notification_client = EmbeddedNotificationClient(
+            server_uri=NOTIFICATION_SERVER_URI, namespace='task_status_change', sender='task_executor'
+        )
         self.command_queue = PersistentQueue(maxsize=MAX_QUEUE_SIZE)
         self.command_processor.start()
         self.heartbeat_manager = HeartbeatManager()
@@ -71,6 +78,21 @@ class TaskExecutorBase(TaskExecutor):
         self.command_processor.stop()
         self.command_processor.join()
         self.command_queue.join()
+        self.notification_client.close()
+
+    def _send_task_status_change(self, key: TaskExecutionKey, status: TaskStatus):
+        event_for_meta = TaskStatusEvent(workflow_execution_id=key.workflow_execution_id,
+                                         task_name=key.task_name,
+                                         sequence_number=key.seq_num,
+                                         status=status)
+        self.notification_client.send_event(event_for_meta)
+        workflow = self._get_workflow(key.workflow_execution_id)
+        event_for_schedule = TaskStatusChangedEvent(workflow_name=workflow.name,
+                                                    workflow_execution_id=key.workflow_execution_id,
+                                                    task_name=key.task_name,
+                                                    status=status,
+                                                    namespace=workflow.namespace)
+        self.notification_client.send_event(event_for_schedule)
 
     def _process_command(self):
         # TODO put command processor in an Actor or thread pool with order preserving
@@ -84,14 +106,18 @@ class TaskExecutorBase(TaskExecutor):
                     if action == TaskAction.START:
                         logger.info("Running {} command on {}".format(action, new_task))
                         self.start_task_execution(new_task)
+                        self._send_task_status_change(new_task, TaskStatus.RUNNING)
                     elif action == TaskAction.STOP:
                         logger.info("Running {} command on {}".format(action, current_task))
                         self.stop_task_execution(current_task)
+                        self._send_task_status_change(current_task, TaskStatus.STOPPED)
                     elif action == TaskAction.RESTART:
                         logger.info("Running {} command on {}".format(action, current_task))
                         if current_task is not None:
                             self.stop_task_execution(current_task)
+                            self._send_task_status_change(current_task, TaskStatus.STOPPED)
                         self.start_task_execution(new_task)
+                        self._send_task_status_change(new_task, TaskStatus.RUNNING)
                 except Exception as e:
                     logger.exception("Error occurred while processing command queue, {}".format(e))
                 finally:

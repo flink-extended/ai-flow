@@ -114,12 +114,15 @@ def build_workflow_rule_index(workflow_dict: Dict[int, Workflow],
     for workflow_trigger_meta in workflow_trigger_dict.values():
         if workflow_trigger_meta.workflow_id not in workflow_dict:
             continue
-        rule: WorkflowRule = cloudpickle.loads(workflow_trigger_meta.rule)
-        expect_keys = expect_keys_to_tuple_set(rule.condition.expect_events)
-        for key in expect_keys:
-            if key not in workflow_rule_index:
-                workflow_rule_index[key] = set()
-            workflow_rule_index[key].add(workflow_trigger_meta.workflow_id)
+        try:
+            rule: WorkflowRule = cloudpickle.loads(workflow_trigger_meta.rule)
+            expect_keys = expect_keys_to_tuple_set(rule.condition.expect_events)
+            for key in expect_keys:
+                if key not in workflow_rule_index:
+                    workflow_rule_index[key] = set()
+                workflow_rule_index[key].add(workflow_trigger_meta.workflow_id)
+        except Exception as e:
+            logging.exception("Failed to load workflow trigger: %s, %s", workflow_trigger_meta.id, e)
     return workflow_rule_index
 
 
@@ -188,7 +191,10 @@ class RuleExtractor(object):
                 namespace=None, filters=Filters(filters=[(FilterEqual('is_enabled'), True)]))
         workflow_dict = {}
         for w_m in workflows:
-            workflow_dict[w_m.id] = cloudpickle.loads(w_m.workflow_object)
+            try:
+                workflow_dict[w_m.id] = cloudpickle.loads(w_m.workflow_object)
+            except Exception as e:
+                logging.exception("Failed to load workflow: %s, %s", w_m.name, e)
         return workflow_dict
 
     @staticmethod

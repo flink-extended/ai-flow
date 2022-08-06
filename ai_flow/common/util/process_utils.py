@@ -62,6 +62,8 @@ def stop_process(pid, timeout_sec: int = 60):
                 raise RuntimeError(
                     "pid: {} does not exit after {} seconds.".format(pid, timeout_sec))
             time.sleep(1)
+    except ProcessLookupError:
+        pass
     except Exception:
         logger.warning("Failed to stop pid: {} with SIGTERM. Try to send SIGKILL".format(pid))
         try:
