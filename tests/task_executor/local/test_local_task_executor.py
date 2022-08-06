@@ -75,8 +75,9 @@ class TestLocalExecutor(unittest.TestCase):
                 psutil.Process(process.pid)
 
     @mock.patch.object(config_constants, 'TASK_EXECUTOR_HEARTBEAT_CHECK_INTERVAL', 1)
-    @mock.patch('ai_flow.task_executor.common.heartbeat_manager.EmbeddedNotificationClient')
-    def test_negative_parallelism(self, mock_ns):
+    @mock.patch('ai_flow.task_executor.common.task_executor_base.HeartbeatManager')
+    @mock.patch('ai_flow.task_executor.common.task_executor_base.EmbeddedNotificationClient')
+    def test_negative_parallelism(self, mock_ns, mock_heartbeat):
         with self.assertRaises(AIFlowException) as context:
             try:
                 executor = LocalTaskExecutor(0)
