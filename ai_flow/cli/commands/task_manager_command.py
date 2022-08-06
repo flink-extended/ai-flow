@@ -84,13 +84,11 @@ class TaskManager(object):
 
     def run_task(self):
         try:
-            self._send_task_status_change(TaskStatus.RUNNING)
             self._execute()
         except TaskFailedException:
             self._send_task_status_change(TaskStatus.FAILED)
             raise
         except TaskForceStoppedException:
-            self._send_task_status_change(TaskStatus.STOPPED)
             raise
         else:
             self._send_task_status_change(TaskStatus.SUCCESS)
