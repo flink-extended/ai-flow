@@ -64,7 +64,7 @@ class SimpleNotificationServerHaManager(NotificationServerHaManager):
 
     def __init__(self):
         self.server_uri = None
-        self.storage = None  # type: HighAvailabilityStorage
+        self.storage = None
         self.ttl_ms = None
         self.cached_notify = deque()
         self.living_members = []
