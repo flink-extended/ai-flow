@@ -20,7 +20,7 @@ from datetime import datetime
 from typing import Union
 
 import cloudpickle
-from notification_service.event import Event
+from notification_service.model.event import Event
 
 from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.action import TaskAction

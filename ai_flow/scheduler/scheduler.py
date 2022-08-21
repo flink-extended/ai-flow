@@ -16,7 +16,7 @@
 # under the License.
 import sys
 
-from notification_service.event import Event
+from notification_service.model.event import Event
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.scheduler.dispatcher import Dispatcher

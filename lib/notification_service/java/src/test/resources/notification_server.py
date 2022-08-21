@@ -14,9 +14,9 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from notification_service.event_storage import MemoryEventStorage
-from notification_service.server import NotificationServer
-from notification_service.service import NotificationService
+from notification_service.storage.in_memory.memory_event_storage import MemoryEventStorage
+from notification_service.server.server import NotificationServer
+from notification_service.rpc.service import NotificationService
 
 
 def run_server():

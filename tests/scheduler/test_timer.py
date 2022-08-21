@@ -21,8 +21,8 @@ import unittest
 from datetime import datetime
 from typing import List
 
-from notification_service.event import Event, EventKey
-from notification_service.notification_client import NotificationClient, ListenerRegistrationId, ListenerProcessor
+from notification_service.model.event import Event, EventKey
+from notification_service.client.notification_client import NotificationClient, ListenerRegistrationId, ListenerProcessor
 from tests.test_utils.unittest_base import BaseUnitTest
 
 from ai_flow.common.util.db_util.session import new_session, create_session

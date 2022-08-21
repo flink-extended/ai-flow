@@ -17,7 +17,7 @@
 import abc
 from typing import List
 
-from notification_service.event import EventKey, Event
+from notification_service.model.event import EventKey, Event
 
 from ai_flow.model.context import Context
 

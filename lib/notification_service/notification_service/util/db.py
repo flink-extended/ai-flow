@@ -1,11 +1,9 @@
 #
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
+# Copyright 2022 The AI Flow Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
 #   http://www.apache.org/licenses/LICENSE-2.0
 #
@@ -23,17 +21,13 @@ import logging
 import os
 import urllib.parse
 import sqlalchemy
-from collections import Iterable
 from enum import Enum
 from functools import wraps
-from typing import Tuple, Union
 
-from sqlalchemy import create_engine, Column, String, BigInteger, Text, Integer, Boolean, func
+from sqlalchemy import create_engine, Column, String, BigInteger, Text, Integer, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from notification_service.base_notification import BaseEvent, Member, ANY_CONDITION
-from notification_service.util.utils import event_model_to_event, count_result_to_sender_event_count
 
 if not hasattr(time, 'time_ns'):
     time.time_ns = lambda: int(time.time() * 1e9)
@@ -107,11 +101,11 @@ def upgrade(url, version=None):
     command.upgrade(config, version)
 
 
-def clear_db(url):
+def clear_db(url, metadata):
     _logger.info('Clear the database, db uri: {}'.format(url))
     engine = sqlalchemy.create_engine(url)
     connection = engine.connect()
-    Base.metadata.drop_all(connection)
+    metadata.drop_all(connection)
     # alembic adds significant import time, so we import it lazily
     from alembic.migration import MigrationContext  # noqa
 
@@ -121,9 +115,9 @@ def clear_db(url):
         version.drop(connection)
 
 
-def reset_db(url):
+def reset_db(url, metadata):
     _logger.info('Reset the database, db uri: {}'.format(url))
-    clear_db(url)
+    clear_db(url, metadata)
     upgrade(url)
 
 
@@ -254,325 +248,6 @@ def provide_session(func):
     return wrapper
 
 
-Base = declarative_base()
-
-
-class EventModel(Base):
-    __tablename__ = "event_model"
-    version = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True)
-    key = Column(String(1024), nullable=False)
-    value = Column(Text())
-    event_type = Column(String(1024), server_default="UNDEFINED")
-    context = Column(Text())
-    namespace = Column(String(1024))
-    sender = Column(String(1024))
-    create_time = Column(BigInteger(), nullable=False)
-    uuid = Column(String(40), nullable=False, unique=True)
-
-    @staticmethod
-    @provide_session
-    def add_event(event: BaseEvent, uuid, session=None):
-        event_model = EventModel()
-        event_model.key = event.key
-        event_model.value = event.value
-        event_model.event_type = event.event_type
-        event_model.context = event.context
-        event_model.namespace = event.namespace
-        event_model.create_time = int(time.time() * 1000)
-        event_model.uuid = uuid
-        event_model.sender = event.sender
-        session.add(event_model)
-        session.commit()
-        return event_model_to_event(event_model)
-
-    @staticmethod
-    @provide_session
-    def list_events(key: Union[str, Tuple[str]],
-                    version: int = None,
-                    event_type: str = None,
-                    start_time: int = None,
-                    namespace: str = None,
-                    sender: str = None,
-                    session=None):
-        key = None if key == "" else key
-        event_type = None if event_type == "" else event_type
-        namespace = None if namespace == "" else namespace
-        sender = None if sender == "" else sender
-        if isinstance(key, str):
-            key = (key,)
-        elif isinstance(key, Iterable):
-            key = tuple(key)
-        if key is None:
-            raise Exception('key cannot be empty.')
-
-        conditions = []
-        if event_type is not None and event_type != ANY_CONDITION:
-            conditions.append(EventModel.event_type == event_type)
-        if start_time is not None and start_time > 0:
-            conditions.append(EventModel.create_time >= start_time)
-        if namespace is not None and ANY_CONDITION != namespace:
-            conditions.append(EventModel.namespace == namespace)
-        if sender is not None and ANY_CONDITION != sender:
-            conditions.append(EventModel.sender == sender)
-        if version > 0:
-            conditions.append(EventModel.version > version)
-        if ANY_CONDITION not in key:
-            conditions.append(EventModel.key.in_(key))
-        event_model_list = session.query(EventModel).filter(*conditions).all()
-        return [event_model_to_event(event_model) for event_model in event_model_list]
-
-    @staticmethod
-    @provide_session
-    def count_events(key: Union[str, Tuple[str]],
-                     version: int = None,
-                     event_type: str = None,
-                     start_time: int = None,
-                     namespace: str = None,
-                     sender: str = None,
-                     session=None):
-        key = None if key == "" else key
-        event_type = None if event_type == "" else event_type
-        namespace = None if namespace == "" else namespace
-        sender = None if sender == "" else sender
-        if isinstance(key, str):
-            key = (key,)
-        elif isinstance(key, Iterable):
-            key = tuple(key)
-        if key is None:
-            raise Exception('key cannot be empty.')
-        conditions = []
-        if event_type is not None and event_type != ANY_CONDITION:
-            conditions.append(EventModel.event_type == event_type)
-        if start_time is not None and start_time > 0:
-            conditions.append(EventModel.create_time >= start_time)
-        if namespace is not None and ANY_CONDITION != namespace:
-            conditions.append(EventModel.namespace == namespace)
-        if sender is not None and ANY_CONDITION != sender:
-            conditions.append(EventModel.sender == sender)
-        if version > 0:
-            conditions.append(EventModel.version > version)
-        if ANY_CONDITION not in key:
-            conditions.append(EventModel.key.in_(key))
-
-        count_results = session.query(EventModel.sender, func.count('*').label('event_count')).filter(*conditions).group_by(
-            EventModel.sender)
-        return [count_result_to_sender_event_count(count_result) for count_result in count_results]
-
-    @staticmethod
-    @provide_session
-    def list_all_events(start_time: int, session=None):
-        conditions = [
-            EventModel.create_time >= start_time
-        ]
-        event_model_list = session.query(EventModel).filter(*conditions).all()
-        return [event_model_to_event(event_model) for event_model in event_model_list]
-
-    @staticmethod
-    @provide_session
-    def list_all_events_from_version(start_version: int, end_version: int = None, session=None):
-        conditions = [
-            EventModel.version > start_version
-        ]
-        if end_version is not None and end_version > 0:
-            conditions.append(EventModel.version <= end_version)
-        event_model_list = session.query(EventModel).filter(*conditions).all()
-        return [event_model_to_event(event_model) for event_model in event_model_list]
-
-    @staticmethod
-    @provide_session
-    def sync_event(event: BaseEvent, uuid, session=None):
-        event_model = EventModel()
-        event_model.key = event.key
-        event_model.value = event.value
-        event_model.event_type = event.event_type
-        event_model.context = event.context
-        event_model.namespace = event.namespace
-        event_model.create_time = event.create_time
-        event_model.uuid = uuid
-        event_model.sender = event.sender
-        session.add(event_model)
-        session.commit()
-        return event_model_to_event(event_model)
-
-    @staticmethod
-    @provide_session
-    def get_latest_version(session=None):
-        event = session.query(EventModel).order_by(EventModel.version.desc()) \
-            .limit(1).first()
-        if event is not None:
-            return event.version
-        else:
-            return 0
-
-    @staticmethod
-    @provide_session
-    def timestamp_to_version(timestamp, session=None):
-        e = session.query(EventModel).filter(EventModel.create_time >= timestamp) \
-            .order_by(EventModel.version.asc()) \
-            .limit(1).first()
-        if e is None:
-            return None
-        else:
-            return e.version
-
-    @staticmethod
-    @provide_session
-    def get_event_by_uuid(uuid, session=None):
-        conditions = [
-            EventModel.uuid == uuid
-        ]
-        return session.query(EventModel).filter(*conditions).first()
-
-    @staticmethod
-    def create_table(db_conn=None):
-        if db_conn is not None:
-            global SQL_ALCHEMY_CONN
-            SQL_ALCHEMY_CONN = db_conn
-        prepare_db()
-        if not engine.dialect.has_table(engine, EventModel.__tablename__):
-            Base.metadata.create_all(engine)
-
-    @staticmethod
-    @provide_session
-    def cleanup(session=None):
-        session.query(EventModel).delete()
-        session.commit()
-
-
-class ClientModel(Base):
-    __tablename__ = "notification_client"
-    id = Column(BigInteger().with_variant(Integer, "sqlite"), autoincrement=True, primary_key=True)
-    namespace = Column(String(1024))
-    sender = Column(String(1024))
-    create_time = Column(BigInteger)
-    is_deleted = Column(Boolean, default=False)
-
-    @staticmethod
-    @provide_session
-    def register_client(namespace: str = None, sender: str = None, session=None):
-        client = ClientModel()
-        client.namespace = namespace
-        client.sender = sender
-        client.create_time = int(time.time() * 1000)
-        session.add(client)
-        session.commit()
-        return client.id
-
-    @staticmethod
-    @provide_session
-    def delete_client(client_id, session=None):
-        client_to_delete = session.query(ClientModel).filter(ClientModel.id == client_id).first()
-        if client_to_delete is None:
-            raise Exception("You are trying to delete an non-existing notification client!")
-        client_to_delete.is_deleted = True
-        session.flush()
-
-    @staticmethod
-    @provide_session
-    def is_client_exists(client_id, session=None):
-        client_to_check = session.query(ClientModel).filter(ClientModel.id == client_id,
-                                                            ClientModel.is_deleted.is_(False)).first()
-        return client_to_check is not None
-
-    @staticmethod
-    def create_table(db_conn=None):
-        if db_conn is not None:
-            global SQL_ALCHEMY_CONN
-            SQL_ALCHEMY_CONN = db_conn
-        prepare_db()
-        if not engine.dialect.has_table(engine, ClientModel.__tablename__):
-            Base.metadata.create_all(engine)
-
-    @staticmethod
-    @provide_session
-    def cleanup(session=None):
-        session.query(ClientModel).delete()
-        session.commit()
-
-
-class MemberModel(Base):
-    __tablename__ = "member_model"
-    id = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True)
-    version = Column(BigInteger(), nullable=False)
-    server_uri = Column(String(767), nullable=False, unique=True)
-    update_time = Column(BigInteger(), nullable=False)
-    uuid = Column(String(128), nullable=False, unique=True)
-
-    @staticmethod
-    def create_table(db_conn=None):
-        if db_conn is not None:
-            global SQL_ALCHEMY_CONN
-            SQL_ALCHEMY_CONN = db_conn
-        prepare_db()
-        if not engine.dialect.has_table(engine, MemberModel.__tablename__):
-            Base.metadata.create_all(engine)
-
-    @staticmethod
-    @provide_session
-    def cleanup(session=None):
-        session.query(MemberModel).delete()
-        session.commit()
-
-    @staticmethod
-    @provide_session
-    def update_member(server_uri, server_uuid, session=None):
-        member = session.query(MemberModel) \
-            .filter(MemberModel.server_uri == server_uri).first()
-        if member is None:
-            member = MemberModel()
-            member.version = 1
-            member.server_uri = server_uri
-            member.update_time = time.time_ns() / 1000000
-            member.uuid = server_uuid
-            session.add(member)
-        else:
-            if member.uuid != server_uuid:
-                raise Exception("The server uri '%s' is already exists in the storage!" %
-                                server_uri)
-            member.version += 1
-            member.update_time = time.time_ns() / 1000000
-        session.commit()
-
-    @staticmethod
-    @provide_session
-    def get_living_members(ttl, session=None):
-        member_models = session.query(MemberModel) \
-            .filter(MemberModel.update_time >= time.time_ns() / 1000000 - ttl) \
-            .all()
-        return [Member(m.version, m.server_uri, int(m.update_time)) for m in member_models]
-
-    @staticmethod
-    @provide_session
-    def get_dead_members(ttl, session=None):
-        member_models = session.query(MemberModel) \
-            .filter(MemberModel.update_time < time.time_ns() / 1000000 - ttl) \
-            .all()
-        return [Member(m.version, m.server_uri, int(m.update_time)) for m in member_models]
-
-    @staticmethod
-    @provide_session
-    def delete_member(server_uri=None, server_uuid=None, session=None):
-        conditions = []
-        if server_uri:
-            conditions.append(MemberModel.server_uri == server_uri)
-        if server_uuid:
-            conditions.append(MemberModel.uuid == server_uuid)
-        if len(conditions) != 1:
-            raise Exception("Please provide exactly one param, server_uri or server_uuid")
-        member = session.query(MemberModel).filter(*conditions).first()
-        if member is not None:
-            session.delete(member)
-        session.commit()
-
-    @staticmethod
-    @provide_session
-    def clear_dead_members(ttl, session=None):
-        session.query(MemberModel) \
-            .filter(MemberModel.update_time < time.time_ns() / 1000000 - ttl) \
-            .delete()
-        session.commit()
-
-
 def create_all_tables(db_conn=None):
     global SQL_ALCHEMY_CONN
     if db_conn is not None:
@@ -582,8 +257,8 @@ def create_all_tables(db_conn=None):
     prepare_db()
 
 
-def drop_all_tables(db_conn=None):
-    global SQL_ALCHEMY_CONN
-    if db_conn is not None:
-        SQL_ALCHEMY_CONN = db_conn
-    clear_db(url=SQL_ALCHEMY_CONN)
+# def drop_all_tables(db_conn=None):
+#     global SQL_ALCHEMY_CONN
+#     if db_conn is not None:
+#         SQL_ALCHEMY_CONN = db_conn
+#     clear_db(url=SQL_ALCHEMY_CONN)

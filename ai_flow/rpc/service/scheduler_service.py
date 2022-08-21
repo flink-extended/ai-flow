@@ -18,8 +18,8 @@ import os
 import time
 from typing import List
 
-from notification_service.event import Event
-from notification_service.notification_client import ListenerProcessor
+from notification_service.model.event import Event
+from notification_service.client.notification_client import ListenerProcessor
 
 from ai_flow.common.env import get_aiflow_home
 from ai_flow.model.status import WORKFLOW_ALIVE_SET, WorkflowStatus, WORKFLOW_FINISHED_SET, TaskStatus

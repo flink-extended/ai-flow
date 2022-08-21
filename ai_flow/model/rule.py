@@ -14,7 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from notification_service.event import Event
+from notification_service.model.event import Event
 from typing import Optional
 
 from ai_flow.model.action import TaskAction

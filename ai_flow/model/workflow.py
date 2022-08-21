@@ -16,7 +16,7 @@
 # under the License.
 from typing import Dict, List, Optional
 
-from notification_service.event import EventKey, Event
+from notification_service.model.event import EventKey
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition

@@ -20,6 +20,7 @@ import os
 import unittest
 from contextlib import redirect_stdout
 
+from notification_service import settings
 from notification_service.cli import cli_parser
 from notification_service.cli.commands.config_command import config_init, config_get_value, config_list
 from notification_service.settings import NOTIFICATION_HOME
@@ -31,6 +32,22 @@ class TestCliConfig(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.parser = cli_parser.get_parser()
+        cls.config_str = """
+            server_port: 50052
+            db_uri: sqlite:///ns.db
+            enable_ha: false
+            ha_ttl_ms: 10000
+            advertised_uri: 127.0.0.1:50052
+        """
+        cls.tmp_config_file = os.path.join(os.path.dirname(__file__), 'notification_server.yaml')
+        with open(cls.tmp_config_file, 'w') as f:
+            f.write(cls.config_str)
+        settings.NOTIFICATION_HOME = os.path.dirname(__file__)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        if os.path.exists(cls.tmp_config_file):
+            os.remove(cls.tmp_config_file)
 
     def setUp(self) -> None:
         self.config_file = NOTIFICATION_HOME + '/notification_server.yaml'
@@ -60,4 +77,4 @@ class TestCliConfig(unittest.TestCase):
         config_init(self.parser.parse_args(['config', 'init']))
         with redirect_stdout(io.StringIO()) as stdout:
             config_list(self.parser.parse_args(['config', 'list']))
-            self.assertIn('# port of notification server\nserver_port: 50052\n', stdout.getvalue())
+            self.assertIn('server_port: 50052', stdout.getvalue())

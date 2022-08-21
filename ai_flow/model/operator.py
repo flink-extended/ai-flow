@@ -19,7 +19,7 @@ from abc import abstractmethod
 
 from typing import Dict, Optional
 
-from notification_service.event import EventKey
+from notification_service.model.event import EventKey
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition

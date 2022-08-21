@@ -23,10 +23,10 @@ from datetime import datetime
 
 from notification_service.cli import cli_parser
 from notification_service.cli.commands import event_command
-from notification_service.client import NotificationClient
-from notification_service.event_storage import MemoryEventStorage
-from notification_service.server import NotificationServer
-from notification_service.service import NotificationService
+from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
+from notification_service.rpc.service import NotificationService
+from notification_service.server.server import NotificationServer
+from notification_service.storage.in_memory.memory_event_storage import MemoryEventStorage
 from notification_service.util import db
 
 SERVER_URI = "localhost:50051"
@@ -37,7 +37,6 @@ class TestCliEvent(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.parser = cli_parser.get_parser()
-        db.create_all_tables()
         cls.storage = MemoryEventStorage()
         cls.master = NotificationServer(NotificationService(cls.storage))
         cls.master.run()
@@ -59,7 +58,9 @@ class TestCliEvent(unittest.TestCase):
         last_exception = None
         for i in range(60):
             try:
-                return NotificationClient(server_uri=server_uri)
+                return EmbeddedNotificationClient(server_uri=server_uri,
+                                                  namespace=None,
+                                                  sender=None)
             except Exception as e:
                 time.sleep(1)
                 last_exception = e
@@ -114,8 +115,9 @@ class TestCliEvent(unittest.TestCase):
                 )
             self.send_an_event()
         print(stdout.getvalue())
-        self.assertIn('Successfully send event: key:key, value:value1, type:event-type1, version:1', stdout.getvalue())
-        self.assertIn('context: context1, namespace: namespace1, sender: sender1', stdout.getvalue())
+        self.assertIn('Successfully send event: '
+                      'event_key:[name:key, event_type:event-type1, namespace:namespace1, sender:sender1], '
+                      'message:value1', stdout.getvalue())
 
     def test_cli_list_events(self):
         self.send_an_event('key1')
@@ -172,7 +174,7 @@ class TestCliEvent(unittest.TestCase):
                     ['event',
                      'count',
                      '-s', SERVER_URI,
-                     '--begin-version', '1',
+                     '--begin-offset', '1',
                      'key1'
                      ]
                 )

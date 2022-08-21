@@ -18,6 +18,7 @@
 import logging
 
 from notification_service.settings import get_configuration
+from notification_service.storage.alchemy.base import Base
 from notification_service.util import db
 
 _logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ def reset(args):
     config = get_configuration()
     _logger.info('Reset the database, db uri: {}'.format(config.db_uri))
     if args.yes or input("This will drop existing tables if they exist. Proceed? (y/n)").upper() == "Y":
-        db.reset_db(url=config.db_uri)
+        db.reset_db(url=config.db_uri, metadata=Base.metadata)
     else:
         _logger.info('Cancel reset the database, db uri: {}'.format(config.db_uri))
 
