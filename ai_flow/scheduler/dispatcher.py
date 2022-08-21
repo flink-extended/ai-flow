@@ -17,7 +17,7 @@
 import json
 import logging
 
-from notification_service.event import Event
+from notification_service.model.event import Event
 from typing import List
 
 from ai_flow.common.exception.exceptions import AIFlowException

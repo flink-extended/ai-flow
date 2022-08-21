@@ -19,7 +19,7 @@ import logging
 import queue
 import threading
 
-from notification_service.event import Event
+from notification_service.model.event import Event
 from ai_flow.common.util.db_util.session import create_session
 from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.action import TaskAction

@@ -16,8 +16,9 @@
 # under the License.
 from typing import List, Dict
 from datetime import datetime
-from notification_service.event import Event, EventKey
-from notification_service.notification_client import NotificationClient, ListenerProcessor, ListenerRegistrationId
+from notification_service.model.event import Event, EventKey
+from notification_service.client.notification_client import NotificationClient, \
+    ListenerProcessor, ListenerRegistrationId
 
 from ai_flow.scheduler.timer import Timer, build_trigger
 

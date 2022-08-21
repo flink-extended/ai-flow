@@ -18,6 +18,7 @@
 import os
 import unittest
 import notification_service.settings
+from notification_service.storage.alchemy import ClientModel
 
 from sqlalchemy import create_engine
 
@@ -31,8 +32,27 @@ class TestCliDb(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.parser = cli_parser.get_parser()
-        notification_service.settings.NOTIFICATION_HOME = os.path.join(os.path.dirname(__file__), '../../')
+        cls.config_str = """
+                    server_port: 50052
+                    # uri of database backend for notification server
+                    db_uri: sqlite:///ns.db
+                    # High availability is disabled by default
+                    enable_ha: false
+                    # TTL of the heartbeat of a server, i.e., if the server hasn't send heartbeat for the TTL time, it is down.
+                    ha_ttl_ms: 10000
+                    # Hostname and port the server will advertise to clients when HA enabled. If not set, it will use the local ip and configured port.
+                    advertised_uri: 127.0.0.1:50052
+                """
+        cls.tmp_config_file = os.path.join(os.path.dirname(__file__), 'notification_server.yaml')
+        with open(cls.tmp_config_file, 'w') as f:
+            f.write(cls.config_str)
+        notification_service.settings.NOTIFICATION_HOME = os.path.dirname(__file__)
         cls.config = get_configuration()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        if os.path.exists(cls.tmp_config_file):
+            os.remove(cls.tmp_config_file)
 
     def _remove_db_file(self):
         if os.path.exists('ns.db'):
@@ -57,16 +77,16 @@ class TestCliDb(unittest.TestCase):
         db_command.init(self.parser.parse_args(['db', 'init']))
         db.prepare_db()
         with db.create_session() as session:
-            client = db.ClientModel()
+            client = ClientModel()
             client.namespace = 'a'
             client.sender = 'a'
             client.create_time = 1
             session.add(client)
             session.commit()
-            client_res = session.query(db.ClientModel).all()
+            client_res = session.query(ClientModel).all()
             self.assertEqual(1, len(client_res))
             db_command.reset(self.parser.parse_args(['db', 'reset', '-y']))
-            client_res = session.query(db.ClientModel).all()
+            client_res = session.query(ClientModel).all()
             self.assertEqual(0, len(client_res))
 
     def test_cli_db_upgrade(self):

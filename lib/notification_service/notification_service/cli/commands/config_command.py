@@ -24,7 +24,7 @@ from pygments.lexers.configs import IniLexer
 
 from notification_service.settings import get_configuration_file_path, NOTIFICATION_HOME
 from notification_service.util.cli import should_use_colors, get_terminal_formatter
-from notification_service.util.config import create_server_config
+from notification_service.util.server_config import create_server_config
 
 logger = logging.getLogger(__name__)
 

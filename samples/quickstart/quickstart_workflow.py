@@ -17,7 +17,7 @@
 import time
 
 from ai_flow.rpc.client.aiflow_client import get_notification_client
-from notification_service.event import EventKey, Event
+from notification_service.model.event import EventKey, Event
 
 from ai_flow.model.action import TaskAction
 from ai_flow.operators.bash import BashOperator
