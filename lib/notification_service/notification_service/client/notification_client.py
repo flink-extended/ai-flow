@@ -90,7 +90,9 @@ class NotificationClient(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def time_to_offset(self, time: datetime) -> int:
         """
-        Look up the offset of the first event whose create_time is bigger the given timestamp
+        Look up the biggest offset of the event whose create_time is
+        less than or equal to the given timestamp.
+
         :return: The offset of the founded event.
         """
         pass

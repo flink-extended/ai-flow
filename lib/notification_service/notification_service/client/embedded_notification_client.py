@@ -400,10 +400,7 @@ class EmbeddedNotificationClient(NotificationClient):
         timestamp = int(time.timestamp() * 1000)
         request = TimeToOffsetRequest(timestamp=timestamp)
         response = self.notification_stub.timestampToEventOffset(request)
-        if response.return_code == ReturnStatus.SUCCESS:
-            return response.offset
-        else:
-            raise Exception("There is no event whose create_time is greater than or equal to {}!".format(timestamp))
+        return response.offset
 
     def count_events(self,
                      name: Union[str, List[str]],

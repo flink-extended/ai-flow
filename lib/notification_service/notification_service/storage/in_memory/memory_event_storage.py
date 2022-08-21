@@ -153,9 +153,9 @@ class MemoryEventStorage(BaseEventStorage):
 
     def timestamp_to_event_offset(self, timestamp: int) -> int:
         for e in self.store:
-            if e.create_time >= timestamp:
-                return e.offset
-        return None
+            if e.create_time > timestamp:
+                return e.offset - 1
+        return 0
 
     def clean_up(self):
         self.store.clear()

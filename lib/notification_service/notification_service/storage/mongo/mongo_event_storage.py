@@ -23,7 +23,7 @@ from typing import Union, Tuple
 
 from notification_service.model.event import Event, ANY_CONDITION
 from notification_service.model.sender_event_count import SenderEventCount
-from notification_service.mongo_notification import MongoEvent, MongoClientModel
+from notification_service.storage.mongo.mongo_event_storage import MongoEvent, MongoClientModel
 from notification_service.storage.event_storage import BaseEventStorage
 
 from mongoengine import connect
@@ -147,10 +147,7 @@ class MongoEventStorage(BaseEventStorage):
         return MongoEvent.get_event_by_uuid(uuid)
 
     def timestamp_to_event_offset(self, timestamp: int) -> int:
-        mongo_events = MongoEvent.timestamp_to_event_offset(timestamp=timestamp)
-        if not mongo_events:
-            return None
-        return mongo_events[0].version
+        return MongoEvent.timestamp_to_event_offset(timestamp=timestamp)
 
     def clean_up(self):
         MongoEvent.delete_by_client(self.server_ip)
@@ -289,6 +286,11 @@ class MongoEvent(Document):
     def get_event_by_uuid(cls, uuid):
         event = cls.objects(uuid=uuid).first()
         return event.to_base_event()
+
+    @classmethod
+    def timestamp_to_event_offset(cls, timestamp):
+        event = cls.objects(create_time__lte=timestamp).order_by('-version').first()
+        return event.offset if event else 0
 
 
 class MongoClientModel(Document):

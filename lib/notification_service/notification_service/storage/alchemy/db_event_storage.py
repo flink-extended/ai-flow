@@ -243,13 +243,10 @@ class EventModel(Base):
     @staticmethod
     @provide_session
     def timestamp_to_version(timestamp, session=None):
-        e = session.query(EventModel).filter(EventModel.create_time >= timestamp) \
-            .order_by(EventModel.version.asc()) \
+        e = session.query(EventModel).filter(EventModel.create_time <= timestamp) \
+            .order_by(EventModel.version.desc()) \
             .limit(1).first()
-        if e is None:
-            return None
-        else:
-            return e.version
+        return e.version if e else 0
 
     @staticmethod
     @provide_session

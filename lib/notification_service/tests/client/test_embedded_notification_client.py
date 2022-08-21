@@ -132,12 +132,11 @@ class TestGrpcNotificationClient(unittest.TestCase):
         time.sleep(1)
         t3 = datetime.now()
         offset = self.client.time_to_offset(t1)
-        self.assertEqual(1, offset)
+        self.assertEqual(0, offset)
         offset = self.client.time_to_offset(t2)
-        self.assertEqual(4, offset)
-        with self.assertRaises(Exception) as e:
-            offset = self.client.time_to_offset(t3)
-        self.assertTrue(str(e.exception).startswith('There is no event whose create_time is greater'))
+        self.assertEqual(3, offset)
+        offset = self.client.time_to_offset(t3)
+        self.assertEqual(5, offset)
 
 
 if __name__ == '__main__':

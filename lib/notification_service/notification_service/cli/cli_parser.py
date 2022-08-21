@@ -154,7 +154,7 @@ ARG_EVENT_CONTEXT = Arg(
 
 ARG_BEGIN_OFFSET = Arg(
     ("--begin-offset",),
-    help="Begin version of the event. Defaults to 0",
+    help="Begin offset of the event. Defaults to 0",
     type=int,
     default=0,
 )
@@ -305,10 +305,10 @@ CONFIG_COMMANDS = (
 
 notification_commands: List[CLICommand] = [
     ActionCommand("version",
-                  "Shows the version of Notification",
+                  "Shows the version of Notification Service",
                   lazy_load_command("notification_service.cli.commands.version_command.version"),
                   [],
-                  "Shows the version of Notification"),
+                  "Shows the version of Notification Service"),
     GroupCommand(
         name='server',
         help='Notification server operations',

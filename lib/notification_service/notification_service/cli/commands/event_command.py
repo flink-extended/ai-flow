@@ -56,13 +56,10 @@ def list_events(args):
     """List events at the command line"""
     client = EmbeddedNotificationClient(server_uri=args.server_uri)
     offset = 0
-    if args.begin_offset and args.begin_time:
-        print("Only one of --begin-offset and --begin-time should be set")
-        return
-    elif args.begin_offset:
+    if args.begin_offset:
         offset = args.begin_offset
     elif args.begin_time:
-        offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time)) -1
+        offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time))
     events = client.list_events(name=args.event_name,
                                 namespace=args.namespace,
                                 event_type=args.event_type,
@@ -89,13 +86,10 @@ def count_events(args):
     """Count events at the command line"""
     client = EmbeddedNotificationClient(server_uri=args.server_uri)
     offset = 0
-    if args.begin_offset and args.begin_time:
-        print("Only one of --begin-offset and --begin-time should be set")
-        return
-    elif args.begin_offset:
+    if args.begin_offset:
         offset = args.begin_offset
     elif args.begin_time:
-        offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time)) - 1
+        offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time))
     res = client.count_events(name=args.event_name,
                               namespace=args.namespace,
                               event_type=args.event_type,
@@ -118,13 +112,10 @@ def listen_events(args):
     client = EmbeddedNotificationClient(server_uri=args.server_uri)
 
     offset = 0
-    if args.offset and args.begin_time:
-        print("Only one of --offset and --begin-time should be set")
-        return
-    elif args.offset:
-        offset = args.offset
+    if args.begin_offset:
+        offset = args.begin_offset
     elif args.begin_time:
-        offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time)) - 1
+        offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time))
 
     event_key = EventKey(name=args.event_name,
                          event_type=args.event_type,
