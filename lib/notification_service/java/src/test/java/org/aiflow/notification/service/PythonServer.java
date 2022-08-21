@@ -41,7 +41,7 @@ public class PythonServer {
 
     public void stop() throws InterruptedException {
         while (process.isAlive()) {
-            process.destroyForcibly();
+            process.destroy();
             Thread.sleep(100);
         }
     }

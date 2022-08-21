@@ -17,7 +17,7 @@
 #
 import unittest
 
-from notification_service.event import Event, EventKey
+from notification_service.model.event import Event, EventKey
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition

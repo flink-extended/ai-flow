@@ -22,7 +22,7 @@ import cloudpickle
 from copy import deepcopy
 from typing import List, Dict, Set, Tuple
 
-from notification_service.event import Event, EventKey
+from notification_service.model.event import Event, EventKey
 
 from ai_flow.common.util.db_util.session import create_session
 from ai_flow.common.util.json_utils import is_valid_json

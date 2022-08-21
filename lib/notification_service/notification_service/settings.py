@@ -17,7 +17,7 @@
 import logging.config
 import os
 
-from notification_service.server_config import NotificationServerConfig
+from notification_service.util.server_config import NotificationServerConfig
 
 # We hard code the logging config, we should make it configurable in the future.
 logging.config.dictConfig({

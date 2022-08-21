@@ -22,7 +22,6 @@ from unittest import mock
 from ai_flow.common.util.db_util import session
 from ai_flow.common.util.db_util.db_migration import init_db
 from ai_flow.common.util.thread_utils import StoppableThread
-from ai_flow.model.status import TaskStatus
 from ai_flow.metadata.message import PersistentQueue
 from ai_flow.model.action import TaskAction
 
@@ -94,7 +93,8 @@ class TestTaskExecutorBase(unittest.TestCase):
         finally:
             command_processor.stop()
 
-    def test_process_restart_command(self):
+    @mock.patch('ai_flow.task_executor.common.task_executor_base.TaskExecutorBase._send_task_status_change')
+    def test_process_restart_command(self, mock_status):
         try:
             command_processor = StoppableThread(target=self.executor._process_command)
             command_processor.start()

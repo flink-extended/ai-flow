@@ -32,12 +32,19 @@ public class Configuration {
 
     public static final int CLIENT_INITIAL_SEQUENCE_NUMBER_CONFIG_DEFAULT_VALUE = 0;
 
-    /** Maximum message length of bytes that the channel can receive. */
-    public static final String GRPC_MAX_RECEIVE_MESSAGE_LENGTH_CONFIG_KEY =
-            "grpc.max_receive_message_length";
+    public static final String HA_CLIENT_LIST_MEMBERS_INTERVAL_MS_CONFIG_KEY =
+            "ha_client_list_members_interval_ms";
 
-    public static final int GRPC_MAX_RECEIVE_MESSAGE_LENGTH_CONFIG_DEFAULT_VALUE =
-            Integer.MAX_VALUE;
+    public static final int HA_CLIENT_LIST_MEMBERS_INTERVAL_MS_CONFIG_DEFAULT_VALUE = 1000;
+
+    public static final String HA_CLIENT_RETRY_INTERVAL_MS_CONFIG_KEY =
+            "ha_client_retry_interval_ms";
+
+    public static final int HA_CLIENT_RETRY_INTERVAL_MS_CONFIG_DEFAULT_VALUE = 1000;
+
+    public static final String HA_CLIENT_RETRY_TIMEOUT_MS_CONFIG_KEY = "ha_client_retry_timeout_ms";
+
+    public static final int HA_CLIENT_RETRY_TIMEOUT_MS_CONFIG_DEFAULT_VALUE = 10000;
 
     private final Properties properties;
 

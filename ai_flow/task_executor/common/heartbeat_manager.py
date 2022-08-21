@@ -20,7 +20,7 @@ import time
 from concurrent import futures
 
 import grpc
-from notification_service.embedded_notification_client import EmbeddedNotificationClient
+from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
 
 from ai_flow.common.configuration.config_constants import NOTIFICATION_SERVER_URI
 from ai_flow.common.util.db_util.session import create_session

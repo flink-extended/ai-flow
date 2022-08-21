@@ -19,7 +19,7 @@ import time
 import unittest
 
 import cloudpickle
-from notification_service.event import EventKey, Event
+from notification_service.model.event import EventKey, Event
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition

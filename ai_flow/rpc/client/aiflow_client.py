@@ -16,8 +16,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from notification_service.embedded_notification_client import EmbeddedNotificationClient
-from notification_service.event import DEFAULT_NAMESPACE
+from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
+from notification_service.model.event import DEFAULT_NAMESPACE
 
 from ai_flow.rpc.client.scheduler_client import SchedulerClient
 

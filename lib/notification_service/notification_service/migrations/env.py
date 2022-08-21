@@ -32,8 +32,8 @@ fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from notification_service.util import db
-target_metadata = db.Base.metadata
+from notification_service.storage.alchemy.base import Base
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

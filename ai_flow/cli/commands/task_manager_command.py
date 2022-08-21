@@ -20,7 +20,7 @@ import logging
 import os
 import signal
 
-from notification_service.embedded_notification_client import EmbeddedNotificationClient
+from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.blob_manager.blob_manager_interface import BlobManagerFactory, BlobManagerConfig

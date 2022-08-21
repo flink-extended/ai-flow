@@ -30,9 +30,28 @@ class TestCliServer(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.parser = cli_parser.get_parser()
+        cls.config_str = """
+            server_port: 50052
+            # uri of database backend for notification server
+            db_uri: sqlite:///ns.db
+            # High availability is disabled by default
+            enable_ha: false
+            # TTL of the heartbeat of a server, i.e., if the server hasn't send heartbeat for the TTL time, it is down.
+            ha_ttl_ms: 10000
+            # Hostname and port the server will advertise to clients when HA enabled. If not set, it will use the local ip and configured port.
+            advertised_uri: 127.0.0.1:50052
+        """
+        cls.tmp_config_file = os.path.join(os.path.dirname(__file__), 'notification_server.yaml')
+        with open(cls.tmp_config_file, 'w') as f:
+            f.write(cls.config_str)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        if os.path.exists(cls.tmp_config_file):
+            os.remove(cls.tmp_config_file)
 
     def test_cli_server_start(self):
-        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_home = os.path.dirname(__file__)
         notification_service.settings.NOTIFICATION_HOME = notification_home
         pid_file = os.path.join(notification_home, "notification_server.pid")
 
@@ -52,7 +71,7 @@ class TestCliServer(unittest.TestCase):
             self.assertFalse(os.path.exists(pid_file))
 
     def test_cli_server_start_daemon(self):
-        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_home = os.path.dirname(__file__)
         notification_service.settings.NOTIFICATION_HOME = notification_home
         with mock.patch.object(server_command, "_get_daemon_context") as get_daemon_context, \
                 mock.patch.object(server_command, "NotificationServerRunner") as NotificationServerRunnerClass:
@@ -73,7 +92,7 @@ class TestCliServer(unittest.TestCase):
             mock_server_runner.start.assert_called_once_with(True)
 
     def test_cli_server_start_twice(self):
-        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_home = os.path.dirname(__file__)
         notification_service.settings.NOTIFICATION_HOME = notification_home
         pid_file_path = os.path.join(notification_home,
                                      notification_service.settings.NOTIFICATION_PID_FILENAME)
@@ -101,7 +120,7 @@ class TestCliServer(unittest.TestCase):
             self.assertIn('Notification Server is running', str(log.output))
 
     def test_cli_server_stop_without_pid_file(self):
-        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_home = os.path.dirname(__file__)
         notification_service.settings.NOTIFICATION_HOME = notification_home
 
         with self.assertLogs("notification_service.cli.commands.server_command", "INFO") as log:
@@ -110,7 +129,7 @@ class TestCliServer(unittest.TestCase):
             self.assertIn("PID file of Notification server does not exist at", log_output)
 
     def test_cli_server_stop_with_staled_pid_file(self):
-        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_home = os.path.dirname(__file__)
         notification_service.settings.NOTIFICATION_HOME = notification_home
         pid_file = os.path.join(notification_home, notification_service.settings.NOTIFICATION_PID_FILENAME)
 
@@ -123,7 +142,7 @@ class TestCliServer(unittest.TestCase):
             self.assertFalse(os.path.exists(pid_file))
 
     def test_cli_server_stop(self):
-        notification_home = os.path.join(os.path.dirname(__file__), "..", "..")
+        notification_home = os.path.dirname(__file__)
         notification_service.settings.NOTIFICATION_HOME = notification_home
         pid_file = os.path.join(notification_home, notification_service.settings.NOTIFICATION_PID_FILENAME)
         with TmpPidFile(pid_file), \

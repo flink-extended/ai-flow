@@ -20,6 +20,8 @@ import os
 from sqlalchemy import create_engine
 from notification_service.util import db
 
+from notification_service.storage.alchemy.base import Base
+
 DB_FILE = 'ns.db'
 DB_URL = 'sqlite:///{}'.format(DB_FILE)
 
@@ -60,7 +62,7 @@ class TestDB(unittest.TestCase):
     def test_clear_db(self):
         db.upgrade(url=DB_URL)
         engine = create_engine(DB_URL)
-        db.clear_db(url=DB_URL)
+        db.clear_db(url=DB_URL, metadata=Base.metadata)
         self.assertFalse('event_model' in engine.table_names())
         self.assertFalse('notification_client' in engine.table_names())
         self.assertFalse('member_model' in engine.table_names())
@@ -68,7 +70,7 @@ class TestDB(unittest.TestCase):
     def test_reset_db(self):
         db.upgrade(url=DB_URL)
         engine = create_engine(DB_URL)
-        db.reset_db(url=DB_URL)
+        db.reset_db(url=DB_URL, metadata=Base.metadata)
         self.assertTrue('event_model' in engine.table_names())
         self.assertTrue('notification_client' in engine.table_names())
         self.assertTrue('member_model' in engine.table_names())

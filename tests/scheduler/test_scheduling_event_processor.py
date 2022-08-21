@@ -17,7 +17,7 @@
 import unittest
 
 import cloudpickle
-from notification_service.event import Event
+from notification_service.model.event import Event
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.internal.events import StartWorkflowExecutionEvent, StopTaskExecutionEvent, StartTaskExecutionEvent, \

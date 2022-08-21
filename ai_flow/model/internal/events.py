@@ -16,7 +16,7 @@
 # under the License.
 from enum import Enum
 import json
-from notification_service.event import Event, EventKey, DEFAULT_NAMESPACE
+from notification_service.model.event import Event, EventKey, DEFAULT_NAMESPACE
 
 from ai_flow.model.status import TaskStatus
 

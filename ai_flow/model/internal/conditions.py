@@ -16,7 +16,7 @@
 # under the License.
 import json
 
-from notification_service.event import EventKey, Event
+from notification_service.model.event import EventKey, Event
 from typing import List
 
 from ai_flow.model.condition import Condition
