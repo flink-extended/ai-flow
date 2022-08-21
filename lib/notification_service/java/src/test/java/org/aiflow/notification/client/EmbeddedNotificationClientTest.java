@@ -241,9 +241,10 @@ public class EmbeddedNotificationClientTest {
                                 "{}"));
             }
         } finally {
+            Thread.sleep(1000);
             client.unRegisterListener(handle);
         }
-        Thread.sleep(10000);
+
         assertEquals(3, events.size());
     }
 
