@@ -82,16 +82,20 @@ public class EventListener {
     }
 
     private boolean match(EventKey eventKey, EventMeta event) {
-        if (eventKey.getNamespace() != null && !eventKey.getNamespace().equals(event.getEventKey().getNamespace())) {
+        if (eventKey.getNamespace() != null
+                && !eventKey.getNamespace().equals(event.getEventKey().getNamespace())) {
             return false;
         }
-        if (eventKey.getName() != null && !eventKey.getName().equals(event.getEventKey().getName())) {
+        if (eventKey.getName() != null
+                && !eventKey.getName().equals(event.getEventKey().getName())) {
             return false;
         }
-        if (eventKey.getEventType() != null && !eventKey.getEventType().equals(event.getEventKey().getEventType())) {
+        if (eventKey.getEventType() != null
+                && !eventKey.getEventType().equals(event.getEventKey().getEventType())) {
             return false;
         }
-        if (eventKey.getSender() != null && !eventKey.getSender().equals(event.getEventKey().getSender())) {
+        if (eventKey.getSender() != null
+                && !eventKey.getSender().equals(event.getEventKey().getSender())) {
             return false;
         }
         return true;
@@ -102,8 +106,8 @@ public class EventListener {
             return events;
         }
         List<EventMeta> results = new ArrayList<>();
-        for (EventMeta event: events) {
-            for (EventKey key: eventKeys) {
+        for (EventMeta event : events) {
+            for (EventKey key : eventKeys) {
                 if (match(key, event)) {
                     results.add(event);
                     break;
@@ -122,7 +126,8 @@ public class EventListener {
                         break;
                     }
                     List<EventMeta> events =
-                            listAllEvents(this.serviceStub,-1l, listenOffset, -1l, this.timeoutSeconds);
+                            listAllEvents(
+                                    this.serviceStub, -1l, listenOffset, -1l, this.timeoutSeconds);
                     if (events.size() > 0) {
                         events = filterEvents(eventKeys, events);
                     }

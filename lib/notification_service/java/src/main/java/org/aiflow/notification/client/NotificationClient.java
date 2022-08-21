@@ -23,17 +23,14 @@ public abstract class NotificationClient {
      * @param offset Start offset of notification for listening.
      */
     protected abstract ListenerRegistrationId registerListener(
-            ListenerProcessor listenerProcessor,
-            List<EventKey> eventKeys,
-            Long offset);
+            ListenerProcessor listenerProcessor, List<EventKey> eventKeys, Long offset);
 
-    /***
-     * Unregister the listener by id.
+    /**
+     * * Unregister the listener by id.
      *
      * @param id The ListenerRegistrationId
      */
     protected abstract void unRegisterListener(ListenerRegistrationId id);
-
 
     /**
      * List specific events in Notification Service.
@@ -46,14 +43,11 @@ public abstract class NotificationClient {
      * @return List of events in Notification Service.
      */
     protected abstract List<EventMeta> listEvents(
-            String event_name,
-            String namespace,
-            String eventType,
-            String sender,
-            Long offset) throws Exception;
+            String event_name, String namespace, String eventType, String sender, Long offset)
+            throws Exception;
 
-    /***
-     * Look up the offset of the first event whose create_time is bigger than the given timestamp
+    /**
+     * * Look up the offset of the first event whose create_time is bigger than the given timestamp
      *
      * @param timestamp The timestamp to look up.
      * @return The offset of the founded event.

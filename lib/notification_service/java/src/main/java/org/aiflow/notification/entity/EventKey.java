@@ -31,11 +31,19 @@ public class EventKey {
 
     @Override
     public String toString() {
-        return "EventKey{" +
-                "name='" + name + '\'' +
-                ", eventType='" + eventType + '\'' +
-                ", namespace='" + namespace + '\'' +
-                ", sender='" + sender + '\'' +
-                '}';
+        return "EventKey{"
+                + "name='"
+                + name
+                + '\''
+                + ", eventType='"
+                + eventType
+                + '\''
+                + ", namespace='"
+                + namespace
+                + '\''
+                + ", sender='"
+                + sender
+                + '\''
+                + '}';
     }
 }

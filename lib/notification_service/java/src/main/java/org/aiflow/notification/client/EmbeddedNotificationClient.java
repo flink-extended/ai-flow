@@ -21,12 +21,12 @@ package org.aiflow.notification.client;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import org.aiflow.notification.conf.Configuration;
 import org.aiflow.notification.entity.EventKey;
 import org.aiflow.notification.entity.EventMeta;
 import org.aiflow.notification.entity.SenderEventCount;
 import org.aiflow.notification.proto.NotificationServiceGrpc;
 import org.aiflow.notification.proto.NotificationServiceOuterClass;
-import org.aiflow.notification.conf.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ import static org.aiflow.notification.conf.Configuration.HA_CLIENT_RETRY_INTERVA
 import static org.aiflow.notification.conf.Configuration.HA_CLIENT_RETRY_TIMEOUT_MS_CONFIG_DEFAULT_VALUE;
 import static org.aiflow.notification.conf.Configuration.HA_CLIENT_RETRY_TIMEOUT_MS_CONFIG_KEY;
 
-public class EmbeddedNotificationClient extends NotificationClient{
+public class EmbeddedNotificationClient extends NotificationClient {
 
     private static final Logger logger = LoggerFactory.getLogger(EmbeddedNotificationClient.class);
     public static String ANY_CONDITION = "*";
@@ -70,10 +70,7 @@ public class EmbeddedNotificationClient extends NotificationClient{
     private final Configuration conf;
 
     public EmbeddedNotificationClient(
-            String target,
-            String defaultNamespace,
-            String sender,
-            Properties properties)
+            String target, String defaultNamespace, String sender, Properties properties)
             throws Exception {
         this.defaultNamespace = defaultNamespace;
         this.sender = sender;
@@ -219,7 +216,6 @@ public class EmbeddedNotificationClient extends NotificationClient{
         NotificationServiceOuterClass.ListEventsResponse response =
                 serviceStub.listAllEvents(request);
         return parseEventsFromResponse(response);
-
     }
 
     private static List<EventMeta> parseEventsFromResponse(
@@ -271,9 +267,10 @@ public class EmbeddedNotificationClient extends NotificationClient{
     /** Select a valid server from server candidates as current server. */
     protected void selectValidServer() {
         boolean lastError = false;
-        int listMemberIntervalMs = this.conf.getInt(
-                HA_CLIENT_LIST_MEMBERS_INTERVAL_MS_CONFIG_KEY,
-                HA_CLIENT_LIST_MEMBERS_INTERVAL_MS_CONFIG_DEFAULT_VALUE);
+        int listMemberIntervalMs =
+                this.conf.getInt(
+                        HA_CLIENT_LIST_MEMBERS_INTERVAL_MS_CONFIG_KEY,
+                        HA_CLIENT_LIST_MEMBERS_INTERVAL_MS_CONFIG_DEFAULT_VALUE);
         for (NotificationServiceOuterClass.MemberProto livingMember : livingMembers) {
             try {
                 currentUri = livingMember.getServerUri();
@@ -304,22 +301,22 @@ public class EmbeddedNotificationClient extends NotificationClient{
     /** Initialize notification service stub. */
     protected void initNotificationServiceStub() {
         if (notificationServiceStub == null) {
-            channel = ManagedChannelBuilder.forTarget(
-                    StringUtils.isEmpty(currentUri)
-                            ? SERVER_URI
-                            : currentUri)
-                    .usePlaintext()
-                    .build();
-            notificationServiceStub =
-                    NotificationServiceGrpc.newBlockingStub(channel);
+            channel =
+                    ManagedChannelBuilder.forTarget(
+                                    StringUtils.isEmpty(currentUri) ? SERVER_URI : currentUri)
+                            .usePlaintext()
+                            .build();
+            notificationServiceStub = NotificationServiceGrpc.newBlockingStub(channel);
         }
         if (enableHa) {
-            int retryIntervalMs = this.conf.getInt(
-                    HA_CLIENT_RETRY_INTERVAL_MS_CONFIG_KEY,
-                    HA_CLIENT_RETRY_INTERVAL_MS_CONFIG_DEFAULT_VALUE);
-            int retryTimeoutMs = this.conf.getInt(
-                    HA_CLIENT_RETRY_TIMEOUT_MS_CONFIG_KEY,
-                    HA_CLIENT_RETRY_TIMEOUT_MS_CONFIG_DEFAULT_VALUE);
+            int retryIntervalMs =
+                    this.conf.getInt(
+                            HA_CLIENT_RETRY_INTERVAL_MS_CONFIG_KEY,
+                            HA_CLIENT_RETRY_INTERVAL_MS_CONFIG_DEFAULT_VALUE);
+            int retryTimeoutMs =
+                    this.conf.getInt(
+                            HA_CLIENT_RETRY_TIMEOUT_MS_CONFIG_KEY,
+                            HA_CLIENT_RETRY_TIMEOUT_MS_CONFIG_DEFAULT_VALUE);
             notificationServiceStub =
                     wrapBlockingStub(
                             notificationServiceStub,
@@ -334,9 +331,10 @@ public class EmbeddedNotificationClient extends NotificationClient{
     /** List living members under high available mode. */
     protected Runnable listMembers() {
         return () -> {
-            int listMemberIntervalMs = this.conf.getInt(
-                    HA_CLIENT_LIST_MEMBERS_INTERVAL_MS_CONFIG_KEY,
-                    HA_CLIENT_LIST_MEMBERS_INTERVAL_MS_CONFIG_DEFAULT_VALUE);
+            int listMemberIntervalMs =
+                    this.conf.getInt(
+                            HA_CLIENT_LIST_MEMBERS_INTERVAL_MS_CONFIG_KEY,
+                            HA_CLIENT_LIST_MEMBERS_INTERVAL_MS_CONFIG_DEFAULT_VALUE);
             while (enableHa) {
                 try {
                     if (Thread.currentThread().isInterrupted()) {
@@ -370,8 +368,7 @@ public class EmbeddedNotificationClient extends NotificationClient{
         listMembersService.shutdownNow();
     }
 
-    public EventMeta sendEvent(EventMeta event)
-            throws Exception {
+    public EventMeta sendEvent(EventMeta event) throws Exception {
         boolean enableIdempotence =
                 this.conf.getBoolean(
                         CLIENT_ENABLE_IDEMPOTENCE_CONFIG_KEY,
@@ -409,11 +406,8 @@ public class EmbeddedNotificationClient extends NotificationClient{
     }
 
     public List<EventMeta> listEvents(
-            String event_name,
-            String namespace,
-            String eventType,
-            String sender,
-            Long offset) throws Exception {
+            String event_name, String namespace, String eventType, String sender, Long offset)
+            throws Exception {
 
         String realEventName = StringUtils.isEmpty(event_name) ? ANY_CONDITION : event_name;
         String realNamespace = StringUtils.isEmpty(namespace) ? ANY_CONDITION : namespace;
@@ -435,12 +429,13 @@ public class EmbeddedNotificationClient extends NotificationClient{
     public Long timeToOffset(Long timestamp) throws Exception {
         NotificationServiceOuterClass.TimeToOffsetRequest request =
                 NotificationServiceOuterClass.TimeToOffsetRequest.newBuilder()
-                .setTimestamp(timestamp)
-                .build();
+                        .setTimestamp(timestamp)
+                        .build();
         NotificationServiceOuterClass.TimeToOffsetResponse response =
                 notificationServiceStub.timestampToEventOffset(request);
         if (response.getReturnCode() != NotificationServiceOuterClass.ReturnStatus.SUCCESS) {
-            throw new Exception("There is no event whose create_time is greater than or equal to " + timestamp);
+            throw new Exception(
+                    "There is no event whose create_time is greater than or equal to " + timestamp);
         } else {
             return response.getOffset();
         }
@@ -457,11 +452,8 @@ public class EmbeddedNotificationClient extends NotificationClient{
      * @return Count of events in Notification Service.
      */
     public ImmutablePair<Long, List<SenderEventCount>> countEvents(
-            String event_name,
-            String namespace,
-            String eventType,
-            String sender,
-            Long offset) throws Exception {
+            String event_name, String namespace, String eventType, String sender, Long offset)
+            throws Exception {
 
         String realEventName = StringUtils.isEmpty(event_name) ? ANY_CONDITION : event_name;
         String realNamespace = StringUtils.isEmpty(namespace) ? ANY_CONDITION : namespace;
@@ -494,18 +486,11 @@ public class EmbeddedNotificationClient extends NotificationClient{
     }
 
     public ListenerRegistrationId registerListener(
-            ListenerProcessor listenerProcessor,
-            List<EventKey> eventKeys,
-            Long offset) {
+            ListenerProcessor listenerProcessor, List<EventKey> eventKeys, Long offset) {
         String listenKey = eventKeys.toString() + offset + listenerProcessor.toString();
         EventListener listener =
                 new EventListener(
-                        notificationServiceStub,
-                        eventKeys,
-                        offset,
-                        0l,
-                        listenerProcessor,
-                        10);
+                        notificationServiceStub, eventKeys, offset, 0l, listenerProcessor, 10);
         listener.start();
         threads.put(listenKey, listener);
         return new ListenerRegistrationId(listenKey);

@@ -20,7 +20,6 @@ package org.aiflow.notification.entity;
 
 import org.aiflow.notification.proto.NotificationServiceOuterClass;
 
-
 public class EventMeta {
 
     private EventKey eventKey;
@@ -69,25 +68,30 @@ public class EventMeta {
 
     @Override
     public String toString() {
-        return "EventMeta{" +
-                "eventKey=" + eventKey +
-                ", message='" + message + '\'' +
-                ", offset=" + offset +
-                ", createTime=" + createTime +
-                ", context='" + context + '\'' +
-                '}';
+        return "EventMeta{"
+                + "eventKey="
+                + eventKey
+                + ", message='"
+                + message
+                + '\''
+                + ", offset="
+                + offset
+                + ", createTime="
+                + createTime
+                + ", context='"
+                + context
+                + '\''
+                + '}';
     }
 
     public static EventMeta buildEventMeta(NotificationServiceOuterClass.EventProto eventProto) {
-        EventKey eventKey = new EventKey(
-                eventProto.getName(),
-                eventProto.getEventType(),
-                eventProto.getNamespace(),
-                eventProto.getSender());
-        EventMeta event = new EventMeta(
-                eventKey,
-                eventProto.getMessage(),
-                eventProto.getContext());
+        EventKey eventKey =
+                new EventKey(
+                        eventProto.getName(),
+                        eventProto.getEventType(),
+                        eventProto.getNamespace(),
+                        eventProto.getSender());
+        EventMeta event = new EventMeta(eventKey, eventProto.getMessage(), eventProto.getContext());
         event.setOffset(eventProto.getOffset());
         event.setCreateTime(eventProto.getCreateTime());
         return event;

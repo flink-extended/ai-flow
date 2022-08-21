@@ -42,8 +42,7 @@ public class Configuration {
 
     public static final int HA_CLIENT_RETRY_INTERVAL_MS_CONFIG_DEFAULT_VALUE = 1000;
 
-    public static final String HA_CLIENT_RETRY_TIMEOUT_MS_CONFIG_KEY =
-            "ha_client_retry_timeout_ms";
+    public static final String HA_CLIENT_RETRY_TIMEOUT_MS_CONFIG_KEY = "ha_client_retry_timeout_ms";
 
     public static final int HA_CLIENT_RETRY_TIMEOUT_MS_CONFIG_DEFAULT_VALUE = 10000;
 
