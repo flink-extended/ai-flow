@@ -24,7 +24,7 @@ import os
 from notification_service.server import NotificationServerRunner
 from notification_service.server_config import NotificationServerConfig
 from notification_service.util import db
-from notification_service.util.config import create_server_config
+from notification_service.util.server_config import create_server_config
 
 
 def _prepare_args():

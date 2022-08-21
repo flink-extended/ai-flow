@@ -16,7 +16,7 @@
 # under the License.
 from typing import Union, Tuple, Optional
 
-from notification_service.event import Event
+from notification_service.model.event import Event
 
 from ai_flow.scheduler.rule_wrapper import WorkflowExecutionRuleWrapper, WorkflowRuleWrapper
 

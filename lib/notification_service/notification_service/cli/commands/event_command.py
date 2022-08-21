@@ -21,8 +21,11 @@ from datetime import datetime as dt
 from queue import Queue
 from typing import Callable, TypeVar, cast, List
 
-from notification_service.base_notification import EventWatcher, BaseEvent
-from notification_service.client import NotificationClient
+from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
+from notification_service.client.notification_client import ListenerProcessor
+from notification_service.model.event import EventKey, Event
+
+from ai_flow.common.util import time_utils
 from notification_service.cli.simple_table import NotificationConsole
 
 
@@ -51,25 +54,32 @@ def check_arguments(f: T) -> T:
 @check_arguments
 def list_events(args):
     """List events at the command line"""
-    client = NotificationClient(server_uri=args.server_uri)
-    events = client.list_events(key=args.key,
+    client = EmbeddedNotificationClient(server_uri=args.server_uri)
+    offset = 0
+    if args.begin_offset and args.begin_time:
+        print("Only one of --begin-offset and --begin-time should be set")
+        return
+    elif args.begin_offset:
+        offset = args.begin_offset
+    elif args.begin_time:
+        offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time)) -1
+    events = client.list_events(name=args.event_name,
                                 namespace=args.namespace,
-                                version=args.begin_version,
                                 event_type=args.event_type,
-                                start_time=args.begin_time,
-                                sender=args.sender)
+                                sender=args.sender,
+                                offset=offset)
     NotificationConsole().print_as(
         data=events,
         output=args.output,
         mapper=lambda event: {
-            "namespace": event.namespace,
-            "key": event.key,
-            "value": event.value,
-            "event_type": event.event_type,
-            "sender": event.sender,
+            "namespace": event.event_key.namespace,
+            "event_name": event.event_key.name,
+            "event_message": event.message,
+            "event_type": event.event_key.event_type,
+            "sender": event.event_key.sender,
             "create_time": dt.fromtimestamp(event.create_time/1000).isoformat(),
             "context": event.context,
-            "version": event.version,
+            "version": event.offset,
         },
     )
 
@@ -77,53 +87,74 @@ def list_events(args):
 @check_arguments
 def count_events(args):
     """Count events at the command line"""
-    client = NotificationClient(server_uri=args.server_uri)
-    res = client.count_events(key=args.key,
+    client = EmbeddedNotificationClient(server_uri=args.server_uri)
+    offset = 0
+    if args.begin_offset and args.begin_time:
+        print("Only one of --begin-offset and --begin-time should be set")
+        return
+    elif args.begin_offset:
+        offset = args.begin_offset
+    elif args.begin_time:
+        offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time)) - 1
+    res = client.count_events(name=args.event_name,
                               namespace=args.namespace,
-                              version=args.begin_version,
                               event_type=args.event_type,
-                              start_time=args.begin_time,
-                              sender=args.sender)
+                              sender=args.sender,
+                              offset=offset)
     print(res[0])
 
 
 @check_arguments
 def listen_events(args):
     """Listen events at the command line"""
-    class CliWatcher(EventWatcher):
+    class Processor(ListenerProcessor):
         def __init__(self, queue):
             self.queue = queue
 
-        def process(self, events: List[BaseEvent]):
+        def process(self, events: List[Event]):
             for e in events:
                 self.queue.put(e)
 
-    client = NotificationClient(server_uri=args.server_uri)
+    client = EmbeddedNotificationClient(server_uri=args.server_uri)
+
+    offset = 0
+    if args.offset and args.begin_time:
+        print("Only one of --offset and --begin-time should be set")
+        return
+    elif args.offset:
+        offset = args.offset
+    elif args.begin_time:
+        offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time)) - 1
+
+    event_key = EventKey(name=args.event_name,
+                         event_type=args.event_type,
+                         namespace=args.namespace,
+                         sender=args.sender)
     event_queue = Queue()
-    client.start_listen_event(key=args.key,
-                              namespace=args.namespace,
-                              version=args.begin_version,
-                              event_type=args.event_type,
-                              start_time=args.begin_time,
-                              sender=args.sender,
-                              watcher=CliWatcher(event_queue))
+    registration_id = client.register_listener(listener_processor=Processor(event_queue),
+                                               event_keys=[event_key, ],
+                                               offset=offset)
+
     try:
         while True:
             print(event_queue.get())
     except KeyboardInterrupt:
         pass
+    finally:
+        client.unregister_listener(registration_id)
 
 
 @check_arguments
 def send_event(args):
     """Send an event at the command line"""
-    client = NotificationClient(server_uri=args.server_uri,
-                                default_namespace=args.namespace,
-                                sender=args.sender)
-    event = BaseEvent(
-        key=args.key,
-        value=args.value,
-        event_type=args.event_type,
-        context=args.context)
-    event: BaseEvent = client.send_event(event)
+    client = EmbeddedNotificationClient(server_uri=args.server_uri,
+                                        namespace=args.namespace,
+                                        sender=args.sender)
+    event_key = EventKey(name=args.event_name,
+                         event_type=args.event_type)
+    event = Event(
+        event_key=event_key,
+        message=args.event_message
+    )
+    event: Event = client.send_event(event)
     print("Successfully send event: {}.".format(event))

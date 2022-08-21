@@ -24,7 +24,7 @@ import daemon
 from daemon.pidfile import TimeoutPIDLockFile
 
 import notification_service.settings
-from notification_service.server import NotificationServerRunner
+from notification_service.server.server_runner import NotificationServerRunner
 from notification_service.settings import get_configuration_file_path
 from notification_service.util.utils import check_pid_exist, stop_process
 

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.aiflow.notification.client.NotificationClient.wrapBlockingStub;
+import static org.aiflow.notification.client.EmbeddedNotificationClient.wrapBlockingStub;
 
 public class NotificationInterceptor implements ClientInterceptor {
 

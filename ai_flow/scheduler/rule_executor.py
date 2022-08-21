@@ -16,7 +16,7 @@
 # under the License.
 import cloudpickle
 import logging
-from notification_service.event import Event
+from notification_service.model.event import Event
 from typing import Optional
 
 from ai_flow.metadata.metadata_manager import MetadataManager

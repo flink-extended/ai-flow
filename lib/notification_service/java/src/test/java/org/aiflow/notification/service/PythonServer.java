@@ -18,7 +18,7 @@ public class PythonServer {
         String serverScript = this.getClass().getResource("/notification_server.py").getFile();
         process =
                 new ProcessBuilder()
-                        .command("python3", serverScript)
+                        .command("/Users/alibaba/work/opensource/venv/bin/python", serverScript)
                         .redirectErrorStream(true)
                         .start();
 
@@ -41,7 +41,7 @@ public class PythonServer {
 
     public void stop() throws InterruptedException {
         while (process.isAlive()) {
-            process.destroyForcibly();
+            process.destroy();
             Thread.sleep(100);
         }
     }

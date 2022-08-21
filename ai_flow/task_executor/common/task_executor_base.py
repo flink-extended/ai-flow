@@ -20,7 +20,7 @@ from abc import abstractmethod
 from queue import Empty
 from typing import Optional
 
-from notification_service.embedded_notification_client import EmbeddedNotificationClient
+from ai_flow.rpc.client.aiflow_client import get_notification_client
 
 from ai_flow.common.util.db_util.session import create_session
 from ai_flow.metadata.metadata_manager import MetadataManager
@@ -61,9 +61,7 @@ class TaskExecutorBase(TaskExecutor):
 
     def start(self):
         logging.info("starting task executor.")
-        self.notification_client = EmbeddedNotificationClient(
-            server_uri=NOTIFICATION_SERVER_URI, namespace='task_status_change', sender='task_executor'
-        )
+        self.notification_client = get_notification_client(namespace='task_status_change', sender='task_executor')
         self.command_queue = PersistentQueue(maxsize=MAX_QUEUE_SIZE)
         self.command_processor.start()
         self.heartbeat_manager = HeartbeatManager()

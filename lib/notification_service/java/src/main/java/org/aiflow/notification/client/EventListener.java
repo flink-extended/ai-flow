@@ -19,48 +19,45 @@
 package org.aiflow.notification.client;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.aiflow.notification.entity.EventKey;
 import org.aiflow.notification.entity.EventMeta;
 import org.aiflow.notification.proto.NotificationServiceGrpc;
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
-import static org.aiflow.notification.client.NotificationClient.listEvents;
+import static org.aiflow.notification.client.EmbeddedNotificationClient.listAllEvents;
 
 public class EventListener {
 
+    private static final Logger logger = LoggerFactory.getLogger(EventListener.class);
     private final NotificationServiceGrpc.NotificationServiceBlockingStub serviceStub;
-    private final List<String> keys;
-    private final long version;
-    private final String eventType;
+    private final List<EventKey> eventKeys;
+    private final long startOffset;
     private final long startTime;
-    private final String namespace;
-    private final String sender;
-    private final EventWatcher watcher;
+    private final ListenerProcessor listernerProcessor;
     private final ExecutorService executorService;
     private final int timeoutSeconds;
     private volatile boolean isRunning = true;
 
     public EventListener(
             NotificationServiceGrpc.NotificationServiceBlockingStub serviceStub,
-            List<String> keys,
-            long version,
-            String eventType,
+            List<EventKey> eventKeys,
+            long startOffset,
             long startTime,
-            String namespace,
-            String sender,
-            EventWatcher watcher,
+            ListenerProcessor listernerProcessor,
             Integer timeoutSeconds) {
         this.serviceStub = serviceStub;
-        this.keys = keys;
-        this.version = version;
-        this.eventType = eventType;
+        this.eventKeys = eventKeys;
+        this.startOffset = startOffset;
         this.startTime = startTime;
-        this.namespace = namespace;
-        this.sender = sender;
-        this.watcher = watcher;
+        this.listernerProcessor = listernerProcessor;
         this.timeoutSeconds = timeoutSeconds;
         this.executorService =
                 Executors.newSingleThreadExecutor(
@@ -77,29 +74,61 @@ public class EventListener {
     public void shutdown() {
         this.isRunning = false;
         this.executorService.shutdown();
+        try {
+            this.executorService.awaitTermination(5000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ex) {
+            logger.error("gRPC channel shutdown interrupted");
+        }
+    }
+
+    private boolean match(EventKey eventKey, EventMeta event) {
+        if (eventKey.getNamespace() != null && !eventKey.getNamespace().equals(event.getEventKey().getNamespace())) {
+            return false;
+        }
+        if (eventKey.getName() != null && !eventKey.getName().equals(event.getEventKey().getName())) {
+            return false;
+        }
+        if (eventKey.getEventType() != null && !eventKey.getEventType().equals(event.getEventKey().getEventType())) {
+            return false;
+        }
+        if (eventKey.getSender() != null && !eventKey.getSender().equals(event.getEventKey().getSender())) {
+            return false;
+        }
+        return true;
+    }
+
+    private List<EventMeta> filterEvents(List<EventKey> eventKeys, List<EventMeta> events) {
+        if (eventKeys == null) {
+            return events;
+        }
+        List<EventMeta> results = new ArrayList<>();
+        for (EventMeta event: events) {
+            for (EventKey key: eventKeys) {
+                if (match(key, event)) {
+                    results.add(event);
+                    break;
+                }
+            }
+        }
+        return results;
     }
 
     public Runnable listenEvents() {
         return () -> {
-            long listenVersion = this.version;
+            long listenOffset = this.startOffset;
             while (this.isRunning) {
                 try {
                     if (Thread.currentThread().isInterrupted()) {
                         break;
                     }
                     List<EventMeta> events =
-                            listEvents(
-                                    this.serviceStub,
-                                    this.namespace,
-                                    this.sender,
-                                    this.keys,
-                                    listenVersion,
-                                    this.eventType,
-                                    this.startTime,
-                                    this.timeoutSeconds);
+                            listAllEvents(this.serviceStub,-1l, listenOffset, -1l, this.timeoutSeconds);
+                    if (events.size() > 0) {
+                        events = filterEvents(eventKeys, events);
+                    }
                     if (CollectionUtils.isNotEmpty(events)) {
-                        this.watcher.process(events);
-                        listenVersion = events.get(events.size() - 1).getVersion();
+                        this.listernerProcessor.process(events);
+                        listenOffset = events.get(events.size() - 1).getOffset();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -132,28 +132,28 @@ ARG_SERVER_URI = Arg(
     help="The uri of notification server",
 )
 
-ARG_NAMESPACE = Arg(
+ARG_EVENT_NAMESPACE = Arg(
     ("-n", "--namespace"),
     help="Namespace of the event. If not set, all namespaces would be handled",
 )
 
-ARG_KEY = Arg(
-    ("key",),
-    help="Key of the event",
+ARG_EVENT_NAME = Arg(
+    ("event_name",),
+    help="Name of the event",
 )
 
-ARG_VALUE = Arg(
-    ("value",),
-    help="Value of the event",
+ARG_EVENT_MESSAGE = Arg(
+    ("event_message",),
+    help="Message of the event",
 )
 
-ARG_CONTEXT = Arg(
+ARG_EVENT_CONTEXT = Arg(
     ("--context",),
     help="Context of the event",
 )
 
-ARG_BEGIN_VERSION = Arg(
-    ("--begin-version",),
+ARG_BEGIN_OFFSET = Arg(
+    ("--begin-offset",),
     help="Begin version of the event. Defaults to 0",
     type=int,
     default=0,
@@ -177,7 +177,7 @@ ARG_LISTEN_BEGIN_TIME = Arg(
     default=datetime.now().isoformat()
 )
 
-ARG_SENDER = Arg(
+ARG_EVENT_SENDER = Arg(
     ("--sender",),
     help="Sender of the event",
 )
@@ -215,28 +215,29 @@ EVENT_COMMANDS = (
         name='list',
         help="Lists events",
         func=lazy_load_command('notification_service.cli.commands.event_command.list_events'),
-        args=(ARG_KEY, ARG_SERVER_URI, ARG_NAMESPACE, ARG_BEGIN_VERSION, ARG_EVENT_TYPE,
-              ARG_BEGIN_TIME, ARG_SENDER, ARG_OUTPUT),
+        args=(ARG_EVENT_NAME, ARG_SERVER_URI, ARG_EVENT_NAMESPACE, ARG_BEGIN_OFFSET, ARG_EVENT_TYPE,
+              ARG_BEGIN_TIME, ARG_EVENT_SENDER, ARG_OUTPUT),
     ),
     ActionCommand(
         name='count',
         help='Counts events',
         func=lazy_load_command('notification_service.cli.commands.event_command.count_events'),
-        args=(ARG_KEY, ARG_SERVER_URI, ARG_NAMESPACE, ARG_BEGIN_VERSION, ARG_EVENT_TYPE,
-              ARG_BEGIN_TIME, ARG_SENDER),
+        args=(ARG_EVENT_NAME, ARG_SERVER_URI, ARG_EVENT_NAMESPACE, ARG_BEGIN_OFFSET, ARG_EVENT_TYPE,
+              ARG_BEGIN_TIME, ARG_EVENT_SENDER),
     ),
     ActionCommand(
         name='listen',
         help='Listens events',
         func=lazy_load_command('notification_service.cli.commands.event_command.listen_events'),
-        args=(ARG_KEY, ARG_SERVER_URI, ARG_NAMESPACE, ARG_BEGIN_VERSION, ARG_EVENT_TYPE,
-              ARG_LISTEN_BEGIN_TIME, ARG_SENDER)
+        args=(ARG_EVENT_NAME, ARG_SERVER_URI, ARG_EVENT_NAMESPACE, ARG_BEGIN_OFFSET, ARG_EVENT_TYPE,
+              ARG_LISTEN_BEGIN_TIME, ARG_EVENT_SENDER)
     ),
     ActionCommand(
         name='send',
         help='Sends an event',
         func=lazy_load_command('notification_service.cli.commands.event_command.send_event'),
-        args=(ARG_KEY, ARG_VALUE, ARG_SERVER_URI, ARG_NAMESPACE, ARG_EVENT_TYPE, ARG_CONTEXT, ARG_SENDER)
+        args=(ARG_EVENT_NAME, ARG_EVENT_MESSAGE, ARG_SERVER_URI, ARG_EVENT_NAMESPACE, ARG_EVENT_TYPE,
+              ARG_EVENT_CONTEXT, ARG_EVENT_SENDER)
     )
 )
 

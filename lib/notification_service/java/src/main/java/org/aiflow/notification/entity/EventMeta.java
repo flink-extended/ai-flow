@@ -20,137 +20,76 @@ package org.aiflow.notification.entity;
 
 import org.aiflow.notification.proto.NotificationServiceOuterClass;
 
+
 public class EventMeta {
 
-    private String key;
-    private String value;
-    private String eventType;
-    private long version;
+    private EventKey eventKey;
+    private String message;
+    private long offset;
     private long createTime;
     private String context;
-    private String namespace;
-    private String sender;
 
-    public EventMeta(
-            String key,
-            String value,
-            String eventType,
-            long version,
-            long createTime,
-            String context,
-            String namespace,
-            String sender) {
-        this.key = key;
-        this.value = value;
-        this.eventType = eventType;
-        this.version = version;
-        this.createTime = createTime;
+    public EventMeta(EventKey eventKey, String message, String context) {
+        this.eventKey = eventKey;
+        this.message = message;
         this.context = context;
-        this.namespace = namespace;
-        this.sender = sender;
     }
 
-    public String getKey() {
-        return key;
+    public EventKey getEventKey() {
+        return eventKey;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public String getMessage() {
+        return message;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public String getEventType() {
-        return eventType;
-    }
-
-    public void setEventType(String eventType) {
-        this.eventType = eventType;
-    }
-
-    public long getVersion() {
-        return version;
-    }
-
-    public void setVersion(long version) {
-        this.version = version;
+    public long getOffset() {
+        return offset;
     }
 
     public long getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(long createTime) {
-        this.createTime = createTime;
-    }
-
     public String getContext() {
         return context;
+    }
+
+    public void setOffset(long offset) {
+        this.offset = offset;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
     }
 
     public void setContext(String context) {
         this.context = context;
     }
 
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
-    public String getSender() {
-        return sender;
-    }
-
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
-
     @Override
     public String toString() {
-        return "EventMeta{"
-                + "key='"
-                + key
-                + '\''
-                + ", value='"
-                + value
-                + '\''
-                + ", eventType='"
-                + eventType
-                + '\''
-                + ", version="
-                + version
-                + ", createTime="
-                + createTime
-                + ", context='"
-                + context
-                + '\''
-                + ", namespace='"
-                + namespace
-                + '\''
-                + ", sender='"
-                + sender
-                + '\''
-                + '}';
+        return "EventMeta{" +
+                "eventKey=" + eventKey +
+                ", message='" + message + '\'' +
+                ", offset=" + offset +
+                ", createTime=" + createTime +
+                ", context='" + context + '\'' +
+                '}';
     }
 
     public static EventMeta buildEventMeta(NotificationServiceOuterClass.EventProto eventProto) {
-        return new EventMeta(
-                eventProto.getKey(),
-                eventProto.getValue(),
+        EventKey eventKey = new EventKey(
+                eventProto.getName(),
                 eventProto.getEventType(),
-                eventProto.getVersion(),
-                eventProto.getCreateTime(),
-                eventProto.getContext(),
                 eventProto.getNamespace(),
                 eventProto.getSender());
+        EventMeta event = new EventMeta(
+                eventKey,
+                eventProto.getMessage(),
+                eventProto.getContext());
+        event.setOffset(eventProto.getOffset());
+        event.setCreateTime(eventProto.getCreateTime());
+        return event;
     }
 }
