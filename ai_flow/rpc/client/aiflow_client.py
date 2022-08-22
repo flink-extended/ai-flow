@@ -24,13 +24,31 @@ from ai_flow.rpc.client.scheduler_client import SchedulerClient
 from ai_flow.common.configuration import config_constants
 
 
-def get_scheduler_client():
-    server_uri = config_constants.SERVER_ADDRESS
+def get_scheduler_client(server_uri: str = None):
+    """
+    Create a client to connect with AIFlow scheduler server.
+
+    :param server_uri: The uri of AIFlow server.
+                       Use the default value in aiflow_client.yaml if not set.
+    """
+    if server_uri is None:
+        server_uri = config_constants.SERVER_ADDRESS
     return SchedulerClient(server_uri=server_uri)
 
 
-def get_notification_client(namespace=DEFAULT_NAMESPACE, sender=None):
+def get_notification_client(notification_server_uri: str = None,
+                            namespace: str = DEFAULT_NAMESPACE,
+                            sender: str = None):
+    """
+    Create a notification client to connect with notification server.
+
+    :param notification_server_uri: The uri of notification server.
+    :param namespace: The event namespace.
+    :param sender: The event sender.
+    """
+    if notification_server_uri is None:
+        notification_server_uri = config_constants.NOTIFICATION_SERVER_URI
     return EmbeddedNotificationClient(
-        server_uri=config_constants.NOTIFICATION_SERVER_URI,
+        server_uri=notification_server_uri,
         namespace=namespace,
         sender=sender)

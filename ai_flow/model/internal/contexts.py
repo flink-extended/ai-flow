@@ -14,8 +14,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import contextlib
+import json
+
 from ai_flow.model.context import Context
-from ai_flow.model.task_execution import TaskExecution
+from ai_flow.model.task_execution import TaskExecutionKey
 from ai_flow.model.workflow import Workflow
 from ai_flow.model.workflow_execution import WorkflowExecution
 
@@ -42,9 +45,18 @@ class WorkflowExecutionContext(Context):
 class TaskExecutionContext(Context):
     """It contains a workflow, a workflow execution and a task execution. It is used to execute operators"""
     def __init__(self,
-                 workflow: Workflow,
-                 workflow_execution: WorkflowExecution,
-                 task_execution: TaskExecution):
-        self.workflow = workflow
-        self.workflow_execution = workflow_execution
-        self.task_execution = task_execution
+                 task_execution_key: TaskExecutionKey):
+        self.task_execution_key = task_execution_key
+
+
+_CURRENT_TASK_CONTEXT: TaskExecutionContext = None
+
+
+def set_runtime_task_context(context: TaskExecutionContext):
+    global _CURRENT_TASK_CONTEXT
+    _CURRENT_TASK_CONTEXT = context
+
+
+def get_runtime_task_context():
+    return _CURRENT_TASK_CONTEXT
+

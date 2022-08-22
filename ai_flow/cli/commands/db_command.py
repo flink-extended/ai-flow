@@ -19,6 +19,7 @@ import logging
 import os
 import shutil
 
+from ai_flow.common.env import get_aiflow_home
 from ai_flow.metadata.base import Base
 from ai_flow.common.util.db_util import db_migration
 from ai_flow.common.configuration import config_constants
@@ -39,7 +40,12 @@ def reset(args):
     if args.yes or input("This will drop existing tables if they exist. Proceed? (y/n)").upper() == "Y":
         db_migration.reset_db(url=db_uri, metadata=Base.metadata)
         if os.path.isdir(config_constants.LOCAL_REGISTRY_PATH):
+            print("Removing registry files of local task executor.")
             shutil.rmtree(config_constants.LOCAL_REGISTRY_PATH)
+        ckp_file = os.path.join(get_aiflow_home(), '.checkpoint')
+        if os.path.exists(ckp_file):
+            print("Removing checkpoint file.")
+            os.remove(ckp_file)
     else:
         _logger.info('Cancel reset the database, db uri: {}'.format(db_uri))
 

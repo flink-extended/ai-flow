@@ -20,20 +20,20 @@ import logging
 import os
 import signal
 
-from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
-
 from ai_flow.common.configuration import config_constants
 from ai_flow.blob_manager.blob_manager_interface import BlobManagerFactory, BlobManagerConfig
 from ai_flow.common.exception.exceptions import TaskFailedException, TaskForceStoppedException
 from ai_flow.common.util import workflow_utils
 from ai_flow.common.util.thread_utils import RepeatedTimer
-from ai_flow.model.context import Context
+from ai_flow.model.internal.contexts import TaskExecutionContext
 from ai_flow.model.internal.events import TaskStatusEvent, TaskStatusChangedEvent
 from ai_flow.model.operator import AIFlowOperator
 from ai_flow.model.status import TaskStatus
 from ai_flow.model.task_execution import TaskExecutionKey
+from ai_flow.rpc.client.aiflow_client import get_notification_client
 from ai_flow.rpc.client.heartbeat_client import HeartbeatClient
 from ai_flow.common.configuration.helpers import AIFLOW_HOME
+from ai_flow.model.internal.contexts import set_runtime_task_context
 
 logger = logging.getLogger('aiflow.task')
 
@@ -74,10 +74,11 @@ class TaskManager(object):
         self.workflow_name = workflow_name
         self.task_execution_key = task_execution_key
         self.workflow_snapshot_path = workflow_snapshot_path
-        self.notification_client = EmbeddedNotificationClient(
-            server_uri=notification_server_uri, namespace='task_status_change', sender='task_manager')
+        self.notification_client = get_notification_client(
+            notification_server_uri=notification_server_uri, namespace='task_status_change', sender='task_manager')
         self.heartbeat_client = HeartbeatClient(heartbeat_server_uri)
         self.heartbeat_thread = RepeatedTimer(heartbeat_interval, self._send_heartbeat)
+        self.context = TaskExecutionContext(task_execution_key)
 
     def start(self):
         self.heartbeat_thread.start()
@@ -95,18 +96,16 @@ class TaskManager(object):
 
     def _execute(self):
         task = self._get_task()
+        set_runtime_task_context(self.context)
         try:
             if isinstance(task, AIFlowOperator):
                 def signal_handler(signum, frame):  # pylint: disable=unused-argument
                     logger.error("Received SIGTERM. Terminating subprocesses.")
-                    context = Context()
-                    task.stop(context)
+                    task.stop(self.context)
                     raise TaskForceStoppedException("Task received SIGTERM signal")
                 signal.signal(signal.SIGTERM, signal_handler)
-
-                context = Context()
-                task.start(context)
-                task.await_termination(context)
+                task.start(self.context)
+                task.await_termination(self.context)
         except TaskForceStoppedException:
             raise
         except (Exception, KeyboardInterrupt) as e:
@@ -160,4 +159,3 @@ class TaskManager(object):
         self.heartbeat_thread.cancel()
         self.heartbeat_thread.join()
         self.notification_client.close()
-
