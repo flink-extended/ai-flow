@@ -25,6 +25,7 @@ from notification_service.client.notification_client import ListenerRegistration
     ListenerProcessor
 from notification_service.model.event import Event, EventKey
 
+from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.internal.contexts import get_runtime_task_context
 from ai_flow.model.internal.events import EventContextConstant
 
@@ -46,10 +47,27 @@ class AIFlowNotificationClient(object):
         )
 
     def send_event_to_all_workflow_executions(self, event: Event) -> Event:
+        """
+        Send event to all workflow executions.
+
+        :param event: the event to send.
+        :return: The sent event.
+        """
         return self.client.send_event(event)
 
     def send_event(self, event: Event) -> Event:
-        workflow_execution_id = get_runtime_task_context().task_execution_key.workflow_execution_id
+        """
+        Send event to current workflow execution. This function can only be used
+        in AIFlow Operator runtime. It will retrieve the workflow execution info from runtime
+        context and set to context of the event.
+
+        :param event: the event to send.
+        :return: The sent event.
+        """
+        context = get_runtime_task_context()
+        if not context:
+            raise AIFlowException("send_event can only be used in AIFlow Operator runtime.")
+        workflow_execution_id = context.task_execution_key.workflow_execution_id
         if event.context is not None:
             context_dict: dict = json.loads(event.context)
             context_dict.update({
