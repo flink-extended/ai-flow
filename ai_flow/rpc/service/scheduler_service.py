@@ -314,6 +314,8 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
             workflow_executor = WorkflowExecutor(metadata_manager=metadata_manager)
 
             workflow_meta = metadata_manager.get_workflow_by_name(namespace, workflow_name)
+            if workflow_meta is None:
+                raise AIFlowRpcServerException(f'Workflow {namespace}.{workflow_name} not exists')
             latest_snapshot = metadata_manager.get_latest_snapshot(workflow_meta.id)
             event = StartWorkflowExecutionEvent(workflow_meta.id, latest_snapshot.id)
             workflow_execution_start_command = scheduling_event_processor.process(event=event)
