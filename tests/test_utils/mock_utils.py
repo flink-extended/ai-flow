@@ -25,12 +25,13 @@ from ai_flow.scheduler.timer import Timer, build_trigger
 
 class MockNotificationClient(NotificationClient):
 
-    def __init__(self, server_uri=None, namespace=None, sender=None):
+    def __init__(self, server_uri=None, namespace=None, sender=None, **kwargs):
         self.events = []
         super().__init__(namespace, sender)
 
     def send_event(self, event: Event):
         self.events.append(event)
+        return event
 
     def register_listener(self, listener_processor: ListenerProcessor, event_keys: List[EventKey] = None,
                           offset: int = None) -> ListenerRegistrationId:

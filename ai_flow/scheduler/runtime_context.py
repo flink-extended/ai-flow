@@ -18,7 +18,7 @@ from ai_flow.metadata.metadata_manager import MetadataManager
 from ai_flow.model.internal.contexts import WorkflowContext, WorkflowExecutionContext, TaskExecutionContext
 from ai_flow.model.state import State, StateDescriptor
 from ai_flow.model.status import TaskStatus
-from ai_flow.model.task_execution import TaskExecution
+from ai_flow.model.task_execution import TaskExecution, TaskExecutionKey
 from ai_flow.model.workflow import Workflow
 from ai_flow.model.workflow_execution import WorkflowExecution
 
@@ -63,14 +63,12 @@ class WorkflowExecutionContextImpl(WorkflowExecutionContext):
 
 class TaskExecutionContextImpl(TaskExecutionContext):
     def __init__(self,
-                 workflow: Workflow,
-                 workflow_execution: WorkflowExecution,
-                 task_execution: TaskExecution,
+                 task_execution_key: TaskExecutionKey,
                  metadata_manager: MetadataManager):
-        super().__init__(workflow, workflow_execution, task_execution)
+        super().__init__(task_execution_key)
         self._metadata_manager = metadata_manager
 
     def get_state(self, state_descriptor: StateDescriptor) -> State:
         return self._metadata_manager.get_or_create_workflow_execution_state(
-            workflow_execution_id=self.workflow_execution.id,
+            workflow_execution_id=self.task_execution_key.workflow_execution_id,
             descriptor=state_descriptor)

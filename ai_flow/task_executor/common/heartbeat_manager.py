@@ -17,14 +17,12 @@
 import logging
 import threading
 import time
+import grpc
 from concurrent import futures
 
-import grpc
-from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
-
-from ai_flow.common.configuration.config_constants import NOTIFICATION_SERVER_URI
 from ai_flow.common.util.db_util.session import create_session
 from ai_flow.model.task_execution import TaskExecutionKey
+from ai_flow.rpc.client.aiflow_client import get_notification_client
 
 from ai_flow.rpc.protobuf.message_pb2 import Response, SUCCESS
 
@@ -55,8 +53,7 @@ class HeartbeatManager(object):
         self.heartbeat_check_thread = StoppableThread(target=self._check_heartbeat_timeout)
 
     def start(self):
-        self.notification_client = EmbeddedNotificationClient(
-            server_uri=NOTIFICATION_SERVER_URI, namespace='task_status_change', sender='task_executor')
+        self.notification_client = get_notification_client(namespace='task_status_change', sender='task_executor')
 
         self.grpc_server.start()
         logger.info('Heartbeat Service started.')
