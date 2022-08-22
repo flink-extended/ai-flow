@@ -16,23 +16,30 @@
 #
 import time
 
-from ai_flow.rpc.client.aiflow_client import get_notification_client
 from notification_service.model.event import EventKey, Event
 
 from ai_flow.model.action import TaskAction
+from ai_flow.notification.notification_client import AIFlowNotificationClient
 from ai_flow.operators.bash import BashOperator
 from ai_flow.operators.python import PythonOperator
 from ai_flow.model.status import TaskStatus
 
 from ai_flow.model.workflow import Workflow
 
-EVENT_KEY = EventKey(name='quickstart_key',
-                     event_type='quickstart_type')
+EVENT_KEY = EventKey(name='event_name',
+                     event_type='user_defined_type',
+                     namespace="my_namespace",
+                     sender="task3"
+                     )
 
 
 def func():
     time.sleep(5)
-    notification_client = get_notification_client()
+    notification_client = AIFlowNotificationClient(
+        server_uri="localhost:50052",
+        namespace="my_namespace",
+        sender="task3"
+    )
     event = Event(event_key=EVENT_KEY, message='This is a custom message.')
     notification_client.send_event(event)
 
