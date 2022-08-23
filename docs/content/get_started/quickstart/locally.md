@@ -40,13 +40,13 @@ please refer to [Troubleshooting](./troubleshooting.md) section to get solutions
 ## Running a Workflow
 
 ### Defining a Workflow
-Below is a typically event-driven workflow. The workflow contains four tasks, task3 is triggered once task1 and task2 finished and will send a custom event which would trigger task4.
+Below is a typically event-driven workflow. The workflow contains 4 tasks, task3 is started once both task1 and task2 finished, then task3 will send a custom event which would trigger task4 to start running.
 
 ```python
 import time
 
 from ai_flow.rpc.client.aiflow_client import get_notification_client
-from notification_service.event import EventKey, Event
+from notification_service.model.event import EventKey, Event
 
 from ai_flow.model.action import TaskAction
 from ai_flow.operators.bash import BashOperator
@@ -79,17 +79,11 @@ with Workflow(name='quickstart_workflow') as w1:
 
     task4.action_on_event_received(action=TaskAction.RESTART, event_key=EVENT_KEY)
 ```
-You can save the above workflow as a python file on your workstation.
+You can save the above workflow as a python file on your workstation and remember the file path as ${path_of_the_workflow_file}.
 
 ### Uploading the Workflow
 
-Each workflow belongs to a namespace, before uploading the workflow you need to create a namespace. 
-
-```shell
-aiflow namespace add default
-```
-
-Then you can upload the workflow with the path of the file you just saved.
+Now you can upload the workflow with the path of the file you just saved.
 ```
 aiflow workflow upload ${path_of_the_workflow_file}
 ```
