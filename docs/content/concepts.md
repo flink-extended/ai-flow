@@ -16,7 +16,7 @@ These stages could be described as jobs, and each job could be batched or stream
 
 ### Workflow
 
-A workflow consists of [jobs](#job) and relationships([data dependencies](#data-dependency) and [control dependencies](#control-dependency)) between jobs. A workflow can run regularly or be triggered by [events](#event).
+A workflow consists of [tasks](#task) and relationships between tasks. A workflow can run regularly or be triggered by [events](#event).
 
 ### Project
 
