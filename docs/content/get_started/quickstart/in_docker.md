@@ -1,6 +1,6 @@
 # Running AIFlow in Docker
 
-This section will show you how to start AIFlow in docker container.
+This section will show you how to start AIFlow in docker container if you are tired of managing the python environment and dependencies.
 
 ## Pulling Docker Image
 Run following command to pull latest AIFlow docker image.
