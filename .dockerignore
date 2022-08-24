@@ -28,7 +28,6 @@
 
 # Allow only these directories
 !ai_flow
-!ai_flow_plugins
 !bin
 !docs
 !samples
