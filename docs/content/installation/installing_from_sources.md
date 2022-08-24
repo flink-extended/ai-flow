@@ -4,8 +4,10 @@ This page describes installations from ai-flow source code.
 
 ## Prerequisites
 
+Please make sure you have below tools installed on your workflow station.
+
 * Git
-* Python: 3.7,3.8
+* Python: 3.7, 3.8
 * Pip: 19.0.0+
 * SQLite: 3.15.0+
 
