@@ -41,7 +41,6 @@ class TestWorkflowScheduleRpc(BaseUnitTest):
         super().tearDown()
 
     def prepare_workflow(self):
-        self.client.add_namespace('default')
         with Workflow(name='workflow1') as workflow:
             BashOperator(name='bash', bash_command='echo 1')
         workflow_meta = self.client.add_workflow(workflow.name, 'default', 'mock_content', cloudpickle.dumps(workflow))
