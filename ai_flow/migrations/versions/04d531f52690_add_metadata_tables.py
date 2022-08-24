@@ -39,6 +39,7 @@ def upgrade():
                     sa.Column('properties', sa.String(length=1024), nullable=True),
                     sa.PrimaryKeyConstraint('name'),
                     )
+    op.execute("INSERT INTO namespace VALUES ('default', '{}')")
     op.create_table('workflow',
                     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
                     sa.Column('name', sa.String(length=256), nullable=False),
