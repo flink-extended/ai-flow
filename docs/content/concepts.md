@@ -1,13 +1,13 @@
 # Concepts
 
-## Workflow
+## Workflows
 A workflow consists of [tasks](#Tasks) and relationships between tasks. A workflow can run regularly or be triggered by [events](#Events).
 
 ## Namespaces
-A namespace can contains multiple business related workflows. Workflows with the same names in different namespaces can be uniquely identified.
+A namespace can contains multiple business related [workflows](#Workflows). Workflows with the same names in different namespaces can be uniquely identified.
 
 ## Tasks
-A Task is the basic unit of execution in workflow. Tasks are arranged into a workflow, and they have dependencies between them in order to express the conditions on which they should run.
+A Task is the basic unit of execution in [workflow](#Workflows). Tasks are arranged into a workflow, and they have dependencies between them in order to express the conditions on which they should run.
 
 ## Operators
 An Operator is conceptually a template for a predefined [task](#Tasks).
@@ -16,7 +16,7 @@ An Operator is conceptually a template for a predefined [task](#Tasks).
 A task execution is the runtime instance of a [task](#Tasks). A task can be executed for multiple times which generates multiple job executions.
 
 ## Workflow Executions
-The workflow execution is a runtime instance of the [workflow](#Workflow).
+The workflow execution is a runtime instance of the [workflow](#Workflows).
 A workflow can be executed multiple times to generate multiple workflow executions.
 
 ## Events
