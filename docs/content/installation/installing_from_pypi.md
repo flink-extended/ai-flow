@@ -6,7 +6,7 @@ This page describes installations using the `ai-flow` package [published in PyPI
 
 AIFlow is tested with:
 
-* Python: 3.7,3.8
+* Python: 3.7, 3.8
 * Pip: 19.0.0+
 * SQLite: 3.15.0+
 
@@ -14,7 +14,8 @@ AIFlow is tested with:
 
 ## Installing AIFlow
 
-**[Optional]** To avoid dependencies conflict, we strongly recommend using [venv](https://docs.python.org/3.7/library/venv.html) or other similar tools for an isolated Python environment like below:
+### Preparing Environment [Optional] 
+To avoid dependencies conflict, we strongly recommend using [venv](https://docs.python.org/3.7/library/venv.html) or other similar tools for an isolated Python environment like below:
 
 ```shell
 python3 -m venv venv_for_aiflow

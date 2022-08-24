@@ -47,7 +47,7 @@ ENV LANG en_US.UTF-8
 ENV LC_CTYPE en_US.UTF-8
 ENV LC_MESSAGES en_US.UTF-8
 
-COPY ./examples /opt/aiflow/examples
+COPY ./samples /opt/aiflow/samples
 
 COPY --from=builder /tmp/dist /tmp/dist
 RUN apt-get update -y \
