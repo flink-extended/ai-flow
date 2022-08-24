@@ -37,7 +37,6 @@ class TestWorkflowSnapshotRpc(BaseUnitTest):
 
     @mock.patch('ai_flow.scheduler.rule_extractor.RuleExtractor.update_workflow')
     def test_workflow_snapshot_operation(self, mock_update):
-        self.client.add_namespace('default')
         workflow_meta = self.client.add_workflow('workflow1', 'default', 'mock_content', b'111')
         snapshot1 = self.client.add_workflow_snapshot(workflow_meta.id, 'uri', b'111', 'md5')
         mock_update.assert_called_once_with(workflow_meta.id, b'111')

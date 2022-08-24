@@ -20,6 +20,7 @@ import unittest
 from datetime import datetime
 
 import cloudpickle
+from sqlalchemy.exc import IntegrityError
 
 from ai_flow.common.util.db_util.db_migration import init_db
 from ai_flow.common.util.db_util.session import new_session
@@ -51,7 +52,15 @@ class TestMetadataManager(unittest.TestCase):
     def session_rollback(self):
         self.metadata_manager.rollback()
 
+    def test_default_namespace_already_exists(self):
+        with self.assertRaises(IntegrityError):
+            self.metadata_manager.add_namespace(name='default', properties={})
+
     def test_namespace_operations(self):
+        namespace_metas = self.metadata_manager.list_namespace()
+        self.assertEqual(1, len(namespace_metas))
+        self.assertEqual('default', namespace_metas[0].name)
+
         namespace_meta_1 = self.metadata_manager.add_namespace(name='namespace_1', properties={'a': 'a'})
         self.metadata_manager.commit()
         self.assertEqual('namespace_1', namespace_meta_1.name)
@@ -64,15 +73,15 @@ class TestMetadataManager(unittest.TestCase):
         namespace_meta_2 = self.metadata_manager.add_namespace(name='namespace_2', properties={'c': 'c'})
         self.metadata_manager.commit()
         namespace_metas = self.metadata_manager.list_namespace()
-        self.assertEqual(2, len(namespace_metas))
+        self.assertEqual(3, len(namespace_metas))
         self.metadata_manager.delete_namespace('namespace_1')
         self.metadata_manager.commit()
         namespace_metas = self.metadata_manager.list_namespace()
-        self.assertEqual(1, len(namespace_metas))
+        self.assertEqual(2, len(namespace_metas))
         self.metadata_manager.delete_namespace('namespace_2')
         self.metadata_manager.commit()
         namespace_metas = self.metadata_manager.list_namespace()
-        self.assertEqual(0, len(namespace_metas))
+        self.assertEqual(1, len(namespace_metas))
 
     def test_add_workflow_without_namespace(self):
         namespace_name = 'namespace'

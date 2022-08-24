@@ -75,7 +75,6 @@ class TestWorkflowRpc(BaseUnitTest):
                          self.rule_extractor.event_workflow_index.workflow_rule_index)
 
     def test_rollback_adding_invalid_workflow(self):
-        self.client.add_namespace('default')
         with self.assertRaises(AIFlowException):
             self.client.add_workflow('workflow', 'default', 'mock_content', b'invalid')
         self.assertEqual('default', self.client.get_namespace('default').name)
