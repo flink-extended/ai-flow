@@ -36,6 +36,8 @@ class TestNamespaceRpc(BaseUnitTest):
         super().tearDown()
 
     def test_namespace_operation(self):
+        self.client.delete_namespace('default')
+
         namespace = self.client.add_namespace('ns1', {'key': 'value'})
         self.assertEqual('ns1', namespace.name)
         self.assertEqual({'key': 'value'}, namespace.get_properties())
