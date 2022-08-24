@@ -1,74 +1,32 @@
 # Concepts
 
-## Workflow Orchestration
+## Workflows
+A workflow consists of [tasks](#Tasks) and relationships between tasks. A workflow can run regularly or be triggered by [events](#Events).
 
-The figure below shows a common machine learning workflow:
+## Namespaces
+A namespace can contains multiple business related [workflows](#Workflows). Workflows with the same names in different namespaces can be uniquely identified.
 
-![machine learning workflow](images/machine_learning_workflow.png)
-The workflow consists of 4 stages: feature engineering, model training, model validation, and model inference.
+## Tasks
+A Task is the basic unit of execution in [workflow](#Workflows). Tasks are arranged into a workflow, and they have dependencies between them in order to express the conditions on which they should run.
 
-1. Feature engineering produces the sample data from the raw data.
-2. Model training trains models based on the sample data and generates new models. 
-3. Model validation validates the metrics of new models from the validation data. 
-4. If the new model's metrics meet the conditions, model inference will use the new model to do inference work from inference data.
+## Operators
+An Operator is conceptually a template for a predefined [task](#Tasks).
 
-These stages could be described as jobs, and each job could be batched or streaming.
+## Task Executions
+A task execution is the runtime instance of a [task](#Tasks). A task can be executed for multiple times which generates multiple job executions.
 
-### Workflow
-
-A workflow consists of [tasks](#task) and relationships between tasks. A workflow can run regularly or be triggered by [events](#event).
-
-### Project
-
-A project contains multiple business related workflows.
-
-For example, we can have a project that consists workflows for a recommendation system and another project with 
-workflows for risk controlling system.
-
-### Job
-A Job is the basic unit of execution in workflow. Jobs are arranged into a workflow, and they have dependencies between them in order to express the conditions on which they should run.
-For example, a workflow contains feature engineering job, model training job, model validation job, and model inference job.
-
-### Job Action
-A job action contains creating a job execution, stopping a job execution and restarting a [job execution](#job-execution).
-
-### Event
-The event specifies the signal that triggers the [job action](#job-action).
-
-For example, feature engineering job execution produces a sample data created event and 
-model validation job execution produces a new model validated event.
-
-### Data Dependency
-The data dependency indicates the [job](#job) in the workflow depends on certain [datasets](#dataset).
-For example, model training job depends on a sample data created by the feature engineering job.
-
-### Control Dependency
-The control dependency indicates conditions under which a [job action](#job-action) should be triggered.
-
-For example, after the feature engineering job finished, 
-the sample data created event will trigger the model training job to run.
-
-### Workflow Execution
-The workflow execution is a runtime instance of the [workflow](#workflow).
+## Workflow Executions
+The workflow execution is a runtime instance of the [workflow](#Workflows).
 A workflow can be executed multiple times to generate multiple workflow executions.
 
-### Job Execution
-The job execution is a runtime instance of the [job](#job).
-A job can be executed multiple times to generate multiple job executions.
+## Events
+The event specifies the signal that triggers evaluating [condition](#Conditions) and taking the [task action](#Task Actions). 
 
-## Machine Learning
-### Dataset
+## Conditions
+Consists of the conditions that need to be satisfied in order to carry out the specified [task action](#Task Actions). The condition is only checked upon occurrence of the specified [event](#Events).
 
-A dataset represents the data that can be processed by jobs like feature engineering, model training, etc.
-For example, datasets used in the above example contain raw data, sample data, etc.
-
-### Model
-
-A model is the output of a machine learning algorithm run on [the sample data](#dataset).
-
-### Metric
-The metric is a measure of certain characteristics of [dataset](#dataset) or [model](#model).
-The metric contains the dataset's metric(such as data null rate), the model's metric(such as AUC of the model).
-
-### Artifact
-The artifact represents the additional resource files(except dataset, model) required by the workflow, such as dictionaries, jar packages, etc.
+## Task Actions
+A task can perform the following actions: 
+* START: creates a new execution of the task
+* STOP: stops the running execution of the task
+* RESTART: stops the current running execution and starts a new task execution
