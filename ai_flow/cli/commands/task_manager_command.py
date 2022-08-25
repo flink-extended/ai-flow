@@ -19,11 +19,13 @@
 import logging
 import os
 import signal
+from contextlib import contextmanager, redirect_stdout, redirect_stderr
 
 from ai_flow.common.configuration import config_constants
 from ai_flow.blob_manager.blob_manager_interface import BlobManagerFactory, BlobManagerConfig
 from ai_flow.common.exception.exceptions import TaskFailedException, TaskForceStoppedException
 from ai_flow.common.util import workflow_utils
+from ai_flow.common.util.log_util.log_writer import StreamLogWriter
 from ai_flow.common.util.thread_utils import RepeatedTimer
 from ai_flow.model.internal.contexts import TaskExecutionContext
 from ai_flow.model.internal.events import TaskStatusEvent, TaskStatusChangedEvent
@@ -43,6 +45,23 @@ def set_logger_context(logger, workflow_name, task_execution_key):
         i.set_context(workflow_name, task_execution_key)
 
 
+@contextmanager
+def _capture_task_logs():
+    """
+    Replace the root logger configuration with the aiflow.task configuration
+    so we can capture logs from any custom loggers used in the task.
+    """
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logger.level)
+    root_logger.handlers[:] = logger.handlers
+
+    info_writer = StreamLogWriter(logger, logging.INFO)
+    warning_writer = StreamLogWriter(logger, logging.WARNING)
+
+    with redirect_stdout(info_writer), redirect_stderr(warning_writer):
+        yield
+
+
 def run_task_manager(args):
     key = TaskExecutionKey(workflow_execution_id=int(args.workflow_execution_id),
                            task_name=str(args.task_name),
@@ -57,7 +76,8 @@ def run_task_manager(args):
                                heartbeat_interval=heartbeat_interval)
     try:
         task_manager.start()
-        task_manager.run_task()
+        with _capture_task_logs():
+            task_manager.run_task()
     finally:
         task_manager.stop()
 

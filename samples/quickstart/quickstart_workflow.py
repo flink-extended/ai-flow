@@ -28,7 +28,7 @@ from ai_flow.model.workflow import Workflow
 
 EVENT_KEY = EventKey(name='event_name',
                      event_type='user_defined_type',
-                     namespace="my_namespace",
+                     namespace="sample",
                      sender="task3"
                      )
 
@@ -37,7 +37,7 @@ def func():
     time.sleep(5)
     notification_client = AIFlowNotificationClient(
         server_uri="localhost:50052",
-        namespace="my_namespace",
+        namespace="sample",
         sender="task3"
     )
     event = Event(event_key=EVENT_KEY, message='This is a custom message.')
@@ -55,4 +55,4 @@ with Workflow(name='quickstart_workflow') as w1:
         task2: TaskStatus.SUCCESS
     })
 
-    task4.action_on_event_received(action=TaskAction.RESTART, event_key=EVENT_KEY)
+    task4.action_on_event_received(action=TaskAction.START, event_key=EVENT_KEY)
