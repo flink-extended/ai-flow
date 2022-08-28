@@ -23,26 +23,26 @@ from notification_service.model.event import Event, EventKey
 class TestEvent(unittest.TestCase):
 
     def test_event_key_equal(self):
-        event_key_1 = EventKey(name='a')
-        event_key_2 = EventKey(name='a')
+        event_key_1 = EventKey(event_name='a')
+        event_key_2 = EventKey(event_name='a')
         self.assertEqual(event_key_1, event_key_2)
 
     def test_event_key_not_equal(self):
-        event_key_1 = EventKey(name='a')
-        event_key_2 = EventKey(name='b')
+        event_key_1 = EventKey(event_name='a')
+        event_key_2 = EventKey(event_name='b')
         self.assertNotEqual(event_key_1, event_key_2)
 
     def test_event_equal(self):
-        event_key_1 = EventKey(name='a')
+        event_key_1 = EventKey(event_name='a')
         event_1 = Event(event_key_1, 'message')
-        event_key_2 = EventKey(name='a')
+        event_key_2 = EventKey(event_name='a')
         event_2 = Event(event_key_2, 'message')
         self.assertEqual(event_1, event_2)
 
     def test_event_not_equal(self):
-        event_key_1 = EventKey(name='a')
+        event_key_1 = EventKey(event_name='a')
         event_1 = Event(event_key_1, 'message')
-        event_key_2 = EventKey(name='b')
+        event_key_2 = EventKey(event_name='b')
         event_2 = Event(event_key_2, 'message')
         self.assertNotEqual(event_1, event_2)
         event_3 = Event(event_key_1, 'message_3')

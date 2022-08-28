@@ -104,7 +104,7 @@ class HaServerTest(unittest.TestCase):
                 time.sleep(10)
 
     def test_server_change(self):
-        event_key = EventKey(name="key")
+        event_key = EventKey(event_name="key")
         self.client.send_event(Event(event_key, "value1"))
         self.client.send_event(Event(event_key, "value2"))
         self.client.send_event(Event(event_key, "value3"))
@@ -139,11 +139,11 @@ class HaServerTest(unittest.TestCase):
                                                     namespace=None,
                                                     sender=None)
         try:
-            event_key = EventKey(name="key")
+            event_key = EventKey(event_name="key")
             event1 = another_client.send_event(Event(event_key=event_key, message="value1"))
             registration_id = self.client.register_listener(
                 listener_processor=TestWatch(event_list),
-                event_keys=[EventKey(name='key', namespace=None)],
+                event_keys=[EventKey(event_name='key', namespace=None)],
                 offset=event1.offset
             )
             another_client.send_event(Event(event_key=event_key, message="value2"))

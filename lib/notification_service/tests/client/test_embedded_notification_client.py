@@ -69,7 +69,7 @@ class TestGrpcNotificationClient(unittest.TestCase):
         db.clear_engine_and_session()
 
     def test_send_event(self):
-        event = self.client.send_event(Event(event_key=EventKey(name='name_1'),
+        event = self.client.send_event(Event(event_key=EventKey(event_name='name_1'),
                                              message='message_1'))
         self.assertTrue(event.offset >= 1)
 
@@ -84,7 +84,7 @@ class TestGrpcNotificationClient(unittest.TestCase):
         l_id = self.client.register_listener(listener_processor=processor)
         self.assertEqual(1, len(self.client.threads))
         for i in range(3):
-            event = self.client.send_event(Event(event_key=EventKey(name='name_{}'.format(i)),
+            event = self.client.send_event(Event(event_key=EventKey(event_name='name_{}'.format(i)),
                                                  message='message_{}'.format(i)))
         self.client.unregister_listener(l_id)
         self.assertEqual(3, processor.counter)
@@ -100,7 +100,7 @@ class TestGrpcNotificationClient(unittest.TestCase):
         processor = Counter()
         l_id = self.client.register_listener(listener_processor=processor, offset=1)
         for i in range(3):
-            event = self.client.send_event(Event(event_key=EventKey(name='name_{}'.format(i)),
+            event = self.client.send_event(Event(event_key=EventKey(event_name='name_{}'.format(i)),
                                                  message='message_{}'.format(i)))
         self.client.unregister_listener(l_id)
         self.assertEqual(2, processor.counter)
@@ -114,10 +114,10 @@ class TestGrpcNotificationClient(unittest.TestCase):
                 self.counter += len(events)
         processor = Counter()
         l_id = self.client.register_listener(listener_processor=processor,
-                                             event_keys=[EventKey(name='name_2', namespace=None),
-                                                         EventKey(name='name_3', namespace=None)])
+                                             event_keys=[EventKey(event_name='name_2'),
+                                                         EventKey(event_name='name_3')])
         for i in range(5):
-            event = self.client.send_event(Event(event_key=EventKey(name='name_{}'.format(i)),
+            event = self.client.send_event(Event(event_key=EventKey(event_name='name_{}'.format(i)),
                                                  message='message_{}'.format(i)))
         self.client.unregister_listener(l_id)
         self.assertEqual(2, processor.counter)
@@ -127,7 +127,7 @@ class TestGrpcNotificationClient(unittest.TestCase):
         for i in range(5):
             if i == 3:
                 t2 = datetime.now()
-            event = self.client.send_event(Event(event_key=EventKey(name='name_{}'.format(i)),
+            event = self.client.send_event(Event(event_key=EventKey(event_name='name_{}'.format(i)),
                                                  message='message_{}'.format(i)))
         time.sleep(1)
         t3 = datetime.now()

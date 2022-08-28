@@ -29,11 +29,9 @@ from notification_service.model.event import Event, EventKey
 from notification_service.client.notification_client import NotificationClient, ListenerRegistrationId, \
     ListenerProcessor
 from notification_service.rpc.protobuf import notification_service_pb2_grpc
-from notification_service.rpc.protobuf.notification_service_pb2 \
-    import SendEventRequest, ListEventsRequest, EventProto, ReturnStatus, ListAllEventsRequest, \
-    RegisterClientRequest, ClientMeta, ClientIdRequest, TimeToOffsetRequest
-from notification_service.rpc.protobuf.notification_service_pb2 import CountEventsRequest, \
-    GetLatestOffsetByKeyRequest, ListMembersRequest
+from notification_service.rpc.protobuf.notification_service_pb2 import SendEventRequest, \
+    ListEventsRequest, CountEventsRequest, EventProto, ReturnStatus, ListAllEventsRequest, \
+    RegisterClientRequest, ClientMeta, ClientIdRequest, TimeToOffsetRequest, ListMembersRequest
 from notification_service.util.utils import event_proto_to_event, proto_to_member, sleep_and_detecting_running, \
     event_count_proto_to_event_count
 
@@ -54,26 +52,6 @@ class SequenceNumberManager(object):
 
     def get_sequence_number(self):
         return self._seq_num
-
-
-def filter_events(event_keys: List[EventKey], events: List[Event]) -> List[Event]:
-    def match(event_key: EventKey, event: Event) -> bool:
-        if event_key.namespace is not None and event_key.namespace != event.event_key.namespace:
-            return False
-        if event_key.name is not None and event_key.name != event.event_key.name:
-            return False
-        if event_key.event_type is not None and event_key.event_type != event.event_key.event_type:
-            return False
-        if event_key.sender is not None and event_key.sender != event.event_key.sender:
-            return False
-        return True
-    results = []
-    for e in events:
-        for k in event_keys:
-            if match(k, e):
-                results.append(e)
-                break
-    return results
 
 
 class EmbeddedNotificationClient(NotificationClient):
@@ -250,7 +228,7 @@ class EmbeddedNotificationClient(NotificationClient):
 
         request = SendEventRequest(
             event=EventProto(
-                name=event.event_key.name,
+                name=event.event_key.event_name,
                 message=event.message,
                 event_type=event.event_key.event_type,
                 context=event.context,
@@ -296,7 +274,7 @@ class EmbeddedNotificationClient(NotificationClient):
                                                             NOTIFICATION_TIMEOUT_SECONDS)
                     if len(notifications) > 0:
                         if event_keys is not None:
-                            events = filter_events(event_keys=event_keys, events=notifications)
+                            events = client.filter_events(event_keys=event_keys, events=notifications)
                         else:
                             events = notifications
                         p.process(events)
@@ -359,29 +337,30 @@ class EmbeddedNotificationClient(NotificationClient):
             raise Exception(response.return_msg)
 
     def list_events(self,
-                    name: str = None,
-                    namespace: str = None,
+                    event_name: str = None,
                     event_type: str = None,
+                    namespace: str = None,
                     sender: str = None,
-                    offset: int = None) -> List[Event]:
+                    begin_offset: int = None,
+                    end_offset: int = None) -> List[Event]:
         """
         List specific events in Notification Service.
 
-        :param name: name of the event for listening.
-        :param namespace: (Optional) Namespace of the event for listening.
-        :param offset: (Optional) Offset of the events must greater than this offset.
+        :param event_name: name of the event for listening.
         :param event_type: (Optional) Type of the events.
+        :param namespace: (Optional) Namespace of the event for listening.
         :param sender: The event sender.
+        :param begin_offset: (Optional) Offset of the events must be greater than this offset.
+        :param end_offset: (Optional) Offset of the events must be less than or equal to this offset.
         :return: The event list.
         """
-        event_names = (name,)
         request = ListEventsRequest(
-            names=event_names,
+            event_name=event_name,
             event_type=event_type,
             namespace=namespace,
             sender=sender,
-            start_offset=offset,
-            start_time=None
+            start_offset=begin_offset,
+            end_offset=end_offset,
         )
         response = self.notification_stub.listEvents(request)
         if response.return_code == ReturnStatus.SUCCESS:
@@ -403,31 +382,30 @@ class EmbeddedNotificationClient(NotificationClient):
         return response.offset
 
     def count_events(self,
-                     name: Union[str, List[str]],
-                     namespace: str = None,
+                     event_name: str = None,
                      event_type: str = None,
+                     namespace: str = None,
                      sender: str = None,
-                     offset: int = None) -> Tuple[int, List[SenderEventCount]]:
+                     begin_offset: int = None,
+                     end_offset: int = None) -> Tuple[int, List[SenderEventCount]]:
         """
         Count specific events in Notification Service.
 
-        :param name: The name or the list of names of the events for listening.
-        :param namespace: (Optional) Namespace of the event for listening.
+        :param event_name: name of the event for listening.
         :param event_type: (Optional) Type of the events.
-        :param sender: (Optional) The event sender.
-        :param offset: (Optional) Offset of the events must greater than this offset.
+        :param namespace: (Optional) Namespace of the event for listening.
+        :param sender: The event sender.
+        :param begin_offset: (Optional) Offset of the events must be greater than this offset.
+        :param end_offset: (Optional) Offset of the events must be less than or equal to this offset.
         :return: The total event count and the list of event counts of each sender.
         """
-        if isinstance(name, str):
-            names = (name,)
-        elif isinstance(name, Iterable):
-            names = tuple(name)
         request = CountEventsRequest(
-            names=names,
-            start_offset=offset,
+            event_name=event_name,
             event_type=event_type,
             namespace=namespace,
-            sender=sender
+            sender=sender,
+            start_offset=begin_offset,
+            end_offset=end_offset,
         )
         response = self.notification_stub.countEvents(request)
         if response.return_code == ReturnStatus.SUCCESS:
@@ -439,19 +417,20 @@ class EmbeddedNotificationClient(NotificationClient):
         else:
             raise Exception(response.return_msg)
 
-    def get_latest_offset(self, name: str = None, namespace: str = None):
-        """
-        get latest event's offset by name.
-        :param name: (Optional) Name of events.
-        :param namespace: (Optional) Namespace of events.
-        :return: Offset number of the specific key.
-        """
-        self.lock.acquire()
-        try:
-            request = GetLatestOffsetByKeyRequest(name=name,
-                                                  namespace=namespace)
-            response = self.notification_stub.getLatestOffsetByKey(request)
-            if response.return_code == str(ReturnStatus.SUCCESS):
-                return response.offset
-        finally:
-            self.lock.release()
+    def filter_events(self, event_keys: List[EventKey], events: List[Event]) -> List[Event]:
+        def match(event_name, event_type, namespace, event: Event) -> bool:
+            if event_name is not None and event_name != event.event_key.event_name:
+                return False
+            if event_type is not None and event_type != event.event_key.event_type:
+                return False
+            if namespace is not None and namespace != event.namespace:
+                return False
+            return True
+
+        results = []
+        for e in events:
+            for k in event_keys:
+                if match(k.event_name, k.event_type, self.namespace, e):
+                    results.append(e)
+                    break
+        return results

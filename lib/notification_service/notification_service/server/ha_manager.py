@@ -142,7 +142,7 @@ class SimpleNotificationServerHaManager(NotificationServerHaManager):
             notifies = []
             while len(self.cached_notify) > 0:
                 event = self.cached_notify.popleft()
-                notify = Notify(key=str(event.event_key), namespace=event.event_key.namespace)
+                notify = Notify(key=str(event.event_key), namespace=event.namespace)
                 notifies.append(notify)
 
             # notify others

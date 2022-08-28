@@ -42,72 +42,67 @@ class MemoryEventStorage(BaseEventStorage):
         return event
 
     def list_events(self,
-                    key: Union[str, Tuple[str]],
-                    version: int = None,
+                    event_name: str = None,
                     event_type: str = None,
-                    start_time: int = None,
                     namespace: str = None,
-                    sender: str = None):
+                    sender: str = None,
+                    begin_offset: int = None,
+                    end_offset: int = None):
         res = []
-        key = None if key == "" else key
-        version = None if version == 0 else version
+        event_name = None if event_name == "" else event_name
         event_type = None if event_type == "" else event_type
         namespace = None if namespace == "" else namespace
         sender = None if sender == "" else sender
-        if isinstance(key, str):
-            key = (key,)
-        elif isinstance(key, Iterable):
-            key = tuple(key)
+        begin_offset = None if begin_offset == 0 else begin_offset
+        end_offset = None if end_offset == 0 else end_offset
+
         for event in self.store:
-            if key is not None and event.event_key.name not in key and ANY_CONDITION not in key:
+            if event_name is not None and event_name != ANY_CONDITION and event.event_key.event_name != event_name:
                 continue
-            if version is not None and event.offset <= version:
+            if event_type is not None and event_type != ANY_CONDITION and event.event_key.event_type != event_type:
                 continue
-            if event_type is not None and event.event_key.event_type != event_type and event_type != ANY_CONDITION:
+            if namespace is not None and namespace != ANY_CONDITION and event.namespace != namespace:
                 continue
-            if start_time is not None and event.create_time < start_time:
+            if sender is not None and sender != ANY_CONDITION and event.sender != sender:
                 continue
-            if namespace is not None and namespace != ANY_CONDITION and event.event_key.namespace != namespace:
+            if begin_offset is not None and event.offset <= begin_offset:
                 continue
-            if sender is not None and sender != ANY_CONDITION and event.event_key.sender != sender:
+            if end_offset is not None and event.offset > end_offset:
                 continue
             res.append(event)
         return res
 
     def count_events(self,
-                     key: Union[str, Tuple[str]],
-                     version: int = None,
+                     event_name: str = None,
                      event_type: str = None,
-                     start_time: int = None,
                      namespace: str = None,
-                     sender: str = None):
-        key = None if key == "" else key
-        version = None if version == 0 else version
+                     sender: str = None,
+                     begin_offset: int = None,
+                     end_offset: int = None):
+        event_name = None if event_name == "" else event_name
         event_type = None if event_type == "" else event_type
         namespace = None if namespace == "" else namespace
         sender = None if sender == "" else sender
-        if isinstance(key, str):
-            key = (key,)
-        elif isinstance(key, Iterable):
-            key = tuple(key)
+        begin_offset = None if begin_offset == 0 else begin_offset
+        end_offset = None if end_offset == 0 else end_offset
         event_counts = {}
         for event in self.store:
-            if key is not None and event.event_key.name not in key and ANY_CONDITION not in key:
+            if event_name is not None and event_name != ANY_CONDITION and event.event_key.event_name != event_name:
                 continue
-            if version is not None and event.offset <= version:
+            if event_type is not None and event_type != ANY_CONDITION and event.event_key.event_type != event_type:
                 continue
-            if event_type is not None and event.event_key.event_type != event_type and event_type != ANY_CONDITION:
+            if namespace is not None and namespace != ANY_CONDITION and event.namespace != namespace:
                 continue
-            if start_time is not None and event.create_time < start_time:
+            if sender is not None and sender != ANY_CONDITION and event.sender != sender:
                 continue
-            if namespace is not None and namespace != ANY_CONDITION and event.event_key.namespace != namespace:
+            if begin_offset is not None and event.offset <= begin_offset:
                 continue
-            if sender is not None and sender != ANY_CONDITION and event.event_key.sender != sender:
+            if end_offset is not None and event.offset > end_offset:
                 continue
-            if event.event_key.sender in event_counts:
-                event_counts.update({event.event_key.sender: event_counts.get(event.event_key.sender) + 1})
+            if event.sender in event_counts:
+                event_counts.update({event.sender: event_counts.get(event.sender) + 1})
             else:
-                event_counts.update({event.event_key.sender: 1})
+                event_counts.update({event.sender: 1})
         res = []
         for sender, event_count in event_counts.items():
             res.append(SenderEventCount(sender=sender, event_count=event_count))
@@ -128,9 +123,6 @@ class MemoryEventStorage(BaseEventStorage):
             if event.offset > start_version:
                 res.append(event)
         return res
-
-    def get_latest_version(self, key: str, namespace: str = None):
-        return self.max_offset
 
     def register_client(self, namespace: str = None, sender: str = None) -> int:
         self.clients.append((len(self.clients), namespace, sender))

@@ -16,7 +16,7 @@
 # under the License.
 import abc
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from notification_service.model.event import Event, EventKey
 
@@ -33,8 +33,8 @@ class ListenerProcessor(object):
 
 class NotificationClient(metaclass=abc.ABCMeta):
     def __init__(self,
-                 namespace: str,
-                 sender: str):
+                 namespace: Optional[str] = None,
+                 sender: Optional[str] = None):
         self.namespace = namespace
         self.sender = sender
 
@@ -74,16 +74,22 @@ class NotificationClient(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def list_events(self,
-                    name: str = None,
-                    namespace: str = None,
+                    event_name: str = None,
                     event_type: str = None,
+                    namespace: str = None,
                     sender: str = None,
-                    offset: int = None,
-                    ) -> List[Event]:
+                    begin_offset: int = None,
+                    end_offset: int = None) -> List[Event]:
         """
-        List specific events in Notification Service, if no parameter passed,
-        all events would be listed.
-        :return: List of query events.
+        List specific events in Notification Service.
+
+        :param event_name: name of the event for listening.
+        :param event_type: (Optional) Type of the events.
+        :param namespace: (Optional) Namespace of the event for listening.
+        :param sender: The event sender.
+        :param begin_offset: (Optional) Offset of the events must be greater than this offset.
+        :param end_offset: (Optional) Offset of the events must be less than or equal to this offset.
+        :return: The event list.
         """
         pass
 

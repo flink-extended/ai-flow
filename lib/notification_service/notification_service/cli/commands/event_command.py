@@ -69,11 +69,11 @@ def list_events(args):
         data=events,
         output=args.output,
         mapper=lambda event: {
-            "namespace": event.event_key.namespace,
-            "event_name": event.event_key.name,
+            "namespace": event.namespace,
+            "event_name": event.event_key.event_name,
             "event_message": event.message,
             "event_type": event.event_key.event_type,
-            "sender": event.event_key.sender,
+            "sender": event.sender,
             "create_time": dt.fromtimestamp(event.create_time/1000).isoformat(),
             "context": event.context,
             "version": event.offset,
@@ -117,7 +117,7 @@ def listen_events(args):
     elif args.begin_time:
         offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time))
 
-    event_key = EventKey(name=args.event_name,
+    event_key = EventKey(event_name=args.event_name,
                          event_type=args.event_type,
                          namespace=args.namespace,
                          sender=args.sender)
@@ -141,7 +141,7 @@ def send_event(args):
     client = EmbeddedNotificationClient(server_uri=args.server_uri,
                                         namespace=args.namespace,
                                         sender=args.sender)
-    event_key = EventKey(name=args.event_name,
+    event_key = EventKey(event_name=args.event_name,
                          event_type=args.event_type)
     event = Event(
         event_key=event_key,

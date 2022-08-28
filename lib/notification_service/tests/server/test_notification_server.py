@@ -40,7 +40,7 @@ class TestNotificationServer(unittest.TestCase):
         config = NotificationServerConfig(config_file)
         db.clear_engine_and_session()
         db.create_all_tables(config.db_uri)
-        self.event_key = EventKey(name='a')
+        self.event_key = EventKey(event_name='a')
 
     def tearDown(self) -> None:
         self._clean_db()
