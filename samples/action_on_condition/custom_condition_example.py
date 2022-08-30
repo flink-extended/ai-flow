@@ -17,7 +17,7 @@
 import random
 import time
 
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
@@ -54,7 +54,7 @@ class NumCondition(Condition):
         if con is None:
             con = Consumer()
 
-        con.accumulator = con.accumulator + int(event.message)
+        con.accumulator = con.accumulator + int(event.value)
         if con.accumulator >= 100 and not con.is_consumed:
             con.is_consumed = True
             state.update(con)
@@ -65,18 +65,11 @@ class NumCondition(Condition):
 
 
 def random_produce():
-    notification_client = AIFlowNotificationClient(
-        server_uri='localhost:50052',
-        namespace='sample',
-        sender='record_producer',
-    )
+    notification_client = \
+        AIFlowNotificationClient(server_uri='localhost:50052')
     while True:
         num = random.randint(0, 9)
-        event: Event = Event(
-            event_key=EventKey(event_name='name', event_type='NUM_GENERATED'),
-            message=str(num)
-        )
-        notification_client.send_event(event)
+        notification_client.send_event(key='num_event', value=str(num))
         print(f"Produced {num} records")
         time.sleep(1)
 
@@ -91,14 +84,8 @@ with Workflow(name='condition_workflow') as workflow:
     task4 = BashOperator(name='consumer',
                          bash_command='echo Got 100 records.')
 
-    expected_event_key = EventKey(
-        event_name='name',
-        event_type='NUM_GENERATED',
-        namespace='sample',
-        sender='record_producer'
-    )
     task4.action_on_condition(action=TaskAction.START,
-                              condition=NumCondition(expect_events=[expected_event_key]))
+                              condition=NumCondition(expect_events=['num_event']))
 
     task1.action_on_task_status(action=TaskAction.STOP,
                                 upstream_task_status_dict={task4: TaskStatus.SUCCESS})

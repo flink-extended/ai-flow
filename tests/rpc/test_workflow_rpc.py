@@ -16,11 +16,11 @@
 from unittest import mock
 
 import cloudpickle
-from notification_service.model.event import EventKey
 
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.action import TaskAction
 from ai_flow.model.internal.conditions import SingleEventCondition
+from ai_flow.model.internal.events import TaskStatusChangedEvent
 from ai_flow.operators.bash import BashOperator
 from ai_flow.model.rule import WorkflowRule
 from ai_flow.model.status import TaskStatus
@@ -54,7 +54,7 @@ class TestWorkflowRpc(BaseUnitTest):
             op2 = BashOperator(name='bash2', bash_command='echo 2')
             op2.action_on_task_status(TaskAction.START, upstream_task_status_dict={op1: TaskStatus.SUCCESS})
         workflow_meta = self.client.add_workflow(workflow.name, 'default', 'mock_content', cloudpickle.dumps(workflow))
-        rule = WorkflowRule(SingleEventCondition(EventKey(name='key1')))
+        rule = WorkflowRule(SingleEventCondition('key1'))
         self.client.add_workflow_trigger(namespace=workflow_meta.namespace,
                                          workflow_name=workflow_meta.name,
                                          rule=cloudpickle.dumps(rule))
@@ -69,9 +69,9 @@ class TestWorkflowRpc(BaseUnitTest):
         self.assertEqual(cloudpickle.dumps(workflow), workflow_meta.workflow_object)
         self.assertEqual(
             cloudpickle.dumps(self.rule_extractor.workflow_dict[workflow_meta.id]), workflow_meta.workflow_object)
-        self.assertEqual({(None, 'default.workflow1.bash1', 'TASK_STATUS_CHANGED', None): {1}},
+        self.assertEqual({('default', '[task_status_change].default.workflow1.bash1'): {1}},
                          self.rule_extractor.event_workflow_index.task_rule_index)
-        self.assertEqual({('DEFAULT', 'key1', 'UNDEFINED', None): {1}},
+        self.assertEqual({('default', 'key1'): {1}},
                          self.rule_extractor.event_workflow_index.workflow_rule_index)
 
     def test_rollback_adding_invalid_workflow(self):
@@ -102,9 +102,9 @@ class TestWorkflowRpc(BaseUnitTest):
         self.assertEqual(cloudpickle.dumps(workflow), workflow_meta.workflow_object)
         self.assertEqual(
             cloudpickle.dumps(self.rule_extractor.workflow_dict[workflow_meta.id]), workflow_meta.workflow_object)
-        self.assertEqual({(None, 'default.workflow1.bash3', 'TASK_STATUS_CHANGED', None): {1}},
+        self.assertEqual({('default', '[task_status_change].default.workflow1.bash3'): {1}},
                          self.rule_extractor.event_workflow_index.task_rule_index)
-        self.assertEqual({('DEFAULT', 'key1', 'UNDEFINED', None): {1}},
+        self.assertEqual({('default', 'key1'): {1}},
                          self.rule_extractor.event_workflow_index.workflow_rule_index)
 
     def test_update_non_exists_workflow(self):
@@ -131,9 +131,9 @@ class TestWorkflowRpc(BaseUnitTest):
         workflow_meta = self.client.get_workflow(workflow.name, workflow.namespace)
         self.assertTrue(workflow_meta.is_enabled)
         self.assertEqual(1, len(self.rule_extractor.workflow_dict))
-        self.assertEqual({(None, 'default.workflow1.bash1', 'TASK_STATUS_CHANGED', None): {1}},
+        self.assertEqual({('default', '[task_status_change].default.workflow1.bash1'): {1}},
                          self.rule_extractor.event_workflow_index.task_rule_index)
-        self.assertEqual({('DEFAULT', 'key1', 'UNDEFINED', None): {1}},
+        self.assertEqual({('default', 'key1'): {1}},
                          self.rule_extractor.event_workflow_index.workflow_rule_index)
 
     def test_rollback_disable_workflow(self):
@@ -169,12 +169,13 @@ class TestWorkflowRpc(BaseUnitTest):
     def test_delete_workflow(self):
         self.prepare_workflow('workflow1')
         self.prepare_workflow('workflow2')
+        prefix = TaskStatusChangedEvent.event_key_prefix()
         self.assertEqual({
-            (None, 'default.workflow1.bash1', 'TASK_STATUS_CHANGED', None): {1},
-            (None, 'default.workflow2.bash1', 'TASK_STATUS_CHANGED', None): {2}
+            ('default', f'{prefix}.default.workflow1.bash1'): {1},
+            ('default', f'{prefix}.default.workflow2.bash1'): {2}
         }, self.rule_extractor.event_workflow_index.task_rule_index)
         self.assertEqual({
-            ('DEFAULT', 'key1', 'UNDEFINED', None): {1, 2}
+            ('default', 'key1'): {1, 2}
         }, self.rule_extractor.event_workflow_index.workflow_rule_index)
 
         self.client.delete_workflow(name='workflow2', namespace='default')
@@ -182,10 +183,10 @@ class TestWorkflowRpc(BaseUnitTest):
         self.assertEqual(1, len(workflows))
         self.assertEqual(1, len(self.rule_extractor.workflow_dict))
         self.assertEqual({
-            (None, 'default.workflow1.bash1', 'TASK_STATUS_CHANGED', None): {1}
+            ('default', '[task_status_change].default.workflow1.bash1'): {1}
         }, self.rule_extractor.event_workflow_index.task_rule_index)
         self.assertEqual({
-            ('DEFAULT', 'key1', 'UNDEFINED', None): {1}
+            ('default', 'key1'): {1}
         }, self.rule_extractor.event_workflow_index.workflow_rule_index)
 
     def test_delete_non_exists_workflow(self):

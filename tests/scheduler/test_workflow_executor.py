@@ -16,9 +16,7 @@
 # under the License.
 #
 import unittest
-
 import cloudpickle
-from notification_service.model.event import EventKey
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
@@ -30,38 +28,24 @@ from ai_flow.scheduler.workflow_executor import WorkflowExecutor
 from tests.scheduler.test_utils import UnitTestWithNamespace
 
 
-def build_workflow():
-    expect_events_1 = [EventKey(namespace='namespace',
-                                event_name='event_1',
-                                event_type='event_type',
-                                sender='sender'
-                                )
-                       ]
-    expect_events_2 = [EventKey(namespace='namespace',
-                                event_name='event_2',
-                                event_type='event_type',
-                                sender='sender'
-                                )
-                       ]
-
-    with Workflow(name='workflow') as workflow:
-        op_1 = Operator(name='op_1')
-        op_2 = Operator(name='op_2')
-        op_3 = Operator(name='op_3')
-        op_4 = Operator(name='op_4')
-        op_5 = Operator(name='op_5')
-
-        op_1.action_on_condition(action=TaskAction.START,
-                                 condition=Condition(expect_events=expect_events_1))
-        op_2.action_on_condition(action=TaskAction.START,
-                                 condition=Condition(expect_events=expect_events_2))
-    return workflow
-
-
 class TestWorkflowExecutor(UnitTestWithNamespace):
 
+    def build_workflow(self):
+        with Workflow(name='workflow', namespace=self.namespace_name) as workflow:
+            op_1 = Operator(name='op_1')
+            op_2 = Operator(name='op_2')
+            op_3 = Operator(name='op_3')
+            op_4 = Operator(name='op_4')
+            op_5 = Operator(name='op_5')
+
+            op_1.action_on_condition(action=TaskAction.START,
+                                     condition=Condition(expect_events=["event_1"]))
+            op_2.action_on_condition(action=TaskAction.START,
+                                     condition=Condition(expect_events=["event_2"]))
+        return workflow
+
     def test_execute_workflow_command(self):
-        workflow = build_workflow()
+        workflow = self.build_workflow()
         workflow_meta = self.metadata_manager.add_workflow(namespace=self.namespace_name,
                                                            name=workflow.name,
                                                            content='',

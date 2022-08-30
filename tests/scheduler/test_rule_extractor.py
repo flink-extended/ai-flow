@@ -82,45 +82,19 @@ class TestRuleExtractor(UnitTestWithNamespace):
     def test_extract_workflow_rules(self):
         def build_workflows():
             for i in range(3):
-                with Workflow(name='workflow_{}'.format(i)) as workflow:
+                with Workflow(name='workflow_{}'.format(i), namespace=self.namespace_name) as workflow:
                     o1 = Operator(name='op')
                 workflow_meta = self.metadata_manager.add_workflow(namespace=self.namespace_name,
                                                                    name=workflow.name,
                                                                    content='',
                                                                    workflow_object=cloudpickle.dumps(workflow))
                 self.metadata_manager.flush()
-                expect_events_1 = [EventKey(namespace='namespace',
-                                            event_name='event_1',
-                                            event_type='event_type',
-                                            sender='sender'
-                                            ),
-                                   EventKey(namespace='namespace',
-                                            event_name='event_1_{}'.format(i),
-                                            event_type=None,
-                                            sender='sender'
-                                            ),
-                                   EventKey(namespace='namespace',
-                                            event_name='event',
-                                            event_type=None,
-                                            sender='sender'
-                                            )
-                                   ]
-                expect_events_2 = [EventKey(namespace='namespace',
-                                            event_name='event_2',
-                                            event_type='event_type',
-                                            sender='sender'
-                                            ),
-                                   EventKey(namespace='namespace',
-                                            event_name='event_2_{}'.format(i),
-                                            event_type=None,
-                                            sender='sender'
-                                            ),
-                                   EventKey(namespace='namespace',
-                                            event_name='event',
-                                            event_type=None,
-                                            sender='sender'
-                                            )
-                                   ]
+                expect_events_1 = ['event_1',
+                                   'event_1_{}'.format(i),
+                                   'event']
+                expect_events_2 = ['event_2',
+                                   'event_2_{}'.format(i),
+                                   'event']
                 self.metadata_manager.add_workflow_trigger(workflow_id=workflow_meta.id,
                                                            rule=cloudpickle.dumps(WorkflowRule(condition=Condition(
                                                                expect_events=expect_events_1))))
@@ -134,20 +108,16 @@ class TestRuleExtractor(UnitTestWithNamespace):
 
         rule_extractor = RuleExtractor()
 
-        event = Event(event_key=EventKey(namespace='namespace',
-                                         name='event_1',
-                                         event_type='event_type',
-                                         sender='sender'), message='')
+        event = Event(key='event_1', value='')
+        event.namespace = self.namespace_name
         results = rule_extractor.extract_workflow_rules(event=event)
         self.metadata_manager.flush()
         self.assertEqual(3, len(results))
         for r in results:
             self.assertEqual(1, len(r.rules))
 
-        event = Event(event_key=EventKey(namespace='namespace',
-                                         name='event',
-                                         event_type='event_type',
-                                         sender='sender'), message='')
+        event = Event(key='event', value='')
+        event.namespace = self.namespace_name
         results = rule_extractor.extract_workflow_rules(event=event)
         self.metadata_manager.flush()
         self.assertEqual(3, len(results))

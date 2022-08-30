@@ -19,7 +19,7 @@ import time
 import unittest
 
 import cloudpickle
-from notification_service.model.event import EventKey, Event
+from notification_service.model.event import Event
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
@@ -63,16 +63,10 @@ def wait_worker_done(worker: Worker):
 class TestWorker(UnitTestWithNamespace):
     def setUp(self) -> None:
         super().setUp()
-        with Workflow(name='workflow') as workflow:
+        with Workflow(name='workflow', namespace=self.namespace_name) as workflow:
             op1 = Operator(name='op_1')
             op2 = Operator(name='op_2')
-            op1.action_on_condition(action=TaskAction.START, condition=TrueCondition(expect_events=[
-                EventKey(namespace='namespace',
-                         event_name='event_1',
-                         event_type='event_type',
-                         sender='sender'
-                         ),
-            ]))
+            op1.action_on_condition(action=TaskAction.START, condition=TrueCondition(expect_events=['event_1']))
 
         self.workflow_meta = self.metadata_manager.add_workflow(namespace=self.namespace_name,
                                                                 name=workflow.name,
@@ -82,13 +76,7 @@ class TestWorker(UnitTestWithNamespace):
         self.workflow_trigger \
             = self.metadata_manager.add_workflow_trigger(self.workflow_meta.id,
                                                          rule=cloudpickle.dumps(WorkflowRule(
-                                                             condition=TrueCondition(expect_events=[
-                                                                 EventKey(namespace='namespace',
-                                                                          event_name='event_2',
-                                                                          event_type='event_type',
-                                                                          sender='sender'
-                                                                          ),
-                                                             ]))))
+                                                             condition=TrueCondition(expect_events=['event_2']))))
         self.metadata_manager.flush()
         self.snapshot_meta = self.metadata_manager.add_workflow_snapshot(
             workflow_id=self.workflow_meta.id,
@@ -103,7 +91,8 @@ class TestWorker(UnitTestWithNamespace):
         worker = Worker(task_executor=task_executor)
         try:
             worker.start()
-            event: Event = StartWorkflowExecutionEvent(workflow_id=self.workflow_meta.id, snapshot_id=self.snapshot_meta.id)
+            event: Event = StartWorkflowExecutionEvent(workflow_id=self.workflow_meta.id,
+                                                       snapshot_id=self.snapshot_meta.id)
             event.offset = 1
             worker.add_unit((event, None))
             wait_worker_done(worker)
@@ -119,11 +108,9 @@ class TestWorker(UnitTestWithNamespace):
             offset = self.metadata_manager.get_workflow_event_offset(workflow_id=self.workflow_meta.id)
             self.assertEqual(1, offset)
 
-            event = Event(event_key=EventKey(namespace='namespace',
-                                             event_name='event_1',
-                                             event_type='event_type',
-                                             sender='sender'), message='')
+            event = Event(key='event_1', value='')
             event.offset = 2
+            event.namespace = self.namespace_name
             rules = rule_extractor.extract_workflow_execution_rules(event=event)
             worker.add_unit((event, rules[0]))
             wait_worker_done(worker)
@@ -142,10 +129,8 @@ class TestWorker(UnitTestWithNamespace):
             self.metadata_manager.session.refresh(te)
             self.assertEqual(TaskStatus.STOPPING, te.status)
 
-            event = Event(event_key=EventKey(namespace='namespace',
-                                             event_name='event_2',
-                                             event_type='event_type',
-                                             sender='sender'), message='')
+            event = Event(key='event_2', value='')
+            event.namespace = self.namespace_name
             rules = rule_extractor.extract_workflow_rules(event=event)
             worker.add_unit((event, rules[0]))
             wait_worker_done(worker)

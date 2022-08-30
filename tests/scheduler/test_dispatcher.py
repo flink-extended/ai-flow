@@ -18,7 +18,7 @@
 import unittest
 
 import cloudpickle
-from notification_service.model.event import EventKey, Event
+from notification_service.model.event import Event
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
@@ -37,15 +37,10 @@ from tests.scheduler.test_utils import UnitTestWithNamespace
 class TestDispatcher(UnitTestWithNamespace):
     def setUp(self) -> None:
         super().setUp()
-        with Workflow(name='workflow') as workflow:
+        with Workflow(name='workflow', namespace=self.namespace_name) as workflow:
             op = Operator(name='op')
-            op.action_on_condition(action=TaskAction.START, condition=Condition(expect_events=[
-                EventKey(namespace='namespace',
-                         name='event_1',
-                         event_type='event_type',
-                         sender='sender'
-                         ),
-            ]))
+            op.action_on_condition(action=TaskAction.START,
+                                   condition=Condition(expect_events=['event_1']))
 
         self.workflow_meta = self.metadata_manager.add_workflow(namespace=self.namespace_name,
                                                                 name=workflow.name,
@@ -53,15 +48,10 @@ class TestDispatcher(UnitTestWithNamespace):
                                                                 workflow_object=cloudpickle.dumps(workflow))
         self.metadata_manager.flush()
         self.workflow_trigger \
-            = self.metadata_manager.add_workflow_trigger(self.workflow_meta.id,
-                                                         rule=cloudpickle.dumps(WorkflowRule(
-                                                             condition=Condition(expect_events=[
-                                                                 EventKey(namespace='namespace',
-                                                                          name='event_2',
-                                                                          event_type='event_type',
-                                                                          sender='sender'
-                                                                          ),
-                                                             ]))))
+            = self.metadata_manager.add_workflow_trigger(workflow_id=self.workflow_meta.id,
+                                                         rule=cloudpickle.dumps(
+                                                             WorkflowRule(condition=Condition(expect_events=['event_2']))
+                                                         ))
         self.metadata_manager.flush()
         self.snapshot_meta = self.metadata_manager.add_workflow_snapshot(
             workflow_id=self.workflow_meta.id,
@@ -93,18 +83,14 @@ class TestDispatcher(UnitTestWithNamespace):
         dispatcher.dispatch(event)
         self.assertEqual(1, workers[2].input_queue.qsize())
 
-        event = Event(event_key=EventKey(namespace='namespace',
-                                         name='event_1',
-                                         event_type='event_type',
-                                         sender='sender'), message='')
+        event = Event(key='event_1', value='')
+        event.namespace = self.namespace_name
         event.offset = 1
         dispatcher.dispatch(event)
         self.assertEqual(2, workers[1].input_queue.qsize())
 
-        event = Event(event_key=EventKey(namespace='namespace',
-                                         name='event_2',
-                                         event_type='event_type',
-                                         sender='sender'), message='')
+        event = Event(key='event_2', value='')
+        event.namespace = self.namespace_name
         event.offset = 1
         dispatcher.dispatch(event)
         self.assertEqual(3, workers[1].input_queue.qsize())
@@ -149,15 +135,17 @@ class TestDispatcher(UnitTestWithNamespace):
         workers = []
         for i in range(worker_num):
             workers.append(Worker())
-        event_key1 = EventKey(namespace='namespace', name='event_1', event_type='event_type', sender='sender')
-        event1: Event = Event(event_key=event_key1, message=None)
+        event1: Event = Event(key="event_1", value=None)
+        event1.namespace = self.namespace_name
         event1.offset = 1
-        event2: Event = Event(event_key=event_key1, message=None)
+        event2: Event = Event(key="event_1", value=None)
+        event2.namespace = self.namespace_name
         event2.offset = 3
-        event_key2 = EventKey(namespace='namespace', name='event_2', event_type='event_type', sender='sender')
-        event3: Event = Event(event_key=event_key2, message=None)
+        event3: Event = Event(key="event_2", value=None)
+        event3.namespace = self.namespace_name
         event3.offset = 1
-        event4: Event = Event(event_key=event_key2, message=None)
+        event4: Event = Event(key="event_2", value=None)
+        event4.namespace = self.namespace_name
         event4.offset = 2
 
         self.metadata_manager.set_workflow_execution_event_offset(self.workflow_execution_meta.id, 2)
