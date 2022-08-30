@@ -39,9 +39,9 @@ class TestWorkflowExecutor(UnitTestWithNamespace):
             op_5 = Operator(name='op_5')
 
             op_1.action_on_condition(action=TaskAction.START,
-                                     condition=Condition(expect_events=["event_1"]))
+                                     condition=Condition(expect_event_keys=["event_1"]))
             op_2.action_on_condition(action=TaskAction.START,
-                                     condition=Condition(expect_events=["event_2"]))
+                                     condition=Condition(expect_event_keys=["event_2"]))
         return workflow
 
     def test_execute_workflow_command(self):

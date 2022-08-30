@@ -66,7 +66,7 @@ class TestWorker(UnitTestWithNamespace):
         with Workflow(name='workflow', namespace=self.namespace_name) as workflow:
             op1 = Operator(name='op_1')
             op2 = Operator(name='op_2')
-            op1.action_on_condition(action=TaskAction.START, condition=TrueCondition(expect_events=['event_1']))
+            op1.action_on_condition(action=TaskAction.START, condition=TrueCondition(expect_event_keys=['event_1']))
 
         self.workflow_meta = self.metadata_manager.add_workflow(namespace=self.namespace_name,
                                                                 name=workflow.name,
@@ -76,7 +76,7 @@ class TestWorker(UnitTestWithNamespace):
         self.workflow_trigger \
             = self.metadata_manager.add_workflow_trigger(self.workflow_meta.id,
                                                          rule=cloudpickle.dumps(WorkflowRule(
-                                                             condition=TrueCondition(expect_events=['event_2']))))
+                                                             condition=TrueCondition(expect_event_keys=['event_2']))))
         self.metadata_manager.flush()
         self.snapshot_meta = self.metadata_manager.add_workflow_snapshot(
             workflow_id=self.workflow_meta.id,

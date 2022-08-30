@@ -29,11 +29,11 @@ from ai_flow.model.status import TaskStatus
 class SingleEventCondition(Condition):
     """The Condition that depend on a single event."""
     def __init__(self,
-                 expect_event: str):
+                 expect_event_key: str):
         """
-        :param expect_event: The event that this condition depends on.
+        :param expect_event_key: The key of the event that this condition depends on.
         """
-        super().__init__([expect_event])
+        super().__init__([expect_event_key])
 
     def is_met(self, event: Event, context: Context) -> bool:
         return True
@@ -61,8 +61,8 @@ class MeetAllCondition(Condition):
         """
         events = []
         for c in conditions:
-            events.extend(c.expect_events)
-        super().__init__(expect_events=events)
+            events.extend(c.expect_event_keys)
+        super().__init__(expect_event_keys=events)
         self.conditions = conditions
         self.name = name
 
@@ -72,7 +72,7 @@ class MeetAllCondition(Condition):
         if state_value is None:
             state_value = [False] * len(self.conditions)
         for i in range(len(self.conditions)):
-            if match_events(event_keys=self.conditions[i].expect_events, event=event):
+            if match_events(event_keys=self.conditions[i].expect_event_keys, event=event):
                 if self.conditions[i].is_met(event, context):
                     state_value[i] = True
                 else:
@@ -95,13 +95,13 @@ class MeetAnyCondition(Condition):
         """
         events = []
         for c in conditions:
-            events.extend(c.expect_events)
-        super().__init__(expect_events=events)
+            events.extend(c.expect_event_keys)
+        super().__init__(expect_event_keys=events)
         self.conditions = conditions
 
     def is_met(self, event: Event, context: Context) -> bool:
         for condition in self.conditions:
-            if match_events(event_keys=condition.expect_events, event=event) and condition.is_met(event, context):
+            if match_events(event_keys=condition.expect_event_keys, event=event) and condition.is_met(event, context):
                 return True
         return False
 
@@ -145,8 +145,8 @@ class TaskStatusAllMetCondition(Condition):
         """
         events = []
         for c in condition_list:
-            events.extend(c.expect_events)
-        super().__init__(expect_events=events)
+            events.extend(c.expect_event_keys)
+        super().__init__(expect_event_keys=events)
         self.condition_list = condition_list
 
     def is_met(self, event: Event, context: Context) -> bool:
@@ -155,7 +155,7 @@ class TaskStatusAllMetCondition(Condition):
         for condition in self.condition_list:
             prefix = TaskStatusChangedEvent.event_key_prefix()
             index = len(f'{prefix}.{namespace}.{workflow_name}')
-            event_key = condition.expect_events[0]
+            event_key = condition.expect_event_keys[0]
             task_name = event_key[index+1:]
             task_status = context.get_task_status(task_name=task_name)
             if task_status != condition.expect_status:

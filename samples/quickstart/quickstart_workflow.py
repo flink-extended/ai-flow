@@ -16,8 +16,6 @@
 #
 import time
 
-from notification_service.model.event import Event
-
 from ai_flow.model.action import TaskAction
 from ai_flow.notification.notification_client import AIFlowNotificationClient
 from ai_flow.operators.bash import BashOperator
@@ -36,7 +34,7 @@ def func():
                                    value='This is a custom message.')
 
 
-with Workflow(name='quickstart_workflow') as w1:
+with Workflow(name='quickstart_workflow', namespace='sample') as w1:
     task1 = BashOperator(name='task1', bash_command='echo I am 1st task.')
     task2 = BashOperator(name='task2', bash_command='echo I am 2nd task.')
     task3 = PythonOperator(name='task3', python_callable=func)

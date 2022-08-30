@@ -85,7 +85,7 @@ with Workflow(name='condition_workflow') as workflow:
                          bash_command='echo Got 100 records.')
 
     task4.action_on_condition(action=TaskAction.START,
-                              condition=NumCondition(expect_events=['num_event']))
+                              condition=NumCondition(expect_event_keys=['num_event']))
 
     task1.action_on_task_status(action=TaskAction.STOP,
                                 upstream_task_status_dict={task4: TaskStatus.SUCCESS})

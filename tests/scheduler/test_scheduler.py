@@ -71,7 +71,7 @@ class TestEventDrivenScheduler(UnitTestWithNamespace):
             op1 = Operator(name='op_1')
             op2 = Operator(name='op_2')
             op1.action_on_condition(action=TaskAction.START,
-                                    condition=TrueCondition(expect_events=['event_1']))
+                                    condition=TrueCondition(expect_event_keys=['event_1']))
 
         self.workflow_meta = self.metadata_manager.add_workflow(namespace=self.namespace_name,
                                                                 name=workflow.name,
@@ -82,7 +82,7 @@ class TestEventDrivenScheduler(UnitTestWithNamespace):
             workflow_id=self.workflow_meta.id,
             rule=cloudpickle.dumps(
                 WorkflowRule(
-                    condition=TrueCondition(expect_events=['event_2'])
+                    condition=TrueCondition(expect_event_keys=['event_2'])
                 )
             )
         )

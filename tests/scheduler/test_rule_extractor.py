@@ -43,29 +43,27 @@ class TestRuleExtractorUtil(unittest.TestCase):
                 o1 = Operator(name='op_1')
                 o2 = Operator(name='op_2')
 
-                o1.action_on_condition(action=TaskAction.START,
-                                       condition=Condition(
-                                           expect_events=['event_1',
-                                                          'event_2_{}'.format(i),
-                                                          ]))
-                o2.action_on_condition(action=TaskAction.START,
-                                       condition=Condition(
-                                           expect_events=['event_3_{}'.format(i),
-                                                          'event_4'
-                                                          ]))
+                o1.action_on_condition(
+                    action=TaskAction.START, condition=Condition(
+                        expect_event_keys=['event_1', 'event_2_{}'.format(i),]
+                    )
+                )
+                o2.action_on_condition(
+                    action=TaskAction.START, condition=Condition(
+                        expect_event_keys=['event_3_{}'.format(i), 'event_4']
+                    )
+                )
                 workflow_dict[i + 1] = workflow
         return workflow_dict
 
     def test_parse_expect_keys(self):
         with Workflow(name='workflow') as workflow:
             o1 = Operator(name='op')
-            o1.action_on_condition(action=TaskAction.START,
-                                   condition=Condition(
-                                       expect_events=['event_1',
-                                                      'event_2',
-                                                      'event_2',
-                                                      ])
-                                   )
+            o1.action_on_condition(
+                action=TaskAction.START, condition=Condition(
+                    expect_event_keys=['event_1', 'event_2', 'event_2', ]
+                )
+            )
         expect_keys = workflow_expect_event_tuples(workflow=workflow)
         self.assertEqual(2, len(expect_keys))
 
@@ -97,11 +95,11 @@ class TestRuleExtractor(UnitTestWithNamespace):
                                    'event']
                 self.metadata_manager.add_workflow_trigger(workflow_id=workflow_meta.id,
                                                            rule=cloudpickle.dumps(WorkflowRule(condition=Condition(
-                                                               expect_events=expect_events_1))))
+                                                               expect_event_keys=expect_events_1))))
                 self.metadata_manager.flush()
                 self.metadata_manager.add_workflow_trigger(workflow_id=workflow_meta.id,
                                                            rule=cloudpickle.dumps(WorkflowRule(condition=Condition(
-                                                               expect_events=expect_events_2))))
+                                                               expect_event_keys=expect_events_2))))
                 self.metadata_manager.flush()
 
         build_workflows()
@@ -139,9 +137,9 @@ class TestRuleExtractor(UnitTestWithNamespace):
                     op_3 = Operator(name='op_3')
 
                     op_1.action_on_condition(action=TaskAction.START,
-                                             condition=Condition(expect_events=expect_events_1))
+                                             condition=Condition(expect_event_keys=expect_events_1))
                     op_2.action_on_condition(action=TaskAction.START,
-                                             condition=Condition(expect_events=expect_events_2))
+                                             condition=Condition(expect_event_keys=expect_events_2))
                     op_3.action_on_task_status(TaskAction.START, {
                         op_1: TaskStatus.SUCCESS, op_2: TaskStatus.SUCCESS
                     })

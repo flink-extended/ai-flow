@@ -59,7 +59,7 @@ def workflow_expect_event_tuples(workflow: Workflow) -> Set[EventKeyTuple]:
     result_keys = set()
     for task_name, rules in workflow.rules.items():
         for rule in rules:
-            keys = expect_keys_to_tuple_set(workflow.namespace, rule.condition.expect_events)
+            keys = expect_keys_to_tuple_set(workflow.namespace, rule.condition.expect_event_keys)
             result_keys = result_keys | keys
     return result_keys
 
@@ -92,7 +92,7 @@ def build_workflow_rule_index(workflow_dict: Dict[int, Workflow],
             workflow: Workflow = workflow_dict.get(workflow_trigger_meta.workflow_id)
             rule: WorkflowRule = cloudpickle.loads(workflow_trigger_meta.rule)
 
-            expect_keys = expect_keys_to_tuple_set(workflow.namespace, rule.condition.expect_events)
+            expect_keys = expect_keys_to_tuple_set(workflow.namespace, rule.condition.expect_event_keys)
             for key in expect_keys:
                 if key not in workflow_rule_index:
                     workflow_rule_index[key] = set()
@@ -135,7 +135,7 @@ def extract_task_rules_from_workflow_by_event(event, workflow) \
     for task_name, rules in workflow.rules.items():
         rule_list = []
         for rule in rules:
-            if match_events(event_keys=rule.condition.expect_events, event=event):
+            if match_events(event_keys=rule.condition.expect_event_keys, event=event):
                 rule_list.append(rule)
         if len(rule_list) > 0:
             rule_wrapper = TaskRuleWrapper(task_name=task_name,
@@ -259,7 +259,7 @@ class RuleExtractor(object):
                 metas = metadata_manager.list_workflow_triggers(workflow_id=workflow_id)
                 for meta in metas:
                     rule = cloudpickle.loads(meta.rule)
-                    if match_events(rule.condition.expect_events, event):
+                    if match_events(rule.condition.expect_event_keys, event):
                         rules.append(cloudpickle.loads(meta.rule))
                 if len(rules) > 0:
                     results.append(WorkflowRuleWrapper(workflow_id=workflow_id, rules=rules))

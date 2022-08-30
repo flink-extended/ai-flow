@@ -37,8 +37,8 @@ from tests.scheduler.test_utils import UnitTestWithNamespace
 
 class SimpleCondition(Condition):
 
-    def __init__(self, expect_events: List[str], flag):
-        super().__init__(expect_events)
+    def __init__(self, expect_event_keys: List[str], flag):
+        super().__init__(expect_event_keys)
         self.flag = flag
 
     def is_met(self, event: Event, context: Context) -> bool:
@@ -71,15 +71,15 @@ class TestRuleExecutor(UnitTestWithNamespace):
             op_5 = Operator(name='op_5')
 
             op_1.action_on_condition(action=TaskAction.START,
-                                     condition=SimpleCondition(expect_events=['event_1'], flag=True))
+                                     condition=SimpleCondition(expect_event_keys=['event_1'], flag=True))
             op_2.action_on_condition(action=TaskAction.START,
-                                     condition=SimpleCondition(expect_events=['event_2'], flag=False))
+                                     condition=SimpleCondition(expect_event_keys=['event_2'], flag=False))
             op_3.action_on_condition(action=TaskAction.STOP,
-                                     condition=SimpleCondition(expect_events=['event_3'], flag=True))
+                                     condition=SimpleCondition(expect_event_keys=['event_3'], flag=True))
             op_4.action_on_condition(action=TaskAction.RESTART,
-                                     condition=SimpleCondition(expect_events=['event_4'], flag=True))
+                                     condition=SimpleCondition(expect_event_keys=['event_4'], flag=True))
             op_5.action_on_condition(action=TaskAction.RESTART,
-                                     condition=StateCondition(expect_events=['event_5']))
+                                     condition=StateCondition(expect_event_keys=['event_5']))
 
         workflow_meta = self.metadata_manager.add_workflow(namespace=self.namespace_name,
                                                            name=workflow.name,
@@ -193,25 +193,25 @@ class TestRuleExecutor(UnitTestWithNamespace):
         self.metadata_manager.add_workflow_trigger(workflow_id=workflow_meta.id,
                                                    rule=cloudpickle.dumps(
                                                        WorkflowRule(
-                                                           condition=SimpleCondition(expect_events=['event_1'],
+                                                           condition=SimpleCondition(expect_event_keys=['event_1'],
                                                                                      flag=True))))
         self.metadata_manager.flush()
         self.metadata_manager.add_workflow_trigger(workflow_id=workflow_meta.id,
                                                    rule=cloudpickle.dumps(
                                                        WorkflowRule(
-                                                           condition=SimpleCondition(expect_events=['event_2'],
+                                                           condition=SimpleCondition(expect_event_keys=['event_2'],
                                                                                      flag=False))))
         self.metadata_manager.flush()
         self.metadata_manager.add_workflow_trigger(workflow_id=workflow_meta.id,
                                                    rule=cloudpickle.dumps(
                                                        WorkflowRule(
-                                                           condition=SimpleCondition(expect_events=['event_3'],
+                                                           condition=SimpleCondition(expect_event_keys=['event_3'],
                                                                                      flag=True))))
         self.metadata_manager.flush()
         self.metadata_manager.add_workflow_trigger(workflow_id=workflow_meta.id,
                                                    rule=cloudpickle.dumps(
                                                        WorkflowRule(
-                                                           condition=StateCondition(expect_events=['event_4']))))
+                                                           condition=StateCondition(expect_event_keys=['event_4']))))
         self.metadata_manager.flush()
 
     def test_execute_workflow_rule(self):
