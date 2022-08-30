@@ -81,12 +81,10 @@ public class EventListener {
     }
 
     private boolean match(String eventKey, String namespace, EventMeta event) {
-        if (eventKey != null
-                && !eventKey.equals(event.getKey())) {
+        if (eventKey != null && !eventKey.equals(event.getKey())) {
             return false;
         }
-        if (namespace != null
-                && !namespace.equals(event.getNamespace())) {
+        if (namespace != null && !namespace.equals(event.getNamespace())) {
             return false;
         }
         return true;
@@ -118,7 +116,11 @@ public class EventListener {
                     }
                     List<EventMeta> events =
                             listAllEvents(
-                                    this.serviceStub, null, listenOffset, null, this.timeoutSeconds);
+                                    this.serviceStub,
+                                    null,
+                                    listenOffset,
+                                    null,
+                                    this.timeoutSeconds);
                     if (events.size() > 0) {
                         events = filterEvents(eventKeys, events);
                     }

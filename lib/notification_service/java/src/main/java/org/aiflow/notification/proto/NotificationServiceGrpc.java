@@ -269,37 +269,6 @@ public final class NotificationServiceGrpc {
     return getNotifyNewMemberMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetByKeyRequest,
-      org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetResponse> getGetLatestOffsetByKeyMethod;
-
-  @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "getLatestOffsetByKey",
-      requestType = org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetByKeyRequest.class,
-      responseType = org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetByKeyRequest,
-      org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetResponse> getGetLatestOffsetByKeyMethod() {
-    io.grpc.MethodDescriptor<org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetByKeyRequest, org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetResponse> getGetLatestOffsetByKeyMethod;
-    if ((getGetLatestOffsetByKeyMethod = NotificationServiceGrpc.getGetLatestOffsetByKeyMethod) == null) {
-      synchronized (NotificationServiceGrpc.class) {
-        if ((getGetLatestOffsetByKeyMethod = NotificationServiceGrpc.getGetLatestOffsetByKeyMethod) == null) {
-          NotificationServiceGrpc.getGetLatestOffsetByKeyMethod = getGetLatestOffsetByKeyMethod =
-              io.grpc.MethodDescriptor.<org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetByKeyRequest, org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "getLatestOffsetByKey"))
-              .setSampledToLocalTracing(true)
-              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetByKeyRequest.getDefaultInstance()))
-              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new NotificationServiceMethodDescriptorSupplier("getLatestOffsetByKey"))
-              .build();
-        }
-      }
-    }
-    return getGetLatestOffsetByKeyMethod;
-  }
-
   private static volatile io.grpc.MethodDescriptor<org.aiflow.notification.proto.NotificationServiceOuterClass.RegisterClientRequest,
       org.aiflow.notification.proto.NotificationServiceOuterClass.RegisterClientResponse> getRegisterClientMethod;
 
@@ -550,16 +519,6 @@ public final class NotificationServiceGrpc {
 
     /**
      * <pre>
-     * Get latest offset by key
-     * </pre>
-     */
-    public void getLatestOffsetByKey(org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetByKeyRequest request,
-        io.grpc.stub.StreamObserver<org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetLatestOffsetByKeyMethod(), responseObserver);
-    }
-
-    /**
-     * <pre>
      * Register notification client in the db of notification service
      * </pre>
      */
@@ -649,13 +608,6 @@ public final class NotificationServiceGrpc {
                 org.aiflow.notification.proto.NotificationServiceOuterClass.NotifyNewMemberRequest,
                 org.aiflow.notification.proto.NotificationServiceOuterClass.CommonResponse>(
                   this, METHODID_NOTIFY_NEW_MEMBER)))
-          .addMethod(
-            getGetLatestOffsetByKeyMethod(),
-            asyncUnaryCall(
-              new MethodHandlers<
-                org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetByKeyRequest,
-                org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetResponse>(
-                  this, METHODID_GET_LATEST_OFFSET_BY_KEY)))
           .addMethod(
             getRegisterClientMethod(),
             asyncUnaryCall(
@@ -783,17 +735,6 @@ public final class NotificationServiceGrpc {
         io.grpc.stub.StreamObserver<org.aiflow.notification.proto.NotificationServiceOuterClass.CommonResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getNotifyNewMemberMethod(), getCallOptions()), request, responseObserver);
-    }
-
-    /**
-     * <pre>
-     * Get latest offset by key
-     * </pre>
-     */
-    public void getLatestOffsetByKey(org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetByKeyRequest request,
-        io.grpc.stub.StreamObserver<org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetLatestOffsetByKeyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -929,16 +870,6 @@ public final class NotificationServiceGrpc {
     public org.aiflow.notification.proto.NotificationServiceOuterClass.CommonResponse notifyNewMember(org.aiflow.notification.proto.NotificationServiceOuterClass.NotifyNewMemberRequest request) {
       return blockingUnaryCall(
           getChannel(), getNotifyNewMemberMethod(), getCallOptions(), request);
-    }
-
-    /**
-     * <pre>
-     * Get latest offset by key
-     * </pre>
-     */
-    public org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetResponse getLatestOffsetByKey(org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetByKeyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetLatestOffsetByKeyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -1081,17 +1012,6 @@ public final class NotificationServiceGrpc {
 
     /**
      * <pre>
-     * Get latest offset by key
-     * </pre>
-     */
-    public com.google.common.util.concurrent.ListenableFuture<org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetResponse> getLatestOffsetByKey(
-        org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetByKeyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetLatestOffsetByKeyMethod(), getCallOptions()), request);
-    }
-
-    /**
-     * <pre>
      * Register notification client in the db of notification service
      * </pre>
      */
@@ -1142,11 +1062,10 @@ public final class NotificationServiceGrpc {
   private static final int METHODID_NOTIFY = 4;
   private static final int METHODID_LIST_MEMBERS = 5;
   private static final int METHODID_NOTIFY_NEW_MEMBER = 6;
-  private static final int METHODID_GET_LATEST_OFFSET_BY_KEY = 7;
-  private static final int METHODID_REGISTER_CLIENT = 8;
-  private static final int METHODID_DELETE_CLIENT = 9;
-  private static final int METHODID_IS_CLIENT_EXISTS = 10;
-  private static final int METHODID_TIMESTAMP_TO_EVENT_OFFSET = 11;
+  private static final int METHODID_REGISTER_CLIENT = 7;
+  private static final int METHODID_DELETE_CLIENT = 8;
+  private static final int METHODID_IS_CLIENT_EXISTS = 9;
+  private static final int METHODID_TIMESTAMP_TO_EVENT_OFFSET = 10;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1192,10 +1111,6 @@ public final class NotificationServiceGrpc {
         case METHODID_NOTIFY_NEW_MEMBER:
           serviceImpl.notifyNewMember((org.aiflow.notification.proto.NotificationServiceOuterClass.NotifyNewMemberRequest) request,
               (io.grpc.stub.StreamObserver<org.aiflow.notification.proto.NotificationServiceOuterClass.CommonResponse>) responseObserver);
-          break;
-        case METHODID_GET_LATEST_OFFSET_BY_KEY:
-          serviceImpl.getLatestOffsetByKey((org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetByKeyRequest) request,
-              (io.grpc.stub.StreamObserver<org.aiflow.notification.proto.NotificationServiceOuterClass.GetLatestOffsetResponse>) responseObserver);
           break;
         case METHODID_REGISTER_CLIENT:
           serviceImpl.registerClient((org.aiflow.notification.proto.NotificationServiceOuterClass.RegisterClientRequest) request,
@@ -1281,7 +1196,6 @@ public final class NotificationServiceGrpc {
               .addMethod(getNotifyMethod())
               .addMethod(getListMembersMethod())
               .addMethod(getNotifyNewMemberMethod())
-              .addMethod(getGetLatestOffsetByKeyMethod())
               .addMethod(getRegisterClientMethod())
               .addMethod(getDeleteClientMethod())
               .addMethod(getIsClientExistsMethod())

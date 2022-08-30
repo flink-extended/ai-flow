@@ -86,15 +86,27 @@ public class EventMeta {
 
     @Override
     public String toString() {
-        return "EventMeta{" +
-                "key='" + key + '\'' +
-                ", value='" + value + '\'' +
-                ", namespace='" + namespace + '\'' +
-                ", sender='" + sender + '\'' +
-                ", offset=" + offset +
-                ", createTime=" + createTime +
-                ", context='" + context + '\'' +
-                '}';
+        return "EventMeta{"
+                + "key='"
+                + key
+                + '\''
+                + ", value='"
+                + value
+                + '\''
+                + ", namespace='"
+                + namespace
+                + '\''
+                + ", sender='"
+                + sender
+                + '\''
+                + ", offset="
+                + offset
+                + ", createTime="
+                + createTime
+                + ", context='"
+                + context
+                + '\''
+                + '}';
     }
 
     public static EventMeta buildEventMeta(NotificationServiceOuterClass.EventProto eventProto) {

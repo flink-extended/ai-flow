@@ -401,18 +401,14 @@ public class EmbeddedNotificationClient extends NotificationClient {
      * @param endOffset Offset of the events must be less than or equal to this offset.
      * @return List of event updated in Notification Service.
      */
-    public List<EventMeta> listEvents(String key, String namespace, String sender, Long beginOffset, Long endOffset)
+    public List<EventMeta> listEvents(
+            String key, String namespace, String sender, Long beginOffset, Long endOffset)
             throws Exception {
 
         return listEvents(
-                notificationServiceStub,
-                key,
-                namespace,
-                sender,
-                beginOffset,
-                endOffset,
-                0);
+                notificationServiceStub, key, namespace, sender, beginOffset, endOffset, 0);
     }
+
     protected static List<EventMeta> listEvents(
             NotificationServiceGrpc.NotificationServiceBlockingStub serviceStub,
             String key,
@@ -512,10 +508,16 @@ public class EmbeddedNotificationClient extends NotificationClient {
 
     public ListenerRegistrationId registerListener(
             ListenerProcessor listenerProcessor, List<String> eventKeys, Long offset) {
-        String listenKey = String.format("%s_%s_%s", eventKeys, offset, listenerProcessor.toString());
+        String listenKey =
+                String.format("%s_%s_%s", eventKeys, offset, listenerProcessor.toString());
         EventListener listener =
                 new EventListener(
-                        notificationServiceStub, this.namespace, eventKeys, offset, listenerProcessor, 10);
+                        notificationServiceStub,
+                        this.namespace,
+                        eventKeys,
+                        offset,
+                        listenerProcessor,
+                        10);
         listener.start();
         threads.put(listenKey, listener);
         return new ListenerRegistrationId(listenKey);
@@ -526,47 +528,6 @@ public class EmbeddedNotificationClient extends NotificationClient {
         if (threads.containsKey(listenKey)) {
             threads.get(listenKey).shutdown();
             threads.remove(listenKey);
-        }
-    }
-
-    private String getStringValue(String original) {
-        return StringUtils.isEmpty(original) ? "" : original;
-    }
-
-    private long getLongValue(Long original) {
-        return original == null ? 0 : original;
-    }
-
-    /**
-     * Get latest offset of specific `key` notifications in Notification Service.
-     *
-     * @param namespace Namespace of the event.
-     * @param key Key of the event.
-     */
-    public long getLatestOffset(String namespace, String key) throws Exception {
-        if (StringUtils.isEmpty(key)) {
-            throw new Exception("Empty event key, please provide valid event key");
-        } else {
-            NotificationServiceOuterClass.GetLatestOffsetByKeyRequest.Builder builder =
-                    NotificationServiceOuterClass.GetLatestOffsetByKeyRequest.newBuilder();
-            if (!StringUtils.isEmpty(namespace)) {
-                builder.setNamespace(namespace);
-            }
-            NotificationServiceOuterClass.GetLatestOffsetByKeyRequest request =
-                    builder.setName(key).build();
-            NotificationServiceOuterClass.GetLatestOffsetResponse response =
-                    notificationServiceStub.getLatestOffsetByKey(request);
-            return parseLatestOffsetFromResponse(response);
-        }
-    }
-
-    public long parseLatestOffsetFromResponse(
-            NotificationServiceOuterClass.GetLatestOffsetResponse response) throws Exception {
-        if (response.getReturnCode()
-                .equals(NotificationServiceOuterClass.ReturnStatus.ERROR.toString())) {
-            throw new Exception(response.getReturnMsg());
-        } else {
-            return response.getOffset();
         }
     }
 

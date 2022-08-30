@@ -65,8 +65,7 @@ public class EmbeddedNotificationClientTest {
 
     private static void prepareEvents(EmbeddedNotificationClient client) throws Exception {
         for (int i = 0; i < 3; i++) {
-            client.sendEvent(
-                    new EventMeta("name" + i, "This is a message"));
+            client.sendEvent(new EventMeta("name" + i, "This is a message"));
         }
     }
 
@@ -85,8 +84,7 @@ public class EmbeddedNotificationClientTest {
         prepareEvents(client);
         Properties properties = new Properties();
         NotificationClient anotherClient =
-                new EmbeddedNotificationClient(
-                        "localhost:50051", "default", "sender2", properties);
+                new EmbeddedNotificationClient("localhost:50051", "default", "sender2", properties);
         anotherClient.sendEvent(new EventMeta("name", "message"));
         assertEquals(
                 1, this.client.countEvents("name0", "default", null, null, 0l).left.intValue());
@@ -106,11 +104,11 @@ public class EmbeddedNotificationClientTest {
         prepareEvents(client);
         List<EventMeta> eventList = this.client.listEvents("name0", null, null, null, null);
         assertEquals(1, eventList.size());
-        eventList = this.client.listEvents(null, "default", "sender",null,  null);
+        eventList = this.client.listEvents(null, "default", "sender", null, null);
         assertEquals(3, eventList.size());
-        eventList = this.client.listEvents(null, "default", "sender",1l, null);
+        eventList = this.client.listEvents(null, "default", "sender", 1l, null);
         assertEquals(2, eventList.size());
-        eventList = this.client.listEvents(null, "default", "sender",null, 2l);
+        eventList = this.client.listEvents(null, "default", "sender", null, 2l);
         assertEquals(2, eventList.size());
     }
 
@@ -119,9 +117,7 @@ public class EmbeddedNotificationClientTest {
         prepareEvents(client);
         long startTime = 0;
         for (int i = 0; i < 3; i++) {
-            EventMeta event =
-                    this.client.sendEvent(
-                            new EventMeta("name" + i, "message"));
+            EventMeta event = this.client.sendEvent(new EventMeta("name" + i, "message"));
             if (i == 1) {
                 startTime = event.getCreateTime();
             }
@@ -141,14 +137,9 @@ public class EmbeddedNotificationClientTest {
         final List<EventMeta> events = new ArrayList<>();
         ListenerRegistrationId handle = null;
         try {
-            handle =
-                    client.registerListener(
-                            new TestListenerProcessor(events),
-                            null,
-                            0l);
+            handle = client.registerListener(new TestListenerProcessor(events), null, 0l);
             for (int i = 0; i < 3; i++) {
-                this.client.sendEvent(
-                        new EventMeta("name" + i, "message"));
+                this.client.sendEvent(new EventMeta("name" + i, "message"));
             }
         } finally {
             Thread.sleep(1000);
@@ -168,8 +159,7 @@ public class EmbeddedNotificationClientTest {
                             Collections.singletonList("name1"),
                             0l);
             for (int i = 0; i < 3; i++) {
-                this.client.sendEvent(
-                        new EventMeta("name" + i, "message"));
+                this.client.sendEvent(new EventMeta("name" + i, "message"));
             }
         } finally {
             Thread.sleep(1000);
@@ -183,9 +173,7 @@ public class EmbeddedNotificationClientTest {
     public void testTimeToOffset() throws Exception {
         long startTime = 0;
         for (int i = 0; i < 3; i++) {
-            EventMeta event =
-                    client.sendEvent(
-                            new EventMeta("name" + i, "message"));
+            EventMeta event = client.sendEvent(new EventMeta("name" + i, "message"));
             if (i == 1) {
                 startTime = event.getCreateTime();
             }
@@ -200,13 +188,11 @@ public class EmbeddedNotificationClientTest {
         assertEquals(1, client.listEvents("name", "default", "sender", null, null).size());
         assertEquals(1, client.getSequenceNum().get());
 
-        client.sendEvent(
-                new EventMeta("name", "message2"));
+        client.sendEvent(new EventMeta("name", "message2"));
         assertEquals(2, client.listEvents("name", "default", "sender", null, null).size());
         assertEquals(2, client.getSequenceNum().getAndDecrement());
 
-        client.sendEvent(
-                new EventMeta("name", "message3"));
+        client.sendEvent(new EventMeta("name", "message3"));
         assertEquals(2, client.listEvents("name", "default", "sender", null, null).size());
         assertEquals(2, client.getSequenceNum().get());
     }
@@ -219,8 +205,7 @@ public class EmbeddedNotificationClientTest {
 
         assertEquals(0, client1.getSequenceNum().get());
         for (int i = 0; i < 3; i++) {
-            client1.sendEvent(
-                    new EventMeta("name", "message" + i));
+            client1.sendEvent(new EventMeta("name", "message" + i));
         }
         assertEquals(3, client1.listEvents("name", "default", "sender", null, null).size());
         assertEquals(3, client1.getSequenceNum().get());
@@ -232,16 +217,13 @@ public class EmbeddedNotificationClientTest {
                 new EmbeddedNotificationClient("localhost:50051", "default", "sender", properties);
 
         try {
-            client2.sendEvent(
-                    new EventMeta("name", "message3"));
-            List<EventMeta> events =
-                    client2.listEvents("name", "default", "sender", null, null);
+            client2.sendEvent(new EventMeta("name", "message3"));
+            List<EventMeta> events = client2.listEvents("name", "default", "sender", null, null);
             assertEquals(3, events.size());
             assertEquals("message2", events.get(2).getValue());
             assertEquals(3, client2.getSequenceNum().get());
 
-            client2.sendEvent(
-                    new EventMeta("name", "message4"));
+            client2.sendEvent(new EventMeta("name", "message4"));
             events = client2.listEvents("name", "default", "sender", null, null);
             assertEquals(4, events.size());
             assertEquals("message4", events.get(3).getValue());
