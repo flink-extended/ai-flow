@@ -17,7 +17,7 @@
 import abc
 from typing import List
 
-from notification_service.model.event import EventKey, Event
+from notification_service.model.event import Event
 
 from ai_flow.model.context import Context
 
@@ -25,7 +25,7 @@ from ai_flow.model.context import Context
 class Condition(object):
     """Conditions that trigger scheduling."""
     def __init__(self,
-                 expect_events: List[EventKey]):
+                 expect_events: List[str]):
         """
         :param expect_events: The events that this condition depends on.
         """

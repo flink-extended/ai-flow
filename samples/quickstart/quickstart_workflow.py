@@ -16,7 +16,7 @@
 #
 import time
 
-from notification_service.model.event import EventKey, Event
+from notification_service.model.event import Event
 
 from ai_flow.model.action import TaskAction
 from ai_flow.notification.notification_client import AIFlowNotificationClient
@@ -26,22 +26,14 @@ from ai_flow.model.status import TaskStatus
 
 from ai_flow.model.workflow import Workflow
 
-EVENT_KEY = EventKey(name='event_name',
-                     event_type='user_defined_type',
-                     namespace="sample",
-                     sender="task3"
-                     )
+EVENT_KEY = "key"
 
 
 def func():
     time.sleep(5)
-    notification_client = AIFlowNotificationClient(
-        server_uri="localhost:50052",
-        namespace="sample",
-        sender="task3"
-    )
-    event = Event(event_key=EVENT_KEY, message='This is a custom message.')
-    notification_client.send_event(event)
+    notification_client = AIFlowNotificationClient("localhost:50052")
+    notification_client.send_event(key=EVENT_KEY,
+                                   value='This is a custom message.')
 
 
 with Workflow(name='quickstart_workflow') as w1:

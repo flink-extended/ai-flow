@@ -63,9 +63,10 @@ class WorkflowExecutionContextImpl(WorkflowExecutionContext):
 
 class TaskExecutionContextImpl(TaskExecutionContext):
     def __init__(self,
+                 workflow: Workflow,
                  task_execution_key: TaskExecutionKey,
                  metadata_manager: MetadataManager):
-        super().__init__(task_execution_key)
+        super().__init__(workflow, task_execution_key)
         self._metadata_manager = metadata_manager
 
     def get_state(self, state_descriptor: StateDescriptor) -> State:

@@ -27,7 +27,7 @@ from notification_service.server.server import NotificationServer
 from notification_service.rpc.service import NotificationService
 from notification_service.util import db
 from notification_service.util.db import SQL_ALCHEMY_DB_FILE
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
 
 
@@ -69,8 +69,9 @@ class TestGrpcNotificationClient(unittest.TestCase):
         db.clear_engine_and_session()
 
     def test_send_event(self):
-        event = self.client.send_event(Event(event_key=EventKey(event_name='name_1'),
-                                             message='message_1'))
+        event = self.client.send_event(
+            Event(key='name_1', value='message_1')
+        )
         self.assertTrue(event.offset >= 1)
 
     def test_register_listener(self):
@@ -84,8 +85,9 @@ class TestGrpcNotificationClient(unittest.TestCase):
         l_id = self.client.register_listener(listener_processor=processor)
         self.assertEqual(1, len(self.client.threads))
         for i in range(3):
-            event = self.client.send_event(Event(event_key=EventKey(event_name='name_{}'.format(i)),
-                                                 message='message_{}'.format(i)))
+            self.client.send_event(
+                Event(key='name_{}'.format(i), value='message_{}'.format(i))
+            )
         self.client.unregister_listener(l_id)
         self.assertEqual(3, processor.counter)
         self.assertEqual(0, len(self.client.threads))
@@ -100,8 +102,9 @@ class TestGrpcNotificationClient(unittest.TestCase):
         processor = Counter()
         l_id = self.client.register_listener(listener_processor=processor, offset=1)
         for i in range(3):
-            event = self.client.send_event(Event(event_key=EventKey(event_name='name_{}'.format(i)),
-                                                 message='message_{}'.format(i)))
+            self.client.send_event(
+                Event(key='name_{}'.format(i), value='message_{}'.format(i))
+            )
         self.client.unregister_listener(l_id)
         self.assertEqual(2, processor.counter)
 
@@ -114,21 +117,39 @@ class TestGrpcNotificationClient(unittest.TestCase):
                 self.counter += len(events)
         processor = Counter()
         l_id = self.client.register_listener(listener_processor=processor,
-                                             event_keys=[EventKey(event_name='name_2'),
-                                                         EventKey(event_name='name_3')])
+                                             event_keys=['name_2', 'name_3'])
         for i in range(5):
-            event = self.client.send_event(Event(event_key=EventKey(event_name='name_{}'.format(i)),
-                                                 message='message_{}'.format(i)))
+            self.client.send_event(
+                Event(key='name_{}'.format(i), value='message_{}'.format(i))
+            )
         self.client.unregister_listener(l_id)
         self.assertEqual(2, processor.counter)
+
+    def test_listen_other_namespace(self):
+        class Counter(ListenerProcessor):
+            def __init__(self):
+                self.counter = 0
+
+            def process(self, events: List[Event]):
+                self.counter += len(events)
+        processor = Counter()
+        l_id = self.client.register_listener(listener_processor=processor,
+                                             event_keys=['name'])
+        client = EmbeddedNotificationClient(server_uri="localhost:50051",
+                                            namespace='other_namespace',
+                                            sender='sender')
+        client.send_event(Event(key='name', value='message'))
+        self.client.unregister_listener(l_id)
+        self.assertEqual(0, processor.counter)
 
     def test_timestamp_to_event_offset(self):
         t1 = datetime.now()
         for i in range(5):
             if i == 3:
                 t2 = datetime.now()
-            event = self.client.send_event(Event(event_key=EventKey(event_name='name_{}'.format(i)),
-                                                 message='message_{}'.format(i)))
+            self.client.send_event(
+                Event(key='name_{}'.format(i), value='message_{}'.format(i))
+            )
         time.sleep(1)
         t3 = datetime.now()
         offset = self.client.time_to_offset(t1)

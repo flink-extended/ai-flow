@@ -94,17 +94,22 @@ class TaskManager(object):
         self.workflow_name = workflow_name
         self.task_execution_key = task_execution_key
         self.workflow_snapshot_path = workflow_snapshot_path
+
+        self.workflow = self._extract_workflow()
+        self.namespace = self.workflow.namespace
+        self.context = TaskExecutionContext(self.workflow, self.task_execution_key)
+
         self.notification_client = get_notification_client(
-            notification_server_uri=notification_server_uri, namespace='task_status_change', sender='task_manager')
+            notification_server_uri=notification_server_uri, namespace=self.namespace, sender='task_manager')
         self.heartbeat_client = HeartbeatClient(heartbeat_server_uri)
         self.heartbeat_thread = RepeatedTimer(heartbeat_interval, self._send_heartbeat)
-        self.context = TaskExecutionContext(task_execution_key)
 
     def start(self):
         self.heartbeat_thread.start()
 
     def run_task(self):
         try:
+            self._send_task_status_change(TaskStatus.RUNNING)
             self._execute()
         except TaskFailedException:
             self._send_task_status_change(TaskStatus.FAILED)
@@ -115,13 +120,14 @@ class TaskManager(object):
             self._send_task_status_change(TaskStatus.SUCCESS)
 
     def _execute(self):
-        task = self._get_task()
+        task = self.workflow.tasks.get(self.task_execution_key.task_name)
         set_runtime_task_context(self.context)
+        context = self.context
         try:
             if isinstance(task, AIFlowOperator):
                 def signal_handler(signum, frame):  # pylint: disable=unused-argument
                     logger.error("Received SIGTERM. Terminating subprocesses.")
-                    task.stop(self.context)
+                    task.stop(context)
                     raise TaskForceStoppedException("Task received SIGTERM signal")
                 signal.signal(signal.SIGTERM, signal_handler)
                 task.start(self.context)
@@ -134,7 +140,7 @@ class TaskManager(object):
         finally:
             logger.info(f'Task execution {self.task_execution_key} finished, ')
 
-    def _get_task(self):
+    def _extract_workflow(self):
         # TODO refactor the blob manager to filesystem based
         # Currently we use blob manager to download snapshot, so we need a config file under $AIFLOW_HOME
         # to get config about blob manager, in the future we can download file according to path schema,
@@ -146,13 +152,11 @@ class TaskManager(object):
 
         # TODO download only if we don't have the same snapshot by checking md5
         workflow_snapshot_zip = blob_manager.download(
-            remote_file_path=self.workflow_snapshot_path, local_dir=snapshot_repo)
-        workflows = workflow_utils.extract_workflows_from_zip(workflow_snapshot_zip, snapshot_repo)
-        workflows = [x for x in workflows if x.name == self.workflow_name]
-        assert len(workflows) == 1
-        matched_workflow = workflows[0]
-        self.namespace = matched_workflow.namespace
-        return matched_workflow.tasks.get(self.task_execution_key.task_name)
+            remote_file_path=self.workflow_snapshot_path, local_dir=snapshot_repo
+        )
+        workflow_list = workflow_utils.extract_workflows_from_zip(workflow_snapshot_zip, snapshot_repo)
+        workflow = [x for x in workflow_list if x.name == self.workflow_name][0]
+        return workflow
 
     def _send_task_status_change(self, status: TaskStatus):
         event_for_meta = TaskStatusEvent(workflow_execution_id=self.task_execution_key.workflow_execution_id,

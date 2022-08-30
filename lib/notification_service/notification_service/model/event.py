@@ -18,45 +18,22 @@
 from typing import Optional
 
 
-UNDEFINED_EVENT_TYPE = "UNDEFINED"
 DEFAULT_NAMESPACE = "DEFAULT"
 ANY_CONDITION = "*"
 
 
-class EventKey(object):
-    def __init__(self,
-                 event_name: Optional[str],
-                 event_type: Optional[str] = UNDEFINED_EVENT_TYPE):
-        """
-        EventKey represents a type of event.
-        :param event_name: The event's name.
-        :param event_type: The event's type.
-        """
-        self.event_name = event_name
-        self.event_type = event_type
-
-    def __str__(self) -> str:
-        return 'event_name:{0}, event_type:{1}'.format(self.event_name, self.event_type)
-
-    def __eq__(self, other):
-        if not isinstance(other, EventKey):
-            return False
-        return self.event_name == other.event_name \
-               and self.event_type == other.event_type
-
-
 class Event(object):
     def __init__(self,
-                 event_key: EventKey,
-                 message: Optional[str],
+                 key: str,
+                 value: Optional[str],
                  ):
         """
         Event represents an event.
-        :param event_key: It represents a type of event.
-        :param message: It represents the event's message.
+        :param key: It represents the key of the event.
+        :param value: It represents the value of the event.
         """
-        self.event_key = event_key
-        self.message = message
+        self.key = key
+        self.value = value
 
         self._namespace = None
         self._sender = None
@@ -105,9 +82,9 @@ class Event(object):
         self._offset = value
 
     def __str__(self) -> str:
-        return 'event_key:[{0}], message:{1}, namespace:{2}, sender:{3}, create_time:{4}, offset:{5}, context: {6}' \
-            .format(self.event_key,
-                    self.message,
+        return 'key:{0}, value:{1}, namespace:{2}, sender:{3}, create_time:{4}, offset:{5}, context: {6}' \
+            .format(self.key,
+                    self.value,
                     self._namespace,
                     self._sender,
                     self._create_time,
@@ -117,8 +94,8 @@ class Event(object):
     def __eq__(self, other):
         if not isinstance(other, Event):
             return False
-        return self.event_key == other.event_key \
-               and self.message == other.message \
+        return self.key == other.key \
+               and self.value == other.value \
                and self._namespace == other.namespace \
                and self.sender == other.sender \
                and self._context == other.context \

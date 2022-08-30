@@ -18,7 +18,7 @@ import abc
 from datetime import datetime
 from typing import List, Optional
 
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 
 
 class ListenerRegistrationId(object):
@@ -51,14 +51,14 @@ class NotificationClient(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def register_listener(self,
                           listener_processor: ListenerProcessor,
-                          event_keys: List[EventKey] = None,
+                          event_keys: List[str] = None,
                           offset: int = None
                           ) -> ListenerRegistrationId:
         """
         Register a listener to listen events from Notification Server
 
         :param listener_processor: The processor of the listener.
-        :param event_keys: EventKeys of notification for listening. If not set, it will listen all events.
+        :param event_keys: Keys of event for listening. If not set, it will listen all events.
         :param offset: The offset of the events to start listening.
         :return: The `ListenerRegistrationId` used to stop the listening.
         """
@@ -74,8 +74,7 @@ class NotificationClient(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def list_events(self,
-                    event_name: str = None,
-                    event_type: str = None,
+                    key: str = None,
                     namespace: str = None,
                     sender: str = None,
                     begin_offset: int = None,
@@ -83,12 +82,11 @@ class NotificationClient(metaclass=abc.ABCMeta):
         """
         List specific events in Notification Service.
 
-        :param event_name: name of the event for listening.
-        :param event_type: (Optional) Type of the events.
-        :param namespace: (Optional) Namespace of the event for listening.
-        :param sender: The event sender.
-        :param begin_offset: (Optional) Offset of the events must be greater than this offset.
-        :param end_offset: (Optional) Offset of the events must be less than or equal to this offset.
+        :param key: The key of the event to list.
+        :param namespace: The namespace of the event to list.
+        :param sender: The sender of the event to list.
+        :param begin_offset: Offset of the events must be greater than this offset.
+        :param end_offset: Offset of the events must be less than or equal to this offset.
         :return: The event list.
         """
         pass

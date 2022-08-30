@@ -44,28 +44,26 @@ class DbEventStorage(BaseEventStorage):
         return EventModel.add_event(event, uuid)
 
     def list_events(self,
-                    event_name: str = None,
-                    event_type: str = None,
+                    key: str = None,
                     namespace: str = None,
                     sender: str = None,
                     begin_offset: int = None,
                     end_offset: int = None):
-        return EventModel.list_events(event_name, event_type, namespace, sender, begin_offset, end_offset)
+        return EventModel.list_events(key, namespace, sender, begin_offset, end_offset)
 
     def count_events(self,
-                     event_name: str = None,
-                     event_type: str = None,
+                     key: str = None,
                      namespace: str = None,
                      sender: str = None,
                      begin_offset: int = None,
                      end_offset: int = None):
-        return EventModel.count_events(event_name, event_type, namespace, sender, begin_offset, end_offset)
+        return EventModel.count_events(key, namespace, sender, begin_offset, end_offset)
 
     def list_all_events(self, start_time: int):
         return EventModel.list_all_events(start_time)
 
-    def list_all_events_from_version(self, start_version: int, end_version: int = None):
-        return EventModel.list_all_events_from_version(start_version, end_version)
+    def list_all_events_from_offset(self, start_offset: int, end_offset: int = None):
+        return EventModel.list_all_events_from_offset(start_offset, end_offset)
 
     def register_client(self, namespace: str = None, sender: str = None) -> int:
         return ClientModel.register_client(namespace, sender)
@@ -80,7 +78,7 @@ class DbEventStorage(BaseEventStorage):
         return EventModel.get_event_by_uuid(uuid)
 
     def timestamp_to_event_offset(self, timestamp: int) -> int:
-        return EventModel.timestamp_to_version(timestamp)
+        return EventModel.timestamp_to_offset(timestamp)
 
     def clean_up(self):
         tables = set(db.engine.table_names())
@@ -92,10 +90,9 @@ class DbEventStorage(BaseEventStorage):
 
 class EventModel(Base):
     __tablename__ = "event_model"
-    version = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True)
+    offset = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True)
     key = Column(String(1024), nullable=False)
     value = Column(Text())
-    event_type = Column(String(1024), server_default="UNDEFINED")
     context = Column(Text())
     namespace = Column(String(1024))
     sender = Column(String(1024))
@@ -106,9 +103,8 @@ class EventModel(Base):
     @provide_session
     def add_event(event: Event, uuid, session=None):
         event_model = EventModel()
-        event_model.key = event.event_key.event_name
-        event_model.value = event.message
-        event_model.event_type = event.event_key.event_type
+        event_model.key = event.key
+        event_model.value = event.value
         event_model.context = event.context
         event_model.namespace = event.namespace
         event_model.create_time = int(time.time() * 1000)
@@ -120,60 +116,52 @@ class EventModel(Base):
 
     @staticmethod
     @provide_session
-    def list_events(event_name: str = None,
-                    event_type: str = None,
+    def list_events(key: str = None,
                     namespace: str = None,
                     sender: str = None,
                     begin_offset: int = None,
                     end_offset: int = None,
                     session=None):
-        event_name = None if event_name == "" else event_name
-        event_type = None if event_type == "" else event_type
+        key = None if key == "" else key
         namespace = None if namespace == "" else namespace
         sender = None if sender == "" else sender
 
         conditions = []
-        if event_name is not None and ANY_CONDITION != event_name:
-            conditions.append(EventModel.key == event_name)
-        if event_type is not None and event_type != ANY_CONDITION:
-            conditions.append(EventModel.event_type == event_type)
+        if key is not None and ANY_CONDITION != key:
+            conditions.append(EventModel.key == key)
         if namespace is not None and ANY_CONDITION != namespace:
             conditions.append(EventModel.namespace == namespace)
         if sender is not None and ANY_CONDITION != sender:
             conditions.append(EventModel.sender == sender)
         if begin_offset and begin_offset > 0:
-            conditions.append(EventModel.version > begin_offset)
+            conditions.append(EventModel.offset > begin_offset)
         if end_offset and end_offset <= 0:
-            conditions.append(EventModel.version <= begin_offset)
+            conditions.append(EventModel.offset <= begin_offset)
         event_model_list = session.query(EventModel).filter(*conditions).all()
         return [event_model_to_event(event_model) for event_model in event_model_list]
 
     @staticmethod
     @provide_session
-    def count_events(event_name: str = None,
-                     event_type: str = None,
+    def count_events(key: str = None,
                      namespace: str = None,
                      sender: str = None,
                      begin_offset: int = None,
                      end_offset: int = None,
                      session=None):
-        event_name = None if event_name == "" else event_name
-        event_type = None if event_type == "" else event_type
+        key = None if key == "" else key
         namespace = None if namespace == "" else namespace
         sender = None if sender == "" else sender
         conditions = []
-        if event_name is not None and ANY_CONDITION != event_name:
-            conditions.append(EventModel.key == event_name)
-        if event_type is not None and event_type != ANY_CONDITION:
-            conditions.append(EventModel.event_type == event_type)
+        if key is not None and ANY_CONDITION != key:
+            conditions.append(EventModel.key == key)
         if namespace is not None and ANY_CONDITION != namespace:
             conditions.append(EventModel.namespace == namespace)
         if sender is not None and ANY_CONDITION != sender:
             conditions.append(EventModel.sender == sender)
         if begin_offset and begin_offset > 0:
-            conditions.append(EventModel.version > begin_offset)
+            conditions.append(EventModel.offset > begin_offset)
         if end_offset and end_offset <= 0:
-            conditions.append(EventModel.version <= begin_offset)
+            conditions.append(EventModel.offset <= begin_offset)
 
         count_results = session.query(EventModel.sender, func.count('*').label('event_count'))\
             .filter(*conditions).group_by(EventModel.sender)
@@ -190,38 +178,22 @@ class EventModel(Base):
 
     @staticmethod
     @provide_session
-    def list_all_events_from_version(start_version: int, end_version: int = None, session=None):
+    def list_all_events_from_offset(start_offset: int, end_offset: int = None, session=None):
         conditions = [
-            EventModel.version > start_version
+            EventModel.offset > start_offset
         ]
-        if end_version is not None and end_version > 0:
-            conditions.append(EventModel.version <= end_version)
+        if end_offset is not None and end_offset > 0:
+            conditions.append(EventModel.offset <= end_offset)
         event_model_list = session.query(EventModel).filter(*conditions).all()
         return [event_model_to_event(event_model) for event_model in event_model_list]
 
     @staticmethod
     @provide_session
-    def sync_event(event: Event, uuid, session=None):
-        event_model = EventModel()
-        event_model.key = event.key
-        event_model.value = event.value
-        event_model.event_type = event.event_type
-        event_model.context = event.context
-        event_model.namespace = event.namespace
-        event_model.create_time = event.create_time
-        event_model.uuid = uuid
-        event_model.sender = event.sender
-        session.add(event_model)
-        session.commit()
-        return event_model_to_event(event_model)
-
-    @staticmethod
-    @provide_session
-    def timestamp_to_version(timestamp, session=None):
+    def timestamp_to_offset(timestamp, session=None):
         e = session.query(EventModel).filter(EventModel.create_time <= timestamp) \
-            .order_by(EventModel.version.desc()) \
+            .order_by(EventModel.offset.desc()) \
             .limit(1).first()
-        return e.version if e else 0
+        return e.offset if e else 0
 
     @staticmethod
     @provide_session

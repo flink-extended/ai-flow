@@ -29,8 +29,7 @@ class BaseEventStorage(ABC):
 
     @abstractmethod
     def list_events(self,
-                    event_name: str = None,
-                    event_type: str = None,
+                    key: str = None,
                     namespace: str = None,
                     sender: str = None,
                     begin_offset: int = None,
@@ -39,8 +38,7 @@ class BaseEventStorage(ABC):
 
     @abstractmethod
     def count_events(self,
-                     event_name: str = None,
-                     event_type: str = None,
+                     key: str = None,
                      namespace: str = None,
                      sender: str = None,
                      begin_offset: int = None,

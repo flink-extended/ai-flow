@@ -23,7 +23,7 @@ from typing import Callable, TypeVar, cast, List
 
 from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
 from notification_service.client.notification_client import ListenerProcessor
-from notification_service.model.event import EventKey, Event
+from notification_service.model.event import Event
 
 from ai_flow.common.util import time_utils
 from notification_service.cli.simple_table import NotificationConsole
@@ -60,23 +60,21 @@ def list_events(args):
         offset = args.begin_offset
     elif args.begin_time:
         offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time))
-    events = client.list_events(name=args.event_name,
+    events = client.list_events(key=args.key,
                                 namespace=args.namespace,
-                                event_type=args.event_type,
                                 sender=args.sender,
-                                offset=offset)
+                                begin_offset=offset)
     NotificationConsole().print_as(
         data=events,
         output=args.output,
         mapper=lambda event: {
             "namespace": event.namespace,
-            "event_name": event.event_key.event_name,
-            "event_message": event.message,
-            "event_type": event.event_key.event_type,
+            "key": event.key,
+            "value": event.value,
             "sender": event.sender,
             "create_time": dt.fromtimestamp(event.create_time/1000).isoformat(),
             "context": event.context,
-            "version": event.offset,
+            "offset": event.offset,
         },
     )
 
@@ -90,11 +88,10 @@ def count_events(args):
         offset = args.begin_offset
     elif args.begin_time:
         offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time))
-    res = client.count_events(name=args.event_name,
+    res = client.count_events(key=args.key,
                               namespace=args.namespace,
-                              event_type=args.event_type,
                               sender=args.sender,
-                              offset=offset)
+                              begin_offset=offset)
     print(res[0])
 
 
@@ -109,7 +106,8 @@ def listen_events(args):
             for e in events:
                 self.queue.put(e)
 
-    client = EmbeddedNotificationClient(server_uri=args.server_uri)
+    client = EmbeddedNotificationClient(server_uri=args.server_uri,
+                                        namespace=args.namespace)
 
     offset = 0
     if args.begin_offset:
@@ -117,13 +115,9 @@ def listen_events(args):
     elif args.begin_time:
         offset = client.time_to_offset(time_utils.timestamp_to_datetime(args.begin_time))
 
-    event_key = EventKey(event_name=args.event_name,
-                         event_type=args.event_type,
-                         namespace=args.namespace,
-                         sender=args.sender)
     event_queue = Queue()
     registration_id = client.register_listener(listener_processor=Processor(event_queue),
-                                               event_keys=[event_key, ],
+                                               event_keys=[args.key, ],
                                                offset=offset)
 
     try:
@@ -141,11 +135,9 @@ def send_event(args):
     client = EmbeddedNotificationClient(server_uri=args.server_uri,
                                         namespace=args.namespace,
                                         sender=args.sender)
-    event_key = EventKey(event_name=args.event_name,
-                         event_type=args.event_type)
     event = Event(
-        event_key=event_key,
-        message=args.event_message
+        key=args.key,
+        value=args.value
     )
     event: Event = client.send_event(event)
     print("Successfully send event: {}.".format(event))

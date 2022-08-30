@@ -73,7 +73,6 @@ class TestCliEvent(unittest.TestCase):
                  'send',
                  '-s', SERVER_URI,
                  '-n', 'namespace1',
-                 '--event-type', 'event-type1',
                  '--sender', 'sender1',
                  '--context', 'context1',
                  key, 'value1',
@@ -116,8 +115,8 @@ class TestCliEvent(unittest.TestCase):
             self.send_an_event()
         print(stdout.getvalue())
         self.assertIn('Successfully send event: '
-                      'event_key:[name:key, event_type:event-type1, namespace:namespace1, sender:sender1], '
-                      'message:value1', stdout.getvalue())
+                      'key:key, value:value1, namespace:namespace1, sender:sender1, '
+                      , stdout.getvalue())
 
     def test_cli_list_events(self):
         self.send_an_event('key1')

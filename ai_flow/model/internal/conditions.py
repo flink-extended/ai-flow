@@ -16,12 +16,12 @@
 # under the License.
 import json
 
-from notification_service.model.event import EventKey, Event
+from notification_service.model.event import Event
 from typing import List
 
 from ai_flow.model.condition import Condition
 from ai_flow.model.context import Context
-from ai_flow.model.internal.events import TaskStatusChangedEventKey, EventContextConstant
+from ai_flow.model.internal.events import EventContextConstant, TaskStatusChangedEvent
 from ai_flow.model.state import ValueState, ValueStateDescriptor
 from ai_flow.model.status import TaskStatus
 
@@ -29,7 +29,7 @@ from ai_flow.model.status import TaskStatus
 class SingleEventCondition(Condition):
     """The Condition that depend on a single event."""
     def __init__(self,
-                 expect_event: EventKey):
+                 expect_event: str):
         """
         :param expect_event: The event that this condition depends on.
         """
@@ -39,21 +39,9 @@ class SingleEventCondition(Condition):
         return True
 
 
-def match_event(event_key: EventKey, event: Event) -> bool:
-    if event_key.namespace is not None and event_key.namespace != event.event_key.namespace:
-        return False
-    if event_key.name is not None and event_key.name != event.event_key.name:
-        return False
-    if event_key.event_type is not None and event_key.event_type != event.event_key.event_type:
-        return False
-    if event_key.sender is not None and event_key.sender != event.event_key.sender:
-        return False
-    return True
-
-
-def match_events(event_keys: List[EventKey], event: Event) -> bool:
-    for ek in event_keys:
-        if match_event(event_key=ek, event=event):
+def match_events(event_keys: List[str], event: Event) -> bool:
+    for key in event_keys:
+        if key == event.key:
             return True
     return False
 
@@ -132,9 +120,10 @@ class TaskStatusCondition(Condition):
         :param workflow_name: The name of the workflow to which the task belongs.
         :param expect_status: Desired status of the task.
         """
-        super().__init__([TaskStatusChangedEventKey(namespace=namespace,
-                                                    workflow_name=workflow_name,
-                                                    task_name=task_name)])
+        key = TaskStatusChangedEvent.generate_task_status_changed_event_key(
+            namespace, workflow_name, task_name
+        )
+        super().__init__([key, ])
         self.expect_status = expect_status
 
     # todo: To judge whether to trigger or not,
@@ -161,13 +150,13 @@ class TaskStatusAllMetCondition(Condition):
         self.condition_list = condition_list
 
     def is_met(self, event: Event, context: Context) -> bool:
+        namespace = context.workflow.namespace
+        workflow_name = context.workflow.name
         for condition in self.condition_list:
-            namespace_name = context.workflow.namespace
-            workflow_name = context.workflow.name
-            index = len(f'{namespace_name}.{workflow_name}')
-
-            event_key: TaskStatusChangedEventKey = condition.expect_events[0]
-            task_name = event_key.name[index+1:]
+            prefix = TaskStatusChangedEvent.event_key_prefix()
+            index = len(f'{prefix}.{namespace}.{workflow_name}')
+            event_key = condition.expect_events[0]
+            task_name = event_key[index+1:]
             task_status = context.get_task_status(task_name=task_name)
             if task_status != condition.expect_status:
                 return False

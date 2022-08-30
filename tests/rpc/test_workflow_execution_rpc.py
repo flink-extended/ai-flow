@@ -73,7 +73,7 @@ class TestWorkflowExecutionRpc(BaseUnitTest):
     def test_stop_workflow_execution(self):
         self.client.stop_workflow_execution(1)
         self.assertEqual(SchedulingEventType.STOP_WORKFLOW_EXECUTION,
-                         self.notification_client.list_events()[0].event_key.name)
+                         self.notification_client.list_events()[0].event_key.event_name)
         self.assertEqual(json.dumps({'workflow_execution_id': 1}),
                          self.notification_client.list_events()[0].context)
 
@@ -82,7 +82,7 @@ class TestWorkflowExecutionRpc(BaseUnitTest):
         self.client.stop_workflow_executions(namespace=self.workflow_meta.namespace,
                                              workflow_name=self.workflow_meta.name)
         self.assertEqual(SchedulingEventType.STOP_WORKFLOW_EXECUTION,
-                         self.notification_client.list_events()[0].event_key.name)
+                         self.notification_client.list_events()[0].event_key.event_name)
         self.assertEqual(json.dumps({'workflow_execution_id': 2}),
                          self.notification_client.list_events()[0].context)
 

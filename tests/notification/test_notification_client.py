@@ -38,19 +38,9 @@ class TestNotificationClient(unittest.TestCase):
             client = AIFlowNotificationClient(
                 server_uri="localhost:8888",
             )
-            event = Event(EventKey(name="event_name"), message="message")
+            event = Event(EventKey(event_name="event_name"), message="message")
             actual_sent_event = client.send_event(event)
             self.assertEqual(json.dumps({
                 EventContextConstant.WORKFLOW_EXECUTION_ID: 1
             }), actual_sent_event.context)
-            self.assertEqual("message", actual_sent_event.message)
-
-    def test_send_event_to_all_workflow_executions(self):
-        with mock.patch('ai_flow.notification.notification_client.EmbeddedNotificationClient', MockNotificationClient):
-            client = AIFlowNotificationClient(
-                server_uri="localhost:8888",
-            )
-            event = Event(EventKey(name="event_name"), message="message")
-            actual_sent_event = client.send_event_to_all_workflow_executions(event)
-            self.assertIsNone(actual_sent_event.context)
             self.assertEqual("message", actual_sent_event.message)

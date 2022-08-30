@@ -27,7 +27,7 @@ from itertools import tee, filterfalse
 import dateutil.parser
 from typing import Callable, Iterable
 
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 from notification_service.model.member import Member
 from notification_service.model.sender_event_count import SenderEventCount
 from notification_service.rpc.protobuf import notification_service_pb2
@@ -39,10 +39,9 @@ logger = logging.getLogger(__name__)
 
 
 def event_to_proto(event: Event):
-    result_event_proto = notification_service_pb2.EventProto(name=event.event_key.event_name,
+    result_event_proto = notification_service_pb2.EventProto(key=event.key,
                                                              offset=event.offset,
-                                                             message=event.message,
-                                                             event_type=event.event_key.event_type,
+                                                             value=event.value,
                                                              create_time=event.create_time,
                                                              namespace=event.namespace,
                                                              context=event.context,
@@ -74,9 +73,7 @@ def count_list_to_proto(count_list):
 
 
 def event_proto_to_event(event_proto):
-    event = Event(event_key=EventKey(event_name=event_proto.name,
-                                     event_type=event_proto.event_type),
-                  message=event_proto.message)
+    event = Event(key=event_proto.key, value=event_proto.value)
     event.namespace = event_proto.namespace
     event.sender = event_proto.sender
     event.context = event_proto.context
@@ -91,12 +88,10 @@ def event_count_proto_to_event_count(event_count_proto):
 
 
 def event_model_to_event(event_model):
-    event = Event(event_key=EventKey(event_name=event_model.key,
-                                     event_type=event_model.event_type),
-                  message=event_model.value)
+    event = Event(key=event_model.key, value=event_model.value)
     event.namespace = event_model.namespace
     event.sender = event_model.sender
-    event.offset = event_model.version
+    event.offset = event_model.offset
     event.create_time = event_model.create_time
     event.context = event_model.context
     return event

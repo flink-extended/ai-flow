@@ -79,7 +79,7 @@ class TestTaskExecutionRpc(BaseUnitTest):
         self.prepare_task_execution(self.workflow_execution.id)
         self.client.stop_task_execution(1, 'task1')
         self.assertEqual(SchedulingEventType.STOP_TASK_EXECUTION,
-                         self.notification_client.list_events()[0].event_key.name)
+                         self.notification_client.list_events()[0].event_key.event_name)
         self.assertEqual(json.dumps({"workflow_execution_id": 1, "task_execution_id": 2}),
                          self.notification_client.list_events()[0].context)
 

@@ -32,13 +32,13 @@ from tests.scheduler.test_utils import UnitTestWithNamespace
 
 def build_workflow():
     expect_events_1 = [EventKey(namespace='namespace',
-                                name='event_1',
+                                event_name='event_1',
                                 event_type='event_type',
                                 sender='sender'
                                 )
                        ]
     expect_events_2 = [EventKey(namespace='namespace',
-                                name='event_2',
+                                event_name='event_2',
                                 event_type='event_type',
                                 sender='sender'
                                 )

@@ -68,7 +68,7 @@ class TestWorker(UnitTestWithNamespace):
             op2 = Operator(name='op_2')
             op1.action_on_condition(action=TaskAction.START, condition=TrueCondition(expect_events=[
                 EventKey(namespace='namespace',
-                         name='event_1',
+                         event_name='event_1',
                          event_type='event_type',
                          sender='sender'
                          ),
@@ -84,7 +84,7 @@ class TestWorker(UnitTestWithNamespace):
                                                          rule=cloudpickle.dumps(WorkflowRule(
                                                              condition=TrueCondition(expect_events=[
                                                                  EventKey(namespace='namespace',
-                                                                          name='event_2',
+                                                                          event_name='event_2',
                                                                           event_type='event_type',
                                                                           sender='sender'
                                                                           ),
@@ -120,7 +120,7 @@ class TestWorker(UnitTestWithNamespace):
             self.assertEqual(1, offset)
 
             event = Event(event_key=EventKey(namespace='namespace',
-                                             name='event_1',
+                                             event_name='event_1',
                                              event_type='event_type',
                                              sender='sender'), message='')
             event.offset = 2
@@ -143,7 +143,7 @@ class TestWorker(UnitTestWithNamespace):
             self.assertEqual(TaskStatus.STOPPING, te.status)
 
             event = Event(event_key=EventKey(namespace='namespace',
-                                             name='event_2',
+                                             event_name='event_2',
                                              event_type='event_type',
                                              sender='sender'), message='')
             rules = rule_extractor.extract_workflow_rules(event=event)

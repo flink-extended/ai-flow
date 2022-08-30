@@ -64,31 +64,31 @@ class TestRuleExecutor(UnitTestWithNamespace):
 
     def _build_workflow_execution(self):
         expect_events_1 = [EventKey(namespace='namespace',
-                                    name='event_1',
+                                    event_name='event_1',
                                     event_type='event_type',
                                     sender='sender'
                                     )
                            ]
         expect_events_2 = [EventKey(namespace='namespace',
-                                    name='event_2',
+                                    event_name='event_2',
                                     event_type='event_type',
                                     sender='sender'
                                     )
                            ]
         expect_events_3 = [EventKey(namespace='namespace',
-                                    name='event_3',
+                                    event_name='event_3',
                                     event_type='event_type',
                                     sender='sender'
                                     )
                            ]
         expect_events_4 = [EventKey(namespace='namespace',
-                                    name='event_4',
+                                    event_name='event_4',
                                     event_type='event_type',
                                     sender='sender'
                                     )
                            ]
         expect_events_5 = [EventKey(namespace='namespace',
-                                    name='event_5',
+                                    event_name='event_5',
                                     event_type='event_type',
                                     sender='sender'
                                     )
@@ -146,7 +146,7 @@ class TestRuleExecutor(UnitTestWithNamespace):
         self._build_workflow_execution()
 
         event = Event(event_key=EventKey(namespace='namespace',
-                                         name='event_1',
+                                         event_name='event_1',
                                          event_type='event_type',
                                          sender='sender'), message='')
         result = self.exec_event_on_workflow_execution(event)
@@ -157,14 +157,14 @@ class TestRuleExecutor(UnitTestWithNamespace):
         self.assertEqual(TaskAction.START, result.task_schedule_commands[0].action)
 
         event = Event(event_key=EventKey(namespace='namespace',
-                                         name='event_2',
+                                         event_name='event_2',
                                          event_type='event_type',
                                          sender='sender'), message='')
         result = self.exec_event_on_workflow_execution(event)
         self.assertIsNone(result)
 
         event = Event(event_key=EventKey(namespace='namespace',
-                                         name='event_3',
+                                         event_name='event_3',
                                          event_type='event_type',
                                          sender='sender'), message='')
         result = self.exec_event_on_workflow_execution(event)
@@ -175,7 +175,7 @@ class TestRuleExecutor(UnitTestWithNamespace):
         self.assertEqual(TaskAction.STOP, result.task_schedule_commands[0].action)
 
         event = Event(event_key=EventKey(namespace='namespace',
-                                         name='event_4',
+                                         event_name='event_4',
                                          event_type='event_type',
                                          sender='sender'), message='')
         result = self.exec_event_on_workflow_execution(event)
@@ -187,7 +187,7 @@ class TestRuleExecutor(UnitTestWithNamespace):
         self.assertEqual(TaskAction.RESTART, result.task_schedule_commands[0].action)
 
         event = Event(event_key=EventKey(namespace='namespace',
-                                         name='event_5',
+                                         event_name='event_5',
                                          event_type='event_type',
                                          sender='sender'), message='')
         result = self.exec_event_on_workflow_execution(event)
@@ -208,25 +208,25 @@ class TestRuleExecutor(UnitTestWithNamespace):
 
     def _build_workflow_trigger(self):
         expect_events_1 = [EventKey(namespace='namespace',
-                                    name='event_1',
+                                    event_name='event_1',
                                     event_type='event_type',
                                     sender='sender'
                                     )
                            ]
         expect_events_2 = [EventKey(namespace='namespace',
-                                    name='event_2',
+                                    event_name='event_2',
                                     event_type='event_type',
                                     sender='sender'
                                     )
                            ]
         expect_events_3 = [EventKey(namespace='namespace',
-                                    name='event_3',
+                                    event_name='event_3',
                                     event_type=None,
                                     sender='sender'
                                     )
                            ]
         expect_events_4 = [EventKey(namespace='namespace',
-                                    name='event_4',
+                                    event_name='event_4',
                                     event_type=None,
                                     sender='sender'
                                     )

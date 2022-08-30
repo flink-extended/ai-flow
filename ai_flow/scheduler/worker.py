@@ -88,7 +88,7 @@ class Worker(threading.Thread):
 
     @staticmethod
     def _set_event_offset_by_scheduling_event(metadata_manager: MetadataManager, event: Event):
-        scheduling_event_type = SchedulingEventType(event.event_key.name)
+        scheduling_event_type = SchedulingEventType(event.value)
         context = json.loads(event.context)
         if SchedulingEventType.START_WORKFLOW_EXECUTION == scheduling_event_type:
             workflow_id = context[EventContextConstant.WORKFLOW_ID]

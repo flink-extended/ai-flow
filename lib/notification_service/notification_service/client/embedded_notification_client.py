@@ -22,10 +22,10 @@ import grpc
 from functools import wraps
 from random import shuffle
 from datetime import datetime
-from typing import List, Dict, Union, Iterable, Tuple
+from typing import List, Dict, Tuple
 
 
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 from notification_service.client.notification_client import NotificationClient, ListenerRegistrationId, \
     ListenerProcessor
 from notification_service.rpc.protobuf import notification_service_pb2_grpc
@@ -228,9 +228,8 @@ class EmbeddedNotificationClient(NotificationClient):
 
         request = SendEventRequest(
             event=EventProto(
-                name=event.event_key.event_name,
-                message=event.message,
-                event_type=event.event_key.event_type,
+                key=event.key,
+                value=event.value,
                 context=event.context,
                 namespace=self.namespace,
                 sender=self.sender
@@ -246,7 +245,7 @@ class EmbeddedNotificationClient(NotificationClient):
 
     def register_listener(self,
                           listener_processor: ListenerProcessor,
-                          event_keys: List[EventKey] = None,
+                          event_keys: List[str] = None,
                           offset: int = None) -> ListenerRegistrationId:
 
         def list_events_from_offset(client, v, timeout_seconds: int = None):
@@ -337,8 +336,7 @@ class EmbeddedNotificationClient(NotificationClient):
             raise Exception(response.return_msg)
 
     def list_events(self,
-                    event_name: str = None,
-                    event_type: str = None,
+                    key: str = None,
                     namespace: str = None,
                     sender: str = None,
                     begin_offset: int = None,
@@ -346,17 +344,15 @@ class EmbeddedNotificationClient(NotificationClient):
         """
         List specific events in Notification Service.
 
-        :param event_name: name of the event for listening.
-        :param event_type: (Optional) Type of the events.
-        :param namespace: (Optional) Namespace of the event for listening.
+        :param key: Key of the event for listening.
+        :param namespace: Namespace of the event for listening.
         :param sender: The event sender.
-        :param begin_offset: (Optional) Offset of the events must be greater than this offset.
-        :param end_offset: (Optional) Offset of the events must be less than or equal to this offset.
+        :param begin_offset: Offset of the events must be greater than this offset.
+        :param end_offset: Offset of the events must be less than or equal to this offset.
         :return: The event list.
         """
         request = ListEventsRequest(
-            event_name=event_name,
-            event_type=event_type,
+            key=key,
             namespace=namespace,
             sender=sender,
             start_offset=begin_offset,
@@ -382,8 +378,7 @@ class EmbeddedNotificationClient(NotificationClient):
         return response.offset
 
     def count_events(self,
-                     event_name: str = None,
-                     event_type: str = None,
+                     key: str = None,
                      namespace: str = None,
                      sender: str = None,
                      begin_offset: int = None,
@@ -391,17 +386,15 @@ class EmbeddedNotificationClient(NotificationClient):
         """
         Count specific events in Notification Service.
 
-        :param event_name: name of the event for listening.
-        :param event_type: (Optional) Type of the events.
-        :param namespace: (Optional) Namespace of the event for listening.
+        :param key: Key of the event for listening.
+        :param namespace: Namespace of the event for listening.
         :param sender: The event sender.
-        :param begin_offset: (Optional) Offset of the events must be greater than this offset.
-        :param end_offset: (Optional) Offset of the events must be less than or equal to this offset.
+        :param begin_offset: Offset of the events must be greater than this offset.
+        :param end_offset: Offset of the events must be less than or equal to this offset.
         :return: The total event count and the list of event counts of each sender.
         """
         request = CountEventsRequest(
-            event_name=event_name,
-            event_type=event_type,
+            key=key,
             namespace=namespace,
             sender=sender,
             start_offset=begin_offset,
@@ -417,11 +410,9 @@ class EmbeddedNotificationClient(NotificationClient):
         else:
             raise Exception(response.return_msg)
 
-    def filter_events(self, event_keys: List[EventKey], events: List[Event]) -> List[Event]:
-        def match(event_name, event_type, namespace, event: Event) -> bool:
-            if event_name is not None and event_name != event.event_key.event_name:
-                return False
-            if event_type is not None and event_type != event.event_key.event_type:
+    def filter_events(self, event_keys: List[str], events: List[Event]) -> List[Event]:
+        def match(key, namespace, event: Event) -> bool:
+            if key is not None and key != event.key:
                 return False
             if namespace is not None and namespace != event.namespace:
                 return False
@@ -430,7 +421,7 @@ class EmbeddedNotificationClient(NotificationClient):
         results = []
         for e in events:
             for k in event_keys:
-                if match(k.event_name, k.event_type, self.namespace, e):
+                if match(k, self.namespace, e):
                     results.append(e)
                     break
         return results

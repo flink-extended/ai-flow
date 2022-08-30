@@ -19,7 +19,7 @@ import json
 import unittest
 
 import cloudpickle
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
@@ -27,112 +27,54 @@ from ai_flow.model.execution_type import ExecutionType
 from ai_flow.model.internal.events import EventContextConstant
 from ai_flow.model.operator import Operator
 from ai_flow.model.rule import WorkflowRule
-from ai_flow.model.status import WorkflowStatus
+from ai_flow.model.status import WorkflowStatus, TaskStatus
 from ai_flow.model.workflow import Workflow
-from ai_flow.scheduler.rule_extractor import gen_all_combination, gen_all_tuple_by_event_key, \
-    workflow_expect_event_tuples, build_task_rule_index, RuleExtractor
+from ai_flow.scheduler.rule_extractor import workflow_expect_event_tuples, build_task_rule_index, RuleExtractor
 from tests.scheduler.test_utils import UnitTestWithNamespace
 
 
 class TestRuleExtractorUtil(unittest.TestCase):
 
-    def test_gen_all_combination(self):
-        a = [1, None, 3, None]
-        results = gen_all_combination(a)
-        self.assertEqual(4, len(results))
-        self.assertTrue((1, None, 3, None) in results)
-        self.assertTrue((1, None, None, None) in results)
-        self.assertTrue((None, None, 3, None) in results)
-        self.assertTrue((None, None, None, None) in results)
+    @staticmethod
+    def build_workflow_dict_1():
+        workflow_dict = {}
+        for i in range(3):
+            with Workflow(name='workflow_'.format(i + 1), namespace='namespace') as workflow:
+                o1 = Operator(name='op_1')
+                o2 = Operator(name='op_2')
 
-        a = [1, 2, 3, None]
-        self.assertEqual(8, len(gen_all_combination(a)))
-
-        a = [1, 2, 3, 4]
-        self.assertEqual(16, len(gen_all_combination(a)))
-
-    def test_gen_all_tuple_by_event_key(self):
-        a = EventKey(namespace='1', name=None, event_type='3', sender=None)
-        results = gen_all_tuple_by_event_key(a)
-        self.assertEqual(4, len(results))
-        self.assertTrue(('1', None, '3', None) in results)
-        self.assertTrue(('1', None, None, None) in results)
-        self.assertTrue((None, None, '3', None) in results)
-        self.assertTrue((None, None, None, None) in results)
-
-        a = EventKey(namespace='1', name='2', event_type='3', sender=None)
-        self.assertEqual(8, len(gen_all_tuple_by_event_key(a)))
-
-        a = EventKey(namespace='1', name='2', event_type='3', sender='4')
-        self.assertEqual(16, len(gen_all_tuple_by_event_key(a)))
+                o1.action_on_condition(action=TaskAction.START,
+                                       condition=Condition(
+                                           expect_events=['event_1',
+                                                          'event_2_{}'.format(i),
+                                                          ]))
+                o2.action_on_condition(action=TaskAction.START,
+                                       condition=Condition(
+                                           expect_events=['event_3_{}'.format(i),
+                                                          'event_4'
+                                                          ]))
+                workflow_dict[i + 1] = workflow
+        return workflow_dict
 
     def test_parse_expect_keys(self):
         with Workflow(name='workflow') as workflow:
             o1 = Operator(name='op')
             o1.action_on_condition(action=TaskAction.START,
                                    condition=Condition(
-                                       expect_events=[EventKey(namespace='namespace',
-                                                               name='event_1',
-                                                               event_type='event_type',
-                                                               sender='sender'
-                                                               ),
-                                                      EventKey(namespace='namespace',
-                                                               name='event_2',
-                                                               event_type='event_type',
-                                                               sender='sender'
-                                                               ),
-                                                      EventKey(namespace='namespace',
-                                                               name='event_2',
-                                                               event_type='event_type',
-                                                               sender='sender'
-                                                               )
-                                                      ]))
+                                       expect_events=['event_1',
+                                                      'event_2',
+                                                      'event_2',
+                                                      ])
+                                   )
         expect_keys = workflow_expect_event_tuples(workflow=workflow)
         self.assertEqual(2, len(expect_keys))
 
     def test_build_task_rule_index(self):
         workflow_dict = self.build_workflow_dict_1()
         task_rule_index = build_task_rule_index(workflow_dict=workflow_dict)
-        self.assertEqual(1, len(task_rule_index[('namespace', 'event_2_0', None, 'sender')]))
-        self.assertEqual(3, len(task_rule_index[('namespace', 'event_1', 'event_type', 'sender')]))
-        self.assertEqual(3, len(task_rule_index[('namespace', 'event_4', 'event_type', None)]))
-
-    @staticmethod
-    def build_workflow_dict_1():
-        workflow_dict = {}
-        for i in range(3):
-            with Workflow(name='workflow_'.format(i + 1)) as workflow:
-                o1 = Operator(name='op_1')
-                o2 = Operator(name='op_2')
-
-                o1.action_on_condition(action=TaskAction.START,
-                                       condition=Condition(
-                                           expect_events=[EventKey(namespace='namespace',
-                                                                   name='event_1',
-                                                                   event_type='event_type',
-                                                                   sender='sender'
-                                                                   ),
-                                                          EventKey(namespace='namespace',
-                                                                   name='event_2_{}'.format(i),
-                                                                   event_type=None,
-                                                                   sender='sender'
-                                                                   )
-                                                          ]))
-                o2.action_on_condition(action=TaskAction.START,
-                                       condition=Condition(
-                                           expect_events=[EventKey(namespace='namespace',
-                                                                   name='event_3_{}'.format(i),
-                                                                   event_type='event_type',
-                                                                   sender=None
-                                                                   ),
-                                                          EventKey(namespace='namespace',
-                                                                   name='event_4',
-                                                                   event_type='event_type',
-                                                                   sender=None
-                                                                   )
-                                                          ]))
-                workflow_dict[i + 1] = workflow
-        return workflow_dict
+        self.assertEqual(1, len(task_rule_index[('namespace', 'event_2_0')]))
+        self.assertEqual(3, len(task_rule_index[('namespace', 'event_1')]))
+        self.assertEqual(3, len(task_rule_index[('namespace', 'event_4')]))
 
 
 class TestRuleExtractor(UnitTestWithNamespace):
@@ -148,33 +90,33 @@ class TestRuleExtractor(UnitTestWithNamespace):
                                                                    workflow_object=cloudpickle.dumps(workflow))
                 self.metadata_manager.flush()
                 expect_events_1 = [EventKey(namespace='namespace',
-                                            name='event_1',
+                                            event_name='event_1',
                                             event_type='event_type',
                                             sender='sender'
                                             ),
                                    EventKey(namespace='namespace',
-                                            name='event_1_{}'.format(i),
+                                            event_name='event_1_{}'.format(i),
                                             event_type=None,
                                             sender='sender'
                                             ),
                                    EventKey(namespace='namespace',
-                                            name='event',
+                                            event_name='event',
                                             event_type=None,
                                             sender='sender'
                                             )
                                    ]
                 expect_events_2 = [EventKey(namespace='namespace',
-                                            name='event_2',
+                                            event_name='event_2',
                                             event_type='event_type',
                                             sender='sender'
                                             ),
                                    EventKey(namespace='namespace',
-                                            name='event_2_{}'.format(i),
+                                            event_name='event_2_{}'.format(i),
                                             event_type=None,
                                             sender='sender'
                                             ),
                                    EventKey(namespace='namespace',
-                                            name='event',
+                                            event_name='event',
                                             event_type=None,
                                             sender='sender'
                                             )
@@ -215,46 +157,24 @@ class TestRuleExtractor(UnitTestWithNamespace):
     def test_extract_workflow_execution_rules(self):
         def build_workflows():
             for i in range(3):
-                expect_events_1 = [EventKey(namespace='namespace',
-                                            name='event_1',
-                                            event_type='event_type',
-                                            sender='sender'
-                                            ),
-                                   EventKey(namespace='namespace',
-                                            name='event_1_{}'.format(i),
-                                            event_type=None,
-                                            sender='sender'
-                                            ),
-                                   EventKey(namespace='namespace',
-                                            name='event',
-                                            event_type=None,
-                                            sender='sender'
-                                            )
-                                   ]
-                expect_events_2 = [EventKey(namespace='namespace',
-                                            name='event_2',
-                                            event_type='event_type',
-                                            sender='sender'
-                                            ),
-                                   EventKey(namespace='namespace',
-                                            name='event_2_{}'.format(i),
-                                            event_type=None,
-                                            sender='sender'
-                                            ),
-                                   EventKey(namespace='namespace',
-                                            name='event',
-                                            event_type=None,
-                                            sender='sender'
-                                            )
-                                   ]
+                expect_events_1 = ['event_1',
+                                   'event_1_{}'.format(i),
+                                   'event']
+                expect_events_2 = ['event_2',
+                                   'event_2_{}'.format(i),
+                                   'event']
                 with Workflow(name='workflow_{}'.format(i)) as workflow:
                     op_1 = Operator(name='op_1')
                     op_2 = Operator(name='op_2')
+                    op_3 = Operator(name='op_3')
 
                     op_1.action_on_condition(action=TaskAction.START,
                                              condition=Condition(expect_events=expect_events_1))
                     op_2.action_on_condition(action=TaskAction.START,
                                              condition=Condition(expect_events=expect_events_2))
+                    op_3.action_on_task_status(TaskAction.START, {
+                        op_1: TaskStatus.SUCCESS, op_2: TaskStatus.SUCCESS
+                    })
 
                 workflow_meta = self.metadata_manager.add_workflow(namespace=self.namespace_name,
                                                                    name=workflow.name,
@@ -284,20 +204,16 @@ class TestRuleExtractor(UnitTestWithNamespace):
 
         rule_extractor = RuleExtractor()
 
-        event = Event(event_key=EventKey(namespace='namespace',
-                                         name='event_1',
-                                         event_type='event_type',
-                                         sender='sender'), message='')
+        event = Event(key='event_1', value='')
+        event.namespace = 'default'
         results = rule_extractor.extract_workflow_execution_rules(event=event)
         self.metadata_manager.flush()
         self.assertEqual(6, len(results))
         for r in results:
             self.assertEqual(1, len(r.task_rule_wrappers))
 
-        event = Event(event_key=EventKey(namespace='namespace',
-                                         name='event',
-                                         event_type='event_type',
-                                         sender='sender'), message='')
+        event = Event(key='event', value='')
+        event.namespace = 'default'
         results = rule_extractor.extract_workflow_execution_rules(event=event)
         self.metadata_manager.flush()
         self.assertEqual(6, len(results))

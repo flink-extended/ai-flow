@@ -28,7 +28,7 @@ from ai_flow.model.status import TaskStatus
 
 class MockCondition(Condition):
     def __init__(self, name: str, flag: bool):
-        super().__init__([EventKey(name=name)])
+        super().__init__([EventKey(event_name=name)])
         self.flag = flag
 
     def is_met(self, event: Event, context: Context) -> bool:
@@ -37,7 +37,7 @@ class MockCondition(Condition):
 
 class MockCondition2(Condition):
     def __init__(self, name: str):
-        super().__init__([EventKey(name=name)])
+        super().__init__([EventKey(event_name=name)])
         self.count = 0
 
     def is_met(self, event: Event, context: Context) -> bool:
@@ -78,24 +78,24 @@ class MockContext(Context):
 class TestConditions(unittest.TestCase):
 
     def test_single_event_condition(self):
-        self.assertEqual(True, SingleEventCondition(expect_event=EventKey(name='a')).is_met(event=None, context=None))
+        self.assertEqual(True, SingleEventCondition(expect_event=EventKey(event_name='a')).is_met(event=None, context=None))
 
     def test_meet_any_condition(self):
         c_1 = MockCondition(name='1', flag=True)
         c_2 = MockCondition(name='2', flag=False)
         any_condition_1 = MeetAnyCondition(conditions=[c_1, c_1])
         self.assertTrue(any_condition_1.is_met(
-            event=Event(event_key=EventKey(name='1'), message=None), context=None))
+            event=Event(event_key=EventKey(event_name='1'), message=None), context=None))
 
         any_condition_2 = MeetAnyCondition(conditions=[c_2, c_2])
         self.assertFalse(any_condition_2.is_met(
-            event=Event(event_key=EventKey(name='2'), message=None), context=None))
+            event=Event(event_key=EventKey(event_name='2'), message=None), context=None))
 
         any_condition_3 = MeetAnyCondition(conditions=[c_1, c_2])
         self.assertTrue(any_condition_3.is_met(
-            event=Event(event_key=EventKey(name='1'), message=None), context=None))
+            event=Event(event_key=EventKey(event_name='1'), message=None), context=None))
         self.assertFalse(any_condition_3.is_met(
-            event=Event(event_key=EventKey(name='2'), message=None), context=None))
+            event=Event(event_key=EventKey(event_name='2'), message=None), context=None))
 
     def test_meet_all_condition(self):
         context = MockContext()
@@ -103,18 +103,18 @@ class TestConditions(unittest.TestCase):
         c_2 = MockCondition(name='2', flag=True)
         condition = MeetAllCondition(name='c', conditions=[c_1, c_2])
         self.assertFalse(condition.is_met(
-            event=Event(event_key=EventKey(name='1'), message=None), context=context))
+            event=Event(event_key=EventKey(event_name='1'), message=None), context=context))
         self.assertTrue(condition.is_met(
-            event=Event(event_key=EventKey(name='2'), message=None), context=context))
+            event=Event(event_key=EventKey(event_name='2'), message=None), context=context))
         context.clear()
         c_3 = MockCondition2(name='1')
         condition = MeetAllCondition(name='c', conditions=[c_2, c_3])
         self.assertFalse(condition.is_met(
-            event=Event(event_key=EventKey(name='2'), message=None), context=context))
+            event=Event(event_key=EventKey(event_name='2'), message=None), context=context))
         self.assertTrue(condition.is_met(
-            event=Event(event_key=EventKey(name='1'), message=None), context=context))
+            event=Event(event_key=EventKey(event_name='1'), message=None), context=context))
         self.assertFalse(condition.is_met(
-            event=Event(event_key=EventKey(name='1'), message=None), context=context))
+            event=Event(event_key=EventKey(event_name='1'), message=None), context=context))
 
 
 if __name__ == '__main__':

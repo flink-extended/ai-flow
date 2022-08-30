@@ -42,24 +42,20 @@ class MemoryEventStorage(BaseEventStorage):
         return event
 
     def list_events(self,
-                    event_name: str = None,
-                    event_type: str = None,
+                    key: str = None,
                     namespace: str = None,
                     sender: str = None,
                     begin_offset: int = None,
                     end_offset: int = None):
         res = []
-        event_name = None if event_name == "" else event_name
-        event_type = None if event_type == "" else event_type
+        key = None if key == "" else key
         namespace = None if namespace == "" else namespace
         sender = None if sender == "" else sender
         begin_offset = None if begin_offset == 0 else begin_offset
         end_offset = None if end_offset == 0 else end_offset
 
         for event in self.store:
-            if event_name is not None and event_name != ANY_CONDITION and event.event_key.event_name != event_name:
-                continue
-            if event_type is not None and event_type != ANY_CONDITION and event.event_key.event_type != event_type:
+            if key is not None and key != ANY_CONDITION and event.key != key:
                 continue
             if namespace is not None and namespace != ANY_CONDITION and event.namespace != namespace:
                 continue
@@ -73,23 +69,19 @@ class MemoryEventStorage(BaseEventStorage):
         return res
 
     def count_events(self,
-                     event_name: str = None,
-                     event_type: str = None,
+                     key: str = None,
                      namespace: str = None,
                      sender: str = None,
                      begin_offset: int = None,
                      end_offset: int = None):
-        event_name = None if event_name == "" else event_name
-        event_type = None if event_type == "" else event_type
+        key = None if key == "" else key
         namespace = None if namespace == "" else namespace
         sender = None if sender == "" else sender
         begin_offset = None if begin_offset == 0 else begin_offset
         end_offset = None if end_offset == 0 else end_offset
         event_counts = {}
         for event in self.store:
-            if event_name is not None and event_name != ANY_CONDITION and event.event_key.event_name != event_name:
-                continue
-            if event_type is not None and event_type != ANY_CONDITION and event.event_key.event_type != event_type:
+            if key is not None and key != ANY_CONDITION and event.key != key:
                 continue
             if namespace is not None and namespace != ANY_CONDITION and event.namespace != namespace:
                 continue
@@ -115,12 +107,12 @@ class MemoryEventStorage(BaseEventStorage):
                 res.append(event)
         return res
 
-    def list_all_events_from_version(self, start_version: int, end_version: int = None):
+    def list_all_events_from_offset(self, start_offset: int, end_offset: int = None):
         res = []
         for event in self.store:
-            if 0 < end_version < event.offset:
+            if 0 < end_offset < event.offset:
                 continue
-            if event.offset > start_version:
+            if event.offset > start_offset:
                 res.append(event)
         return res
 

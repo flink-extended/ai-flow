@@ -73,7 +73,7 @@ def random_produce():
     while True:
         num = random.randint(0, 9)
         event: Event = Event(
-            event_key=EventKey(name='name', event_type='NUM_GENERATED'),
+            event_key=EventKey(event_name='name', event_type='NUM_GENERATED'),
             message=str(num)
         )
         notification_client.send_event(event)
@@ -92,7 +92,7 @@ with Workflow(name='condition_workflow') as workflow:
                          bash_command='echo Got 100 records.')
 
     expected_event_key = EventKey(
-        name='name',
+        event_name='name',
         event_type='NUM_GENERATED',
         namespace='sample',
         sender='record_producer'

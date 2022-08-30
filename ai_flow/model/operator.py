@@ -16,10 +16,7 @@
 # under the License.
 import logging
 from abc import abstractmethod
-
 from typing import Dict, Optional
-
-from notification_service.model.event import EventKey
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
@@ -66,7 +63,7 @@ class Operator(object):
         """
         self.workflow.action_on_condition(task_name=self.name, action=action, condition=condition)
 
-    def action_on_event_received(self, action: TaskAction, event_key: EventKey):
+    def action_on_event_received(self, action: TaskAction, event_key: str):
         """
         When the specified event is received, the task is scheduled.
         :param action: The action for scheduling the task.
