@@ -190,7 +190,6 @@ class RuleExtractor(object):
         with self._lock:
             self.workflow_dict[workflow_id] = cloudpickle.loads(pickled_workflow)
             self.event_workflow_index = self._load_rule_index()
-            logging.info("After update" + str(self.event_workflow_index.task_rule_index))
 
     def delete_workflow(self, workflow_id):
         with self._lock:
