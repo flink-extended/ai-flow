@@ -78,7 +78,7 @@ class MockContext(Context):
 class TestConditions(unittest.TestCase):
 
     def test_single_event_condition(self):
-        self.assertEqual(True, SingleEventCondition(expect_event='a').is_met(event=None, context=None))
+        self.assertEqual(True, SingleEventCondition(expect_event_key='a').is_met(event=None, context=None))
 
     def test_meet_any_condition(self):
         c_1 = MockCondition(name='1', flag=True)

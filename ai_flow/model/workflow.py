@@ -65,7 +65,7 @@ class Workflow(object):
     def action_on_event_received(self, task_name: str, event_key: str, action: TaskAction):
         self.action_on_condition(task_name=task_name,
                                  action=action,
-                                 condition=SingleEventCondition(expect_event=event_key))
+                                 condition=SingleEventCondition(expect_event_key=event_key))
 
     def action_on_task_status(self,
                               task_name: str,

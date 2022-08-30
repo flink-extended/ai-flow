@@ -39,6 +39,6 @@ with Workflow(name='event_trigger_workflow_2', namespace='sample') as w2:
 
 if __name__ == "__main__":
     ops.upload_workflows(__file__)
-    trigger_rule = WorkflowRule(SingleEventCondition(expect_event="trigger_workflow"))
+    trigger_rule = WorkflowRule(SingleEventCondition(expect_event_key="trigger_workflow"))
     ops.add_workflow_trigger(rule=trigger_rule, workflow_name='event_triggered_workflow')
     ops.start_workflow_execution('event_workflow')
