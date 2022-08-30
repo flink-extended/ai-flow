@@ -27,7 +27,6 @@ from notification_service.client.embedded_notification_client import EmbeddedNot
 from notification_service.rpc.service import NotificationService
 from notification_service.server.server import NotificationServer
 from notification_service.storage.in_memory.memory_event_storage import MemoryEventStorage
-from notification_service.util import db
 
 SERVER_URI = "localhost:50051"
 

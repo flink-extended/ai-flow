@@ -19,7 +19,6 @@
 package org.aiflow.notification.client;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.aiflow.notification.entity.EventKey;
 import org.aiflow.notification.entity.EventMeta;
 import org.aiflow.notification.proto.NotificationServiceGrpc;
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,9 +37,9 @@ public class EventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(EventListener.class);
     private final NotificationServiceGrpc.NotificationServiceBlockingStub serviceStub;
-    private final List<EventKey> eventKeys;
+    private final String namespace;
+    private final List<String> eventKeys;
     private final long startOffset;
-    private final long startTime;
     private final ListenerProcessor listernerProcessor;
     private final ExecutorService executorService;
     private final int timeoutSeconds;
@@ -48,15 +47,15 @@ public class EventListener {
 
     public EventListener(
             NotificationServiceGrpc.NotificationServiceBlockingStub serviceStub,
-            List<EventKey> eventKeys,
+            String namespace,
+            List<String> eventKeys,
             long startOffset,
-            long startTime,
             ListenerProcessor listernerProcessor,
             Integer timeoutSeconds) {
         this.serviceStub = serviceStub;
+        this.namespace = namespace;
         this.eventKeys = eventKeys;
         this.startOffset = startOffset;
-        this.startTime = startTime;
         this.listernerProcessor = listernerProcessor;
         this.timeoutSeconds = timeoutSeconds;
         this.executorService =
@@ -81,34 +80,26 @@ public class EventListener {
         }
     }
 
-    private boolean match(EventKey eventKey, EventMeta event) {
-        if (eventKey.getNamespace() != null
-                && !eventKey.getNamespace().equals(event.getEventKey().getNamespace())) {
+    private boolean match(String eventKey, String namespace, EventMeta event) {
+        if (eventKey != null
+                && !eventKey.equals(event.getKey())) {
             return false;
         }
-        if (eventKey.getName() != null
-                && !eventKey.getName().equals(event.getEventKey().getName())) {
-            return false;
-        }
-        if (eventKey.getEventType() != null
-                && !eventKey.getEventType().equals(event.getEventKey().getEventType())) {
-            return false;
-        }
-        if (eventKey.getSender() != null
-                && !eventKey.getSender().equals(event.getEventKey().getSender())) {
+        if (namespace != null
+                && !namespace.equals(event.getNamespace())) {
             return false;
         }
         return true;
     }
 
-    private List<EventMeta> filterEvents(List<EventKey> eventKeys, List<EventMeta> events) {
+    private List<EventMeta> filterEvents(List<String> eventKeys, List<EventMeta> events) {
         if (eventKeys == null) {
             return events;
         }
         List<EventMeta> results = new ArrayList<>();
         for (EventMeta event : events) {
-            for (EventKey key : eventKeys) {
-                if (match(key, event)) {
+            for (String key : eventKeys) {
+                if (match(key, this.namespace, event)) {
                     results.add(event);
                     break;
                 }
@@ -127,7 +118,7 @@ public class EventListener {
                     }
                     List<EventMeta> events =
                             listAllEvents(
-                                    this.serviceStub, -1l, listenOffset, -1l, this.timeoutSeconds);
+                                    this.serviceStub, null, listenOffset, null, this.timeoutSeconds);
                     if (events.size() > 0) {
                         events = filterEvents(eventKeys, events);
                     }

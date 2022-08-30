@@ -135,7 +135,7 @@ class EventModel(Base):
             conditions.append(EventModel.sender == sender)
         if begin_offset and begin_offset > 0:
             conditions.append(EventModel.offset > begin_offset)
-        if end_offset and end_offset <= 0:
+        if end_offset and end_offset > 0:
             conditions.append(EventModel.offset <= begin_offset)
         event_model_list = session.query(EventModel).filter(*conditions).all()
         return [event_model_to_event(event_model) for event_model in event_model_list]
@@ -160,7 +160,7 @@ class EventModel(Base):
             conditions.append(EventModel.sender == sender)
         if begin_offset and begin_offset > 0:
             conditions.append(EventModel.offset > begin_offset)
-        if end_offset and end_offset <= 0:
+        if end_offset and end_offset > 0:
             conditions.append(EventModel.offset <= begin_offset)
 
         count_results = session.query(EventModel.sender, func.count('*').label('event_count'))\

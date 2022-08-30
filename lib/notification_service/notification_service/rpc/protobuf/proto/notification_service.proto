@@ -84,13 +84,6 @@ service NotificationService {
         };
     }
 
-    // Get latest offset by key
-    rpc getLatestOffsetByKey (GetLatestOffsetByKeyRequest) returns (GetLatestOffsetResponse) {
-        option (google.api.http) = {
-            get: "/aiflow/notification-service/get_latest_offset_by_key"
-        };
-    }
-
     // Register notification client in the db of notification service
     rpc registerClient (RegisterClientRequest) returns (RegisterClientResponse) {
         option (google.api.http) = {
@@ -196,18 +189,6 @@ message CountEventsResponse {
     string return_msg = 2;
     int64  event_count = 3;
     repeated SenderEventCountProto sender_event_counts = 4;
-}
-
-message GetLatestOffsetByKeyRequest {
-    string name = 1;
-    string namespace = 2;
-    int32 timeout_seconds = 3;
-}
-
-message GetLatestOffsetResponse {
-    string return_code = 1;
-    string return_msg = 2;
-    int64 offset = 3;
 }
 
 message MemberProto {

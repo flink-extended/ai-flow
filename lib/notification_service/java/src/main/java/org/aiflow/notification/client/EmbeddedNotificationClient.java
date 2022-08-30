@@ -22,7 +22,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.aiflow.notification.conf.Configuration;
-import org.aiflow.notification.entity.EventKey;
 import org.aiflow.notification.entity.EventMeta;
 import org.aiflow.notification.entity.SenderEventCount;
 import org.aiflow.notification.proto.NotificationServiceGrpc;
@@ -56,7 +55,7 @@ public class EmbeddedNotificationClient extends NotificationClient {
     private static final Logger logger = LoggerFactory.getLogger(EmbeddedNotificationClient.class);
     public static String ANY_CONDITION = "*";
     private static final String SERVER_URI = "localhost:50051";
-    private final String defaultNamespace;
+    private final String namespace;
     private final Map<String, EventListener> threads;
     private final ExecutorService listMembersService;
     private ManagedChannel channel;
@@ -70,9 +69,9 @@ public class EmbeddedNotificationClient extends NotificationClient {
     private final Configuration conf;
 
     public EmbeddedNotificationClient(
-            String target, String defaultNamespace, String sender, Properties properties)
+            String target, String namespace, String sender, Properties properties)
             throws Exception {
-        this.defaultNamespace = defaultNamespace;
+        this.namespace = namespace;
         this.sender = sender;
         this.conf = new Configuration(properties);
 
@@ -133,13 +132,17 @@ public class EmbeddedNotificationClient extends NotificationClient {
      * @return Id of registered client
      */
     private long registerClient() throws Exception {
+        NotificationServiceOuterClass.ClientMeta.Builder builder =
+                NotificationServiceOuterClass.ClientMeta.newBuilder();
+        if (!StringUtils.isEmpty(namespace)) {
+            builder.setNamespace(namespace);
+        }
+        if (!StringUtils.isEmpty(sender)) {
+            builder.setSender(sender);
+        }
         NotificationServiceOuterClass.RegisterClientRequest registerClientRequest =
                 NotificationServiceOuterClass.RegisterClientRequest.newBuilder()
-                        .setClientMeta(
-                                NotificationServiceOuterClass.ClientMeta.newBuilder()
-                                        .setNamespace(defaultNamespace)
-                                        .setSender(sender)
-                                        .build())
+                        .setClientMeta(builder.build())
                         .build();
         NotificationServiceOuterClass.RegisterClientResponse registerClientResponse =
                 notificationServiceStub.registerClient(registerClientRequest);
@@ -166,39 +169,6 @@ public class EmbeddedNotificationClient extends NotificationClient {
         }
     }
 
-    /**
-     * List specific registered listener events in Notification Service.
-     *
-     * @param serviceStub Notification service GRPC stub.
-     * @param event_name Name of events to be listed, null indicates not filter by name.
-     * @param namespace Namespace of events to be listed, null indicates not filter by namespace.
-     * @param eventType Type of events to be listed, null indicates not filter by type.
-     * @param sender Sender of events to be listed, null indicates not filter by sender.
-     * @param startOffset (Optional) The offset of events to start listing.
-     * @param timeoutSeconds List events request timeout seconds.
-     * @return List of event updated in Notification Service.
-     */
-    protected static List<EventMeta> listEvents(
-            NotificationServiceGrpc.NotificationServiceBlockingStub serviceStub,
-            String event_name,
-            String namespace,
-            String eventType,
-            String sender,
-            long startOffset,
-            Integer timeoutSeconds)
-            throws Exception {
-        NotificationServiceOuterClass.ListEventsRequest request =
-                NotificationServiceOuterClass.ListEventsRequest.newBuilder()
-                        .addNames(event_name)
-                        .setNamespace(namespace)
-                        .setEventType(eventType)
-                        .setSender(sender)
-                        .setStartOffset(startOffset)
-                        .setTimeoutSeconds(timeoutSeconds)
-                        .build();
-        return parseEventsFromResponse(serviceStub.listEvents(request));
-    }
-
     protected static List<EventMeta> listAllEvents(
             NotificationServiceGrpc.NotificationServiceBlockingStub serviceStub,
             Long startTime,
@@ -206,13 +176,20 @@ public class EmbeddedNotificationClient extends NotificationClient {
             Long endOffset,
             int timeoutSeconds)
             throws Exception {
+        NotificationServiceOuterClass.ListAllEventsRequest.Builder builder =
+                NotificationServiceOuterClass.ListAllEventsRequest.newBuilder();
+        if (startTime != null) {
+            builder.setStartTime(startTime.longValue());
+        }
+        if (startOffset != null) {
+            builder.setStartOffset(startOffset.longValue());
+        }
+        if (endOffset != null) {
+            builder.setEndOffset(endOffset.longValue());
+        }
+
         NotificationServiceOuterClass.ListAllEventsRequest request =
-                NotificationServiceOuterClass.ListAllEventsRequest.newBuilder()
-                        .setStartTime(startTime)
-                        .setStartOffset(startOffset)
-                        .setEndOffset(endOffset)
-                        .setTimeoutSeconds(timeoutSeconds)
-                        .build();
+                builder.setTimeoutSeconds(timeoutSeconds).build();
         NotificationServiceOuterClass.ListEventsResponse response =
                 serviceStub.listAllEvents(request);
         return parseEventsFromResponse(response);
@@ -379,17 +356,26 @@ public class EmbeddedNotificationClient extends NotificationClient {
             signature =
                     StringUtils.join(Arrays.asList("client", this.clientId, currentSeqNum), "_");
         }
+        NotificationServiceOuterClass.EventProto.Builder eventBuilder =
+                NotificationServiceOuterClass.EventProto.newBuilder();
+        if (!StringUtils.isEmpty(event.getKey())) {
+            eventBuilder.setKey(event.getKey());
+        }
+        if (!StringUtils.isEmpty(namespace)) {
+            eventBuilder.setNamespace(namespace);
+        }
+        if (!StringUtils.isEmpty(sender)) {
+            eventBuilder.setSender(sender);
+        }
+        if (!StringUtils.isEmpty(event.getValue())) {
+            eventBuilder.setValue(event.getValue());
+        }
+        if (!StringUtils.isEmpty(event.getContext())) {
+            eventBuilder.setContext(event.getContext());
+        }
         NotificationServiceOuterClass.SendEventRequest request =
                 NotificationServiceOuterClass.SendEventRequest.newBuilder()
-                        .setEvent(
-                                NotificationServiceOuterClass.EventProto.newBuilder()
-                                        .setName(event.getEventKey().getName())
-                                        .setEventType(event.getEventKey().getEventType())
-                                        .setNamespace(event.getEventKey().getNamespace())
-                                        .setSender(event.getEventKey().getSender())
-                                        .setMessage(event.getMessage())
-                                        .setContext(event.getContext())
-                                        .build())
+                        .setEvent(eventBuilder.build())
                         .setUuid(signature)
                         .setEnableIdempotence(enableIdempotence)
                         .build();
@@ -405,24 +391,59 @@ public class EmbeddedNotificationClient extends NotificationClient {
         }
     }
 
-    public List<EventMeta> listEvents(
-            String event_name, String namespace, String eventType, String sender, Long offset)
+    /**
+     * List specific registered listener events in Notification Service.
+     *
+     * @param key Key of events to be listed, null indicates not filter by name.
+     * @param namespace Namespace of events to be listed, null indicates not filter by namespace.
+     * @param sender Sender of events to be listed, null indicates not filter by sender.
+     * @param beginOffset Offset of the events must be greater than this offset.
+     * @param endOffset Offset of the events must be less than or equal to this offset.
+     * @return List of event updated in Notification Service.
+     */
+    public List<EventMeta> listEvents(String key, String namespace, String sender, Long beginOffset, Long endOffset)
             throws Exception {
-
-        String realEventName = StringUtils.isEmpty(event_name) ? ANY_CONDITION : event_name;
-        String realNamespace = StringUtils.isEmpty(namespace) ? ANY_CONDITION : namespace;
-        String realEventType = StringUtils.isEmpty(eventType) ? ANY_CONDITION : eventType;
-        String realSender = StringUtils.isEmpty(sender) ? ANY_CONDITION : sender;
-        long realOffset = offset == null ? 0 : offset;
 
         return listEvents(
                 notificationServiceStub,
-                realEventName,
-                realNamespace,
-                realEventType,
-                realSender,
-                realOffset,
+                key,
+                namespace,
+                sender,
+                beginOffset,
+                endOffset,
                 0);
+    }
+    protected static List<EventMeta> listEvents(
+            NotificationServiceGrpc.NotificationServiceBlockingStub serviceStub,
+            String key,
+            String namespace,
+            String sender,
+            Long beginOffset,
+            Long endOffset,
+            Integer timeoutSeconds)
+            throws Exception {
+        NotificationServiceOuterClass.ListEventsRequest.Builder builder =
+                NotificationServiceOuterClass.ListEventsRequest.newBuilder();
+        if (!StringUtils.isEmpty(key)) {
+            builder.setKey(key);
+        }
+        if (!StringUtils.isEmpty(namespace)) {
+            builder.setNamespace(namespace);
+        }
+        if (!StringUtils.isEmpty(sender)) {
+            builder.setSender(sender);
+        }
+        if (null != beginOffset) {
+            builder.setStartOffset(beginOffset.longValue());
+        }
+        if (null != endOffset) {
+            builder.setEndOffset(endOffset.longValue());
+        }
+        if (null != timeoutSeconds) {
+            builder.setTimeoutSeconds(timeoutSeconds.intValue());
+        }
+        NotificationServiceOuterClass.ListEventsRequest request = builder.build();
+        return parseEventsFromResponse(serviceStub.listEvents(request));
     }
 
     @Override
@@ -444,31 +465,35 @@ public class EmbeddedNotificationClient extends NotificationClient {
     /**
      * Count events in Notification Service.
      *
-     * @param event_name Name of events to be listed, null indicates not filter by name.
-     * @param namespace Namespace of events to be listed, null indicates not filter by namespace.
-     * @param eventType Type of events to be listed, null indicates not filter by type.
-     * @param sender Sender of events to be listed, null indicates not filter by sender.
-     * @param offset (Optional) The offset of events to start listing.
+     * @param key Key of events to be counted, null indicates not filter by name.
+     * @param namespace Namespace of events to be counted, null indicates not filter by namespace.
+     * @param sender Sender of events to be counted, null indicates not filter by sender.
+     * @param beginOffset Offset of the events must be greater than this offset.
+     * @param endOffset Offset of the events must be less than or equal to this offset.
      * @return Count of events in Notification Service.
      */
     public ImmutablePair<Long, List<SenderEventCount>> countEvents(
-            String event_name, String namespace, String eventType, String sender, Long offset)
+            String key, String namespace, String sender, Long beginOffset, Long endOffset)
             throws Exception {
 
-        String realEventName = StringUtils.isEmpty(event_name) ? ANY_CONDITION : event_name;
-        String realNamespace = StringUtils.isEmpty(namespace) ? ANY_CONDITION : namespace;
-        String realEventType = StringUtils.isEmpty(eventType) ? ANY_CONDITION : eventType;
-        String realSender = StringUtils.isEmpty(sender) ? ANY_CONDITION : sender;
-        long realOffset = offset == null ? 0 : offset;
-
-        NotificationServiceOuterClass.CountEventsRequest request =
-                NotificationServiceOuterClass.CountEventsRequest.newBuilder()
-                        .addNames(realEventName)
-                        .setNamespace(realNamespace)
-                        .setEventType(realEventType)
-                        .setSender(realSender)
-                        .setStartOffset(realOffset)
-                        .build();
+        NotificationServiceOuterClass.CountEventsRequest.Builder builder =
+                NotificationServiceOuterClass.CountEventsRequest.newBuilder();
+        if (!StringUtils.isEmpty(key)) {
+            builder.setKey(key);
+        }
+        if (!StringUtils.isEmpty(namespace)) {
+            builder.setNamespace(namespace);
+        }
+        if (!StringUtils.isEmpty(sender)) {
+            builder.setSender(sender);
+        }
+        if (null != beginOffset) {
+            builder.setStartOffset(beginOffset.longValue());
+        }
+        if (null != endOffset) {
+            builder.setEndOffset(endOffset.longValue());
+        }
+        NotificationServiceOuterClass.CountEventsRequest request = builder.build();
         return parseEventCountFromResponse(notificationServiceStub.countEvents(request));
     }
 
@@ -486,11 +511,11 @@ public class EmbeddedNotificationClient extends NotificationClient {
     }
 
     public ListenerRegistrationId registerListener(
-            ListenerProcessor listenerProcessor, List<EventKey> eventKeys, Long offset) {
-        String listenKey = eventKeys.toString() + offset + listenerProcessor.toString();
+            ListenerProcessor listenerProcessor, List<String> eventKeys, Long offset) {
+        String listenKey = String.format("%s_%s_%s", eventKeys, offset, listenerProcessor.toString());
         EventListener listener =
                 new EventListener(
-                        notificationServiceStub, eventKeys, offset, 0l, listenerProcessor, 10);
+                        notificationServiceStub, this.namespace, eventKeys, offset, listenerProcessor, 10);
         listener.start();
         threads.put(listenKey, listener);
         return new ListenerRegistrationId(listenKey);
@@ -504,21 +529,31 @@ public class EmbeddedNotificationClient extends NotificationClient {
         }
     }
 
+    private String getStringValue(String original) {
+        return StringUtils.isEmpty(original) ? "" : original;
+    }
+
+    private long getLongValue(Long original) {
+        return original == null ? 0 : original;
+    }
+
     /**
      * Get latest offset of specific `key` notifications in Notification Service.
      *
      * @param namespace Namespace of the event.
-     * @param event_name Name of the event.
+     * @param key Key of the event.
      */
-    public long getLatestOffset(String namespace, String event_name) throws Exception {
-        if (StringUtils.isEmpty(event_name)) {
-            throw new Exception("Empty event name, please provide valid event name");
+    public long getLatestOffset(String namespace, String key) throws Exception {
+        if (StringUtils.isEmpty(key)) {
+            throw new Exception("Empty event key, please provide valid event key");
         } else {
+            NotificationServiceOuterClass.GetLatestOffsetByKeyRequest.Builder builder =
+                    NotificationServiceOuterClass.GetLatestOffsetByKeyRequest.newBuilder();
+            if (!StringUtils.isEmpty(namespace)) {
+                builder.setNamespace(namespace);
+            }
             NotificationServiceOuterClass.GetLatestOffsetByKeyRequest request =
-                    NotificationServiceOuterClass.GetLatestOffsetByKeyRequest.newBuilder()
-                            .setNamespace(namespace)
-                            .setName(event_name)
-                            .build();
+                    builder.setName(key).build();
             NotificationServiceOuterClass.GetLatestOffsetResponse response =
                     notificationServiceStub.getLatestOffsetByKey(request);
             return parseLatestOffsetFromResponse(response);

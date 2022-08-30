@@ -18,7 +18,7 @@ public class PythonServer {
         String serverScript = this.getClass().getResource("/notification_server.py").getFile();
         process =
                 new ProcessBuilder()
-                        .command("python3", serverScript)
+                        .command("/Users/alibaba/work/opensource/venv/bin/python", serverScript)
                         .redirectErrorStream(true)
                         .start();
 
