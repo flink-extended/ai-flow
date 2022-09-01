@@ -16,7 +16,7 @@
 # under the License.
 from enum import Enum
 import json
-from notification_service.model.event import Event, EventKey, DEFAULT_NAMESPACE
+from notification_service.model.event import Event
 
 from ai_flow.model.status import TaskStatus
 
@@ -68,23 +68,6 @@ class EventContextConstant(object):
     TASK_STATUS = 'task_status'
 
 
-class TaskStatusChangedEventKey(EventKey):
-    """TaskStatusChangedEventKey represents an event of the task status changed."""
-
-    def __init__(self,
-                 namespace: str,
-                 workflow_name: str,
-                 task_name: str):
-        """
-        :param workflow_name: The name of the workflow to which the task belongs.
-        :param task_name: The task's name.
-        """
-        super().__init__(namespace=None,
-                         name='{}.{}.{}'.format(namespace, workflow_name, task_name),
-                         event_type=AIFlowEventType.TASK_STATUS_CHANGED,
-                         sender=None)
-
-
 class TaskStatusChangedEvent(Event):
     """TaskStatusChangedEvent is an event of the task status changed."""
     def __init__(self,
@@ -99,32 +82,36 @@ class TaskStatusChangedEvent(Event):
         :param task_name: The task's name.
         :param status: The current status of the task.
         """
-        super().__init__(event_key=TaskStatusChangedEventKey(workflow_name=workflow_name,
-                                                             task_name=task_name,
-                                                             namespace=namespace),
-                         message="")
+        key = self.generate_task_status_changed_event_key(namespace, workflow_name, task_name)
+        super().__init__(key=key,
+                         value=AIFlowEventType.TASK_STATUS_CHANGED)
         self.context = json.dumps({EventContextConstant.NAMESPACE: namespace,
                                    EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id,
                                    EventContextConstant.WORKFLOW_NAME: workflow_name,
                                    EventContextConstant.TASK_NAME: task_name,
                                    EventContextConstant.TASK_STATUS: status.value})
 
+    @classmethod
+    def event_key_prefix(cls):
+        return '[task_status_change]'
+
+    @classmethod
+    def generate_task_status_changed_event_key(cls, namespace, workflow_name, task_name):
+        return f"{cls.event_key_prefix()}.{namespace}.{workflow_name}.{task_name}"
+
 
 class SchedulingEvent(Event):
     """SchedulingEvent is a scheduling event defined by AIFlow"""
-    def __init__(self, name, message):
-        super().__init__(EventKey(namespace=None,
-                                  sender=None,
-                                  name=name,
-                                  event_type=AIFlowEventType.AIFLOW_SCHEDULING_EVENT),
-                         message)
+    def __init__(self, scheduling_type):
+        super().__init__(key=AIFlowEventType.AIFLOW_SCHEDULING_EVENT,
+                         value=scheduling_type)
 
 
 class StartWorkflowExecutionEvent(SchedulingEvent):
     """StartWorkflowExecutionEvent is an event of starting a workflow execution."""
 
     def __init__(self, workflow_id, snapshot_id):
-        super().__init__(SchedulingEventType.START_WORKFLOW_EXECUTION, None)
+        super().__init__(SchedulingEventType.START_WORKFLOW_EXECUTION)
         self.context = json.dumps({EventContextConstant.WORKFLOW_ID: workflow_id,
                                    EventContextConstant.WORKFLOW_SNAPSHOT_ID: snapshot_id})
 
@@ -133,7 +120,7 @@ class StopWorkflowExecutionEvent(SchedulingEvent):
     """StopWorkflowExecutionEvent is an event of stopping a workflow execution."""
 
     def __init__(self, workflow_execution_id: int):
-        super().__init__(SchedulingEventType.STOP_WORKFLOW_EXECUTION, None)
+        super().__init__(SchedulingEventType.STOP_WORKFLOW_EXECUTION)
         self.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id})
 
 
@@ -141,7 +128,7 @@ class StartTaskExecutionEvent(SchedulingEvent):
     """StartTaskExecutionEvent is an event of starting a task execution."""
 
     def __init__(self, workflow_execution_id: int, task_name: str):
-        super().__init__(SchedulingEventType.START_TASK_EXECUTION, None)
+        super().__init__(SchedulingEventType.START_TASK_EXECUTION)
         self.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id,
                                    EventContextConstant.TASK_NAME: task_name})
 
@@ -150,7 +137,7 @@ class ReStartTaskExecutionEvent(SchedulingEvent):
     """ReStartTaskExecutionEvent is an event of restarting a task execution."""
 
     def __init__(self, workflow_execution_id: int, task_name: str):
-        super().__init__(SchedulingEventType.RESTART_TASK_EXECUTION, None)
+        super().__init__(SchedulingEventType.RESTART_TASK_EXECUTION)
         self.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id,
                                    EventContextConstant.TASK_NAME: task_name})
 
@@ -159,7 +146,7 @@ class StopTaskExecutionEvent(SchedulingEvent):
     """StopTaskExecutionEvent is an event of stopping a task execution."""
 
     def __init__(self, workflow_execution_id: int, task_execution_id: int):
-        super().__init__(SchedulingEventType.STOP_TASK_EXECUTION, None)
+        super().__init__(SchedulingEventType.STOP_TASK_EXECUTION)
         self.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id,
                                    EventContextConstant.TASK_EXECUTION_ID: task_execution_id})
 
@@ -174,7 +161,7 @@ class PeriodicRunTaskEvent(SchedulingEvent):
         :param workflow_execution_id: The unique id of the workflow execution.
         :param task_name: The name of the task.
         """
-        super().__init__(SchedulingEventType.PERIODIC_RUN_TASK, None)
+        super().__init__(SchedulingEventType.PERIODIC_RUN_TASK)
         self.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id,
                                    EventContextConstant.TASK_NAME: task_name})
 
@@ -188,7 +175,7 @@ class PeriodicRunWorkflowEvent(SchedulingEvent):
         """
         :param schedule_id: The unique id of workflow schedule.
         """
-        super().__init__(SchedulingEventType.PERIODIC_RUN_WORKFLOW, None)
+        super().__init__(SchedulingEventType.PERIODIC_RUN_WORKFLOW)
         self.context = json.dumps({EventContextConstant.WORKFLOW_ID: workflow_id,
                                    EventContextConstant.WORKFLOW_SCHEDULE_ID: schedule_id})
 
@@ -201,7 +188,7 @@ class TaskStatusEvent(SchedulingEvent):
                  task_name: str,
                  sequence_number: int,
                  status: TaskStatus):
-        super().__init__(SchedulingEventType.TASK_STATUS, None)
+        super().__init__(SchedulingEventType.TASK_STATUS)
         self.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id,
                                    EventContextConstant.TASK_NAME: task_name,
                                    EventContextConstant.SEQUENCE_NUMBER: sequence_number,
@@ -215,7 +202,7 @@ class TaskHeartbeatTimeoutEvent(SchedulingEvent):
                  workflow_execution_id: int,
                  task_name: str,
                  sequence_number: int):
-        super().__init__(SchedulingEventType.TASK_HEARTBEAT_TIMEOUT, None)
+        super().__init__(SchedulingEventType.TASK_HEARTBEAT_TIMEOUT)
         self.context = json.dumps({EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id,
                                    EventContextConstant.TASK_NAME: task_name,
                                    EventContextConstant.SEQUENCE_NUMBER: sequence_number})

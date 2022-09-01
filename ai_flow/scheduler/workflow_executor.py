@@ -51,17 +51,23 @@ class WorkflowExecutor(object):
             workflow: Workflow = cloudpickle.loads(snapshot_meta.workflow_object)
             task_schedule_commands = []
             for task_name in workflow.tasks.keys():
-                if task_name not in workflow.rules:
-                    task_execution_meta = self.metadata_manager.add_task_execution(
-                        workflow_execution_id=workflow_execution_meta.id,
-                        task_name=task_name)
-                    task_cmd = TaskScheduleCommand(action=TaskAction.START,
-                                                   new_task_execution=TaskExecutionKey(
-                                                       workflow_execution_id=workflow_execution_meta.id,
-                                                       task_name=task_name,
-                                                       seq_num=task_execution_meta.sequence_number,
-                                                   ))
-                    task_schedule_commands.append(task_cmd)
+                if task_name in workflow.rules:
+                    able_to_start = True
+                    for rule in workflow.rules.get(task_name):
+                        if rule.action == TaskAction.START:
+                            able_to_start = False
+                    if not able_to_start:
+                        continue
+                task_execution_meta = self.metadata_manager.add_task_execution(
+                    workflow_execution_id=workflow_execution_meta.id,
+                    task_name=task_name)
+                task_cmd = TaskScheduleCommand(action=TaskAction.START,
+                                               new_task_execution=TaskExecutionKey(
+                                                   workflow_execution_id=workflow_execution_meta.id,
+                                                   task_name=task_name,
+                                                   seq_num=task_execution_meta.sequence_number,
+                                               ))
+                task_schedule_commands.append(task_cmd)
             self.metadata_manager.update_workflow_execution(workflow_execution_id=workflow_execution_meta.id,
                                                             status=WorkflowStatus.RUNNING.value)
             self.metadata_manager.flush()

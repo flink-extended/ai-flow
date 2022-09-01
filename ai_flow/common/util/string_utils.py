@@ -19,6 +19,17 @@
 import re
 from typing import Union, List
 
+# 7-bit C1 ANSI escape sequences
+ANSI_ESCAPE = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
+
+
+def remove_escape_codes(text: str) -> str:
+    """
+    Remove ANSI escapes codes from string. It's used to remove
+    "colors" from log messages.
+    """
+    return ANSI_ESCAPE.sub("", text)
+
 
 def mask_cmd(cmd: Union[str, List[str]]) -> str:
     cmd_masked = re.sub(

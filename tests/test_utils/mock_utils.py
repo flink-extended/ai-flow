@@ -16,7 +16,7 @@
 # under the License.
 from typing import List, Dict
 from datetime import datetime
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 from notification_service.client.notification_client import NotificationClient, \
     ListenerProcessor, ListenerRegistrationId
 
@@ -30,18 +30,20 @@ class MockNotificationClient(NotificationClient):
         super().__init__(namespace, sender)
 
     def send_event(self, event: Event):
+        event.namespace = self.namespace
+        event.sender = self.sender
         self.events.append(event)
         return event
 
-    def register_listener(self, listener_processor: ListenerProcessor, event_keys: List[EventKey] = None,
+    def register_listener(self, listener_processor: ListenerProcessor, event_keys: List[str] = None,
                           offset: int = None) -> ListenerRegistrationId:
         pass
 
-    def unregister_listener(self, id: ListenerRegistrationId):
+    def unregister_listener(self, registration_id: ListenerRegistrationId):
         pass
 
-    def list_events(self, name: str = None, namespace: str = None, event_type: str = None, sender: str = None,
-                    offset: int = None) -> List[Event]:
+    def list_events(self, key: str = None, namespace: str = None, sender: str = None, begin_offset: int = None,
+                    end_offset: int = None) -> List[Event]:
         return self.events
 
     def time_to_offset(self, time: datetime) -> int:

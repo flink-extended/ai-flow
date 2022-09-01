@@ -45,7 +45,9 @@ class WorkflowExecutionContext(Context):
 class TaskExecutionContext(Context):
     """It contains a workflow, a workflow execution and a task execution. It is used to execute operators"""
     def __init__(self,
+                 workflow: Workflow,
                  task_execution_key: TaskExecutionKey):
+        self.workflow = workflow
         self.task_execution_key = task_execution_key
 
 
@@ -57,6 +59,6 @@ def set_runtime_task_context(context: TaskExecutionContext):
     _CURRENT_TASK_CONTEXT = context
 
 
-def get_runtime_task_context():
+def get_runtime_task_context() -> TaskExecutionContext:
     return _CURRENT_TASK_CONTEXT
 

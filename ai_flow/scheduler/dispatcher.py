@@ -42,7 +42,7 @@ class Dispatcher(object):
 
     @staticmethod
     def _is_scheduling_event(event: Event) -> bool:
-        if AIFlowEventType.AIFLOW_SCHEDULING_EVENT == event.event_key.event_type:
+        if AIFlowEventType.AIFLOW_SCHEDULING_EVENT == event.key:
             return True
         else:
             return False
@@ -103,8 +103,8 @@ class Dispatcher(object):
         is_scheduling_event = self._is_scheduling_event(event=event)
         if is_scheduling_event:
             context = json.loads(event.context)
-            if SchedulingEventType.START_WORKFLOW_EXECUTION == SchedulingEventType(event.event_key.name) or \
-                    SchedulingEventType.PERIODIC_RUN_WORKFLOW == SchedulingEventType(event.event_key.name):
+            if SchedulingEventType.START_WORKFLOW_EXECUTION == SchedulingEventType(event.value) or \
+                    SchedulingEventType.PERIODIC_RUN_WORKFLOW == SchedulingEventType(event.value):
                 workflow_id = context[EventContextConstant.WORKFLOW_ID]
                 if self._has_processed_by_workflow(event, workflow_id):
                     return

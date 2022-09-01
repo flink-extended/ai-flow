@@ -16,7 +16,6 @@
 from unittest import mock
 
 import cloudpickle
-from notification_service.model.event import EventKey
 
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.internal.conditions import SingleEventCondition
@@ -40,8 +39,8 @@ class TestWorkflowTriggerRpc(BaseUnitTest):
         self.client = get_scheduler_client()
         self.rule_extractor = self.server.scheduler_service.scheduler.dispatcher.rule_extractor
         self.workflow_meta = self.prepare_workflow()
-        self.rule1 = WorkflowRule(SingleEventCondition(EventKey(name='key1')))
-        self.rule2 = WorkflowRule(SingleEventCondition(EventKey(name='key2')))
+        self.rule1 = WorkflowRule(SingleEventCondition('key1'))
+        self.rule2 = WorkflowRule(SingleEventCondition('key2'))
 
     def tearDown(self) -> None:
         self.server.stop()
@@ -64,7 +63,7 @@ class TestWorkflowTriggerRpc(BaseUnitTest):
         self.assertIsNotNone(trigger.create_time)
         self.assertEqual(1, len(self.rule_extractor.workflow_trigger_dict))
         self.assertEqual(1, self.rule_extractor.workflow_trigger_dict[1].id)
-        self.assertEqual({('DEFAULT', 'key1', 'UNDEFINED', None): {1}},
+        self.assertEqual({('default', 'key1'): {1}},
                          self.rule_extractor.event_workflow_index.workflow_rule_index)
 
     def test_get_workflow_trigger(self):

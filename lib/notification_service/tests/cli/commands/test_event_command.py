@@ -27,7 +27,6 @@ from notification_service.client.embedded_notification_client import EmbeddedNot
 from notification_service.rpc.service import NotificationService
 from notification_service.server.server import NotificationServer
 from notification_service.storage.in_memory.memory_event_storage import MemoryEventStorage
-from notification_service.util import db
 
 SERVER_URI = "localhost:50051"
 
@@ -73,7 +72,6 @@ class TestCliEvent(unittest.TestCase):
                  'send',
                  '-s', SERVER_URI,
                  '-n', 'namespace1',
-                 '--event-type', 'event-type1',
                  '--sender', 'sender1',
                  '--context', 'context1',
                  key, 'value1',
@@ -116,8 +114,8 @@ class TestCliEvent(unittest.TestCase):
             self.send_an_event()
         print(stdout.getvalue())
         self.assertIn('Successfully send event: '
-                      'event_key:[name:key, event_type:event-type1, namespace:namespace1, sender:sender1], '
-                      'message:value1', stdout.getvalue())
+                      'key:key, value:value1, namespace:namespace1, sender:sender1, '
+                      , stdout.getvalue())
 
     def test_cli_list_events(self):
         self.send_an_event('key1')

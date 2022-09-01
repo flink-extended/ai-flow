@@ -73,11 +73,6 @@ class NotificationServiceStub(object):
                 request_serializer=notification__service__pb2.NotifyNewMemberRequest.SerializeToString,
                 response_deserializer=notification__service__pb2.CommonResponse.FromString,
                 )
-        self.getLatestOffsetByKey = channel.unary_unary(
-                '/notification_service.NotificationService/getLatestOffsetByKey',
-                request_serializer=notification__service__pb2.GetLatestOffsetByKeyRequest.SerializeToString,
-                response_deserializer=notification__service__pb2.GetLatestOffsetResponse.FromString,
-                )
         self.registerClient = channel.unary_unary(
                 '/notification_service.NotificationService/registerClient',
                 request_serializer=notification__service__pb2.RegisterClientRequest.SerializeToString,
@@ -156,13 +151,6 @@ class NotificationServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def getLatestOffsetByKey(self, request, context):
-        """Get latest offset by key
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
     def registerClient(self, request, context):
         """Register notification client in the db of notification service
         """
@@ -228,11 +216,6 @@ def add_NotificationServiceServicer_to_server(servicer, server):
                     servicer.notifyNewMember,
                     request_deserializer=notification__service__pb2.NotifyNewMemberRequest.FromString,
                     response_serializer=notification__service__pb2.CommonResponse.SerializeToString,
-            ),
-            'getLatestOffsetByKey': grpc.unary_unary_rpc_method_handler(
-                    servicer.getLatestOffsetByKey,
-                    request_deserializer=notification__service__pb2.GetLatestOffsetByKeyRequest.FromString,
-                    response_serializer=notification__service__pb2.GetLatestOffsetResponse.SerializeToString,
             ),
             'registerClient': grpc.unary_unary_rpc_method_handler(
                     servicer.registerClient,
@@ -384,23 +367,6 @@ class NotificationService(object):
         return grpc.experimental.unary_unary(request, target, '/notification_service.NotificationService/notifyNewMember',
             notification__service__pb2.NotifyNewMemberRequest.SerializeToString,
             notification__service__pb2.CommonResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def getLatestOffsetByKey(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/notification_service.NotificationService/getLatestOffsetByKey',
-            notification__service__pb2.GetLatestOffsetByKeyRequest.SerializeToString,
-            notification__service__pb2.GetLatestOffsetResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

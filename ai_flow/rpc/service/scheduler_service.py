@@ -74,7 +74,7 @@ class SchedulerService(scheduler_service_pb2_grpc.SchedulerServiceServicer):
     def start(self):
         logging.info('Starting scheduler service.')
         self.scheduler.start()
-        self.notification_client = get_notification_client(namespace='scheduler', sender='scheduler')
+        self.notification_client = get_notification_client(sender='aiflow_scheduler')
         self.event_listener = self.notification_client.register_listener(
             listener_processor=Processor(self.scheduler, self.checkpoint_file),
             offset=self._get_last_committed_offset())
