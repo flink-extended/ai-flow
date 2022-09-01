@@ -43,7 +43,7 @@ except ImportError:  # pragma: nocover
 
 
 def send_start_workflow_event(workflow_id, schedule_id):
-    notification_client = get_notification_client(namespace='Timer', sender='Timer')
+    notification_client = get_notification_client(sender='aiflow_timer')
     try:
         notification_client.send_event(PeriodicRunWorkflowEvent(workflow_id=workflow_id,
                                                                 schedule_id=schedule_id))
@@ -52,7 +52,7 @@ def send_start_workflow_event(workflow_id, schedule_id):
 
 
 def send_start_task_event(workflow_execution_id, task_name):
-    notification_client = get_notification_client(namespace='Timer', sender='Timer')
+    notification_client = get_notification_client(sender='aiflow_timer')
     try:
         notification_client.send_event(PeriodicRunTaskEvent(
             workflow_execution_id=workflow_execution_id, task_name=task_name))

@@ -84,13 +84,6 @@ service NotificationService {
         };
     }
 
-    // Get latest offset by key
-    rpc getLatestOffsetByKey (GetLatestOffsetByKeyRequest) returns (GetLatestOffsetResponse) {
-        option (google.api.http) = {
-            get: "/aiflow/notification-service/get_latest_offset_by_key"
-        };
-    }
-
     // Register notification client in the db of notification service
     rpc registerClient (RegisterClientRequest) returns (RegisterClientResponse) {
         option (google.api.http) = {
@@ -124,14 +117,13 @@ service NotificationService {
     }
 }
 message EventProto {
-    string name = 1;
-    string message = 2;
-    string event_type = 3;
-    string context = 4;
-    string namespace = 5;
-    int64 offset = 6;
-    int64 create_time = 7;
-    string sender = 8;
+    string key = 1;
+    string value = 2;
+    string context = 3;
+    string namespace = 4;
+    int64 offset = 5;
+    int64 create_time = 6;
+    string sender = 7;
 }
 
 message SenderEventCountProto {
@@ -163,22 +155,20 @@ message SendEventsResponse {
 }
 
 message ListEventsRequest {
-    repeated string names = 1;
-    string event_type = 2;
-    int64 start_time = 3;
+    string key = 1;
+    string namespace = 2;
+    string sender = 3;
     int64 start_offset = 4;
-    int32 timeout_seconds = 5;
-    string namespace = 6;
-    string sender = 7;
+    int64 end_offset = 5;
+    int32 timeout_seconds = 6;
 }
 
 message CountEventsRequest {
-    repeated string names = 1;
-    string event_type = 2;
-    int64 start_time = 3;
+    string key = 1;
+    string namespace = 2;
+    string sender = 3;
     int64 start_offset = 4;
-    string namespace = 5;
-    string sender = 6;
+    int64 end_offset = 5;
 }
 
 message ListAllEventsRequest {
@@ -199,18 +189,6 @@ message CountEventsResponse {
     string return_msg = 2;
     int64  event_count = 3;
     repeated SenderEventCountProto sender_event_counts = 4;
-}
-
-message GetLatestOffsetByKeyRequest {
-    string name = 1;
-    string namespace = 2;
-    int32 timeout_seconds = 3;
-}
-
-message GetLatestOffsetResponse {
-    string return_code = 1;
-    string return_msg = 2;
-    int64 offset = 3;
 }
 
 message MemberProto {

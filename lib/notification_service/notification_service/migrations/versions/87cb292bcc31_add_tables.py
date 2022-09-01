@@ -34,16 +34,15 @@ depends_on = None
 
 def upgrade():
     op.create_table('event_model',
-                    sa.Column('version', sa.BigInteger().with_variant(sa.Integer(), 'sqlite'), nullable=False),
+                    sa.Column('offset', sa.BigInteger().with_variant(sa.Integer(), 'sqlite'), nullable=False),
                     sa.Column('key', sa.String(length=1024), nullable=False),
                     sa.Column('value', sa.Text(), nullable=True),
-                    sa.Column('event_type', sa.String(length=1024), server_default='UNDEFINED', nullable=True),
                     sa.Column('context', sa.Text(), nullable=True),
                     sa.Column('namespace', sa.String(length=1024), nullable=True),
                     sa.Column('sender', sa.String(length=1024), nullable=True),
                     sa.Column('create_time', sa.BigInteger(), nullable=False),
                     sa.Column('uuid', sa.String(length=40), nullable=False),
-                    sa.PrimaryKeyConstraint('version'),
+                    sa.PrimaryKeyConstraint('offset'),
                     sa.UniqueConstraint('uuid')
                     )
     op.create_table('notification_client',

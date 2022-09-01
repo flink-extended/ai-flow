@@ -17,7 +17,7 @@
 #
 import unittest
 
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
@@ -57,8 +57,8 @@ class TestWorkflow(unittest.TestCase):
 
         with Workflow(name='workflow') as workflow:
             task = MockOperator(name='task')
-            task.action_on_event_received(event_key=EventKey(name='a'), action=TaskAction.START)
-            task.action_on_event_received(event_key=EventKey(name='b'), action=TaskAction.STOP)
+            task.action_on_event_received(event_key='a', action=TaskAction.START)
+            task.action_on_event_received(event_key='b', action=TaskAction.STOP)
         self.assertEqual(1, len(workflow.tasks))
         self.assertEqual(2, len(workflow.rules['task']))
         self.assertEqual(TaskAction.START, workflow.rules['task'][0].action)

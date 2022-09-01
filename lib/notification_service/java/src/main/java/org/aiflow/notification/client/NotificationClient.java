@@ -1,6 +1,5 @@
 package org.aiflow.notification.client;
 
-import org.aiflow.notification.entity.EventKey;
 import org.aiflow.notification.entity.EventMeta;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public abstract class NotificationClient {
      * @param offset Start offset of notification for listening.
      */
     protected abstract ListenerRegistrationId registerListener(
-            ListenerProcessor listenerProcessor, List<EventKey> eventKeys, Long offset);
+            ListenerProcessor listenerProcessor, List<String> eventKeys, Long offset);
 
     /**
      * * Unregister the listener by id.
@@ -35,15 +34,15 @@ public abstract class NotificationClient {
     /**
      * List specific events in Notification Service.
      *
-     * @param event_name Name of events to be listed, null indicates not filter by name.
+     * @param key The key of the event to list.
      * @param namespace Namespace of events to be listed, null indicates not filter by namespace.
-     * @param eventType Type of events to be listed, null indicates not filter by type.
      * @param sender Sender of events to be listed, null indicates not filter by sender.
-     * @param offset (Optional) The offset of events to start listing.
+     * @param beginOffset Offset of the events must be greater than this offset.
+     * @param endOffset Offset of the events must be less than or equal to this offset.
      * @return List of events in Notification Service.
      */
     protected abstract List<EventMeta> listEvents(
-            String event_name, String namespace, String eventType, String sender, Long offset)
+            String key, String namespace, String sender, Long beginOffset, Long endOffset)
             throws Exception;
 
     /**

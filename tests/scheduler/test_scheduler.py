@@ -19,7 +19,7 @@ import time
 import unittest
 
 import cloudpickle
-from notification_service.model.event import EventKey, Event
+from notification_service.model.event import Event
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
@@ -67,32 +67,25 @@ def wait_scheduler_done(scheduler: EventDrivenScheduler):
 class TestEventDrivenScheduler(UnitTestWithNamespace):
     def setUp(self) -> None:
         super().setUp()
-        with Workflow(name='workflow') as workflow:
+        with Workflow(name='workflow', namespace=self.namespace_name) as workflow:
             op1 = Operator(name='op_1')
             op2 = Operator(name='op_2')
-            op1.action_on_condition(action=TaskAction.START, condition=TrueCondition(expect_events=[
-                EventKey(namespace='namespace',
-                         name='event_1',
-                         event_type='event_type',
-                         sender='sender'
-                         ),
-            ]))
+            op1.action_on_condition(action=TaskAction.START,
+                                    condition=TrueCondition(expect_event_keys=['event_1']))
 
         self.workflow_meta = self.metadata_manager.add_workflow(namespace=self.namespace_name,
                                                                 name=workflow.name,
                                                                 content='',
                                                                 workflow_object=cloudpickle.dumps(workflow))
         self.metadata_manager.flush()
-        self.workflow_trigger \
-            = self.metadata_manager.add_workflow_trigger(self.workflow_meta.id,
-                                                         rule=cloudpickle.dumps(WorkflowRule(
-                                                             condition=TrueCondition(expect_events=[
-                                                                 EventKey(namespace='namespace',
-                                                                          name='event_2',
-                                                                          event_type='event_type',
-                                                                          sender='sender'
-                                                                          ),
-                                                             ]))))
+        self.workflow_trigger = self.metadata_manager.add_workflow_trigger(
+            workflow_id=self.workflow_meta.id,
+            rule=cloudpickle.dumps(
+                WorkflowRule(
+                    condition=TrueCondition(expect_event_keys=['event_2'])
+                )
+            )
+        )
         self.metadata_manager.flush()
         self.snapshot_meta = self.metadata_manager.add_workflow_snapshot(
             workflow_id=self.workflow_meta.id,
@@ -106,7 +99,9 @@ class TestEventDrivenScheduler(UnitTestWithNamespace):
         scheduler = EventDrivenScheduler(task_executor=task_executor, schedule_worker_num=3)
         try:
             scheduler.start()
-            event: Event = StartWorkflowExecutionEvent(workflow_id=self.workflow_meta.id, snapshot_id=self.snapshot_meta.id)
+            event: Event = StartWorkflowExecutionEvent(workflow_id=self.workflow_meta.id,
+                                                       snapshot_id=self.snapshot_meta.id)
+            event.namespace = self.namespace_name
             event.offset = 1
             scheduler.trigger(event)
             wait_scheduler_done(scheduler)
@@ -122,11 +117,9 @@ class TestEventDrivenScheduler(UnitTestWithNamespace):
             offset = self.metadata_manager.get_workflow_event_offset(workflow_id=self.workflow_meta.id)
             self.assertEqual(1, offset)
 
-            event = Event(event_key=EventKey(namespace='namespace',
-                                             name='event_1',
-                                             event_type='event_type',
-                                             sender='sender'), message='')
+            event = Event(key='event_1', value='')
             event.offset = 2
+            event.namespace = self.namespace_name
             scheduler.trigger(event)
             wait_scheduler_done(scheduler)
 
@@ -138,17 +131,16 @@ class TestEventDrivenScheduler(UnitTestWithNamespace):
 
             event = StopTaskExecutionEvent(workflow_execution_id=te.workflow_execution_id, task_execution_id=te.id)
             event.offset = 3
+            event.namespace = self.namespace_name
             scheduler.trigger(event)
             wait_scheduler_done(scheduler)
             self.assertEqual(3, len(task_executor.commands))
             self.metadata_manager.session.refresh(te)
             self.assertEqual(TaskStatus.STOPPING, te.status)
 
-            event = Event(event_key=EventKey(namespace='namespace',
-                                             name='event_2',
-                                             event_type='event_type',
-                                             sender='sender'), message='')
+            event = Event(key='event_2', value='')
             event.offset = 4
+            event.namespace = self.namespace_name
             scheduler.trigger(event)
             wait_scheduler_done(scheduler)
             self.assertEqual(4, len(task_executor.commands))

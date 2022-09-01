@@ -20,7 +20,7 @@ import asyncio
 import time
 import traceback
 
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 from notification_service.storage.event_storage import BaseEventStorage
 from notification_service.server.ha_manager import NotificationServerHaManager
 from notification_service.rpc.protobuf import notification_service_pb2_grpc, notification_service_pb2
@@ -77,20 +77,17 @@ class NotificationService(notification_service_pb2_grpc.NotificationServiceServi
 
     async def _send_event(self, request):
         event_proto = request.event
-        event_key = EventKey(
-            name=event_proto.name,
-            event_type=None if event_proto.event_type == "" else event_proto.event_type,
-            namespace=None if event_proto.namespace == "" else event_proto.namespace,
-                 sender=None if event_proto.sender == "" else event_proto.sender)
         event = Event(
-            event_key=event_key,
-            message=event_proto.message,
+            key=event_proto.key,
+            value=event_proto.value,
         )
+        event.namespace = None if event_proto.namespace == "" else event_proto.namespace
+        event.sender = None if event_proto.sender == "" else event_proto.sender
         event.context = None if event_proto.context == "" else event_proto.context
 
         uuid = request.uuid
         enable_idempotence = request.enable_idempotence
-        key = str(event_key)
+        key = str(event.key)
         return_msg = ''
         # Lock conditions dict for get/check/update of key
         await self.lock.acquire()
@@ -121,16 +118,17 @@ class NotificationService(notification_service_pb2_grpc.NotificationServiceServi
                 return_code=notification_service_pb2.ReturnStatus.ERROR, return_msg=str(e))
 
     async def _list_events(self, request):
-        event_names = request.names
-        event_type = request.event_type
-        start_time = request.start_time
-        start_offset = request.start_offset
+        key = request.key
         namespace = None if request.namespace == '' else request.namespace
         sender = None if request.sender == '' else request.sender
+        start_offset = request.start_offset
+        end_offset = request.end_offset
         timeout_seconds = request.timeout_seconds
 
         if timeout_seconds == 0:
-            event_models = self._query_events(event_names, event_type, start_time, start_offset, namespace, sender)
+            event_models = self._query_events(
+                key, namespace, sender, start_offset, end_offset
+            )
             event_proto_list = event_list_to_proto(event_models)
             return notification_service_pb2.ListEventsResponse(
                 return_code=notification_service_pb2.ReturnStatus.SUCCESS,
@@ -140,48 +138,44 @@ class NotificationService(notification_service_pb2_grpc.NotificationServiceServi
             start = time.time()
             # Lock conditions dict for get/check/update of name
             await self.lock.acquire()
-            for name in event_names:
-                if self.notification_conditions.get(name) is None:
-                    self.notification_conditions.update({(name, asyncio.Condition())})
+            if self.notification_conditions.get(key) is None:
+                self.notification_conditions.update({(key, asyncio.Condition())})
             # Release lock after check/update name of notification conditions dict
             self.lock.release()
             event_models = []
-            if len(event_names) == 1:
-                name = event_names[0]
-                condition = self.notification_conditions.get(name)
-            else:
-                condition = self.write_condition
+            condition = self.notification_conditions.get(key)
             async with condition:
                 while time.time() - start < timeout_seconds and len(event_models) == 0:
                     try:
                         await asyncio.wait_for(condition.wait(),
                                                timeout_seconds - time.time() + start)
                         event_models = self._query_events(
-                            event_names, event_type, start_time, start_offset, namespace, sender)
+                            key, namespace, sender, start_offset, end_offset
+                        )
                     except asyncio.TimeoutError:
                         pass
                 if len(event_models) == 0:
                     event_models = self._query_events(
-                        event_names, event_type, start_time, start_offset, namespace, sender)
+                        key, namespace, sender, start_offset, end_offset
+                    )
             event_proto_list = event_list_to_proto(event_models)
             return notification_service_pb2.ListEventsResponse(
                 return_code=notification_service_pb2.ReturnStatus.SUCCESS,
                 return_msg='',
                 events=event_proto_list)
 
-    def _query_events(self, event_names, event_type, start_time, start_offset, namespace, sender):
-        return self.storage.list_events(event_names, start_offset, event_type, start_time, namespace, sender)
+    def _query_events(self, key, namespace, sender, start_offset, end_offset):
+        return self.storage.list_events(key, namespace, sender, start_offset, end_offset)
 
     def countEvents(self, request, context):
-        event_names = request.names
-        event_type = request.event_type
-        start_time = request.start_time
-        start_offset = request.start_offset
+        key = request.key
         namespace = None if request.namespace == '' else request.namespace
         sender = None if request.sender == '' else request.sender
+        start_offset = request.start_offset
+        end_offset = request.end_offset
         try:
             event_counts = self.storage.count_events(
-                event_names, start_offset, event_type, start_time, namespace, sender
+                key, namespace, sender, start_offset, end_offset
             )
             event_count, count_proto_list = count_list_to_proto(event_counts)
             return notification_service_pb2.CountEventsResponse(
@@ -233,47 +227,9 @@ class NotificationService(notification_service_pb2_grpc.NotificationServiceServi
 
     def _query_all_events(self, start_time, start_offset, end_offset):
         if start_offset > 0:
-            return self.storage.list_all_events_from_version(start_offset, end_offset)
+            return self.storage.list_all_events_from_offset(start_offset, end_offset)
         else:
             return self.storage.list_all_events(start_time)
-
-    @asyncio.coroutine
-    def getLatestOffsetByKey(self, request, context):
-        try:
-            return self._get_latest_offset_by_key(request)
-        except Exception as e:
-            return notification_service_pb2.GetLatestOffsetResponse(
-                return_code=str(notification_service_pb2.ReturnStatus.ERROR), return_msg=str(e))
-
-    async def _get_latest_offset_by_key(self, request):
-        event_name = request.name
-        namespace = request.namespace
-        timeout_seconds = request.timeout_seconds
-        if 0 == timeout_seconds:
-            latest_offset = self._query_latest_offset_by_key(event_name, namespace)
-            return notification_service_pb2.GetLatestOffsetResponse(
-                return_code=str(notification_service_pb2.ReturnStatus.SUCCESS),
-                return_msg='',
-                offset=latest_offset)
-        else:
-            start = time.time()
-            latest_offset = self._query_latest_offset_by_key(event_name, namespace)
-            async with self.write_condition:
-                while time.time() - start < timeout_seconds and latest_offset == 0:
-                    try:
-                        await asyncio.wait_for(self.write_condition.wait(), timeout_seconds - time.time() + start)
-                        latest_offset = self._query_latest_offset_by_key(event_name, namespace)
-                    except asyncio.TimeoutError:
-                        pass
-            return notification_service_pb2.GetLatestOffsetResponse(
-                return_code=str(notification_service_pb2.ReturnStatus.SUCCESS),
-                return_msg='',
-                offset=latest_offset)
-
-    def _query_latest_offset_by_key(self, key, namespace):
-        if len(namespace) == 0:
-            namespace = None
-        return self.storage.get_latest_version(key=key, namespace=namespace)
 
     @asyncio.coroutine
     def notify(self, request, context):

@@ -22,7 +22,7 @@ import unittest
 from typing import List
 
 from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 from notification_service.client.notification_client import ListenerProcessor
 from notification_service.server.ha_manager import SimpleNotificationServerHaManager
 from notification_service.storage.alchemy.db_event_storage import DbEventStorage
@@ -104,10 +104,9 @@ class HaServerTest(unittest.TestCase):
                 time.sleep(10)
 
     def test_server_change(self):
-        event_key = EventKey(name="key")
-        self.client.send_event(Event(event_key, "value1"))
-        self.client.send_event(Event(event_key, "value2"))
-        self.client.send_event(Event(event_key, "value3"))
+        self.client.send_event(Event("key", "value1"))
+        self.client.send_event(Event("key", "value2"))
+        self.client.send_event(Event("key", "value3"))
         results = self.client.list_all_events()
         self.master2 = self.start_master("localhost", "50052")
         self.wait_for_new_members_detected("localhost:50052")
@@ -139,15 +138,14 @@ class HaServerTest(unittest.TestCase):
                                                     namespace=None,
                                                     sender=None)
         try:
-            event_key = EventKey(name="key")
-            event1 = another_client.send_event(Event(event_key=event_key, message="value1"))
+            event1 = another_client.send_event(Event("key", "value1"))
             registration_id = self.client.register_listener(
                 listener_processor=TestWatch(event_list),
-                event_keys=[EventKey(name='key', namespace=None)],
+                event_keys=["key"],
                 offset=event1.offset
             )
-            another_client.send_event(Event(event_key=event_key, message="value2"))
-            another_client.send_event(Event(event_key=event_key, message="value3"))
+            another_client.send_event(Event("key", "value2"))
+            another_client.send_event(Event("key", "value3"))
         finally:
             self.client.unregister_listener(registration_id)
         self.assertEqual(2, len(event_list))

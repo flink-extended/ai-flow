@@ -41,7 +41,7 @@ class SchedulingEventProcessor(object):
     def process(self, event: Event) -> Union[WorkflowExecutionScheduleCommand,
                                              WorkflowExecutionStartCommand,
                                              WorkflowExecutionStopCommand]:
-        scheduling_event_type = SchedulingEventType(event.event_key.name)
+        scheduling_event_type = SchedulingEventType(event.value)
         context = json.loads(event.context)
         if SchedulingEventType.START_WORKFLOW_EXECUTION == scheduling_event_type:
             snapshot_id = context[EventContextConstant.WORKFLOW_SNAPSHOT_ID]

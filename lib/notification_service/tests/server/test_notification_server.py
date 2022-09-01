@@ -19,7 +19,7 @@ import os
 import unittest
 
 from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 from notification_service.server.server_runner import NotificationServerRunner
 from notification_service.util import db
 from notification_service.util.server_config import NotificationServerConfig
@@ -40,7 +40,6 @@ class TestNotificationServer(unittest.TestCase):
         config = NotificationServerConfig(config_file)
         db.clear_engine_and_session()
         db.create_all_tables(config.db_uri)
-        self.event_key = EventKey(name='a')
 
     def tearDown(self) -> None:
         self._clean_db()
@@ -50,9 +49,9 @@ class TestNotificationServer(unittest.TestCase):
         server = NotificationServerRunner(config_file=config_file)
         server.start()
         client = EmbeddedNotificationClient(server_uri='localhost:50052', namespace='default', sender='sender')
-        client.send_event(Event(event_key=self.event_key, message='a'))
-        self.assertEqual(1, len(client.list_events(name='a')))
-        self.assertEqual('a', client.list_events(name='a')[0].message)
+        client.send_event(Event("a", "a"))
+        self.assertEqual(1, len(client.list_events(key="a")))
+        self.assertEqual("a", client.list_events(key="a")[0].value)
         server.stop()
 
     def test__wait_for_server_available(self):
@@ -79,9 +78,9 @@ class TestNotificationServer(unittest.TestCase):
         client = EmbeddedNotificationClient(server_uri='localhost:50053,localhost:50054',
                                             namespace='default',
                                             sender='sender')
-        client.send_event(Event(event_key=self.event_key, message='b'))
-        self.assertEqual(1, len(client.list_events(name='a')))
-        self.assertEqual('b', client.list_events(name='a')[0].message)
+        client.send_event(Event("a", "b"))
+        self.assertEqual(1, len(client.list_events(key='a')))
+        self.assertEqual('b', client.list_events(key='a')[0].value)
         client.disable_high_availability()
         server1.stop()
         server2.stop()
