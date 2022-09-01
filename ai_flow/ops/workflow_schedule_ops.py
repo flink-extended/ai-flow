@@ -32,8 +32,12 @@ def add_workflow_schedule(expression: str, workflow_name: str,
 
     :param expression: The string express when the workflow execution is triggered.
                        Two types of expression are supported here: cron and interval.
-                       cron_expression: cron@seconds minutes hours days months weeks years timezone(optional)
-                       interval_expression: interval@days hours minutes seconds
+                       cron_expression:
+                            cron@minute, hour, day of month, month, day of week
+                            See https://en.wikipedia.org/wiki/Cron for more information on the format accepted here.
+                       interval_expression:
+                            interval@days hours minutes seconds
+                            e.g. "interval@0 1 0 0" means running every 1 hour since now.
     :param workflow_name: The name of the workflow to be registered schedule.
     :param namespace: The namespace of the workflow.
     :return: The WorkflowScheduleMeta instance just added.

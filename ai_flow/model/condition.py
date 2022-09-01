@@ -17,7 +17,7 @@
 import abc
 from typing import List
 
-from notification_service.model.event import EventKey, Event
+from notification_service.model.event import Event
 
 from ai_flow.model.context import Context
 
@@ -25,11 +25,11 @@ from ai_flow.model.context import Context
 class Condition(object):
     """Conditions that trigger scheduling."""
     def __init__(self,
-                 expect_events: List[EventKey]):
+                 expect_event_keys: List[str]):
         """
-        :param expect_events: The events that this condition depends on.
+        :param expect_event_keys: The keys of events that this condition depends on.
         """
-        self.expect_events = expect_events
+        self.expect_event_keys = expect_event_keys
 
     @abc.abstractmethod
     def is_met(self, event: Event, context: Context) -> bool:

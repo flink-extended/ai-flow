@@ -16,8 +16,6 @@
 # under the License.
 from typing import Dict, List, Optional
 
-from notification_service.model.event import EventKey
-
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
 from ai_flow.model.internal.conditions import SingleEventCondition, TaskStatusCondition, TaskStatusAllMetCondition
@@ -64,10 +62,10 @@ class Workflow(object):
             self.rules[task_name] = []
         self.rules[task_name].append(TaskRule(condition=condition, action=action))
 
-    def action_on_event_received(self, task_name: str, event_key: EventKey, action: TaskAction):
+    def action_on_event_received(self, task_name: str, event_key: str, action: TaskAction):
         self.action_on_condition(task_name=task_name,
                                  action=action,
-                                 condition=SingleEventCondition(expect_event=event_key))
+                                 condition=SingleEventCondition(expect_event_key=event_key))
 
     def action_on_task_status(self,
                               task_name: str,

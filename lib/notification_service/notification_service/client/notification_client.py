@@ -16,9 +16,9 @@
 # under the License.
 import abc
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 
 
 class ListenerRegistrationId(object):
@@ -33,8 +33,8 @@ class ListenerProcessor(object):
 
 class NotificationClient(metaclass=abc.ABCMeta):
     def __init__(self,
-                 namespace: str,
-                 sender: str):
+                 namespace: Optional[str] = None,
+                 sender: Optional[str] = None):
         self.namespace = namespace
         self.sender = sender
 
@@ -51,14 +51,14 @@ class NotificationClient(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def register_listener(self,
                           listener_processor: ListenerProcessor,
-                          event_keys: List[EventKey] = None,
+                          event_keys: List[str] = None,
                           offset: int = None
                           ) -> ListenerRegistrationId:
         """
         Register a listener to listen events from Notification Server
 
         :param listener_processor: The processor of the listener.
-        :param event_keys: EventKeys of notification for listening. If not set, it will listen all events.
+        :param event_keys: Keys of event for listening. If not set, it will listen all events.
         :param offset: The offset of the events to start listening.
         :return: The `ListenerRegistrationId` used to stop the listening.
         """
@@ -74,16 +74,20 @@ class NotificationClient(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def list_events(self,
-                    name: str = None,
+                    key: str = None,
                     namespace: str = None,
-                    event_type: str = None,
                     sender: str = None,
-                    offset: int = None,
-                    ) -> List[Event]:
+                    begin_offset: int = None,
+                    end_offset: int = None) -> List[Event]:
         """
-        List specific events in Notification Service, if no parameter passed,
-        all events would be listed.
-        :return: List of query events.
+        List specific events in Notification Service.
+
+        :param key: The key of the event to list.
+        :param namespace: The namespace of the event to list.
+        :param sender: The sender of the event to list.
+        :param begin_offset: Offset of the events must be greater than this offset.
+        :param end_offset: Offset of the events must be less than or equal to this offset.
+        :return: The event list.
         """
         pass
 

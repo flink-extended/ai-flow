@@ -23,7 +23,7 @@ from typing import List
 from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
 from notification_service.client.notification_client import ListenerRegistrationId, \
     ListenerProcessor
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.internal.contexts import get_runtime_task_context
@@ -32,57 +32,38 @@ from ai_flow.model.internal.events import EventContextConstant
 
 class AIFlowNotificationClient(object):
 
-    def __init__(self,
-                 server_uri: str,
-                 namespace: str = None,
-                 sender: str = None,
-                 client_id: int = None,
-                 initial_seq_num: int = None):
+    def __init__(self, server_uri: str):
+        self.context = get_runtime_task_context()
+        if not self.context:
+            raise AIFlowException("AIFlowNotificationClient can only be used in AIFlow operators.")
         self.client = EmbeddedNotificationClient(
             server_uri=server_uri,
-            namespace=namespace,
-            sender=sender,
-            client_id=client_id,
-            initial_seq_num=initial_seq_num
+            namespace=self.context.workflow.namespace,
+            sender=str(self.context.task_execution_key)
         )
 
-    def send_event_to_all_workflow_executions(self, event: Event) -> Event:
-        """
-        Send event to all workflow executions.
-
-        :param event: the event to send.
-        :return: The sent event.
-        """
-        return self.client.send_event(event)
-
-    def send_event(self, event: Event) -> Event:
+    def send_event(self, key: str, value: str):
         """
         Send event to current workflow execution. This function can only be used
         in AIFlow Operator runtime. It will retrieve the workflow execution info from runtime
         context and set to context of the event.
 
-        :param event: the event to send.
-        :return: The sent event.
+        :param key: the key of the event.
+        :param value: the value of the event.
         """
-        context = get_runtime_task_context()
-        if not context:
-            raise AIFlowException("send_event can only be used in AIFlow Operator runtime.")
-        workflow_execution_id = context.task_execution_key.workflow_execution_id
-        if event.context is not None:
-            context_dict: dict = json.loads(event.context)
-            context_dict.update({
-                EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id
-            })
-        else:
-            event.context = json.dumps({
-                EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id
-            })
+        workflow_execution_id = self.context.task_execution_key.workflow_execution_id
+        event = Event(key=key, value=value)
+        event.context = json.dumps({
+            EventContextConstant.WORKFLOW_EXECUTION_ID: workflow_execution_id
+        })
         return self.client.send_event(event)
 
     def register_listener(self,
                           listener_processor: ListenerProcessor,
-                          event_keys: List[EventKey] = None,
-                          offset: int = None) -> ListenerRegistrationId:
+                          event_keys: List[str] = None,
+                          begin_time: datetime = None) -> ListenerRegistrationId:
+        begin_time = begin_time or datetime.now()
+        offset = self.client.time_to_offset(begin_time)
         return self.client.register_listener(
             listener_processor=listener_processor,
             event_keys=event_keys,
@@ -91,16 +72,3 @@ class AIFlowNotificationClient(object):
 
     def unregister_listener(self, registration_id: ListenerRegistrationId):
         self.client.unregister_listener(registration_id)
-
-    def list_events(self, name: str = None, namespace: str = None, event_type: str = None, sender: str = None,
-                    offset: int = None) -> List[Event]:
-        return self.client.list_events(
-            name=name,
-            namespace=namespace,
-            event_type=event_type,
-            sender=sender,
-            offset=offset
-        )
-
-    def time_to_offset(self, time: datetime) -> int:
-        return self.client.time_to_offset(time)

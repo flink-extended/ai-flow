@@ -37,7 +37,7 @@ def get_scheduler_client(server_uri: str = None):
 
 
 def get_notification_client(notification_server_uri: str = None,
-                            namespace: str = DEFAULT_NAMESPACE,
+                            namespace: str = None,
                             sender: str = None):
     """
     Create a notification client to connect with notification server.

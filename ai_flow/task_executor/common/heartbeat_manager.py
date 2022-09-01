@@ -53,7 +53,7 @@ class HeartbeatManager(object):
         self.heartbeat_check_thread = StoppableThread(target=self._check_heartbeat_timeout)
 
     def start(self):
-        self.notification_client = get_notification_client(namespace='task_status_change', sender='task_executor')
+        self.notification_client = get_notification_client(sender='aiflow_heartbeat_manager')
 
         self.grpc_server.start()
         logger.info('Heartbeat Service started.')

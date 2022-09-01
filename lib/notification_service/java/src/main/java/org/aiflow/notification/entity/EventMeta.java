@@ -22,44 +22,62 @@ import org.aiflow.notification.proto.NotificationServiceOuterClass;
 
 public class EventMeta {
 
-    private EventKey eventKey;
-    private String message;
+    private String key;
+    private String value;
+
+    private String namespace;
+    private String sender;
     private long offset;
     private long createTime;
     private String context;
 
-    public EventMeta(EventKey eventKey, String message, String context) {
-        this.eventKey = eventKey;
-        this.message = message;
-        this.context = context;
+    public EventMeta(String key, String value) {
+        this.key = key;
+        this.value = value;
     }
 
-    public EventKey getEventKey() {
-        return eventKey;
+    public String getKey() {
+        return key;
     }
 
-    public String getMessage() {
-        return message;
+    public String getValue() {
+        return value;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 
     public long getOffset() {
         return offset;
     }
 
-    public long getCreateTime() {
-        return createTime;
-    }
-
-    public String getContext() {
-        return context;
-    }
-
     public void setOffset(long offset) {
         this.offset = offset;
     }
 
+    public long getCreateTime() {
+        return createTime;
+    }
+
     public void setCreateTime(long createTime) {
         this.createTime = createTime;
+    }
+
+    public String getContext() {
+        return context;
     }
 
     public void setContext(String context) {
@@ -69,10 +87,17 @@ public class EventMeta {
     @Override
     public String toString() {
         return "EventMeta{"
-                + "eventKey="
-                + eventKey
-                + ", message='"
-                + message
+                + "key='"
+                + key
+                + '\''
+                + ", value='"
+                + value
+                + '\''
+                + ", namespace='"
+                + namespace
+                + '\''
+                + ", sender='"
+                + sender
                 + '\''
                 + ", offset="
                 + offset
@@ -85,14 +110,11 @@ public class EventMeta {
     }
 
     public static EventMeta buildEventMeta(NotificationServiceOuterClass.EventProto eventProto) {
-        EventKey eventKey =
-                new EventKey(
-                        eventProto.getName(),
-                        eventProto.getEventType(),
-                        eventProto.getNamespace(),
-                        eventProto.getSender());
-        EventMeta event = new EventMeta(eventKey, eventProto.getMessage(), eventProto.getContext());
+        EventMeta event = new EventMeta(eventProto.getKey(), eventProto.getValue());
+        event.setNamespace(eventProto.getNamespace());
+        event.setSender(eventProto.getSender());
         event.setOffset(eventProto.getOffset());
+        event.setContext(eventProto.getContext());
         event.setCreateTime(eventProto.getCreateTime());
         return event;
     }

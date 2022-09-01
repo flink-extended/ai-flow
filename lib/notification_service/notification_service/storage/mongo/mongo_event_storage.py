@@ -23,7 +23,6 @@ from typing import Union, Tuple
 
 from notification_service.model.event import Event, ANY_CONDITION
 from notification_service.model.sender_event_count import SenderEventCount
-from notification_service.storage.mongo.mongo_event_storage import MongoEvent, MongoClientModel
 from notification_service.storage.event_storage import BaseEventStorage
 
 from mongoengine import connect
@@ -56,75 +55,54 @@ class MongoEventStorage(BaseEventStorage):
             })
         return connect(**db_conf)
 
-    def get_latest_version(self, key: str, namespace: str = None):
-        mongo_events = MongoEvent.get_by_key(key, 0, 1, "-version")
-        if not mongo_events:
-            return 0
-        return mongo_events[0].version
-
     def add_event(self, event: Event, uuid: str):
         kwargs = {
             "server_ip": self.server_ip,
             "create_time": int(time.time() * 1000),
-            "event_type": event.event_key.event_type,
-            "key": event.event_key.name,
-            "value": event.message,
+            "key": event.key,
+            "value": event.value,
             "context": event.context,
-            "namespace": event.event_key.namespace,
-            "sender": event.event_key.sender,
+            "namespace": event.namespace,
+            "sender": event.sender,
             "uuid": uuid
         }
         mongo_event = MongoEvent(**kwargs)
         mongo_event.save()
         mongo_event.reload()
         event.create_time = mongo_event.create_time
-        event.version = mongo_event.version
+        event.offset = mongo_event.offset
         return event
 
     def list_events(self,
-                    key: Union[str, Tuple[str]],
-                    version: int = None,
-                    event_type: str = None,
-                    start_time: int = None,
+                    key: str = None,
                     namespace: str = None,
-                    sender: str = None):
+                    sender: str = None,
+                    begin_offset: int = None,
+                    end_offset: int = None):
         key = None if key == "" else key
-        version = None if version == 0 else version
-        event_type = None if event_type == "" else event_type
         namespace = None if namespace == "" else namespace
         sender = None if sender == "" else sender
-        if isinstance(key, str):
-            key = (key,)
-        elif isinstance(key, Iterable):
-            key = tuple(key)
-        res = MongoEvent.get_base_events(key, version, event_type, start_time, namespace, sender)
+        res = MongoEvent.get_base_events(key, namespace, sender, begin_offset, end_offset)
         return res
 
     def count_events(self,
-                     key: Union[str, Tuple[str]],
-                     version: int = None,
-                     event_type: str = None,
-                     start_time: int = None,
+                     key: str = None,
                      namespace: str = None,
-                     sender: str = None):
+                     sender: str = None,
+                     begin_offset: int = None,
+                     end_offset: int = None):
         key = None if key == "" else key
-        version = None if version == 0 else version
-        event_type = None if event_type == "" else event_type
         namespace = None if namespace == "" else namespace
         sender = None if sender == "" else sender
-        if isinstance(key, str):
-            key = (key,)
-        elif isinstance(key, Iterable):
-            key = tuple(key)
-        res = MongoEvent.count_base_events(key, version, event_type, start_time, namespace, sender)
+        res = MongoEvent.count_base_events(key, namespace, sender, begin_offset, end_offset)
         return res
 
     def list_all_events(self, start_time: int):
         res = MongoEvent.get_base_events_by_time(start_time)
         return res
 
-    def list_all_events_from_version(self, start_version: int, end_version: int = None):
-        res = MongoEvent.get_base_events_by_version(start_version, end_version)
+    def list_all_events_from_offset(self, start_offset: int, end_offset: int = None):
+        res = MongoEvent.get_base_events_by_offset(start_offset, end_offset)
         return res
 
     def register_client(self, namespace: str = None, sender: str = None) -> int:
@@ -159,8 +137,7 @@ class MongoEvent(Document):
     server_ip = StringField()   # track server that the event belongs to
     key = StringField()
     value = StringField()
-    event_type = StringField()
-    version = SequenceField()  # use 'version' as the auto increase id
+    offset = SequenceField()  # use 'offset' as the auto increase id
     create_time = LongField()
     context = StringField()
     namespace = StringField()
@@ -171,8 +148,7 @@ class MongoEvent(Document):
         return {
             "key": self.key,
             "value": self.value,
-            "event_type": self.event_type,
-            "version": int(self.version),
+            "offset": int(self.offset),
             "create_time": self.create_time,
             "context": self.context,
             "namespace": self.namespace,
@@ -202,77 +178,64 @@ class MongoEvent(Document):
         return event_counts
 
     @classmethod
-    def get_base_events_by_version(cls, start_version: int, end_version: int = None):
+    def get_base_events_by_offset(cls, start_offset: int, end_offset: int = None):
         conditions = dict()
-        conditions["version__gt"] = start_version
-        if end_version is not None and end_version > 0:
-            conditions["version__lte"] = end_version
-        mongo_events = cls.objects(**conditions).order_by("version")
+        conditions["offset__gt"] = start_offset
+        if end_offset is not None and end_offset > 0:
+            conditions["offset__lte"] = end_offset
+        mongo_events = cls.objects(**conditions).order_by("offset")
         return cls.convert_to_base_events(mongo_events)
 
     @classmethod
     def get_base_events(cls,
-                        key: Tuple[str],
-                        version: int = None,
-                        event_type: str = None,
-                        start_time: int = None,
+                        key: str = None,
                         namespace: str = None,
-                        sender: str = None):
+                        sender: str = None,
+                        begin_offset: int = None,
+                        end_offset: int = None):
         conditions = dict()
-        if len(key) == 1:
-            if ANY_CONDITION != key[0]:
-                conditions["key"] = key[0]
-        elif len(key) > 1:
-            conditions["key__in"] = list(key)
-        if version is not None and version > 0:
-            conditions["version__gt"] = version
-        if event_type is not None:
-            if event_type != ANY_CONDITION:
-                conditions["event_type"] = event_type
-        if start_time is not None and start_time > 0:
-            conditions["start_time_gte"] = start_time
-        if ANY_CONDITION != namespace:
+        if key and key != ANY_CONDITION:
+            conditions["key"] = key
+        if namespace and namespace != ANY_CONDITION:
             conditions["namespace"] = namespace
-        if sender is not None and ANY_CONDITION != sender:
+        if sender and sender != ANY_CONDITION:
             conditions["sender"] = sender
-        mongo_events = cls.objects(**conditions).order_by("version")
+        if begin_offset:
+            conditions["offset__gt"] = begin_offset
+        if end_offset:
+            conditions["offset__lte"] = end_offset
+
+        mongo_events = cls.objects(**conditions).order_by("offset")
         return cls.convert_to_base_events(mongo_events)
 
     @classmethod
     def count_base_events(cls,
-                          key: Tuple[str],
-                          version: int = None,
-                          event_type: str = None,
-                          start_time: int = None,
+                          key: str = None,
                           namespace: str = None,
-                          sender: str = None):
+                          sender: str = None,
+                          begin_offset: int = None,
+                          end_offset: int = None):
         conditions = dict()
-        if len(key) == 1:
-            if ANY_CONDITION != key[0]:
-                conditions["key"] = key[0]
-        elif len(key) > 1:
-            conditions["key__in"] = list(key)
-        if version is not None and version > 0:
-            conditions["version__gt"] = version
-        if event_type is not None:
-            if event_type != ANY_CONDITION:
-                conditions["event_type"] = event_type
-        if start_time is not None and start_time > 0:
-            conditions["start_time_gte"] = start_time
-        if ANY_CONDITION != namespace:
+        if key and key != ANY_CONDITION:
+            conditions["key"] = key
+        if namespace and namespace != ANY_CONDITION:
             conditions["namespace"] = namespace
-        if sender is not None and ANY_CONDITION != sender:
+        if sender and sender != ANY_CONDITION:
             conditions["sender"] = sender
+        if begin_offset:
+            conditions["offset__gt"] = begin_offset
+        if end_offset:
+            conditions["offset__lte"] = end_offset
         mongo_counts = cls.objects(**conditions).aggregate([{"$group": {"_id": "$sender", "count": {"$sum": 1}}}])
         return cls.convert_to_event_counts(mongo_counts)
 
     @classmethod
     def get_base_events_by_time(cls, create_time: int = None):
-        mongo_events = cls.objects(create_time__gte=create_time).order_by("version")
+        mongo_events = cls.objects(create_time__gte=create_time).order_by("offset")
         return cls.convert_to_base_events(mongo_events)
 
     @classmethod
-    def get_by_key(cls, key: str = None, start: int = None, end: int = None, sort_key: str = "version"):
+    def get_by_key(cls, key: str = None, start: int = None, end: int = None, sort_key: str = "offset"):
         if key:
             return cls.objects(key=key).order_by(sort_key)[start:end]
         else:
@@ -289,7 +252,7 @@ class MongoEvent(Document):
 
     @classmethod
     def timestamp_to_event_offset(cls, timestamp):
-        event = cls.objects(create_time__lte=timestamp).order_by('-version').first()
+        event = cls.objects(create_time__lte=timestamp).order_by('-offset').first()
         return event.offset if event else 0
 
 

@@ -16,46 +16,21 @@
 # under the License.
 #
 import threading
-import time
 import unittest
 from datetime import datetime
 from typing import List
 
-from notification_service.model.event import Event, EventKey
+from notification_service.model.event import Event
 from notification_service.client.notification_client import NotificationClient, ListenerRegistrationId, ListenerProcessor
 from tests.test_utils.unittest_base import BaseUnitTest
 
-from ai_flow.common.util.db_util.session import new_session, create_session
+from ai_flow.common.util.db_util.session import create_session
 from ai_flow.scheduler.timer import Timer
-
-
-class MockNotificationClient(NotificationClient):
-
-    def __init__(self):
-        super().__init__('namespace', 'sender')
-
-    def send_event(self, event: Event):
-        pass
-
-    def register_listener(self, listener_processor: ListenerProcessor, event_keys: List[EventKey] = None,
-                          offset: int = None) -> ListenerRegistrationId:
-        pass
-
-    def unregister_listener(self, id: ListenerRegistrationId):
-        pass
-
-    def list_events(self, name: str = None, namespace: str = None, event_type: str = None, sender: str = None,
-                    offset: int = None) -> List[Event]:
-        pass
-
-    def time_to_offset(self, time: datetime) -> int:
-        pass
 
 
 class TestTimer(BaseUnitTest):
     def setUp(self) -> None:
         super().setUp()
-        self.notification_client = MockNotificationClient()
 
     def test_workflow_schedule_cron_expression(self):
         timer = Timer()

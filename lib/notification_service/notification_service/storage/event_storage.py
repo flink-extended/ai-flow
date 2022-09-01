@@ -17,7 +17,6 @@
 # under the License.
 #
 from abc import ABC, abstractmethod
-from typing import Union, Tuple
 
 from notification_service.model.event import Event
 
@@ -30,38 +29,24 @@ class BaseEventStorage(ABC):
 
     @abstractmethod
     def list_events(self,
-                    key: Union[str, Tuple[str]],
-                    version: int = None,
-                    event_type: str = None,
-                    start_time: int = None,
+                    key: str = None,
                     namespace: str = None,
-                    sender: str = None):
+                    sender: str = None,
+                    begin_offset: int = None,
+                    end_offset: int = None):
         pass
 
     @abstractmethod
     def count_events(self,
-                     key: Union[str, Tuple[str]],
-                     version: int = None,
-                     event_type: str = None,
-                     start_time: int = None,
+                     key: str = None,
                      namespace: str = None,
-                     sender: str = None):
-        pass
-
-    @abstractmethod
-    def list_all_events(self, start_time: int):
-        pass
-
-    @abstractmethod
-    def list_all_events_from_version(self, start_version: int, end_version: int = None):
+                     sender: str = None,
+                     begin_offset: int = None,
+                     end_offset: int = None):
         pass
 
     @abstractmethod
     def clean_up(self):
-        pass
-
-    @abstractmethod
-    def get_latest_version(self, key: str, namespace: str = None):
         pass
 
     @abstractmethod

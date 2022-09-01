@@ -71,26 +71,26 @@ class NotificationTestBase(object):
         self.client.sender = 'sender'
         self.client.send_event(
             Event(
-                event_key=EventKey(name="key"),
+                event_key=EventKey(event_name="key"),
                 message="value1"
             )
         )
         self.client.namespace = "namespace_b"
         self.client.send_event(
             Event(
-                event_key=EventKey(name="key", event_type="type_a"),
+                event_key=EventKey(event_name="key", event_type="type_a"),
                 message="value2"
             )
         )
         self.client.send_event(
             Event(
-                event_key=EventKey(name="key"),
+                event_key=EventKey(event_name="key"),
                 message="value3"
             )
         )
         self.client.send_event(
             Event(
-                event_key=EventKey(name="key2"),
+                event_key=EventKey(event_name="key2"),
                 message="value3"
             )
         )
@@ -98,7 +98,7 @@ class NotificationTestBase(object):
     def test_send_event(self):
         event = self.client.send_event(
             Event(
-                event_key=EventKey(name="key"),
+                event_key=EventKey(event_name="key"),
                 message="value1"
             )
         )
@@ -107,7 +107,7 @@ class NotificationTestBase(object):
     def test_list_events(self):
         self._prepare_events()
 
-        events = self.client.list_events(name="key", namespace="namespace_a")
+        events = self.client.list_events(event_name="key", namespace="namespace_a")
         self.assertEqual(1, len(events))
         events = self.client.list_events("key", namespace="namespace_b")
         self.assertEqual(2, len(events))
@@ -117,6 +117,12 @@ class NotificationTestBase(object):
         self.assertEqual(3, len(events))
         events = self.client.list_events("key", sender='invalid')
         self.assertEqual(0, len(events))
+        events = self.client.list_events("key", begin_offset=1, end_offset=2)
+        self.assertEqual(2, len(events))
+        self.assertEqual('value2', events[0].message)
+        self.assertEqual('value3', events[1].message)
+
+
 
     def test_count_events(self):
         self._prepare_events()
@@ -142,7 +148,7 @@ class NotificationTestBase(object):
             event1 = self.client.send_event(Event(EventKey("key"), message="value1"))
             handle = self.client.register_listener(
                 listener_processor=TestListenerProcessor(event_list),
-                event_keys=[EventKey("key", None, None, None)],
+                event_keys=[EventKey("key", None)],
                 offset=event1.offset
             )
             self.client.send_event(Event(EventKey("key"), message="value2"))
@@ -153,7 +159,7 @@ class NotificationTestBase(object):
             self.client.unregister_listener(handle)
 
         self.client.namespace = "a"
-        events = self.client.list_events("key", offset=event1.offset)
+        events = self.client.list_events("key", begin_offset=event1.offset)
         self.assertEqual(2, len(events))
         self.assertEqual(2, len(event_list))
 
@@ -162,46 +168,14 @@ class NotificationTestBase(object):
         try:
             handle = self.client.register_listener(
                 listener_processor=TestListenerProcessor(event_list),
-                event_keys=[EventKey(name="key", event_type="e", namespace=None, sender=None)]
+                event_keys=[EventKey(event_name="key", event_type="e")]
             )
-            self.client.send_event(Event(EventKey(name="key", event_type="e"), "value2"))
-            self.client.send_event(Event(EventKey(name="key", event_type="f"), "value2"))
+            self.client.send_event(Event(EventKey(event_name="key", event_type="e"), "value2"))
+            self.client.send_event(Event(EventKey(event_name="key", event_type="f"), "value2"))
         finally:
             self.client.unregister_listener(handle)
         self.assertEqual(1, len(event_list))
         self.assertEqual("e", event_list[0].event_key.event_type)
-
-    def test_listen_events_by_namespace(self):
-        self.client.namespace = "a"
-        event_list = []
-        try:
-            handle = self.client.register_listener(
-                listener_processor=TestListenerProcessor(event_list),
-                event_keys=[EventKey(name="key", namespace="a")]
-            )
-            self.client.send_event(Event(EventKey(name="key"), "value2"))
-            self.client.namespace = "b"
-            self.client.send_event(Event(EventKey(name="key"), "value2"))
-        finally:
-            self.client.unregister_listener(handle)
-        self.assertEqual(1, len(event_list))
-        self.assertEqual("a", event_list[0].event_key.namespace)
-
-    def test_listen_events_by_sender(self):
-        event_list = []
-        try:
-            handle = self.client.register_listener(
-                listener_processor=TestListenerProcessor(event_list),
-                event_keys=[EventKey(name="key", event_type=None, namespace=None, sender="s")]
-            )
-            self.client.sender = "s"
-            self.client.send_event(Event(EventKey(name="key"), "value2"))
-            self.client.sender = "p"
-            self.client.send_event(Event(EventKey(name="key"), "value2"))
-        finally:
-            self.client.unregister_listener(handle)
-        self.assertEqual(1, len(event_list))
-        self.assertEqual("s", event_list[0].event_key.sender)
 
     def test_list_all_events(self):
         self.client.send_event(Event(EventKey("key"), "value1"))
@@ -246,12 +220,6 @@ class NotificationTestBase(object):
             self.client.unregister_listener(handle)
         self.assertEqual(2, len(event_list))
 
-    def test_get_latest_version(self):
-        event = self.client.send_event(Event(EventKey("key"), "value1"))
-        event = self.client.send_event(Event(EventKey("key"), "value2"))
-        latest_offset = self.client.get_latest_offset(name="key")
-        self.assertEqual(event.offset, latest_offset)
-
     def test_register_client(self):
         self.assertIsNotNone(self.client.client_id)
         tmp_client = EmbeddedNotificationClient(server_uri="localhost:50051",
@@ -274,16 +242,16 @@ class NotificationTestBase(object):
         event = Event(EventKey("key"), "value1")
         self.client.send_event(event)
         self.assertEqual(1, self.client.sequence_num_manager.get_sequence_number())
-        self.assertEqual(1, len(self.client.list_events(name="key")))
+        self.assertEqual(1, len(self.client.list_events(event_name="key")))
 
         self.client.send_event(event)
         self.assertEqual(2, self.client.sequence_num_manager.get_sequence_number())
-        self.assertEqual(2, len(self.client.list_events(name="key")))
+        self.assertEqual(2, len(self.client.list_events(event_name="key")))
 
         self.client.sequence_num_manager._seq_num = 1
         self.client.send_event(event)
         self.assertEqual(2, self.client.sequence_num_manager.get_sequence_number())
-        self.assertEqual(2, len(self.client.list_events(name="key")))
+        self.assertEqual(2, len(self.client.list_events(event_name="key")))
 
     def test_client_recovery(self):
         event = Event(EventKey("key"), "value1")
@@ -291,7 +259,7 @@ class NotificationTestBase(object):
         self.client.send_event(event)
         self.client.send_event(event)
         self.assertEqual(2, self.client.sequence_num_manager.get_sequence_number())
-        self.assertEqual(2, len(self.client.list_events(name="key")))
+        self.assertEqual(2, len(self.client.list_events(event_name="key")))
 
         client2 = EmbeddedNotificationClient(server_uri="localhost:50051",
                                              namespace=None,
@@ -300,11 +268,11 @@ class NotificationTestBase(object):
                                              initial_seq_num=1)
         client2.send_event(event)
         self.assertEqual(2, client2.sequence_num_manager.get_sequence_number())
-        self.assertEqual(2, len(client2.list_events(name="key")))
+        self.assertEqual(2, len(client2.list_events(event_name="key")))
 
         client2.send_event(event)
         self.assertEqual(3, client2.sequence_num_manager.get_sequence_number())
-        self.assertEqual(3, len(client2.list_events(name="key")))
+        self.assertEqual(3, len(client2.list_events(event_name="key")))
 
 
 class DbStorageTest(unittest.TestCase, NotificationTestBase):

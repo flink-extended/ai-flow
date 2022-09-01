@@ -26,7 +26,7 @@ TRUTH_TEXT = frozenset(("t", "true", "y", "yes", "on", "1"))
 FALSE_TEXT = frozenset(("f", "false", "n", "no", "off", "0", ""))
 
 
-# Set AIRFLOW_HOME to local() to effect in `parameterized_config`
+# Set AIFLOW_HOME to local() to effect in `parameterized_config`
 AIFLOW_HOME = get_aiflow_home()
 
 
