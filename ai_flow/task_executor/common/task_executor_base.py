@@ -52,7 +52,6 @@ class TaskExecutorBase(TaskExecutor):
         self.command_queue: PersistentQueue = None
         self.command_processor = StoppableThread(target=self._process_command)
         self.heartbeat_manager: HeartbeatManager = None
-        self.notification_client = None
 
     def schedule_task(self, command: TaskScheduleCommand):
         if not self.command_queue:
@@ -61,7 +60,6 @@ class TaskExecutorBase(TaskExecutor):
 
     def start(self):
         logging.info("starting task executor.")
-        self.notification_client = get_notification_client(namespace='task_status_change', sender='task_executor')
         self.command_queue = PersistentQueue(maxsize=MAX_QUEUE_SIZE)
         self.command_processor.start()
         self.heartbeat_manager = HeartbeatManager()
@@ -76,7 +74,6 @@ class TaskExecutorBase(TaskExecutor):
         self.command_processor.stop()
         self.command_processor.join()
         self.command_queue.join()
-        self.notification_client.close()
 
     def _send_task_status_change(self, key: TaskExecutionKey, status: TaskStatus):
         workflow_meta = self._get_workflow(key.workflow_execution_id)
@@ -85,7 +82,7 @@ class TaskExecutorBase(TaskExecutor):
         else:
             client = None
             try:
-                client = get_notification_client(namespace=workflow_meta.name, sender='task_executor')
+                client = get_notification_client(namespace=workflow_meta.namespace, sender='task_executor')
                 event_for_meta = TaskStatusEvent(workflow_execution_id=key.workflow_execution_id,
                                                  task_name=key.task_name,
                                                  sequence_number=key.seq_num,
