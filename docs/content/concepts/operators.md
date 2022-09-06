@@ -1,5 +1,5 @@
 # Operators
-An Operator is conceptually a template for a predefined [Task](./tasks.md), the way to create a Task is just to initialize an instance of Operator inside the Workflow.
+An Operator is conceptually a template for a predefined [Task](./tasks.md), in other words, Task is an instantiated Operator.
 
 AIFlow has an extensive set of operators available and some popular operators are built-in to the core:
 
@@ -12,9 +12,12 @@ AIFlow has an extensive set of operators available and some popular operators ar
 AIFlow Operators have some common configurations that can be passed as parameters when initializing the Operator.
 
 ### Periodic Task
-Similar to Workflow, A Task can also run periodically by passing parameters `periodic_expression`. Instead of binding to a [Workflow Schedule](./workflow_schedules.md), A Task  can only have one periodic expression which has the same format as the [Workflow Schedule](./workflow_schedules.md), e.g.
+Similar to Workflow, A Task can also run periodically by passing parameters `periodic_expression`. Instead of binding to a [Workflow Schedule](./workflow_schedules.md), A Task can only have one periodic expression which has the same format as the [Workflow Schedule](./workflow_schedules.md), e.g.
 
 ```python
+from ai_flow.model.workflow import Workflow
+from ai_flow.operators.bash import BashOperator
+
 with Workflow(name='periodic_task_example') as workflow:
     task1 = BashOperator(name='task_1',
                          bash_command='echo I am the 1st task',

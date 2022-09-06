@@ -1,10 +1,10 @@
 # Workflow Schedules
 
-A Workflow Schedule is the periodic execution plan of the Workflow. 
+A Workflow Schedule is the periodic execution plan of the [Workflow](./workflows.md). 
 
 ## Creating Schedules
 
-Users can add a Workflow Schedule to a Workflow by the following command.
+Users can add a Workflow Schedule to a Workflow by the following command:
 ```bash
 aiflow workflow-schedule add workflow_name expression
 ```
@@ -29,14 +29,14 @@ aiflow workflow-schedule add my_workflow "interval0 0 10 0"
 
 ## Viewing Schedules
 
-Users can view all Schedules of the Workflow by the following command.
+Users can view all Schedules of the Workflow by the following command:
 ```bash
 aiflow workflow-schedule list my_workflow
 ```
 
 ## Pausing and Resuming Schedules
 
-If you want to temporarily stop a periodic schedule, you can run the following command.
+If you want to temporarily stop a periodic schedule, you can run the following command:
 ```bash
 aiflow workflow-schedule pause workflow_execution_id
 ```
@@ -47,7 +47,7 @@ aiflow workflow-schedule resume workflow_execution_id
 ```
 
 ## Deleting Schedules
-To completely delete the metadata of the periodic scheduling, you can use the `delete` 
+To completely delete the metadata of the Workflow Schedule, you can use the `delete` sub-command.
 ```bash
 aiflow workflow-schedule delete workflow_execution_id
 ```

@@ -1,6 +1,6 @@
 # Workflows
 
-A Workflow consists of [Tasks](#Tasks), organized with [Task Rules](./rules.md) to describe how they should run. 
+A Workflow consists of [Tasks](./tasks.md), organized with [Task Rules](./task_rules.md) to describe how they should run. 
 The Workflow and Tasks are defined in a Python script which just acts as a configuration file specifying the Workflow’s structure as code.
 
 ## Declaring Workflows
@@ -8,7 +8,10 @@ The Workflow and Tasks are defined in a Python script which just acts as a confi
 A Workflow is declared in a `with` statement, which includes all Tasks and Task Rules inside it.
 
 ```python
-with Workflow(name='my_workflow') as workflow:
+from ai_flow.model.workflow import Workflow
+from ai_flow.operators.bash import BashOperator
+
+with Workflow(name='workflow_name') as workflow:
     task1 = BashOperator(name='task_1',
                          bash_command='echo I am the 1st task')
     task2 = BashOperator(name='task_2',
@@ -25,25 +28,12 @@ aiflow workflow upload workflow.py --files f1,f2
 ```
 
 ## Running Workflows
-A Workflow can be executed to generate runtime instances, which is called _workflow execution_. There are 3 ways to run Workflow and generate _workflow executions_.
-
-### Manually
-
-Users can manually start an execution of a Workflow immediately by the command-line interface.
-```bash
-aiflow workflow-execution start my_workflow
-```
-### Periodically 
-
-A Workflow can be bound to a [Workflow Schedule](./schedule.md) to make it run periodically.
-
-### Driven by Events
-
-A Workflow can be bound to a [Workflow Trigger](./trigger.md) to make it can be triggered by Events and Conditions. 
+A Workflow can be executed to generate [Workflow Execution](./workflow_executions.md). 
+There are 3 ways to run Workflow and [generate workflow executions](./workflow_executions.md#Creating Workflow Execution).
 
 ## Workflow disabling and deletion
 
-A Workflow can be disabled which means no more Workflow Executions or Task Executions will be scheduled.
+A Workflow can be disabled which means no more [Workflow Executions](./workflow_executions.md) or [Task Executions](./tasks.md#Task Executions) will be scheduled.
 ```bash
 aiflow workflow disable workflow_name
 ```

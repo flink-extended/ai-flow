@@ -1018,6 +1018,8 @@ Stops the AIFlow Webserver
 aiflow webserver stop [-h]
 ```
 
+(aiflow-cli-version)=
+
 ### version
 
 Shows the version.

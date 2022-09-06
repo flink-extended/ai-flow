@@ -18,7 +18,7 @@ A Task Execution has a Status representing what stage of the lifecycle it is in.
 - retrying: The task execution failed, but has retry attempts left and will be rescheduled.
 
 ```{note}
-In a Workflow Execution, there can be only one running execution of each task.
+In a Workflow Execution, there can be only one running execution of each task, nothing would happen even if you force start a running task. 
 ```
 
 ## Task Actions

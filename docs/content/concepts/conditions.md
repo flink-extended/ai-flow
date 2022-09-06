@@ -10,6 +10,12 @@ A Condition consists of a list of expected keys of [Events](./events.md) and a l
 
 It is allowed to define custom Conditions according to various scenarios by inheriting class `Condition` and implementing `is_met` function, e.g.
 ```python
+from notification_service.model.event import Event
+
+from ai_flow.model.condition import Condition
+from ai_flow.model.context import Context
+from ai_flow.model.state import ValueState, ValueStateDescriptor
+
 class NumCondition(Condition):
     def is_met(self, event: Event, context: Context) -> bool:
         state: ValueState = context.get_state(ValueStateDescriptor(name='num_state'))
@@ -23,6 +29,15 @@ class NumCondition(Condition):
 ```
 The above examples shows a Condition that is satisfied only when it receives enough events that the number adds up to 100. With the `NumCondition`, we can easily define a Workflow that the consumer task starts only when the upstream producers prepared more than 100 records.
 ```python
+import random
+import time
+
+from ai_flow.model.action import TaskAction
+from ai_flow.model.workflow import Workflow
+from ai_flow.notification.notification_client import AIFlowNotificationClient
+from ai_flow.operators.bash import BashOperator
+from ai_flow.operators.python import PythonOperator
+
 def random_produce():
     notification_client = \
         AIFlowNotificationClient(server_uri='localhost:50052')

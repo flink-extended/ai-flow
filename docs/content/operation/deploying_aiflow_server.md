@@ -10,7 +10,7 @@ To initialize the default configuration file, you can run the following command:
 aiflow config init
 ```
 
-This command will generate the [default configuration](default_aiflow_server_config) file `aiflow_server.yaml` in
+This command will generate the default configuration file `aiflow_server.yaml` in
 the `$AIFLOW_HOME` directory(`$HOME/aiflow` by default).
 
 ```{note}
@@ -18,7 +18,7 @@ If the config file already exists, the command will not generate the default con
 the configration, you need to remove it manually and then run the script again.
 ```
 
-If you want to learn all configurations, you can refer to [here](configuration).
+If you want to learn all configurations, you can refer to [here](#configuration).
 
 ## Initialize Database
 The database uri of AIFlow Server is configured in `aiflow_server.yaml`, you can run following command to initialize database.
@@ -75,7 +75,7 @@ This section shows an exhaustive list of available configuration of the AIFlow S
 |task_heartbeat_timeout|Integer|60|The timeout in seconds that the task executions is treated as timeout.|
 |local_executor_parallelism|Integer|10|Num of workers of local task executor.|
 
-## Default AIFlow server Configuration example
+## Default AIFlow server Configuration
 
 ```yaml
 # directory of AIFlow logs

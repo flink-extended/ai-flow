@@ -1,7 +1,7 @@
 # Namespaces
 
-Namespaces provide a mechanism for isolating groups of workflows within a single cluster. Names of workflows need to be unique within a namespace, but not across namespaces.
-Multiple business-related workflows can be put into the same namespace to have the same access control and Event isolation.
+Namespaces provide a mechanism for isolating groups of [Workflows](./workflows.md) within a single cluster. Names of Workflows need to be unique within a namespace, but not across Namespaces.
+Multiple business-related Workflows can be put into the same Namespace to have the same access control and Event isolation.
 
 
 ## Creating Namespaces

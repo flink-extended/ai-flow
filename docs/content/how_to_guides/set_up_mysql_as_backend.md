@@ -1,6 +1,6 @@
 # Set up MySQL as Backend
 
-Both [AIFlow](../deployment/deploying_aiflow_server.md) and [Notification Server](../deployment/deploying_notification_server.md) support MySQL as backend during deployment. By default, AIFlow and Notification Server use SQLite, which is intended for development purposes only. This document will show you how to set up MySQL as backend.
+Both [AIFlow](../operation/deploying_aiflow_server.md) and [Notification Server](../operation/deploying_notification_server.md) support MySQL as backend during deployment. By default, AIFlow and Notification Server use SQLite, which is intended for development purposes only. This document will show you how to set up MySQL as backend.
 
 ## Installing MySQL Client
 

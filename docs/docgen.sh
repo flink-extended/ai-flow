@@ -35,4 +35,4 @@ sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow/notification
 sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow/operators
 sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow/ops
 cp -a "$tmpdir"/. "${generated_source}"
-rm "$tmpdir"/*
+rm -rf "$tmpdir"

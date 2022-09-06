@@ -17,7 +17,7 @@ To initialize the default configuration file, you can run the following command:
 notification config init
 ```
 
-This command will generate the [default configuration](default_config) file `notification_server.yaml` in
+This command will generate the default configuration file `notification_server.yaml` in
 the `$NOTIFICATION_HOME` directory(`$HOME/notification_service` by default).
 
 ```{note}
@@ -25,7 +25,7 @@ If the configration file already exists, the command will not generate the confi
 the configration, you need to remove it manually and then run the script again.
 ```
 
-If you want to learn all configurations, you can refer to [here](configuration).
+If you want to learn all configurations, you can refer to [here](#configuration).
 
 ## Initialize Database
 
