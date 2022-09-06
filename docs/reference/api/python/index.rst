@@ -24,21 +24,7 @@ Python
    :maxdepth: 1
    :caption: Contents
 
-   source_rst/ai_flow
-   source_rst/notification_service
-
-====================
-Core Classes/Modules
-====================
-
-   :class:`ai_flow.ai_graph.ai_graph.AIGraph`
-
-   Core abstraction of AIFlow. Workflow defined by users will be translated into AIGraph by the AIFlow framework. :class:`~ai_flow.ai_graph.ai_graph.AIGraph` consists of :class:`~ai_flow.ai_graph.ai_node.AINode` and edges. For edges, they are either the :class:`~ai_flow.ai_graph.data_edge.DataEdge`  between AINodes in a job or the :class:`~ai_flow.workflow.control_edge.ControlEdge` between jobs.
-
-   :py:mod:`ai_flow.api.ops`
-
-   Main module for defining customized workflow. It provides users with a variety of methods(e.g. :py:meth:`~ai_flow.api.ops.transform`, :py:meth:`~ai_flow.api.ops.train`) to define their own machine learning workflow.
-
-   :py:mod:`ai_flow.api.workflow_operation`
-
-   Module for manipulating workflow including managing a workflow's scheduling and execution.
+   source_rst/model
+   source_rst/operators
+   source_rst/notification
+   source_rst/ops
