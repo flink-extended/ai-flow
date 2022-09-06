@@ -10,6 +10,10 @@ Please make sure that you have installed AIFlow refer to [installation guide](..
 ### Starting Notification Server
 AIFlow depends on notification service as an event dispatcher. Before running AIFlow, you need to start notification server.
 ```shell script
+# Notification service needs a home directory. `~/notification_service` is the default, 
+# but you can put it somewhere else if you prefer.
+export NOTIFICATION_HOME=~/notification_service
+
 # Initialize configuration
 notification config init 
 
@@ -22,6 +26,10 @@ notification server start -d
 
 ### Starting AIFlow Server
 ```shell script
+# AIFlow needs a home directory. `~/aiflow` is the default, 
+# but you can put it somewhere else if you prefer.
+export AIFLOW_HOME=~/aiflow
+
 # Initialize configuration
 aiflow config init
 
@@ -70,7 +78,7 @@ with Workflow(name='quickstart_workflow') as w1:
     task1 = BashOperator(name='task1', bash_command='echo I am 1st task.')
     task2 = BashOperator(name='task2', bash_command='echo I am 2nd task.')
     task3 = PythonOperator(name='task3', python_callable=func)
-    task4 = BashOperator(name='task4', bash_command='echo I an 4th task.')
+    task4 = BashOperator(name='task4', bash_command='echo I am 4th task.')
 
     task3.action_on_task_status(TaskAction.START, {
         task1: TaskStatus.SUCCESS,
@@ -111,6 +119,17 @@ aiflow task-execution list 1
 ```
 Also you can check the log under `${HOME}/aiflow/logs` to view the outputs of tasks.
 
+### Stopping AIFlow Server
+```shell script
+# Stop AIFlow server, it may take a few seconds to wait for the server stopped.
+aiflow server stop
+```
+
+### Stopping Notification Server
+```shell script
+# Stop Notification server
+notification server stop
+```
 
 ## What’s Next?
 

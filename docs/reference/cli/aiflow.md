@@ -9,517 +9,33 @@ AIFlow has a very rich command-line interface that supports many types of operat
 * Positional Arguments
 * Sub-commands:  
 
-  * [server](aiflow-cli-server)
-  * [workflow](aiflow-cli-workflow)
-  * [job](aiflow-cli-job)
   * [config](aiflow-cli-config)
   * [db](aiflow-cli-db)
-  * [version](aiflow-cli-version)
+  * [namespace](aiflow-cli-namespace)
+  * [server](aiflow-cli-server)
+  * [workflow](aiflow-cli-workflow)
+  * [workflow-execution](aiflow-cli-workflow-execution)
+  * [task-execution](aiflow-cli-task-execution)
+  * [workflow-schedule](aiflow-cli-workflow-schedule)
+  * [workflow-trigger](aiflow-cli-workflow-trigger)
   * [webserver](aiflow-cli-webserver)
-
-### aiflow
+  * [version](aiflow-cli-version)
 
 ```
 usage: aiflow [-h] COMMAND ... 
 ```
 
-### Positional Arguments
+## Positional Arguments
 
 > GROUP_OR_COMMAND
 
-Possible choices: server, workflow, job, config, db, version, webserver.
+Possible choices: config, db, namespace, server, task-execution, workflow, workflow-execution, workflow-schedule, workflow-trigger, version.
 
-### Sub-commands
-
-(aiflow-cli-server)=
-
-#### server
-
-AIFlow server operations.
-
-```
-aiflow server [-h] COMMAND ...
-```
-
-#### Positional Arguments
-
-> COMMAND
-
-Possible choices: start, stop.
-
-#### Sub-commands
-
-##### start
-
-Starts the AIFlow server.
-
-```
-aiflow server start [-h] [-d]
-```
-
-##### Named Arguments
-
-> -d, --daemon
-
-Daemonizes instead of running in the foreground.
-
-##### stop
-
-Stops the AIFlow server.
-
-```
-aiflow server stop [-h]
-```
-
-(aiflow-cli-workflow)=
-
-#### workflow
-
-Manages workflows of the given project.
-
-```
-aiflow workflow [-h] COMMAND ...
-```
-
-#### Positional Arguments
-
-> COMMAND
-
-Possible choices: delete, list, list-executions, pause-scheduling, resume-scheduling, show, show-execution, start-execution, stop-execution, submit.
-
-#### Sub-commands
-
-##### delete
-
-Deletes all DB records related to the specified workflow.
-
-```
-aiflow workflow delete [-h] [-y] project_path workflow_name
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> workflow_name
-
-The name of the workflow.
-
-##### Named Arguments
-
-> -y, --yes
-
-Do not prompt to confirm reset. Use with care!  
-Default: False.
-
-##### list
-
-Lists all the workflows.
-
-```
-aiflow workflow list [-h] [-o table, json, yaml, plain] project_path
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-##### Named Arguments
-
-> -o, --output
-
-Possible choices: table, json, yaml, plain.  
-Output format. Allowed values: json, yaml, plain, table (default: table).  
-Default: "table".
-
-##### list-executions
-
-Lists all workflow executions of the workflow by workflow name.
-
-```
-aiflow workflow list-executions [-h] [-o table, json, yaml, plain] project_path workflow_name
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> workflow_name
-
-The name of the workflow.
-
-##### Named Arguments
-
-> -o, --output
-
-Possible choices: table, json, yaml, plain.  
-Output format. Allowed values: json, yaml, plain, table (default: table).  
-Default: "table".
-
-##### pause-scheduling
-
-Pauses a workflow scheduling.
-
-```
-aiflow workflow pause-scheduling [-h] project_path workflow_name
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> workflow_name
-
-The name of the workflow.
-
-##### resume-scheduling
-
-Resumes a paused workflow scheduling.
-
-```
-aiflow workflow resume-scheduling [-h] project_path workflow_name
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> workflow_name
-
-The name of the workflow.
-
-##### show
-
-Shows the workflow by workflow name.
-
-```
-aiflow workflow show [-h] [-o table, json, yaml, plain] project_path workflow_name 
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> workflow_name
-
-The name of the workflow.
-
-##### Named Arguments
-
-> -o, --output
-
-Possible choices: table, json, yaml, plain.  
-Output format. Allowed values: json, yaml, plain, table (default: table).  
-Default: "table".
-
-##### show-execution
-
-Shows the workflow execution by workflow execution id.
-
-```
-aiflow workflow show-execution [-h] [-o table, json, yaml, plain] project_path workflow_execution_id 
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> workflow_execution_id
-
-The id of the workflow execution.
-
-##### Named Arguments
-
-> -o, --output
-
-Possible choices: table, json, yaml, plain.  
-Output format. Allowed values: json, yaml, plain, table (default: table).  
-Default: "table".
-
-##### start-execution
-
-Starts a new workflow execution by workflow name.
-
-```
-aiflow workflow start-execution [-h] [-c CONTEXT] project_path workflow_name 
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> workflow_name
-
-The name of the workflow.
-
-##### Named Arguments
-
-> -c, --context
-
-The context of the workflow execution to start.
-
-##### stop-execution
-
-Stops the workflow execution by workflow execution id.
-
-```
-aiflow workflow stop-execution [-h] project_path workflow_execution_id 
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> workflow_execution_id
-
-The id of the workflow execution.
-
-##### stop-executions
-
-Stops all workflow executions by workflow name.
-
-```
-aiflow workflow stop-executions [-h] project_path workflow_name 
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> workflow_name
-
-The name of the workflow.
-
-##### submit
-
-Submits the workflow by workflow name.
-
-```
-aiflow workflow submit [-h] project_path workflow_name  
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> workflow_name
-
-The name of the workflow.
-
-(aiflow-cli-job)=
-
-#### job
-
-Manages jobs of the given project.
-
-```
-aiflow job [-h] COMMAND ...
-```
-
-#### Positional Arguments
-
-> COMMAND
-
-Possible choices: list-executions, restart-execution, show-execution, start-execution, stop-execution, 
-resume-scheduling, stop-scheduling.
-
-#### Sub-commands
-
-##### list-executions
-
-Lists all job executions of the workflow execution by workflow execution id.
-
-```
-aiflow job list-executions [-h] [-o table, json, yaml, plain] project_path workflow_execution_id
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> workflow_execution_id
-
-The id of the workflow execution.
-
-##### Named Arguments
-
-> -o, --output
-
-Possible choices: table, json, yaml, plain.  
-Output format. Allowed values: json, yaml, plain, table (default: table).  
-Default: "table".
-
-##### restart-execution
-
-Restarts the job execution by job name and workflow execution id.
-
-```
-aiflow job restart-execution [-h] project_path job_name workflow_execution_id 
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> job_name
-
-The name of the job.
-
-> workflow_execution_id
-
-The id of the workflow execution.
-
-
-###### show-execution
-
-Shows the job execution by job name and workflow execution id.
-
-```
-aiflow job show-execution [-h] [-o table, json, yaml, plain] project_path job_name workflow_execution_id
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> job_name
-
-The name of the job.
-
-> workflow_execution_id
-
-The id of the workflow execution.
-
-##### Named Arguments
-
-> -o, --output
-
-Possible choices: table, json, yaml, plain.  
-Output format. Allowed values: json, yaml, plain, table (default: table).  
-Default: "table".
-
-##### start-execution
-
-Starts the job execution by job name and workflow execution id.
-
-```
-aiflow job start-execution [-h] project_path job_name workflow_execution_id 
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> job_name
-
-The name of the job.
-
-> workflow_execution_id
-
-The id of the workflow execution.
-
-##### stop-execution
-
-Stops the job execution by job name and workflow execution id.
-
-```
-aiflow job stop-execution [-h] project_path job_name workflow_execution_id
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> job_name
-
-The name of the job.
-
-> workflow_execution_id
-
-The id of the workflow execution.
-
-
-##### stop-scheduling
-
-Stops scheduling the job by job name and workflow execution id.
-
-```
-aiflow job stop-scheduling [-h] project_path job_name workflow_execution_id
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> job_name
-
-The name of the job.
-
-> workflow_execution_id
-
-The id of the workflow execution.
-
-
-##### resume-scheduling
-
-Resumes scheduling the job by job name and workflow execution id.
-
-```
-aiflow job resume-scheduling [-h] project_path job_name workflow_execution_id
-```
-
-##### Positional Arguments
-
-> project_path
-
-The path of the project.
-
-> job_name
-
-The name of the job.
-
-> workflow_execution_id
-
-The id of the workflow execution.
-
+## Sub-commands
 
 (aiflow-cli-config)=
 
-#### config
+### config
 
 Manages configuration.
 
@@ -543,7 +59,7 @@ Gets the option value of the configuration.
 aiflow config get-value [-h] option
 ```
  
-##### Positional Arguments
+###### Positional Arguments
 
 > option
 
@@ -565,7 +81,7 @@ Lists all options of the configuration.
 aiflow config list [-h] [--color {auto,off,on}]
 ```
 
-##### Named Arguments
+###### Named Arguments
 
 > --color
 
@@ -575,7 +91,7 @@ Default: "auto".
 
 (aiflow-cli-db)=
 
-#### db
+### db
 
 Database operations
 
@@ -589,7 +105,7 @@ aiflow db [-h] COMMAND ...
 
 Possible choices: downgrade, init, reset, upgrade.
 
-##### Sub-commands
+#### Sub-commands
 
 ##### downgrade
 
@@ -599,7 +115,7 @@ Downgrades the metadata database to the version.
 aiflow db downgrade [-h] [-v VERSION]
 ```
 
-##### Named Arguments
+###### Named Arguments
 
 > -v, --version
 
@@ -622,7 +138,7 @@ Burns down and rebuild the metadata database.
 aiflow db reset [-h] [-y]
 ```
 
-##### Named Arguments
+###### Named Arguments
 
 > -y, --yes
 
@@ -637,26 +153,834 @@ Upgrades the metadata database to the version
 aiflow db upgrade [-h] [-v VERSION]
 ```
 
-#### Named Arguments
+###### Named Arguments
 
 > -v, --version
 
 The version corresponding to the database.  
 Default: "heads".
 
-(aiflow-cli-version)=
+(aiflow-cli-namespace)=
 
-#### version
+### namespace
 
-Shows the version.
+Namespace related operations.
 
 ```
-aiflow version [-h]
+aiflow namespace [-h] COMMAND ...
 ```
+
+#### Positional Arguments
+
+> COMMAND
+
+Possible choices: add, delete, list.
+
+#### Sub-commands
+
+##### add
+
+Creates a namespace with specific name.
+
+```
+aiflow namespace add [-h] [--properties PROPERTIES] namespace_name
+```
+
+###### Positional Arguments
+
+> namespace_name
+
+The name of the namespace.
+
+###### Named Arguments
+
+> --properties
+
+Properties of namespace, which is a string in json format.
+
+##### delete
+
+Deletes a namespace with specific name.
+
+```
+aiflow namespace delete [-h] [-y] namespace_name
+```
+
+###### Positional Arguments
+
+> namespace_name
+
+The name of the namespace.
+
+###### Named Arguments
+
+> -y, --yes
+
+Do not prompt to confirm reset. Use with care!
+Default: False.
+
+##### list
+
+Lists all the namespaces.
+
+```
+aiflow namespace list [-h] [-o table, json, yaml]
+```
+
+###### Named Arguments
+
+> -o, --output
+
+Possible choices: table, json, yaml, plain.  
+Output format. Allowed values: json, yaml, plain, table (default: table).  
+Default: "table".
+
+(aiflow-cli-server)=
+
+### server
+
+AIFlow server operations.
+
+```
+aiflow server [-h] COMMAND ...
+```
+
+#### Positional Arguments
+
+> COMMAND
+
+Possible choices: start, stop.
+
+#### Sub-commands
+
+##### start
+
+Starts the AIFlow server.
+
+```
+aiflow server start [-h] [-d]
+```
+
+###### Named Arguments
+
+> -d, --daemon
+
+Daemonizes instead of running in the foreground.
+
+##### stop
+
+Stops the AIFlow server.
+
+```
+aiflow server stop [-h]
+```
+
+(aiflow-cli-workflow)=
+
+### workflow
+
+Workflow related operations.
+
+```
+aiflow workflow [-h] COMMAND ...
+```
+
+#### Positional Arguments
+
+> COMMAND
+
+Possible choices: delete, list, disable, enable, show, upload.
+
+#### Sub-commands
+
+##### delete
+
+Deletes all DB records related to the specified workflow.
+
+```
+aiflow workflow delete [-h] [-n NAMESPACE] [-y] workflow_name
+```
+
+###### Positional Arguments
+
+> workflow_name
+
+The name of the workflow.
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+> -y, --yes
+
+Do not prompt to confirm reset. Use with care!  
+Default: False.
+
+##### list
+
+Lists all the workflows.
+
+```
+aiflow workflow list [-h] [-n NAMESPACE] [-o table, json, yaml]
+```
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+> -o, --output
+
+Possible choices: table, json, yaml, plain.  
+Output format. Allowed values: json, yaml, plain, table (default: table).  
+Default: "table".
+
+##### disable
+
+Disables the workflow so that no more executions would be scheduled.
+
+```
+aiflow workflow disable [-h] [-n NAMESPACE] workflow_name
+```
+
+###### Positional Arguments
+
+> workflow_name
+
+The name of the workflow.
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+> -o, --output
+
+Possible choices: table, json, yaml, plain.  
+Output format. Allowed values: json, yaml, plain, table (default: table).  
+Default: "table".
+
+##### enable
+
+Enables the workflow which is disabled before.
+
+```
+aiflow workflow enable [-h] [-n NAMESPACE] workflow_name
+```
+
+###### Positional Arguments
+
+> workflow_name
+
+The name of the workflow.
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+##### show
+
+Shows the details of the workflow by workflow name.
+
+```
+aiflow workflow show [-h] [-n NAMESPACE] [-o table, json, yaml] workflow_name
+```
+
+###### Positional Arguments
+
+> workflow_name
+
+The name of the workflow.
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+> -o, --output
+
+Possible choices: table, json, yaml, plain.  
+Output format. Allowed values: json, yaml, plain, table (default: table).  
+Default: "table".
+
+##### upload
+
+Upload the workflow to the server along with artifacts.
+
+```
+aiflow workflow upload [-h] [-f FILES] file_path
+```
+
+###### Positional Arguments
+
+> file_path
+
+The path of the workflow file
+
+###### Named Arguments
+
+> -f, --files
+
+Comma separated paths of files that would be uploaded along with the workflow.
+
+(aiflow-cli-workflow-execution)=
+
+### workflow-execution
+
+Workflow execution related operations.
+
+```
+aiflow workflow-execution [-h] COMMAND ...
+```
+
+#### Positional Arguments
+
+> COMMAND
+
+Possible choices: delete, list, show, start, stop, stop-all.
+
+#### Sub-commands
+
+##### delete
+
+Deletes the workflow execution by execution id.
+
+```
+aiflow workflow-execution delete [-h] [-y] workflow_execution_id
+```
+
+###### Positional Arguments
+
+> workflow_execution_id
+
+The id of the workflow execution.
+
+###### Named Arguments
+
+> -y, --yes
+
+Do not prompt to confirm reset. Use with care!
+Default: False.
+
+##### list
+
+Lists all workflow executions of the workflow.
+
+```
+aiflow workflow-execution list [-h] [-n NAMESPACE] [-o table, json, yaml] workflow_name
+```
+
+###### Positional Arguments
+
+> workflow_name
+
+The name of workflow.
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+> -o, --output
+
+Possible choices: table, json, yaml, plain.  
+Output format. Allowed values: json, yaml, plain, table (default: table).  
+Default: "table".
+
+##### show
+
+Shows the details of the workflow execution by execution id.
+
+```
+aiflow workflow-execution show [-h] [-o table, json, yaml] workflow_execution_id
+```
+
+###### Positional Arguments
+
+> workflow_execution_id
+
+The id of the workflow execution
+
+###### Named Arguments
+
+> -o, --output
+
+Possible choices: table, json, yaml, plain.  
+Output format. Allowed values: json, yaml, plain, table (default: table).  
+Default: "table".
+
+##### start
+
+Starts a new execution of the workflow.
+
+```
+aiflow workflow-execution start [-h] [-n NAMESPACE] workflow_name
+```
+
+###### Positional Arguments
+
+> workflow_name
+
+The name of workflow.
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+##### stop
+
+Stops the workflow execution by execution id.
+
+```
+aiflow workflow-execution stop [-h] workflow_execution_id
+```
+
+###### Positional Arguments
+
+> workflow_execution_id
+
+The id of the workflow execution.
+
+##### stop-all
+
+Stops all workflow executions of the workflow.
+
+```
+aiflow workflow-execution stop-all [-h] [-n NAMESPACE] [-y] workflow_name
+```
+
+###### Positional Arguments
+
+> workflow_name
+
+The name of workflow.
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+> -y, --yes
+
+Do not prompt to confirm reset. Use with care!
+Default: False.
+
+(aiflow-cli-task-execution)=
+
+### task-execution
+
+Task execution related operations.
+
+```
+aiflow task-execution [-h] COMMAND ...
+```
+
+#### Positional Arguments
+
+> COMMAND
+
+Possible choices: list, show, start, stop.
+
+#### Sub-commands
+
+##### list
+
+Lists all task executions of the workflow execution.
+
+```
+aiflow task-execution list [-h] [-o table, json, yaml] workflow_execution_id
+```
+
+###### Positional Arguments
+
+> workflow_execution_id
+
+The id of the workflow execution.
+
+###### Named Arguments
+
+> -o, --output
+
+Possible choices: table, json, yaml, plain.  
+Output format. Allowed values: json, yaml, plain, table (default: table).  
+Default: "table".
+
+##### show
+
+Shows the details of the task execution by execution id.
+
+```
+aiflow task-execution show [-h] [-o table, json, yaml] task_execution_id
+```
+
+###### Positional Arguments
+
+> task_execution_id
+
+The id of the task execution.
+
+###### Named Arguments
+
+> -o, --output
+
+Possible choices: table, json, yaml, plain.  
+Output format. Allowed values: json, yaml, plain, table (default: table).  
+Default: "table".
+
+##### start
+
+Starts a new execution of the task of the workflow execution.
+
+```
+aiflow task-execution start [-h] workflow_execution_id task_name
+```
+
+###### Positional Arguments
+
+> workflow_execution_id
+
+The id of the workflow execution.
+
+> task_name
+
+The name of the task.
+
+##### stop
+
+Stops the task execution by execution id.
+
+```
+aiflow task-execution stop [-h] workflow_execution_id task_name
+```
+
+###### Positional Arguments
+
+> workflow_execution_id
+
+The id of the workflow execution.
+
+> task_name
+
+The name of the task.
+
+(aiflow-cli-workflow-schedule)=
+
+### workflow-schedule
+
+Manages the periodic schedules of the workflow.
+
+```
+aiflow workflow-schedule [-h] COMMAND ...
+```
+
+#### Positional Arguments
+
+> COMMAND
+
+Possible choices: add, delete, delete-all, list, pause, resume, show.
+
+#### Sub-commands
+
+##### add
+
+Creates a new schedule for workflow.
+
+```
+aiflow workflow-schedule add [-h] [-n NAMESPACE] workflow_name expression
+```
+
+###### Positional Arguments
+
+> workflow_name
+
+The name of workflow.
+
+> expression
+
+The expression of the workflow schedule.
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+##### delete
+
+Deletes the workflow schedule by id.
+
+```
+aiflow workflow-schedule delete [-h] [-y] workflow_schedule_id
+```
+
+###### Positional Arguments
+
+> workflow_schedule_id
+
+The id of the workflow schedule.
+
+###### Named Arguments
+
+> -y, --yes
+
+Do not prompt to confirm reset. Use with care!
+Default: False.
+
+##### delete-all
+
+Deletes all schedules of the workflow.
+
+```
+aiflow workflow-schedule delete-all [-h] [-n NAMESPACE] [-y] workflow_name
+```
+
+###### Positional Arguments
+
+> workflow_name
+
+The name of workflow.
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+> -y, --yes
+
+Do not prompt to confirm reset. Use with care!
+Default: False.
+
+##### list
+
+Lists all schedules of the workflow.
+
+```
+aiflow workflow-schedule list [-h] [-n NAMESPACE] [-o table, json, yaml] workflow_name
+```
+
+###### Positional Arguments
+
+> workflow_name
+
+The name of workflow.
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+> -o, --output
+
+Possible choices: table, json, yaml, plain.  
+Output format. Allowed values: json, yaml, plain, table (default: table).  
+Default: "table".
+
+##### pause
+
+Pauses the schedule and the workflow would not periodically execute anymore.
+
+```
+aiflow workflow-schedule pause [-h] workflow_schedule_id
+```
+
+###### Positional Arguments
+
+> workflow_schedule_id
+
+The id of the workflow schedule.
+
+##### resume
+
+Resumes the schedule which is paused before.
+
+```
+aiflow workflow-schedule resume [-h] workflow_schedule_id
+```
+
+###### Positional Arguments
+
+> workflow_schedule_id
+
+The id of the workflow schedule.
+
+##### show
+
+Shows the details of the workflow schedule by id.
+
+```
+aiflow workflow-schedule show [-h] [-o table, json, yaml] workflow_schedule_id
+```
+
+###### Positional Arguments
+
+> workflow_schedule_id
+
+The id of the workflow schedule.
+
+###### Named Arguments
+
+> -o, --output
+
+Possible choices: table, json, yaml, plain.  
+Output format. Allowed values: json, yaml, plain, table (default: table).  
+Default: "table".
+
+(aiflow-cli-workflow-trigger)=
+
+### workflow-trigger
+
+Manages the event triggers of the workflow.
+
+```
+aiflow workflow-trigger [-h] COMMAND ...
+```
+
+#### Positional Arguments
+
+> COMMAND
+
+Possible choices: delete, delete-all, list, pause, resume, show.
+
+#### Sub-commands
+
+##### delete
+
+Deletes the workflow event trigger by id.
+
+```
+aiflow workflow-trigger delete [-h] [-y] workflow_trigger_id
+```
+
+###### Positional Arguments
+
+> workflow_trigger_id
+
+The id of the workflow trigger.
+
+###### Named Arguments
+
+> -y, --yes
+
+Do not prompt to confirm reset. Use with care!
+Default: False.
+
+##### delete-all
+
+Deletes all event triggers of the workflow.
+
+```
+aiflow workflow-trigger delete-all [-h] [-n NAMESPACE] [-y] workflow_name
+```
+
+###### Positional Arguments
+
+> workflow_name
+
+The name of workflow.
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+> -y, --yes
+
+Do not prompt to confirm reset. Use with care!
+Default: False.
+
+##### list
+
+Lists all event triggers of the workflow.
+
+```
+aiflow workflow-trigger list [-h] [-n NAMESPACE] [-o table, json, yaml] workflow_name
+```
+
+###### Positional Arguments
+
+> workflow_name
+
+The name of workflow.
+
+###### Named Arguments
+
+> -n, --namespace
+
+Namespace that contains the workflow.
+
+> -o, --output
+
+Possible choices: table, json, yaml, plain.  
+Output format. Allowed values: json, yaml, plain, table (default: table).  
+Default: "table".
+
+##### pause
+
+Pauses the event trigger by id.
+
+```
+aiflow workflow-trigger pause [-h] workflow_trigger_id
+```
+
+###### Positional Arguments
+
+> workflow_trigger_id
+
+The id of the workflow trigger.
+
+##### resume
+
+Resumes the event trigger by id.
+
+```
+aiflow workflow-trigger resume [-h] workflow_trigger_id
+```
+
+###### Positional Arguments
+
+> workflow_trigger_id
+
+The id of the workflow trigger.
+
+##### show
+
+Shows the details of the workflow event trigger by id.
+
+```
+aiflow workflow-trigger show [-h] [-o table, json, yaml] workflow_trigger_id
+```
+
+###### Positional Arguments
+
+> workflow_trigger_id
+
+The id of the workflow trigger.
+
+###### Named Arguments
+
+> -o, --output
+
+Possible choices: table, json, yaml, plain.  
+Output format. Allowed values: json, yaml, plain, table (default: table).  
+Default: "table".
 
 (aiflow-cli-webserver)=
 
-#### webserver
+### webserver
 
 AIFlow Webserver operations.
 
@@ -680,7 +1004,7 @@ Starts the AIFlow Webserver.
 aiflow webserver start [-h] [-d]
 ```
 
-##### Named Arguments
+###### Named Arguments
 
 > -d, --daemon
 
@@ -693,3 +1017,13 @@ Stops the AIFlow Webserver
 ```
 aiflow webserver stop [-h]
 ```
+
+### version
+
+Shows the version.
+
+```
+aiflow version [-h]
+```
+
+

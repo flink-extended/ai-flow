@@ -32,7 +32,7 @@ with Workflow(name='flink_workflow') as workflow:
                                    target='yarn-per-job',
                                    application=streaming_jar)
 
-    streaming_task.action_on_task_status(TaskAction.START, {batch_task: TaskStatus.SUCCESS})
+    streaming_task.start_after([batch_task, ])
 
 
 

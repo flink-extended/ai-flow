@@ -32,7 +32,7 @@ class StreamLogWriter:
 
     def _propagate_log(self, message):
         """Propagate message removing escape codes."""
-        self.logger.log(self.level, remove_escape_codes(message))
+        self.logger .log(self.level, remove_escape_codes(message))
 
     def write(self, message):
         """

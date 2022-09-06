@@ -48,7 +48,6 @@ class TaskStatus(str, Enum):
     """
     INIT = 'INIT'
     QUEUED = 'QUEUED'
-    RESTARTING = 'RESTARTING'
     RUNNING = 'RUNNING'
     SUCCESS = 'SUCCESS'
     FAILED = 'FAILED'
@@ -71,7 +70,6 @@ TASK_ALIVE_SET = frozenset(
         TaskStatus.INIT,
         TaskStatus.QUEUED,
         TaskStatus.RETRYING,
-        TaskStatus.RESTARTING,
         TaskStatus.RUNNING
     ]
 )

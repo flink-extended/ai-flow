@@ -79,7 +79,7 @@ with Workflow(name='quickstart_workflow') as w1:
     task1 = BashOperator(name='task1', bash_command='echo I am 1st task.')
     task2 = BashOperator(name='task2', bash_command='echo I am 2nd task.')
     task3 = PythonOperator(name='task3', python_callable=func)
-    task4 = BashOperator(name='task4', bash_command='echo I an 4th task.')
+    task4 = BashOperator(name='task4', bash_command='echo I am 4th task.')
 
     task3.action_on_task_status(TaskAction.START, {
         task1: TaskStatus.SUCCESS,
