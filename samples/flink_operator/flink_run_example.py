@@ -15,8 +15,6 @@
 # under the License.
 #
 from ai_flow.common.env import expand_env_var
-from ai_flow.model.action import TaskAction
-from ai_flow.model.status import TaskStatus
 from ai_flow.model.workflow import Workflow
 from ai_flow.operators.flink.flink_operator import FlinkOperator
 
@@ -32,7 +30,7 @@ with Workflow(name='flink_workflow') as workflow:
                                    target='yarn-per-job',
                                    application=streaming_jar)
 
-    streaming_task.action_on_task_status(TaskAction.START, {batch_task: TaskStatus.SUCCESS})
+    streaming_task.start_after([batch_task, ])
 
 
 

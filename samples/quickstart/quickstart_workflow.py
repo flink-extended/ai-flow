@@ -20,7 +20,6 @@ from ai_flow.model.action import TaskAction
 from ai_flow.notification.notification_client import AIFlowNotificationClient
 from ai_flow.operators.bash import BashOperator
 from ai_flow.operators.python import PythonOperator
-from ai_flow.model.status import TaskStatus
 
 from ai_flow.model.workflow import Workflow
 
@@ -38,11 +37,8 @@ with Workflow(name='quickstart_workflow') as w1:
     task1 = BashOperator(name='task1', bash_command='echo I am the 1st task.')
     task2 = BashOperator(name='task2', bash_command='echo I am the 2nd task.')
     task3 = PythonOperator(name='task3', python_callable=func)
-    task4 = BashOperator(name='task4', bash_command='echo I an the 4th task.')
+    task4 = BashOperator(name='task4', bash_command='echo I am the 4th task.')
 
-    task3.action_on_task_status(TaskAction.START, {
-        task1: TaskStatus.SUCCESS,
-        task2: TaskStatus.SUCCESS
-    })
+    task3.start_after([task1, task2])
 
     task4.action_on_event_received(action=TaskAction.START, event_key=EVENT_KEY)
