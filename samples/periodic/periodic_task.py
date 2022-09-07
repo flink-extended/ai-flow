@@ -15,8 +15,6 @@
 # under the License.
 #
 from ai_flow import ops
-from ai_flow.model.action import TaskAction
-from ai_flow.model.status import TaskStatus
 from ai_flow.operators.bash import BashOperator
 from ai_flow.model.workflow import Workflow
 

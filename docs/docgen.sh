@@ -30,9 +30,6 @@ generated_source="$workdir"/reference/api/python/source_rst
 mkdir "${generated_source}"
 
 mkdir "$tmpdir"
-sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow/model "$workdir"/../ai_flow/model/internal
-sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow/notification
-sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow/operators
-sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow/ops
+sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow
 cp -a "$tmpdir"/. "${generated_source}"
 rm -r "$tmpdir"

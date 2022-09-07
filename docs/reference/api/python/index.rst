@@ -24,7 +24,4 @@ Python
    :maxdepth: 1
    :caption: Contents
 
-   source_rst/model
-   source_rst/operators
-   source_rst/notification
-   source_rst/ops
+   source_rst/ai_flow
