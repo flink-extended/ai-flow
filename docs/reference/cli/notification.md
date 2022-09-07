@@ -92,7 +92,7 @@ Possible choices: count, list, listen, send.
 Counts events.
 
 ```
-notification event count [-h] key [-s SERVER_URI] [-n NAMESPACE] [--begin-version BEGIN_VERSION] [--event_type EVENT_TYPE] [--begin-time BEGIN_TIME] [--sender SENDER]
+notification event count [-h] [--begin-offset BEGIN_OFFSET] [--begin-time BEGIN_TIME] [-n NAMESPACE] [--sender SENDER] [-s SERVER_URI] key
 ```
 
 ##### Positional Arguments
@@ -111,14 +111,9 @@ The uri of notification server.
 
 Namespace of the event. If not set, all namespaces would be handled.
 
-> --begin-version
+> --begin-offset
 
-Begin version of the event.  
-Default:  0.
-
-> --event_type
-
-Type of the event. If not set, all types would be handled.
+Begin offset of the event. Defaults to 0
 
 > --begin-time
 
@@ -133,7 +128,7 @@ Sender of the event.
 Lists events.
 
 ```
-notification event list [-h] key [-s SERVER_URI] [-n NAMESPACE] [--begin-version BEGIN_VERSION] [--event_type EVENT_TYPE] [--begin-time BEGIN_TIME] [--sender SENDER] [-o table, json, yaml, plain]
+notification event list [-h] [--begin-offset BEGIN_OFFSET] [--begin-time BEGIN_TIME] [-n NAMESPACE] [-o table, json, yaml] [--sender SENDER] [-s SERVER_URI] key
 ```
 
 ##### Positional Arguments
@@ -152,14 +147,9 @@ The uri of notification server.
 
 Namespace of the event. If not set, all namespaces would be handled.
 
-> --begin-version
+> --begin-offset
 
-Begin version of the event.  
-Default:  0.
-
-> --event_type
-
-Type of the event. If not set, all types would be handled.
+Begin offset of the event. Defaults to 0
 
 > --begin-time
 
@@ -180,7 +170,7 @@ Default: "table".
 Listens events
 
 ```
-notification event listen [-h] key [-s SERVER_URI] [-n NAMESPACE] [--begin-version BEGIN_VERSION] [--event_type EVENT_TYPE] [--begin-time BEGIN_TIME] [--sender SENDER]
+notification event listen [-h] [--begin-offset BEGIN_OFFSET] [--begin-time BEGIN_TIME] [-n NAMESPACE] [-s SERVER_URI] key
 ```
 
 ##### Positional Arguments
@@ -199,30 +189,21 @@ The uri of notification server.
 
 Namespace of the event. If not set, all namespaces would be handled.
 
-> --begin-version
+> --begin-offset
 
-Begin version of the event.  
-Default:  0.
-
-> --event_type
-
-Type of the event. If not set, all types would be handled.
+Begin offset of the event. Defaults to 0
 
 > --begin-time
 
 Begin datetime of the event to listen, formatted in ISO 8601.
 Default: `datetime.now().isoformat()`.
 
-> --sender
-
-Sender of the event.
-
 ##### send
 
 Sends an event.
 
 ```
-notification event send [-h] key value [-s SERVER_URI] [-n NAMESPACE] [--event_type EVENT_TYPE] [--context CONTEXT] [--sender SENDER]
+notification event send [-h] [--context CONTEXT] [-n NAMESPACE] [--sender SENDER] [-s SERVER_URI] key value
 ```
 
 ##### Positional Arguments
@@ -244,10 +225,6 @@ The uri of notification server.
 > -n, --namespace
 
 Namespace of the event. If not set, all namespaces would be handled.
-
-> --event_type
-
-Type of the event. If not set, all types would be handled.
 
 > --context
 

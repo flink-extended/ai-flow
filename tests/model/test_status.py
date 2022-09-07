@@ -29,8 +29,6 @@ class TestTaskStatus(unittest.TestCase):
         self.assertTrue(TaskStatus.QUEUED.value in TASK_ALIVE_SET)
         self.assertTrue(TaskStatus.RETRYING in TASK_ALIVE_SET)
         self.assertTrue(TaskStatus.RETRYING.value in TASK_ALIVE_SET)
-        self.assertTrue(TaskStatus.RESTARTING in TASK_ALIVE_SET)
-        self.assertTrue(TaskStatus.RESTARTING.value in TASK_ALIVE_SET)
         self.assertTrue(TaskStatus.RUNNING in TASK_ALIVE_SET)
         self.assertTrue(TaskStatus.RUNNING.value in TASK_ALIVE_SET)
 

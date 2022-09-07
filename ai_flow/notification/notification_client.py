@@ -21,13 +21,17 @@ from datetime import datetime
 from typing import List
 
 from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
-from notification_service.client.notification_client import ListenerRegistrationId, \
-    ListenerProcessor
-from notification_service.model.event import Event
 
 from ai_flow.common.exception.exceptions import AIFlowException
 from ai_flow.model.internal.contexts import get_runtime_task_context
 from ai_flow.model.internal.events import EventContextConstant
+
+import notification_service.model.event as notification_event
+import notification_service.client.notification_client as notification_client
+
+Event = notification_event.Event
+ListenerProcessor = notification_client.ListenerProcessor
+ListenerRegistrationId = notification_client.ListenerRegistrationId
 
 
 class AIFlowNotificationClient(object):

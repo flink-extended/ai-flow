@@ -30,9 +30,6 @@ generated_source="$workdir"/reference/api/python/source_rst
 mkdir "${generated_source}"
 
 mkdir "$tmpdir"
-sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow "$workdir"/../ai_flow/*test*
-cp -a "$tmpdir"/. "${generated_source}"
-rm "$tmpdir"/*
-sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../lib/notification_service/notification_service
+sphinx-apidoc -f -M -o "$tmpdir"/ "$workdir"/../ai_flow
 cp -a "$tmpdir"/. "${generated_source}"
 rm -r "$tmpdir"

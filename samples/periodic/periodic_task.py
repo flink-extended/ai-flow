@@ -15,8 +15,6 @@
 # under the License.
 #
 from ai_flow import ops
-from ai_flow.model.action import TaskAction
-from ai_flow.model.status import TaskStatus
 from ai_flow.operators.bash import BashOperator
 from ai_flow.model.workflow import Workflow
 
@@ -31,16 +29,14 @@ with Workflow(name='periodic_task_example') as workflow:
                          periodic_expression='cron@*/1 * * * *')
     task2 = BashOperator(name='task_2',
                          bash_command='echo I am the 2nd task')
-    task2.action_on_task_status(TaskAction.START,
-                                {task1: TaskStatus.SUCCESS})
+    task2.start_after([task1, ])
 
     task3 = BashOperator(name='task_3',
                          bash_command='echo I am the 3rd task',
                          periodic_expression='interval@0 0 1 0')
     task4 = BashOperator(name='task_4',
                          bash_command='echo I am the 4th task')
-    task4.action_on_task_status(TaskAction.START,
-                                {task3: TaskStatus.SUCCESS})
+    task4.start_after([task3, ])
 
 
 if __name__ == "__main__":

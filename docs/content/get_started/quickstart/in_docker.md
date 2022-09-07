@@ -79,7 +79,7 @@ with Workflow(name='quickstart_workflow') as w1:
     task1 = BashOperator(name='task1', bash_command='echo I am 1st task.')
     task2 = BashOperator(name='task2', bash_command='echo I am 2nd task.')
     task3 = PythonOperator(name='task3', python_callable=func)
-    task4 = BashOperator(name='task4', bash_command='echo I an 4th task.')
+    task4 = BashOperator(name='task4', bash_command='echo I am 4th task.')
 
     task3.action_on_task_status(TaskAction.START, {
         task1: TaskStatus.SUCCESS,
@@ -97,24 +97,24 @@ Now you can upload the workflow with the path of the file you just saved.
 aiflow workflow upload ${path_of_the_workflow_file}
 ```
 
-You can view the workflow you uploaded by the following command.
+You can view the workflow you uploaded by the following command:
 ```shell script
 aiflow workflow list --namespace default
 ```
 
 ### Starting an Execution
-The workflow you uploaded can be executed as an instance which is called execution. You can start a new execution by the following command.
+The workflow you uploaded can be executed as an instance which is called execution. You can start a new execution by the following command:
 ```
 aiflow workflow-execution start quickstart_workflow --namespace default
 ```
 
 ### Viewing the Results
-You can view the workflow execution you just started by the following command.
+You can view the workflow execution you just started by the following command:
 ```shell script
 aiflow workflow-execution list quickstart_workflow --namespace default
 ```
 The result shows `id`, `status` and other information of the workflow execution.
-You can then list tasks of workflow execution with id 1 by the following command.
+You can then list tasks of workflow execution with id 1 by the following command:
 ```shell script
 aiflow task-execution list 1
 ```
@@ -123,4 +123,4 @@ Also you can check the log under `${AIFLOW_HOME}/aiflow/logs` to view the output
 
 ## What’s Next?
 
-For more details about how to write your own workflow, please refer to the [tutorial](../../tutorial_and_examples/tutorial.md) and  [development](../../development/index.md) document.
+For more details about how to write your own workflow, please refer to the [tutorial](../../tutorial_and_examples/tutorial.md) and and [concepts](../../concepts/index.md) document.
