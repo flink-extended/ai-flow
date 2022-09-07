@@ -131,7 +131,7 @@ ARG_SERVER_DAEMON = Arg(
 )
 OPTION_FILES = Arg(
     ("-f", "--files"),
-    help="Files that would be uploaded with workflow",
+    help="Comma separated paths of files that would be uploaded along with the workflow",
 )
 OPTION_NAMESPACE = Arg(
     ("-n", "--namespace"),
@@ -230,7 +230,7 @@ WORKFLOW_COMMANDS = (
     ),
     ActionCommand(
         name='upload',
-        help='Submits the workflow by workflow name.',
+        help='Upload the workflow to the server along with artifacts.',
         func=lazy_load_command('ai_flow.cli.commands.workflow_command.upload_workflows'),
         args=(ARG_FILE_PATH, OPTION_FILES,),
     )

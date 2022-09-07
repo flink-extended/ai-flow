@@ -17,15 +17,13 @@
 import random
 import time
 
-from notification_service.model.event import Event
-
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
 from ai_flow.model.context import Context
 from ai_flow.model.state import ValueState, ValueStateDescriptor
 from ai_flow.model.status import TaskStatus
 from ai_flow.model.workflow import Workflow
-from ai_flow.notification.notification_client import AIFlowNotificationClient
+from ai_flow.notification.notification_client import AIFlowNotificationClient, Event
 from ai_flow.operators.bash import BashOperator
 from ai_flow.operators.python import PythonOperator
 

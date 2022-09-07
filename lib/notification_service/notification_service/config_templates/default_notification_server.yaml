@@ -21,5 +21,14 @@ server_port: 50052
 # uri of database backend for notification server
 db_uri: sqlite:///{NOTIFICATION_HOME}/ns.db
 
+# whether to start server in HA mode
+# enable_ha: False
+
+# time to detect living members in HA mode
+# ha_ttl_ms: 10000
+
+# uri of server registered in HA manager for clients to use
+# advertised_uri: localhost:50052
+
 # timeout for notification server to be available after started in seconds, defaults to 5.0
 # wait_for_server_started_timeout: 5.0

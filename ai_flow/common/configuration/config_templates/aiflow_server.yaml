@@ -36,7 +36,7 @@ history_retention: 30d
 # uri of state backend
 state_backend_uri: sqlite:///{AIFLOW_HOME}/aiflow.db
 
-# whether SqlAlchemy should pool database connections.
+# whether SqlAlchemy enables p s.
 sql_alchemy_pool_enabled: True
 
 # the maximum number of database connections in the pool. 0 indicates no limit.
