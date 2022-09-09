@@ -16,7 +16,7 @@
 #
 import json
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from notification_service.client.embedded_notification_client import EmbeddedNotificationClient
 
@@ -44,14 +44,14 @@ class AIFlowNotificationClient(object):
             sender=str(self.context.task_execution_key)
         )
 
-    def send_event(self, key: str, value: str):
+    def send_event(self, key: str, value: Optional[str] = None):
         """
         Send event to current workflow execution. This function can only be used
         in AIFlow Operator runtime. It will retrieve the workflow execution info from runtime
         context and set to context of the event.
 
         :param key: the key of the event.
-        :param value: the value of the event.
+        :param value: optional, the value of the event.
         """
         workflow_execution_id = self.context.task_execution_key.workflow_execution_id
         event = Event(key=key, value=value)
@@ -74,3 +74,6 @@ class AIFlowNotificationClient(object):
 
     def unregister_listener(self, registration_id: ListenerRegistrationId):
         self.client.unregister_listener(registration_id)
+
+    def close(self):
+        self.client.close()

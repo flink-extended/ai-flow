@@ -53,39 +53,31 @@ Below is a typically event-driven workflow. The workflow contains 4 tasks, task3
 ```python
 import time
 
-from ai_flow.rpc.client.aiflow_client import get_notification_client
-from notification_service.model.event import EventKey, Event
-
 from ai_flow.model.action import TaskAction
+from ai_flow.notification.notification_client import AIFlowNotificationClient
 from ai_flow.operators.bash import BashOperator
 from ai_flow.operators.python import PythonOperator
-from ai_flow.model.status import TaskStatus
-
 from ai_flow.model.workflow import Workflow
 
-EVENT_KEY = EventKey(name='quickstart_key',
-                     event_type='quickstart_type')
+EVENT_KEY = "key"
 
 
 def func():
     time.sleep(5)
-    notification_client = get_notification_client()
-    event = Event(event_key=EVENT_KEY, message='This is a custom message.')
-    notification_client.send_event(event)
+    notification_client = AIFlowNotificationClient("localhost:50052")
+    notification_client.send_event(key=EVENT_KEY,
+                                   value='This is a custom message.')
 
 
 with Workflow(name='quickstart_workflow') as w1:
-    task1 = BashOperator(name='task1', bash_command='echo I am 1st task.')
-    task2 = BashOperator(name='task2', bash_command='echo I am 2nd task.')
+    task1 = BashOperator(name='task1', bash_command='echo I am the 1st task.')
+    task2 = BashOperator(name='task2', bash_command='echo I am the 2nd task.')
     task3 = PythonOperator(name='task3', python_callable=func)
-    task4 = BashOperator(name='task4', bash_command='echo I am 4th task.')
+    task4 = BashOperator(name='task4', bash_command='echo I am the 4th task.')
 
-    task3.action_on_task_status(TaskAction.START, {
-        task1: TaskStatus.SUCCESS,
-        task2: TaskStatus.SUCCESS
-    })
+    task3.start_after([task1, task2])
 
-    task4.action_on_event_received(action=TaskAction.RESTART, event_key=EVENT_KEY)
+    task4.action_on_event_received(action=TaskAction.START, event_key=EVENT_KEY)
 ```
 You can save the above workflow as a python file on your workstation and remember the file path as ${path_of_the_workflow_file}.
 
@@ -119,6 +111,7 @@ aiflow task-execution list 1
 ```
 Also you can check the log under `${HOME}/aiflow/logs` to view the outputs of tasks.
 
+## Stopping AIFlow 
 ### Stopping AIFlow Server
 ```shell script
 # Stop AIFlow server, it may take a few seconds to wait for the server stopped.
