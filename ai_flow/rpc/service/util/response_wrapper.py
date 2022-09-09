@@ -14,6 +14,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import traceback
 from functools import wraps
 from typing import List
 
@@ -35,9 +36,9 @@ def catch_exception(func):
         try:
             return func(*args, **kwargs)
         except AIFlowRpcServerException as e:
-            return Response(return_code=str(e.error_code), error_msg=e.error_msg)
+            return Response(return_code=str(e.error_code), error_msg=traceback.format_exc())
         except Exception as ex:
-            return Response(return_code=str(INTERNAL_ERROR), error_msg=str(ex))
+            return Response(return_code=str(INTERNAL_ERROR), error_msg=traceback.format_exc())
 
     return wrapper
 

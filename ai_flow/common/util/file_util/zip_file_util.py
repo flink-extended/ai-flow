@@ -66,8 +66,8 @@ def extract_zip_file(zip_file_path: Text,
                 time.sleep(1)
             return downloaded_local_path
         else:
-            f = open(lock_file, 'w')
             try:
+                f = open(lock_file, 'w')
                 fcntl.flock(f.fileno(), fcntl.LOCK_EX)
                 if os.path.exists(downloaded_local_path):
                     logging.info(f'Extract directory {downloaded_local_path} already exists.')
@@ -78,9 +78,9 @@ def extract_zip_file(zip_file_path: Text,
                 zip_ref.extractall(dest_path)
             finally:
                 fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-            f.close()
-            try:
-                os.remove(lock_file)
-            except OSError:
-                pass
+                f.close()
+                try:
+                    os.remove(lock_file)
+                except OSError:
+                    pass
             return downloaded_local_path

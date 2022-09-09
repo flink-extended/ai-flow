@@ -14,7 +14,7 @@
 # under the License.
 import logging
 from abc import abstractmethod
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Union
 
 from ai_flow.model.action import TaskAction
 from ai_flow.model.condition import Condition
@@ -81,11 +81,16 @@ class Operator(object):
                                             action=action,
                                             upstream_task_status_dict=upstream_task_status_dict)
 
-    def start_after(self, tasks: List['Operator']):
+    def start_after(self, tasks: Union['Operator', List['Operator']]):
         """
         Start the task after upstream tasks succeed.
         :param tasks: The upstream tasks.
         """
+        task_list = []
+        if isinstance(tasks, List):
+            task_list.extend(tasks)
+        else:
+            task_list.append(tasks)
         task_status = dict.fromkeys(tasks, TaskStatus.SUCCESS)
         self.action_on_task_status(TaskAction.START, task_status)
 

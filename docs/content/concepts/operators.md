@@ -1,6 +1,5 @@
 # Operators
 An Operator is conceptually a template for a predefined [Task](./tasks.md), in other words, Task is an instantiated Operator.
-
 AIFlow has an extensive set of operators available and some popular operators are built-in to the core:
 
 * BashOperator - executes a bash command
