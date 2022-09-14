@@ -91,7 +91,7 @@ class Operator(object):
             task_list.extend(tasks)
         else:
             task_list.append(tasks)
-        task_status = dict.fromkeys(tasks, TaskStatus.SUCCESS)
+        task_status = dict.fromkeys(task_list, TaskStatus.SUCCESS)
         self.action_on_task_status(TaskAction.START, task_status)
 
 

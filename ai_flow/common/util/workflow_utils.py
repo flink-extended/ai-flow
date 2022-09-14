@@ -44,16 +44,20 @@ def upload_workflow_snapshot(file_path: str, artifacts: List[str] = None):
     """
     Uploads the given workflow file along with artifacts to blob server.
     :param file_path: The path of workflow file.
-    :param artifacts: The artifacts to be uploaded, only local file is allowed.
+    :param artifacts: The artifacts to be uploaded, it can be local files or directories.
     """
     with tempfile.TemporaryDirectory() as temp_dir:
         filename, _ = os.path.splitext(os.path.split(file_path)[-1])
         dest_dir = Path(temp_dir) / filename
         dest_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy2(file_path, dest_dir)
-        if artifacts is not None:
-            for file in artifacts:
-                shutil.copy2(file, dest_dir)
+        artifacts = artifacts or []
+        for f in artifacts:
+            artifact_name = os.path.split(f)[-1]
+            if os.path.isdir(f):
+                shutil.copytree(f, os.path.join(dest_dir, artifact_name))
+            else:
+                shutil.copy2(f, dest_dir)
 
         zip_file_name = '{}.zip'.format(filename)
         zip_file_path = Path(temp_dir) / zip_file_name
@@ -90,7 +94,7 @@ def extract_workflows_from_zip(file_path: str, extract_path: str) -> List[Workfl
     :return: The list of workflow objects
     """
     workflows = []
-    root_path = extract_zip_file(file_path, extract_path, True)
+    root_path = extract_zip_file(file_path, extract_path, False)
     for file in os.listdir(root_path):
         abs_path = os.path.join(root_path, file)
         if os.path.isfile(abs_path):
