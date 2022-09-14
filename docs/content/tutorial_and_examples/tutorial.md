@@ -1,388 +1,479 @@
 # Tutorial
 
 This tutorial will show you how to create and run a workflow using AIFlow SDK and walk you through the fundamental AIFlow concepts and their usage.
-In the tutorial, we will write a simple machine learning workflow to train a KNN model using iris training dataset and verify the effectiveness of the model. 
+In the tutorial, we will write a simple machine learning workflow to train a Logistic Regression model and verify the effectiveness of the model using MNIST dataset.
 
-Furthermore, in this workflow, the training job will be a periodical batch job using scikit-learn library. 
-Once the batch training job finishes, we will start a validation job to validate the correctness and generalization ability of the generated model. 
-Finally, when a model is validated, we will start a Flink job to utilize the model to do prediction and save prediction results to a local file.
+## Example Workflow definition
+
+```python
+import logging
+import os
+import shutil
+import time
+import numpy as np
+
+from typing import List
+from joblib import dump, load
+
+from sklearn.utils import check_random_state
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LogisticRegression
+
+from ai_flow import ops
+from ai_flow.model.action import TaskAction
+from ai_flow.operators.python import PythonOperator
+from ai_flow.model.workflow import Workflow
+from ai_flow.notification.notification_client import AIFlowNotificationClient, ListenerProcessor, Event
+
+
+NOTIFICATION_SERVER_URI = "localhost:50052"
+
+current_dir = os.path.dirname(__file__)
+dataset_path = os.path.join(current_dir, 'dataset', 'mnist_{}.npz')
+working_dir = os.path.join(current_dir, 'tmp')
+
+trained_model_dir = os.path.join(working_dir, 'trained_models')
+validated_model_dir = os.path.join(working_dir, 'validated_models')
+deployed_model_dir = os.path.join(working_dir, 'deployed_models')
+
+
+def _prepare_working_dir():
+    for path in [trained_model_dir, validated_model_dir, deployed_model_dir]:
+        if not os.path.isdir(path):
+            os.makedirs(path)
+
+
+def _get_latest_model(model_dir) -> str:
+    file_list = os.listdir(model_dir)
+    if file_list is None or len(file_list) == 0:
+        return None
+    else:
+        file_list.sort(reverse=True)
+        return os.path.join(model_dir, file_list[0])
+
+
+def _preprocess_data(dataset_uri):
+    with np.load(dataset_uri) as f:
+        x_data, y_data = f['x_train'], f['y_train']
+
+    random_state = check_random_state(0)
+    permutation = random_state.permutation(x_data.shape[0])
+    x_train = x_data[permutation]
+    y_train = y_data[permutation]
+
+    reshaped_x_train = x_train.reshape((x_train.shape[0], -1))
+    scaler_x_train = StandardScaler().fit_transform(reshaped_x_train)
+    return scaler_x_train, y_train
+
+
+def preprocess():
+    _prepare_working_dir()
+    train_dataset = dataset_path.format('train')
+    try:
+        event_sender = AIFlowNotificationClient(NOTIFICATION_SERVER_URI)
+        while True:
+            x_train, y_train = _preprocess_data(train_dataset)
+            np.save(os.path.join(working_dir, f'x_train'), x_train)
+            np.save(os.path.join(working_dir, f'y_train'), y_train)
+            event_sender.send_event(key="data_prepared", value=None)
+            time.sleep(30)
+    finally:
+        event_sender.close()
+
+
+def train():
+    """
+    See also:
+        https://scikit-learn.org/stable/auto_examples/linear_model/plot_sparse_logistic_regression_mnist.html
+    """
+    _prepare_working_dir()
+    clf = LogisticRegression(C=50. / 5000, penalty='l1', solver='saga', tol=0.1)
+    x_train = np.load(os.path.join(working_dir, f'x_train.npy'))
+    y_train = np.load(os.path.join(working_dir, f'y_train.npy'))
+    clf.fit(x_train, y_train)
+    model_path = os.path.join(trained_model_dir, time.strftime("%Y%m%d%H%M%S", time.localtime()))
+    dump(clf, model_path)
+
+
+def validate():
+    _prepare_working_dir()
+
+    validate_dataset = dataset_path.format('evaluate')
+    x_validate, y_validate = _preprocess_data(validate_dataset)
+
+    to_be_validated = _get_latest_model(trained_model_dir)
+    clf = load(to_be_validated)
+    scores = cross_val_score(clf, x_validate, y_validate, scoring='precision_macro')
+    try:
+        event_sender = AIFlowNotificationClient(NOTIFICATION_SERVER_URI)
+        deployed_model = _get_latest_model(deployed_model_dir)
+        if deployed_model is None:
+            logging.info(f"Generate the 1st model with score: {scores}")
+            shutil.copy(to_be_validated, validated_model_dir)
+            event_sender.send_event(key="model_validated", value=None)
+        else:
+            deployed_clf = load(deployed_model)
+            old_scores = cross_val_score(deployed_clf, x_validate, y_validate, scoring='precision_macro')
+            if np.mean(scores) > np.mean(old_scores):
+                logging.info(f"A new model with score: {scores} passes validation")
+                shutil.copy(to_be_validated, validated_model_dir)
+                event_sender.send_event(key="model_validated", value=None)
+            else:
+                logging.info(f"New generated model with score: {scores} is worse "
+                             f"than the previous: {old_scores}, ignored.")
+    finally:
+        event_sender.close()
+
+
+def deploy():
+    _prepare_working_dir()
+    to_be_deployed = _get_latest_model(validated_model_dir)
+    deploy_model_path = shutil.copy(to_be_deployed, deployed_model_dir)
+    try:
+        event_sender = AIFlowNotificationClient(NOTIFICATION_SERVER_URI)
+        event_sender.send_event(key="model_deployed", value=deploy_model_path)
+    finally:
+        event_sender.close()
+
+
+class ModelLoader(ListenerProcessor):
+    def __init__(self):
+        self.current_model = None
+        logging.info("Waiting for the first model deployed...")
+
+    def process(self, events: List[Event]):
+        for e in events:
+            self.current_model = e.value
+
+
+def predict():
+    _prepare_working_dir()
+    predict_dataset = dataset_path.format('predict')
+    result_path = os.path.join(working_dir, 'predict_result')
+    x_predict, _ = _preprocess_data(predict_dataset)
+
+    model_loader = ModelLoader()
+    current_model = model_loader.current_model
+    try:
+        event_listener = AIFlowNotificationClient(NOTIFICATION_SERVER_URI)
+        event_listener.register_listener(listener_processor=model_loader,
+                                         event_keys=["model_deployed", ])
+        while True:
+            if current_model != model_loader.current_model:
+                current_model = model_loader.current_model
+                logging.info(f"Predicting with new model: {current_model}")
+                clf = load(current_model)
+                result = clf.predict(x_predict)
+                with open(result_path, 'a') as f:
+                    f.write(f'model [{current_model}] predict result: {result}\n')
+            time.sleep(5)
+    finally:
+        event_listener.close()
+
+
+with Workflow(name="online_machine_learning") as workflow:
+
+    preprocess_task = PythonOperator(name="pre_processing",
+                                     python_callable=preprocess)
+
+    train_task = PythonOperator(name="training",
+                                python_callable=train)
+
+    validate_task = PythonOperator(name="validating",
+                                   python_callable=validate)
+
+    deploy_task = PythonOperator(name="deploying",
+                                 python_callable=deploy)
+
+    predict_task = PythonOperator(name="predicting",
+                                  python_callable=predict)
+
+    train_task.action_on_event_received(action=TaskAction.START, event_key="data_prepared")
+
+    validate_task.start_after(train_task)
+
+    deploy_task.action_on_event_received(action=TaskAction.START, event_key="model_validated")
+```
+The above Python script declares a Workflow that consists of 5 batch or streaming tasks related to machine learning. The general logic of the workflow is as follows:
+1. A `pre_processing` task continuously generates training data and do some transformations. Once a batch of data is prepared, it sends an event with key `data_prepared`.
+2. A `training` task starts as long as the scheduler receives an event with key `data_prepared`, the task trains a new model with the latest dataset.
+3. A `validating` task starts after the `training` task finishes with status `SUCCEED` and does the model validation. If the new model is better than the deployed one, it will send an event with key `model_validated`.
+4. A `deploying` task starts as long as the scheduler receives an event with key `model_validated`, the task deploys the latest model to online serving and send an event with key `model_deployed`.
+5. A `predicting` task keeps running and listening to the events with key `model_deployed`, it would predict with the new deployed model as long as receiving the event.
+
+## Writing the Workflow
+Now let us write the above workflow step by step.
+
+As we mentioned in the [Workflow concept](../concepts/workflows.md), we need to write a Python script to act as a configuration file specifying the Workflow's structure.
+Currently, the workflow needs to contain all user-defined classes and functions in the same Python file to avoid dependency conflicts because AIFlow need to compile the Workflow object in AIFlow server and workers.
+
+### Importing Modules
+As the workflow is defined in a Python script, we need to import the libraries we need.
+```{note}
+The libraries that we imports need to be installed on AIFlow server and workers in advance to avoid importing error.
+```
+```python
+import logging
+import os
+import shutil
+import time
+import numpy as np
+
+from typing import List
+from joblib import dump, load
+
+from sklearn.utils import check_random_state
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LogisticRegression
+
+from ai_flow import ops
+from ai_flow.model.action import TaskAction
+from ai_flow.operators.python import PythonOperator
+from ai_flow.model.workflow import Workflow
+from ai_flow.notification.notification_client import AIFlowNotificationClient, ListenerProcessor, Event
+```
+
+### Defining the Workflow
+
+A Workflow is declared in a `with` statement, which includes all Tasks inside it.
+When you initialize the Workflow, you need to give it a name(required) and a [namespace](../concepts/namespaces.md)(optional). 
+If no namespace is assigned, the workflow belongs to `default` namespace. 
+
+In the example, we create a workflow named `online_machine_learning`, belonging to `defalut` namespace. 
+```python
+with Workflow(name="online_machine_learning") as workflow:
+    ...
+```
+Now let us define the AIFlow Tasks, note that the tasks defined in the workflow will run on different workers at different points in time, 
+so no variables in memory should be passed between them to cross communicate.
+
+### Defining the preprocessing Task
+
+Here we create a `PythonOperator` that accepts a function as a parameter to preprocess dataset before training.
+As we mentioned in the [Operator concept](../concepts/operators.md), an Operator that is instantiated can be called Task, 
+so we could say that we create a Task named `preprocessing` in Workflow `online_machine_learning`.
+```{note}
+The definition of the Task should always be under the `with` statement of the Workflow that contains it.
+```
+
+We use a while loop to simulate continuous data generation and transformation. In each loop, we transform the dataset with sklearn API and save the new dataset to local file, 
+then we send an Event with `AIFlowNotificationClient` to notify that a new batch of data has been prepared.
+
+```python
+with Workflow(name="online_machine_learning") as workflow:
+    preprocess_task = PythonOperator(name="pre_processing",
+                                     python_callable=preprocess)
+
+
+def _prepare_working_dir():
+    for path in [trained_model_dir, validated_model_dir, deployed_model_dir]:
+        if not os.path.isdir(path):
+            os.makedirs(path)
+
+
+def _preprocess_data(dataset_uri):
+    with np.load(dataset_uri) as f:
+        x_data, y_data = f['x_train'], f['y_train']
+
+    random_state = check_random_state(0)
+    permutation = random_state.permutation(x_data.shape[0])
+    x_train = x_data[permutation]
+    y_train = y_data[permutation]
+
+    reshaped_x_train = x_train.reshape((x_train.shape[0], -1))
+    scaler_x_train = StandardScaler().fit_transform(reshaped_x_train)
+    return scaler_x_train, y_train
+
+
+def preprocess():
+    _prepare_working_dir()
+    train_dataset = dataset_path.format('train')
+    try:
+        event_sender = AIFlowNotificationClient(NOTIFICATION_SERVER_URI)
+        while True:
+            x_train, y_train = _preprocess_data(train_dataset)
+            np.save(os.path.join(working_dir, f'x_train'), x_train)
+            np.save(os.path.join(working_dir, f'y_train'), y_train)
+            event_sender.send_event(key="data_prepared", value=None)
+            time.sleep(30)
+    finally:
+        event_sender.close()
+```
+
+### Defining the training Task
+
+The `training` task loads the dataset that is preprocessed and trains a model with Logistic Regression algorithm, and then save the model to the local directory `trained_models`.
+The `training` task has a [Task Rule](../concepts/task_rules.md) declared by `action_on_event_received` API, 
+which means that the `training` task takes the action `START` as long as an event with key `data_prepared` happened. 
+```python
+with Workflow(name="online_machine_learning") as workflow:
+    train_task = PythonOperator(name="training",
+                                python_callable=train)
+    train_task.action_on_event_received(action=TaskAction.START, event_key="data_prepared")
+
+
+def train():
+    _prepare_working_dir()
+    clf = LogisticRegression(C=50. / 5000, penalty='l1', solver='saga', tol=0.1)
+    x_train = np.load(os.path.join(working_dir, f'x_train.npy'))
+    y_train = np.load(os.path.join(working_dir, f'y_train.npy'))
+    clf.fit(x_train, y_train)
+    model_path = os.path.join(trained_model_dir, time.strftime("%Y%m%d%H%M%S", time.localtime()))
+    dump(clf, model_path)
+```
+
+### Defining the validating Task
+
+The `validating` task loads and proprocess the validation dataset and score the latest model with cross validation.
+If the score of the new trained model is better than the current deployed one, send an event with key `model_validated` to notify that a better model is generated.
+
+The `validating` task also has a [Task Rule](../concepts/task_rules.md) which is declared by `start_after` API, 
+which means that the `validating` starts right after the `training` succeeds. 
+```python
+with Workflow(name="online_machine_learning") as workflow:
+    validate_task = PythonOperator(name="validating",
+                                   python_callable=validate)
+    validate_task.start_after(train_task)
+
+
+def validate():
+    _prepare_working_dir()
+
+    validate_dataset = dataset_path.format('evaluate')
+    x_validate, y_validate = _preprocess_data(validate_dataset)
+
+    to_be_validated = _get_latest_model(trained_model_dir)
+    clf = load(to_be_validated)
+    scores = cross_val_score(clf, x_validate, y_validate, scoring='precision_macro')
+    try:
+        event_sender = AIFlowNotificationClient(NOTIFICATION_SERVER_URI)
+        deployed_model = _get_latest_model(deployed_model_dir)
+        if deployed_model is None:
+            logging.info(f"Generate the 1st model with score: {scores}")
+            shutil.copy(to_be_validated, validated_model_dir)
+            event_sender.send_event(key="model_validated", value=None)
+        else:
+            deployed_clf = load(deployed_model)
+            old_scores = cross_val_score(deployed_clf, x_validate, y_validate, scoring='precision_macro')
+            if np.mean(scores) > np.mean(old_scores):
+                logging.info(f"A new model with score: {scores} passes validation")
+                shutil.copy(to_be_validated, validated_model_dir)
+                event_sender.send_event(key="model_validated", value=None)
+            else:
+                logging.info(f"New generated model with score: {scores} is worse "
+                             f"than the previous: {old_scores}, ignored.")
+    finally:
+        event_sender.close()
+```
+
+### Defining the deploying Task
+
+The `deploying` task simulates the deployment by copying the model from the directory `validated_models` to `deployed_models`.
+After deploying the model, the task will send an event with key `model_deployed` to notify that the new model has been deployed.
+
+The `deploying` task also has a [Task Rule](../concepts/task_rules.md) which is declared by `action_on_event_received` API, 
+which means that the `deploying` starts as long as an event with key `model_validated` happened.
+
+```python
+with Workflow(name="online_machine_learning") as workflow:
+    deploy_task = PythonOperator(name="deploying",
+                                 python_callable=deploy)
+    deploy_task.action_on_event_received(action=TaskAction.START, event_key="model_validated")
+
+
+def deploy():
+    _prepare_working_dir()
+    to_be_deployed = _get_latest_model(validated_model_dir)
+    deploy_model_path = shutil.copy(to_be_deployed, deployed_model_dir)
+    try:
+        event_sender = AIFlowNotificationClient(NOTIFICATION_SERVER_URI)
+        event_sender.send_event(key="model_deployed", value=deploy_model_path)
+    finally:
+        event_sender.close()
+```
+
+### Defining the predicting Task
+
+In the `predicting` task, we create a custom event listener to keep listening to events with key `model_deployed`, when it receives the event, it will predict with the latest deployed model. 
+The `predicting` task has no [Task Rules](../concepts/task_rules.md) so it will start as long as the workflow begins.
+
+```python
+class ModelLoader(ListenerProcessor):
+    def __init__(self):
+        self.current_model = None
+        logging.info("Waiting for the first model deployed...")
+
+    def process(self, events: List[Event]):
+        for e in events:
+            self.current_model = e.value
+
+
+def predict():
+    _prepare_working_dir()
+    predict_dataset = dataset_path.format('predict')
+    result_path = os.path.join(working_dir, 'predict_result')
+    x_predict, _ = _preprocess_data(predict_dataset)
+
+    model_loader = ModelLoader()
+    current_model = model_loader.current_model
+    try:
+        event_listener = AIFlowNotificationClient(NOTIFICATION_SERVER_URI)
+        event_listener.register_listener(listener_processor=model_loader,
+                                         event_keys=["model_deployed", ])
+        while True:
+            if current_model != model_loader.current_model:
+                current_model = model_loader.current_model
+                logging.info(f"Predicting with new model: {current_model}")
+                clf = load(current_model)
+                result = clf.predict(x_predict)
+                with open(result_path, 'a') as f:
+                    f.write(f'model [{current_model}] predict result: {result}\n')
+            time.sleep(5)
+    finally:
+        event_listener.close()
+```
 
 ## Running the Example
 
-Before running the example, please download the [tutorial_project](https://github.com/flink-extended/ai-flow/tree/master/examples/tutorial_project) directory to local
-and make sure you have installed AIFlow and started AIFlow Server, Notification Server and Scheduler correctly according to the [QuickStart](../get_started/quickstart/index.md) document.
+To get the full example along with the dataset, please download them from [github](https://github.com/flink-extended/ai-flow/tree/master/samples/online_machine_learning).
 
-Now, run the follow commands to run the example.
+### Uploading the Workflow
+Now we have a complete online machine learning workflow and its required dataset. Let's upload them to AIFlow server.
+```shell script
+aiflow workflow upload ${path_to_workflow_file} --files ${path_to_dataset_directory}
+```
+The workflow is uploaded successfully if you see `Workflow: default.online_machine_learning, submitted.` on the console.
 
-1. Register datasets, artifact and model:
-```shell
-python tutorial_project/workflows/tutorial_workflow/init_env.py
+### Starting the Workflow
+In AIFlow, starting a workflow is creating a new [workflow execution](../concepts/workflow_executions.md), you can do this by the following command.
+
+```shell script
+aiflow workflow-execution start online_machine_learning
+```
+The workflow execution is started if you see `Workflow execution: {} submitted.` on the console.
+You can view the workflow execution you just created by `list` command:
+```shell script
+aiflow workflow-execution list online_machine_learning
 ```
 
-2. Submit the tutorial_workflow to AIFlow Server:
-```shell
-aiflow workflow submit ${tutorial_project absolute path} tutorial_workflow
+### Viewing the results
+You can view the status of the tasks by the following command:
+```shell script
+aiflow task-execution list ${workflow_execution_id}
 ```
+Also you can view the prediction output in the file `${AIFLOW_HOME}/working_dir/online_machine_learning/*/online_ml_workflow/tmp/predict_result`
 
-3. Start a new execution of tutorial_workflow:
-```shell
-aiflow workflow start-execution ${tutorial_project absolute path} tutorial_workflow
-```
+If you want to view logs, you can go to check logs under the directory `${AIFLOW_HOME}/logs/online_machine_learning/`. The log files will give you the information in detail.
 
-Once the bash command returns(it should take no longer than 1 minute), go to check the Airflow WebUI to see if the workflow is submitted successfully. 
-If it is success, wait a minute(because we set the training job to be executed every 1 minute in the config file) then you can see the graph like this:
+### Stopping the Workflow Execution
 
-![Alt text](../images/tutorial/success_workflow.png)
-
-You can view the prediction output under in the file `/tmp/tutorial_output/predict_result.csv` as well.
-
-If you want to view logs, you can go to check logs under directory like `${AIFLOW_HOME}/logs/tutorial_project/tutorial_workflow/`. 
-The log files will give you the information in detail. Also, checking the log in the Airflow WebUI is also a good choice.
-
-Now let's explain the above example.
-
-## Project Directory Structure
-
-The tutorial_project's directory structure is as follows:
-
-```
-tutorial_project/
-        |- workflows/
-           |- tutorial_workflow/
-              |- tutorial_workflow.py 
-              |- tutorial_workflow.yaml 
-        |- dependencies/
-            |-python 
-            |-jar
-        |- resources/
-        └─ project.yaml
-```
-
-`tutorial_project` is the root directory of the project and `workflows` is used to save codes and config files of workflows in this project. 
-
-The `dependecies` directory is used to save python/jar dependencies that will be used by our workflow.
-
-The `resources` directory is for saving all other files(e.g., config files) that will be used by the project.
-
-The `project.yaml` is the project config file. 
-
-
-## Configure the tutorial_project
-
-This is the project.yaml for tutorial project:
-
-```yaml
-project_name: tutorial_project
-server_uri: localhost:50051
-notification_server_uri: localhost:50052
-blob:
-  blob_manager_class: ai_flow_plugins.blob_manager_plugins.local_blob_manager.LocalBlobManager
-```
-
-In `project_name`, we define the project's name, which will be the default namespace of workflows in this project as well. 
-
-```{note}
-Namespace in AIFlow is used for isolation. Each workflow can only send events to its own namespace while it can listen on multiple namespaces. 
-The reason for enabling listening on multiple namespaces is that the workflow could be triggered by external events from Notification Server.
-```
-For `server_uri`,  they tell where the AIFlow Server is running on.
-
-For `notification_server_uri`,  they tell where the Notification Server is running on.
-
-Then, we configure the `blob` property which specifies where the workflow code will be updated when submitting. 
-It also tells the AIFlow Server where and how to download the workflow code.
-
-Here we choose to use `LocalBlobManager` and as a result, the AIFlow Server will download the workflow code locally. 
-Please note that `LocalBlobManager` can only work when you submit your workflow on the same machine as the AIFlow server.
-
-
-## Define the tutorial_workflow
-
-There is a `tutorial_workflow` directory for our workflow. 
-In the `tutorial_workflow.py`, we defined the workflow and `tutorial_workflow.yaml` configure the tutorial_workflow.
-
-```{note}
-The names of 'tutorial_workflow.py' and 'tutorial_workflow.yaml' must be same as the name of 'tutorial_workflow' directory.
-```
-
-### 1. Register Metadata
-
-Now, we introduce how to register the datasets, artifact and model which the tutorial_workflow used in init_env.py.
-
-```python
-import os
-import ai_flow as af
-from ai_flow.api.ai_flow_context import ensure_project_registered
-from ai_flow.context.project_context import init_project_config
-
-DATASET_URI = os.path.abspath(os.path.join(__file__, "../../../../")) + '/dataset_data/iris_{}.csv'
-artifact_prefix = "tutorial_project."
-project_path = os.path.abspath(os.path.join(__file__, "../../../"))
-output_path = '/tmp/tutorial_output'
-
-
-def init():
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-    # Register metadata of training data(dataset) and read dataset(i.e. training dataset)
-    train_dataset = af.register_dataset(name=artifact_prefix + 'train_dataset',
-                                        uri=DATASET_URI.format('train'))
-    # Register test dataset
-    validate_dataset = af.register_dataset(name=artifact_prefix + 'test_dataset',
-                                           uri=DATASET_URI.format('test'))
-
-    # Save prediction result
-    write_dataset = af.register_dataset(name=artifact_prefix + 'write_dataset',
-                                        uri=output_path + '/predict_result.csv')
-
-    validate_artifact_name = artifact_prefix + 'validate_artifact'
-    validate_artifact = af.register_artifact(name=validate_artifact_name,
-                                             uri=output_path + '/validate_result')
-
-    # Register model metadata and train model
-    train_model = af.register_model(model_name=artifact_prefix + 'KNN',
-                                    model_desc='KNN model')
-
-
-if __name__ == '__main__':
-    init_project_config(project_path + '/project.yaml')
-    ensure_project_registered()
-    init()
-```
-In the above codes, methods like `register_dataset` `register_artifact` and `register_model` 
-are just used to save some metadata(e.g., the name of the model, the uri of the artifact or the uri of the dataset) into the database. 
-The return value of these methods are some metadata objects(e.g. `DatasetMeta` `ArtifactMeta` or `ModelMeta`), 
-which can be used to query metadata or serve as parameters of other methods.
-
-### 2. Configure the Workflow
-
-Now we introduce how to configure the workflow.
-
-```yaml
-train:
-  job_type: python
-  periodic_config:
-    interval: '0,0,0,60' # The train job will be executed every 60s
-  # properties:
-  #  train_param_key: train_param_val
-
-validate:
-  job_type: python
-
-predict:
-  job_type: flink
-  properties:
-    run_mode: cluster
-    flink_run_args: #The flink run command args(-pym, -pyexec etc.). It's type is List.
-      - -pyexec
-      - /path/to/bin/python # path to your python3.7 executable path
-```
-
-In the tutorial_workflow.yaml, we define the properties of each job. 
-
-For `train` job, its job type is `python`, which means the user defined logic in this job will be executed using `python`. 
-Besides, we set the `periodic_config` to be `interval: '0,0,0,60'` which means the job will be executed every 60s. 
-The `properties` option which represents the additional properties of the job config can also be configured. 
-The `properties` in the job config can be obtained through **`af.current_workflow_config().job_configs['job_name'].properties`**  in the `process` method in the user-defined `PythonProcessor` implementation.
-
-For `validate` job, we only config its job type to be `python`.
-
-For `predict` job, we set its job type to be `flink`, which means this job is a flink job. 
-In addition, to use flink, we need to set some flink-specific properties including `run_mode` (cluster or local) and `flink_run_args`. For the `flink_run_args`, we follow the list format of `yaml` to add the args such as the `-pyexec`.
-
-
-### 3. Define the Workflow
-
-Now we introduce how to define the tutorial_workflow.
-
-#### 1) Init AIFlow
-
-In AIFlow, a workflow is just a Python script. We need to import the libraries and init AIFlow context.
-
-```python
-import ai_flow as af
-from ai_flow.model_center.entity.model_version_stage import ModelVersionEventType
-from tutorial_processors import DatasetReader, ModelTrainer, ValidateDatasetReader, ModelValidator, Source, Sink, \
-    Predictor
-
-af.init_ai_flow_context()
-```
-
-#### 2) Define a Training Job
-
-In our design, the workflow in AIFlow is a DAG(Directed Acyclic Graph) or to be more specific, it is a [AIGraph](https://github.com/flink-extended/ai-flow/blob/master/ai_flow/ai_graph/ai_graph.py#L28). Each node in the graph is an [AINode](https://github.com/flink-extended/ai-flow/blob/master/ai_flow/ai_graph/ai_node.py#L29), which contains a processor. Users should write their custom logic in the processor. 
-
-In the AIGraph, nodes are connected by 2 types of edges. The first one is named as `DataEdge` which means the destination node depends on the output of the source node. The other is `ControlEdge` which means the destination node depends on the control conditions from source node. We will dive deeper into this kind of edges later.
-
-For now, let's concentrate on the set of AINodes connected by only data edges. Such a set of nodes and data edges between them constitutes a sub-graph. This sub-graph, together with the predefined job config in workflow config yaml, is mapped to a Job by AIFlow framework.
-
-So, to summarize, each AIFlow job is made up of a job config, some AINodes and the data edges between those nodes. 
-
-These concepts seem to be a little difficult, but do not worry. Let's look at some code snippets, and you will find it pretty easy to define a job with provided API of AIFlow.
-
-In the following codes, we define a training job of our workflow:
-```python
-# Training of model
-with af.job_config('train'):
-    # Register metadata of training data(dataset) and read dataset(i.e. training dataset)
-    train_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.train_dataset')
-    train_read_dataset = af.read_dataset(dataset_info=train_dataset,
-                                         read_dataset_processor=DatasetReader())
-
-    # Register model metadata and train model
-    train_model = af.get_model_by_name(model_name="tutorial_project.KNN")
-    train_channel = af.train(input=[train_read_dataset],
-                             training_processor=ModelTrainer(),
-                             model_info=train_model)
-```
-
-The`read_dataset()` and `train()` are `Operators` as they have some specific semantics and will create corresponding `AINodes`. 
-Then, how do we define the data dependency of those newly created nodes? 
-We just put the output of `read_dataset` method into the `input` arg of `train()` method. 
-Such codes imply input of the training node created by`train()` is the output of the node created by `read_dataset()` .  
-The return values of methods like `train()` are `Channel` or list of `Channel`s.
-
-In AIFlow, `Channel` represents the output of AINodes. More vividly, `Channel` is one end of the `DataEdge`. 
-The following picture shows the relation among `AINodes`, `DataEdges` and `Channels`:
-
-![Alt text](../images/tutorial/channels.png)
-
-In the example, AINode N0 has 3 outputs(i.e., 3 channels whose source node is N0). We can make N1 accepts the c0 and c1 channels and N2 accepts c1 and c2 channels. Accordingly, there are 4 DataEdges in all. With such design, we can manipulate the data dependencies more flexibly and reuse the data easier.
-
-Currently, the only puzzle left is how to implement the processors including `DatasetReader()` and `ModelTrainer()`. We will introduce them later in [Implements of Processors](implements-of-processors) section. 
-Next, let's pay attention to defining the Validation and Prediction jobs.
-
-#### 3) Define the Validation Job and the Prediction Job
-
-Here we define the other two jobs of our workflow. They are pretty similar to what we have done in defining the training job.
-
-```python
-# Validation of model
-with af.job_config('validate'):
-    # Read validation dataset
-    validate_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.test_dataset')
-    # Validate model before it is used to predict
-    validate_read_dataset = af.read_dataset(dataset_info=validate_dataset,
-                                            read_dataset_processor=ValidateDatasetReader())
-    validate_artifact_name = 'tutorial_project.validate_artifact'
-    validate_artifact = af.get_artifact_by_name(artifact_name=validate_artifact_name)
-    validate_channel = af.model_validate(input=[validate_read_dataset],
-                                         model_info=train_model,
-                                         model_validation_processor=ModelValidator(validate_artifact_name))
-
-# Prediction(Inference) using flink
-with af.job_config('predict'):
-    # Read test data and do prediction
-    predict_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.test_dataset')
-    predict_read_dataset = af.read_dataset(dataset_info=predict_dataset,
-                                           read_dataset_processor=Source())
-    predict_channel = af.predict(input=[predict_read_dataset],
-                                 model_info=train_model,
-                                 prediction_processor=Predictor())
-    # Save prediction result
-    write_dataset = af.get_dataset_by_name(dataset_name='tutorial_project.write_dataset')
-    af.write_dataset(input=predict_channel,
-                     dataset_info=write_dataset,
-                     write_dataset_processor=Sink())
-```
-
-In above codes, we use 3 new predefined operators by AIFlow: `model_validate()` , `predict()`, `write_dataset()`. 
-
-In addition, in AIFlow, if they don't find the operators needed, users can also define their own operators with the `user_define_operation()` API.
-
-#### 4) Define the Relation between Jobs
-
-We now have defined 3 jobs. Each job has some nodes connected by `DataEdge`s. Then we will need to define relations between jobs to make sure our workflow is scheduled and run correctly. The training job will run periodically and once the training finishes, the validation job should be started to validate the latest generated model. If there is a model passes the validation and get deployed, we should (re)start the downstream prediction job to get better inference.
-
-After reviewing above description, we find that some upstream jobs control the downstream jobs. For instance, the training job controls the (re)start of validation job. We keep using AIGraph abstraction to depicts these control relations. But at this time, each AINode in this new AIGraph is a job. Edges to connect these job nodes are named as `ControlEdge`. We also call such control relation as *control dependencies*.
-
-In AIFlow, we implement control dependencies via *Events*. That is, the upstream job can send specific events to downstream jobs and downstream jobs will take actions due to the events and rules defined by users.
-
-```python
-# Define relation graph connected by control edge: train -> validate -> predict
-af.action_on_model_version_event(job_name='validate',
-                                 model_version_event_type=ModelVersionEventType.MODEL_GENERATED,
-                                 model_name=train_model.name,
-                                 namespace='tutorial_project')
-af.action_on_model_version_event(job_name='predict',
-                                 model_version_event_type=ModelVersionEventType.MODEL_VALIDATED,
-                                 model_name=train_model.name,
-                                 namespace='tutorial_project')
-```
-
-In above codes, the first `ControlEdge` we defined is that the `validate` 
-job (Note, this job name is defined in the yaml file of workflow configs) will be restarted(the default action) when there is a `MODEL_GENERATED` event. 
-The second  `ControlEdge` we defined is that the `predict` job will be restarted when there is a `MODEL_VALIDATED` event. 
-
-Besides, the well-defined out-of-box API for managing machine learning jobs, 
-AIFlow exposes the most flexible API `action_on_events()` to allow users write their own control dependencies.
-
-(implements-of-processors)=
-#### 5) Implements of Processors
-
-As we have mentioned, users need to write their own logic in processors for each job. Currently, AIFlow provides `bash`, `python` and `flink` processors.
-
-The following codes are the `DatasetReader` processor whose type is `python`:
-
-```python
-EXAMPLE_COLUMNS = ['sl', 'sw', 'pl', 'pw', 'type']
-
-class DatasetReader(PythonProcessor):
-
-    def process(self, execution_context: ExecutionContext, input_list: List) -> List:
-        """
-        Read dataset using pandas
-        """
-        # Gets the registered dataset meta info
-        dataset_meta: af.DatasetMeta = execution_context.config.get('dataset')
-        # Read the file using pandas
-        train_data = pd.read_csv(dataset_meta.uri, header=0, names=EXAMPLE_COLUMNS)
-        # Prepare dataset
-        y_train = train_data.pop(EXAMPLE_COLUMNS[4])
-        return [[train_data.values, y_train.values]]
-```
-
-As you can see, it is just a python program using pandas library without any mystery.
-
-Next, we show an example of Flink processors:
-
-```python
-class Predictor(flink.FlinkPythonProcessor):
-    def __init__(self):
-        super().__init__()
-        self.model_name = None
-
-    def setup(self, execution_context: flink.ExecutionContext):
-        self.model_name = execution_context.config['model_info'].name
-
-    def process(self, execution_context: flink.ExecutionContext, input_list: List[Table] = None) -> List[Table]:
-        """
-        Use pyflink udf to do prediction
-        """
-        model_meta = af.get_deployed_model_version(self.model_name)
-        model_path = model_meta.model_path
-        clf = load(model_path)
-
-        class Predict(ScalarFunction):
-            def eval(self, sl, sw, pl, pw):
-                records = [[sl, sw, pl, pw]]
-                df = pd.DataFrame.from_records(records, columns=['sl', 'sw', 'pl', 'pw'])
-                return clf.predict(df)[0]
-
-        execution_context.table_env.register_function('mypred',
-                                                      udf(f=Predict(),
-                                                          input_types=[DataTypes.FLOAT(), DataTypes.FLOAT(),
-                                                                       DataTypes.FLOAT(), DataTypes.FLOAT()],
-                                                          result_type=DataTypes.FLOAT()))
-        return [input_list[0].select("mypred(sl,sw,pl,pw)")]
-```
-
-It is written in Pyflink for convenience and Flink Java Processor is also supported. And to run flink job without bugs, please make sure the properties for running a Flink job is set properly in `tutorial_workflow.yaml` according to your local environment. 
-
-Note, if you use some special dependencies and choose to submit the workflow to a remote environment for execution, you should put your dependencies in the `tutorial_project/dependencies` folder and refer them properly. That's because AIFlow will upload the whole project directory to remote for execution and users need to make sure in the remote env, the python processors can run correctly.
-
-Now we have finished the introduction of how to write a workflow. For the whole codes, please go to check [tutorial_project](https://github.com/flink-extended/ai-flow/tree/master/examples/tutorial_project) directory. After configuring the yaml file according to your own environment, it is time to run the workflow. 
+The `online_machine_learning` workflow contains streaming tasks that will never stop. If you want to stop the workflow execution, you can run the following command:
+```shell script
+aiflow workflow-execution stop-all online_machine_learning
+``` 
 
 ## What's Next
 
-Congratulations! You have been equipped with necessary knowledge to write your own workflow. At the point, you can check [Examples](./examples.md) for more examples and [concepts](../../concepts/index.md) to write your own workflows.
+Congratulations! You have been equipped with the necessary knowledge to write your own workflow. At this point, you can check [Examples](./examples.md) for more examples and [concepts](../concepts/index.md) to write your own workflows.
