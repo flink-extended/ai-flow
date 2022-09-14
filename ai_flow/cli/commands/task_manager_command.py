@@ -138,6 +138,16 @@ class TaskManager(object):
         finally:
             logger.info(f'Task execution {self.task_execution_key} finished, ')
 
+    def _get_working_dir(self):
+        workflow_execution_id = self.task_execution_key.workflow_execution_id
+        working_dir = os.path.join(AIFLOW_HOME,
+                                   'working_dir',
+                                   self.workflow_name,
+                                   str(workflow_execution_id))
+        if not os.path.exists(working_dir):
+            os.makedirs(working_dir, exist_ok=False)
+        return working_dir
+
     def _extract_workflow(self):
         # TODO refactor the blob manager to filesystem based
         # Currently we use blob manager to download snapshot, so we need a config file under $AIFLOW_HOME
@@ -152,7 +162,8 @@ class TaskManager(object):
         workflow_snapshot_zip = blob_manager.download(
             remote_file_path=self.workflow_snapshot_path, local_dir=snapshot_repo
         )
-        workflow_list = workflow_utils.extract_workflows_from_zip(workflow_snapshot_zip, snapshot_repo)
+        working_dir = self._get_working_dir()
+        workflow_list = workflow_utils.extract_workflows_from_zip(workflow_snapshot_zip, working_dir)
         workflow = [x for x in workflow_list if x.name == self.workflow_name][0]
         return workflow
 

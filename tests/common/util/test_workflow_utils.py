@@ -19,22 +19,41 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
+from ai_flow.common.configuration import config_constants
 from ai_flow.common.util import workflow_utils
 from ai_flow.common.util.file_util.zip_file_util import make_dir_zipfile
+
+BLOB_DIR = '/tmp/blob_for_test_workflow_utils'
+BLOB_MANAGER_DEFAULT_VALUE = {
+    'blob_manager_class': 'ai_flow.blob_manager.impl.local_blob_manager.LocalBlobManager',
+    'blob_manager_config': {
+        'root_directory': BLOB_DIR
+    }
+}
 
 
 class TestWorkflowUtils(unittest.TestCase):
 
+    def setUp(self) -> None:
+        if not os.path.exists(BLOB_DIR):
+            os.mkdir(BLOB_DIR)
+
+    def tearDown(self) -> None:
+        if os.path.exists(BLOB_DIR):
+            shutil.rmtree(BLOB_DIR)
+
     def test_extract_workflows_from_file(self):
         workflows = workflow_utils.extract_workflows_from_file(
-            os.path.join(os.path.dirname(__file__), 'for_test_workflow_utils.py'))
+            os.path.join(os.path.dirname(__file__), 'for_test_workflow_utils/workflow.py')
+        )
         self.assertEqual(2, len(workflows))
         self.assertEqual('workflow1', workflows[0].name)
         self.assertEqual('workflow2', workflows[1].name)
 
-    def test_extract_workflows_from_file(self):
-        file_path = os.path.join(os.path.dirname(__file__), 'for_test_workflow_utils.py')
+    def test_extract_workflows_from_zip(self):
+        file_path = os.path.join(os.path.dirname(__file__), 'for_test_workflow_utils/workflow.py')
         with tempfile.TemporaryDirectory() as temp_dir:
             filename, _ = os.path.splitext(os.path.split(file_path)[-1])
             dest_dir = Path(temp_dir) / filename
@@ -46,3 +65,13 @@ class TestWorkflowUtils(unittest.TestCase):
 
             workflows = workflow_utils.extract_workflows_from_zip(zip_file_path, temp_dir)
             self.assertEqual(2, len(workflows))
+
+    @mock.patch.object(config_constants, 'BLOB_MANAGER', BLOB_MANAGER_DEFAULT_VALUE)
+    def test_upload_workflow_snapshot(self):
+        file_path = os.path.join(os.path.dirname(__file__), 'for_test_workflow_utils/workflow.py')
+        artifact = os.path.join(os.path.dirname(__file__), 'for_test_workflow_utils/artifact')
+        workflow_utils.upload_workflow_snapshot(file_path=file_path,
+                                                artifacts=[artifact, ])
+        self.assertTrue(os.path.exists(os.path.join(BLOB_DIR, 'workflow.zip')))
+
+
