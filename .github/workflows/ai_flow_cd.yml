@@ -7,7 +7,7 @@ on:
 jobs:
   push_to_registry:
     name: Nightly build and push packages
-    if: github.repository == 'flink-extended/ai-flow' # Don't do this in forks
+    # if: github.repository == 'flink-extended/ai-flow' # Don't do this in forks
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo for nightly
