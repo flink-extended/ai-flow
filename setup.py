@@ -108,7 +108,7 @@ except IOError:
     sys.exit(-1)
 
 
-VERSION = time.strftime('%Y-%m-%d-%H-%M', time.localtime(time.time())) if nightly_build else __version__ # noqa
+VERSION = time.strftime('%Y.%m.%d', time.localtime(time.time())) if nightly_build else __version__ # noqa
 PACKAGE_NAME = 'ai_flow_nightly' if nightly_build else 'ai_flow'
 
 try:

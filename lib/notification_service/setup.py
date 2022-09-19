@@ -38,7 +38,7 @@ except IOError:
           "'%s' not found!" % version_file,
           file=sys.stderr)
     sys.exit(-1)
-VERSION = time.strftime('%Y-%m-%d-%H-%M', time.localtime(time.time())) if nightly_build else __version__ # noqa
+VERSION = time.strftime('%Y.%m.%d', time.localtime(time.time())) if nightly_build else __version__ # noqa
 PACKAGE_NAME = 'notification_service_nightly' if nightly_build else 'notification_service'
 
 

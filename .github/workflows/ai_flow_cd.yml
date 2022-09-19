@@ -13,16 +13,26 @@ jobs:
       - name: Check out the repo for nightly
         uses: actions/checkout@v2
 
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - name: Install twine
+        run: |
+          python -m pip install --upgrade pip
+          pip install wheel twine
+
       - name: Set variables
         run: |
           echo "NIGHTLY_BUILD=true" >> $GITHUB_ENV
 
-      - name: Upload notification service package
+      - name: Upload notification-service package
         run: |
           cd lib/notification_service && python3 setup.py sdist bdist_wheel
-          twine upload --repository-url https://test.pypi.org/legacy --username=${{ secrets.PYPI_REPOSITORY_USERNAME }} --password=${{ secrets.PYPI_REPOSITORY_PASSWORD }} dist/*
+          twine upload --username=${{ secrets.PYPI_REPOSITORY_USERNAME }} --password=${{ secrets.PYPI_REPOSITORY_PASSWORD }} dist/*
 
-      - name: Upload AIFlow package
+      - name: Upload ai-flow package
         run: |
           python3 setup.py sdist bdist_wheel
-          twine upload --repository-url https://test.pypi.org/legacy --username=${{ secrets.PYPI_REPOSITORY_USERNAME }} --password=${{ secrets.PYPI_REPOSITORY_PASSWORD }}
+          twine upload --username=${{ secrets.PYPI_REPOSITORY_USERNAME }} --password=${{ secrets.PYPI_REPOSITORY_PASSWORD }} dist/*
