@@ -39,7 +39,7 @@ blob:
 `OssBlobManager` relies on [Alibaba Cloud OSS](https://www.alibabacloud.com/en/product/object-storage-service) to store resources. To use `OssBlobManager` you need to install python SDK for OSS client on every node that needs to access OSS file system.
 
 ```shell
-pip install 'ai-flow[oss]'
+pip install 'ai-flow-nightly[oss]'
 ```
 
  `OssBlobManager` has following custom configurations:
@@ -71,7 +71,7 @@ blob:
 `HDFSBlobManager` relies on HDFS to store resources. To use `HDFSBlobManager` you need to install python SDK for HDFS client on every node which needs to access `HDFSBlobManager`.
 
 ```shell
-pip install 'ai-flow[hdfs]'
+pip install 'ai-flow-nightly[hdfs]'
 ```
 
  `HDFSBlobManager` has following custom configurations:

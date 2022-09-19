@@ -22,20 +22,20 @@ python3 -m venv venv_for_aiflow
 source venv_for_aiflow/bin/activate
 ```
 
-Now you can install AIFlow by running:
+Now you can install the latest AIFlow package by running:
 
 ```shell script
-python3 -m pip install ai-flow
+python3 -m pip install ai-flow-nightly
 ```
 
 Congrats, you are ready to run AIFlow and try core features following the [quickstart](../get_started/quickstart/locally.md).
 
 ## Extra Dependencies
 
-The `ai-flow` PyPI basic package only installs what's needed to get started. Additional packages can be installed depending on what will be useful in your environment. For instance, when you are setting MySQL as the metadata backend, you need to install mysqlclient by following command:
+The `ai-flow-nightly` PyPI basic package only installs what's needed to get started. Additional packages can be installed depending on what will be useful in your environment. For instance, when you are setting MySQL as the metadata backend, you need to install mysqlclient by following command:
 
 ```shell
-python -m pip install 'ai-flow[mysql]'
+python -m pip install 'ai-flow-nightly[mysql]'
 ```
 
 For the list of the extras and what they enable, see: [Reference for package extras](../../reference/extra_packages.md).

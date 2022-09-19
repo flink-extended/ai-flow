@@ -36,7 +36,7 @@ sudo yum install python3-devel mysql-devel # Red Hat / CentOS
 Now you can install mysqlclient with following command:
 
 ```shell
-pip install 'ai-flow[mysql]'
+pip install 'ai-flow-nightly[mysql]'
 ```
 
 ## Initializing Database

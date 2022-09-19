@@ -50,7 +50,10 @@ class Processor(ListenerProcessor):
 
     def process(self, events: List[Event]):
         for event in events:
-            self.scheduler.trigger(event)
+            try:
+                self.scheduler.trigger(event)
+            except Exception as e:
+                logging.exception(f"Error occurred while handling event: {event}", e)
         now = time.monotonic()
         if now - self.last_ckp_time > 5:
             self.do_checkpoint()

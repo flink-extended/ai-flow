@@ -65,6 +65,7 @@ EVENT_KEY = "key"
 def func():
     time.sleep(5)
     notification_client = AIFlowNotificationClient("localhost:50052")
+    print(f"Sending event with key: {EVENT_KEY}")
     notification_client.send_event(key=EVENT_KEY,
                                    value='This is a custom message.')
 
@@ -104,12 +105,12 @@ You can view the workflow execution you just started by the following command:
 ```shell script
 aiflow workflow-execution list quickstart_workflow --namespace default
 ```
-The result shows `id`, `status` and other information of the workflow execution.
-You can then list tasks of workflow execution with id 1 by the following command:
+The result shows `id`, `status` and other information of the workflow execution. If it is the first time you execute a workflow, the id of the workflow execution should be `1`,
+so you can then list tasks of workflow execution with id `1` by the following command:
 ```shell script
 aiflow task-execution list 1
 ```
-Also you can check the log under `${HOME}/aiflow/logs` to view the outputs of tasks.
+Also you can check the log under `${AIFLOW_HOME}/logs` to view the outputs of tasks.
 
 ## Stopping AIFlow 
 ### Stopping AIFlow Server

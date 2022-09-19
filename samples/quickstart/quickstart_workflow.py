@@ -29,6 +29,7 @@ EVENT_KEY = "key"
 def func():
     time.sleep(5)
     notification_client = AIFlowNotificationClient("localhost:50052")
+    print(f"Sending event with key: {EVENT_KEY}")
     notification_client.send_event(key=EVENT_KEY,
                                    value='This is a custom message.')
 
