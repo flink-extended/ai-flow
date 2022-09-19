@@ -21,6 +21,7 @@ import sys
 from setuptools import setup, find_packages
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
+nightly_build = os.getenv('NIGHTLY_BUILD') == 'true'
 
 
 def get_script():
@@ -36,7 +37,9 @@ except IOError:
           "'%s' not found!" % version_file,
           file=sys.stderr)
     sys.exit(-1)
-VERSION = __version__  # noqa
+VERSION = time.strftime('%Y-%m-%d-%H-%M', time.localtime(time.time())) if nightly_build else __version__ # noqa
+PACKAGE_NAME = 'notification_service_nightly' if nightly_build else 'notification_service'
+
 
 require_file = '{}/{}'.format(os.path.dirname(os.path.abspath(__file__)), "requirements.txt")
 with open(require_file) as f:
@@ -49,7 +52,7 @@ for line in require_file_lines:
         require_packages.append(line)
 
 setup(
-    name='notification_service',
+    name=PACKAGE_NAME,
     version=VERSION,
     description='A Python package which provides stable notification service.',
     author='',

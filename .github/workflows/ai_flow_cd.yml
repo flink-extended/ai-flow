@@ -1,0 +1,27 @@
+name: AIFlow Nightly CD
+
+on:
+  schedule:
+    - cron: '0 16 * * *'
+jobs:
+  push_to_registry:
+    name: Nightly build and push packages
+    if: github.repository == 'flink-extended/ai-flow' # Don't do this in forks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo for nightly
+        uses: actions/checkout@v2
+
+      - name: Set variables
+        run: |
+          echo "NIGHTLY_BUILD=true" >> $GITHUB_ENV
+
+      - name: Build notification service package
+        run: |
+          cd lib/notification_service && python3 setup.py sdist bdist_wheel
+          twine upload --repository-url https://test.pypi.org/legacy --username=${{ secrets.PYPI_REPOSITORY_USERNAME }} --password=${{ secrets.PYPI_REPOSITORY_PASSWORD }} dist/*
+
+      - name: Build AIFlow package
+        run: |
+          python3 setup.py sdist bdist_wheel
+          twine upload --repository-url https://test.pypi.org/legacy --username=${{ secrets.PYPI_REPOSITORY_USERNAME }} --password=${{ secrets.PYPI_REPOSITORY_PASSWORD }}

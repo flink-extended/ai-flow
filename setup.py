@@ -18,12 +18,14 @@
 import os
 import subprocess
 import sys
+import time
 from shutil import copytree, rmtree
 from setuptools import setup, find_packages
 from typing import Dict, List
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 in_source = os.path.isfile(CURRENT_DIR + "/run_tests.sh")
+nightly_build = os.getenv('NIGHTLY_BUILD') == 'true'
 
 devel = [
     'coverage>=6.1.1',
@@ -104,8 +106,10 @@ except IOError:
           "'%s' not found!" % version_file,
           file=sys.stderr)
     sys.exit(-1)
-VERSION = __version__ # noqa
 
+
+VERSION = time.strftime('%Y-%m-%d-%H-%M', time.localtime(time.time())) if nightly_build else __version__ # noqa
+PACKAGE_NAME = 'ai_flow_nightly' if nightly_build else 'ai_flow'
 
 try:
     # if os.getenv('INSTALL_AIFLOW_WITHOUT_FRONTEND') != 'true':
@@ -115,7 +119,8 @@ try:
     with open(require_file) as f:
         context = f.read()
         require_file_lines = context.strip().split('\n')
-    require_packages = ['notification-service=={}'.format(VERSION)]
+    notification_package = 'notification-service-nightly' if nightly_build else 'notification-service'
+    require_packages = [f'{notification_package}=={VERSION}']
 
     for line in require_file_lines:
         if os.getenv('BUILD_MINI_AI_FLOW_PACKAGE') == 'true' and line.startswith("# Optional"):
@@ -125,7 +130,7 @@ try:
 
     packages = find_packages()
     setup(
-        name='ai_flow',
+        name=PACKAGE_NAME,
         version=VERSION,
         description='An open source framework that bridges big data and AI.',
         author='',
