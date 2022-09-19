@@ -17,7 +17,7 @@
 version: '3'
 x-aiflow-common:
   &aiflow-common
-  image: flinkaiflow/flink-ai-flow:latest
+  image: flinkaiflow/flink-ai-flow-dev:latest
   # build: .
   environment:
     AIFLOW_HOME: /usr/local/aiflow

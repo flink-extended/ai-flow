@@ -46,7 +46,7 @@ sql_alchemy_max_overflow: 10
 # uri of the server of notification service
 notification_server_uri: 127.0.0.1:50052
 
-# task executor
+# task executor, options: local, kubernetes
 task_executor: Local
 
 # the interval in seconds that the task executor check the heartbeat of task executions

@@ -5,13 +5,13 @@ This section will show you how to start AIFlow in docker container if you are ti
 ## Pulling Docker Image
 Run following command to pull latest AIFlow docker image.
 ```shell script
-docker pull flinkaiflow/flink-ai-flow:latest
+docker pull flinkaiflow/flink-ai-flow-dev:latest
 ```
 
 ## Running Docker Container
 Run following command to enter the docker container in interactive mode.
 ```shell script
-docker run -it -p 8080:8080 -p 8000:8000 flinkaiflow/flink-ai-flow:latest /bin/bash
+docker run -it flinkaiflow/flink-ai-flow-dev:latest /bin/bash
 ```
 
 ## Starting AIFlow 
@@ -66,6 +66,7 @@ EVENT_KEY = "key"
 def func():
     time.sleep(5)
     notification_client = AIFlowNotificationClient("localhost:50052")
+    print(f"Sending event with key: {EVENT_KEY}")
     notification_client.send_event(key=EVENT_KEY,
                                    value='This is a custom message.')
 
@@ -105,12 +106,12 @@ You can view the workflow execution you just started by the following command:
 ```shell script
 aiflow workflow-execution list quickstart_workflow --namespace default
 ```
-The result shows `id`, `status` and other information of the workflow execution.
-You can then list tasks of workflow execution with id 1 by the following command:
+The result shows `id`, `status` and other information of the workflow execution. If it is the first time you execute a workflow, the id of the workflow execution should be `1`,
+so you can then list tasks of workflow execution with id `1` by the following command:
 ```shell script
 aiflow task-execution list 1
 ```
-Also you can check the log under `${AIFLOW_HOME}/aiflow/logs` to view the outputs of tasks.
+Also you can check the log under `${AIFLOW_HOME}/logs` to view the outputs of tasks.
 
 
 ## What’s Next?

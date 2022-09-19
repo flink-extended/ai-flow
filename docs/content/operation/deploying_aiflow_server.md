@@ -69,7 +69,7 @@ This section shows an exhaustive list of available configuration of the AIFlow S
 ### Task Executor
 |Key|Type|Default|Description|
 |---|---|---|---|
-|task_executor|String|Local|The executor to run tasks.|
+|task_executor|String|Local|The executor to run tasks, options: local, kubernetes|
 |task_executor_heartbeat_check_interval|Integer|10|The interval in seconds that the task executor check the heartbeat of task executions.|
 |task_heartbeat_interval|Integer|10|The interval in seconds that the task executions send heartbeats.|
 |task_heartbeat_timeout|Integer|60|The timeout in seconds that the task executions is treated as timeout.|
@@ -111,7 +111,7 @@ sql_alchemy_max_overflow: 10
 # uri of the server of notification service
 notification_server_uri: 127.0.0.1:50052
 
-# task executor
+# task executor, options: local, kubernetes
 task_executor: Local
 
 # the interval in seconds that the task executor check the heartbeat of task executions

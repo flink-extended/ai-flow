@@ -88,6 +88,7 @@ class HeartbeatManager(object):
                     elif task_status not in TASK_FINISHED_SET:
                         logger.warning('Task: {} heartbeat timeout, notifying scheduler.'.format(task_execution))
                         self._send_heartbeat_timeout(task_execution)
+                        self.task_dict.pop(key)
                     else:
                         self.task_dict.pop(key)
             self._update_running_tasks()
