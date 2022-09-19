@@ -1,6 +1,7 @@
 name: AIFlow Nightly CD
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 16 * * *'
 jobs:
@@ -16,12 +17,12 @@ jobs:
         run: |
           echo "NIGHTLY_BUILD=true" >> $GITHUB_ENV
 
-      - name: Build notification service package
+      - name: Upload notification service package
         run: |
           cd lib/notification_service && python3 setup.py sdist bdist_wheel
           twine upload --repository-url https://test.pypi.org/legacy --username=${{ secrets.PYPI_REPOSITORY_USERNAME }} --password=${{ secrets.PYPI_REPOSITORY_PASSWORD }} dist/*
 
-      - name: Build AIFlow package
+      - name: Upload AIFlow package
         run: |
           python3 setup.py sdist bdist_wheel
           twine upload --repository-url https://test.pypi.org/legacy --username=${{ secrets.PYPI_REPOSITORY_USERNAME }} --password=${{ secrets.PYPI_REPOSITORY_PASSWORD }}
