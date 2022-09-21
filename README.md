@@ -13,7 +13,7 @@ Most existing workflow orchestration platforms (e.g. Apache AirFlow, KubeFlow)
 schedule task executions based on the status changes of upstream task
 executions. While this approach works well for batch tasks that are guaranteed
 to end, it does not work well for streaming tasks which might run for an
-infinite amount of time without state changes. AIFlow is proposed to facilitate
+infinite amount of time without status changes. AIFlow is proposed to facilitate
 the orchestration of workflows involving streaming tasks.
 
 For example, users might want to run a Flink streaming job continuously to
