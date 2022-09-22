@@ -19,7 +19,7 @@ import os
 from copy import deepcopy
 from typing import Dict, Any
 
-from .helpers import TRUTH_TEXT, FALSE_TEXT, get_aiflow_home, parameterized_config
+from .helpers import TRUTH_TEXT, FALSE_TEXT, get_aiflow_home, parameterized_config, write_default_config
 from ai_flow.common.exception.exceptions import AIFlowConfigException
 from ai_flow.common.util.file_util.yaml_utils import load_yaml_string
 from ..env import expand_env_var
@@ -112,10 +112,13 @@ class Configuration(object):
 
 def get_client_configuration():
     client_config_file_name = 'aiflow_client.yaml'
-    config_path = os.path.join(get_aiflow_home(), client_config_file_name)
+    home_dir = get_aiflow_home()
+    config_path = os.path.join(home_dir, client_config_file_name)
     if not os.path.isfile(config_path):
-        logger.warning("Client configuration file not found in {}, using default.".format(config_path))
-        config_path = os.path.join(os.path.dirname(__file__), 'config_templates', client_config_file_name)
+        logger.warning("Client configuration file not found in {}, generating a default.".format(config_path))
+        if not os.path.exists(home_dir):
+            os.makedirs(home_dir)
+        write_default_config('aiflow_client.yaml')
     config = Configuration(config_path)
     return config
 
