@@ -124,8 +124,8 @@ class TestConfiguration(unittest.TestCase):
                 server_conf = get_server_configuration()
                 self.assertEqual(server_conf.get_str('log_dir'), expand_env_var('~/aiflow/logs'))
 
-                write_default_config('aiflow_client.yaml')
                 client_conf = get_client_configuration()
+                self.assertTrue(os.path.isfile(os.path.join(tmp_dir, 'aiflow_client.yaml')))
                 self.assertEqual(client_conf.get_str('server_address'), expand_env_var('localhost:50051'))
                 root_dir = expand_env_var('~/aiflow/blob')
                 self.assertEqual(client_conf.get('blob_manager').get('blob_manager_config'), {'root_directory': root_dir})
