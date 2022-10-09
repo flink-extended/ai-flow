@@ -165,7 +165,7 @@ class SparkSubmitOperator(AIFlowOperator):
         if self._executable_path:
             spark_submit = self._executable_path
         elif shutil.which('spark-submit') is not None:
-            spark_submit = shutil.which('spark_submit')
+            spark_submit = shutil.which('spark-submit')
             self.log.info(f"Using {spark_submit} in PATH")
         else:
             spark_submit = expand_env_var('${SPARK_HOME}/bin/spark-submit')
